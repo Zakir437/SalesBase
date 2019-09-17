@@ -1,0 +1,110 @@
+﻿@model PointOfSale.ModelViews.UserLoginModelView
+@{
+    ViewBag.Title = "Login";
+    Layout = "~/Views/Shared/_LayoutForLogin.cshtml";
+}
+@*<div class="container" id="div_Form">
+    <div class="row">
+        <div class="col-md-12 col-md-offset-4">
+            <h2>Login</h2>
+            <h4 class="text-danger">@ViewBag.message</h4>
+            <form class="login-form" action="/Account/Login" method="post">
+                <div class="form-group">
+                    <label class="control-label">Username</label>
+                    <div class="input-icon">
+                        <input class="form-control placeholder-no-fix"
+                               type="text" autocomplete="off" placeholder="Username"
+                               data-val="true" data-val-required="Please enter user name"
+                               id="Username" name="Username">
+                    </div>
+                    <span class="field-validation-valid text-danger" data-valmsg-for="Username" data-valmsg-replace="true"></span>
+                </div>
+                <div class="form-group">
+                    <label class="control-label">Password</label>
+                    <div class="input-icon">
+                        <input class="form-control placeholder-no-fix" type="Password" autocomplete="off"
+                               placeholder="Password" data-val="true" data-val-required="Please enter password"
+                               id="Password" name="Password">
+                    </div>
+                    <span class="field-validation-valid text-danger" data-valmsg-for="Password" data-valmsg-replace="true"></span>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn green-haze">Login <i class="m-icon-swapright m-icon-white"></i></button>
+                    <button type="reset" class="btn green-haze" id="btn_Refresh">Refresh <i class="m-icon-swapright m-icon-white"></i></button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>*@
+
+<div class="login-box">
+    <div class="login-logo">
+        <a href="#"><b>CostPOS</b></a>
+    </div>
+    <!-- /.login-logo -->
+    <div class="login-box-body">
+        <p class="login-box-msg">Sign in to start your session</p>
+        <p class="text-left">
+            <h5 class="text-danger">@ViewBag.message</h5>
+        </p>
+        <form class="login-form" action="/Account/Login" method="post">
+            <div class="form-group has-feedback">
+                <input class="form-control placeholder-no-fix"
+                       type="text" autocomplete="off" placeholder="Username"
+                       data-val="true" data-val-required="Please enter user name"
+                       id="Username" name="Username">
+            </div>
+            <div class="form-group has-feedback">
+                <input class="form-control placeholder-no-fix" type="Password" autocomplete="off"
+                       placeholder="Password" data-val="true" data-val-required="Please enter password"
+                       id="Password" name="Password">
+            </div>
+            <div class="row">
+                <div class="col-xs-8">
+                    <div class="checkbox icheck">
+                        <label>
+                            <input type="checkbox"> Remember Me
+                        </label>
+                    </div>
+                </div>
+                <!-- /.col -->
+                <div class="col-xs-4">
+                    <button type="submit" class="btn btn-primary btn-block btn-flat">Sign In</button>
+                </div>
+                <!-- /.col -->
+            </div>
+        </form>
+        @*<div class="social-auth-links text-center">
+            <p>- OR -</p>
+            <a href="#" class="btn btn-block btn-social btn-facebook btn-flat">
+                <i class="fa fa-facebook"></i> Sign in using
+                Facebook
+            </a>
+            <a href="#" class="btn btn-block btn-social btn-google btn-flat">
+                <i class="fa fa-google-plus"></i> Sign in using
+                Google+
+            </a>
+        </div>*@
+        <!-- /.social-auth-links -->
+        <a href="#">I forgot my password</a><br>
+        @*<a href="register.html" class="text-center">Register a new membership</a>*@
+    </div>
+    <!-- /.login-box-body -->
+</div>
+
+
+<script>
+    $(document).ready(function () {
+        $("form").kendoValidator();
+        $("#btn_Refresh").click(function () {
+            window.location.href = '@Url.Action("Login","Account")';
+        });
+    });
+    $(function () {
+        $('input').iCheck({
+            checkboxClass: 'icheckbox_square-blue',
+            radioClass: 'iradio_square-blue',
+            increaseArea: '20%' /* optional */
+        });
+    });
+</script>

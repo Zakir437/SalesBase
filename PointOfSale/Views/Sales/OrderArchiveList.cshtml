@@ -1,0 +1,91 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewPosOrder>
+@using System.Globalization
+@using PointOfSale.Helpers
+@{
+    var count = 0;
+    PointOfSale.Models.PointOfSale_DBEntities db = new PointOfSale.Models.PointOfSale_DBEntities();
+}
+<style>
+    hr {
+        margin: 0px;
+    }
+</style>
+@if (Model.Any())
+{
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Info</th>
+            <th>Order No.</th>
+            <th>PO Voucher</th>
+            <th>Salesman</th>
+            <th>Total Price</th>
+            <th>Due</th>
+            <th>Date</th>
+        </tr>
+        @foreach (var list in Model)
+        {
+            count++;
+            if (list.OrderId == ViewBag.CurrentId)
+            {
+                <tr class="bg-gray">
+                    <td>@count. </td>
+                    <td>
+                        @if (list.Discount > 0)
+                         {
+                            <img src="~/Images/DiscountImage/272498.png" />
+                         }
+                        @if (list.IsItemRefund == true)
+                         {
+                            <i class="fa fa-reply" aria-hidden="true"></i>
+                         }
+                    </td>
+                    <td>
+                        <a href="@Html.EncodedParam("OrderDetails", "Sales", new { OrderId = list.OrderId}, null)">@list.OrderNumber (current)</a>
+                    </td>
+                    <td>@list.POVoucher</td>
+                    <td>@list.CreatedBy</td>
+                    <td>@list.InvoiceAmount.ToString("C", new CultureInfo("bn-BD"))</td>
+                    <td>@list.DueAmount.Value.ToString("C", new CultureInfo("bn-BD"))</td>
+                    <td>@Convert.ToDateTime(list.OrderDate).ToString("MMM dd yyyy hh:mm:ss tt")</td>
+                </tr>
+            }
+            else
+            {
+                <tr>
+                    <td>@count. </td>
+                    <td>
+                        @if (list.Discount > 0)
+                        {
+                            <img src="~/Images/DiscountImage/272498.png" />
+                        }
+                        @if (list.IsItemRefund == true)
+                        {
+                            <i class="fa fa-reply" aria-hidden="true"></i>
+                        }
+                    </td>
+                    <td>
+                        <a href="@Html.EncodedParam("OrderDetails", "Sales", new { OrderId = list.OrderId, currentOrderId = ViewBag.CurrentId}, null)">@list.OrderNumber</a>
+                    </td>
+                    <td>@list.POVoucher</td>
+                    <td>@list.CreatedBy</td>
+                    <td>@list.InvoiceAmount.ToString("C", new CultureInfo("bn-BD"))</td>
+                    <td>@list.DueAmount.Value.ToString("C", new CultureInfo("bn-BD"))</td>
+                    <td>@Convert.ToDateTime(list.OrderDate).ToString("MMM dd yyyy hh:mm:ss tt")</td>
+                </tr>
+            }
+
+        }
+    </table>
+}
+else
+{
+    <h4>There is no record to display</h4>
+}
+<script>
+    $('[data-toggle="tooltip"]').tooltip();
+</script>
+
+
+
+

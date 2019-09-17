@@ -1,0 +1,163 @@
+﻿@{
+    ViewBag.Title = "OfferCreate";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+}
+<style>
+    .btnBox {
+        height: 200px;
+        width: 100%;
+        border: 1px solid #808080;
+        margin-bottom: 15px;
+    }
+
+    h1 {
+        padding: 50px 0px;
+    }
+</style>
+<div class="content">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4 class="uppercase">Offer Create</h4>
+            </div>
+            <div class="pull-right">
+                <a class="btn btn-default" href="/PointOfSale/Offer">
+                    <i class="fa fa-arrow-left"></i> Back
+                </a>
+            </div>
+        </div>
+        <div class="panel-body">
+            <div class="col-md-4">
+                <a class="btn btn-default btnBox" href="/PointOfSale/EventOffer" data-toggle="tooltip" title="Create Event offer">
+                    <h1>Events</h1>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a class="btn btn-default btnBox" href="/PointOfSale/SaleOffer" data-toggle="tooltip" title="Create Sale offer">
+                    <h1>Sale</h1>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a class="btn btn-default btnBox" href="/PointOfSale/Points" data-toggle="tooltip" title="Create Product Points">
+                    <h1>Points</h1>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a class="btn btn-default btnBox" href="/PointOfSale/Coupon" data-toggle="tooltip" title="Create Coupon">
+                    <h1>Coupon</h1>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+    $(document).ready(function () {
+        $("#liForSalesMenu").addClass('active');
+        $("#liForOffer").addClass('active');
+
+        $('[data-toggle="tooltip"]').tooltip();
+    })
+</script>
+
+
+
+
+@*<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin-bottom:4%;margin-top:2%;">
+    <div id="divOfferCreateForm"></div>
+    <div class="k-edit-buttons k-state-default" style="margin-left:30px;">
+        @if (ViewBag.Id > 0)
+        {
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnOfferCreate"><span class="k-icon k-update"></span>Update</button>
+        }
+        else
+        {
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnOfferCreate"><span class="k-icon k-update"></span>Create</button>
+        }
+        <button type="reset" class="k-button k-button-icontext k-grid-update" id="btnRefresh"><span class="k-icon k-i-refresh"></span>Refresh</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#divOfferCreateForm").append('<div class="tiny_loading"></div>');
+        $("#divOfferCreateForm").load('@Url.Action("OfferCreatePartial", "PointOfSale")?id=' + '@ViewBag.Id');
+    });
+    $("#btnRefresh").click(function () {
+        $("#divOfferCreateForm").empty();
+        $("#divOfferCreateForm").append('<div class="tiny_loading"></div>');
+        $("#divOfferCreateForm").load('@Url.Action("OfferCreatePartial", "PointOfSale")?id=' + '@ViewBag.Id');
+    });
+
+    $("#btnCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+
+    var validation = $("#divOfferCreateForm").kendoValidator({
+    }).data("kendoValidator");
+
+    $("#btnOfferCreate").click(function () {
+
+        if (validation.validate())
+        {
+            $(this).prop('disabled', true);
+
+            var sendData = {
+                Id: $("#Id").val(),
+                Type: 2,
+                OfferName: $.trim($("#OfferName").val()),
+                ValidityDate: $("#ValidityDate").val(),
+                ValidityDays: $("#ValidityDays").val(),
+                ValidityTime: $("#ValidityTime").val(), 
+                IsDateValidity: $("#IsDateValidity").val(),
+                IsEditable: $("#IsEditable").val(),
+                ScheduleId: $("#ScheduleId").val(),
+                CreatedBy : userId
+            }
+            $.ajax({
+                url: '@Url.Action("OfferSave", "PointOfSale")',
+                type: "POST",
+                data: sendData,
+                success: function (result) {
+                    $("#divOfferCreateWin").data("kendoWindow").close();
+                    if (result == "success") {
+                        if (tab == 1)
+                        {
+                            $("#div_All").empty();
+                            $("#div_All").append('<div class="loading_partial"></div>');
+                            $("#div_All").load('@Url.Action("OfferList", "PointOfSale")');
+                        }
+                        else if (tab == 2)
+                        {
+                            status = 1;
+                            passdata = { status: status };
+                            $("#div_Active").append('<div class="loading_partial"></div>');
+                            $("#div_Active").load('@Url.Action("OfferList", "PointOfSale")', passdata);
+                        }
+                        else if (tab == 3)
+                        {
+                            status = 0;
+                            passdata = { status: status};
+                            $("#div_Inactive").append('<div class="loading_partial"></div>');
+                            $("#div_Inactive").load('@Url.Action("OfferList", "PointOfSale")', passdata);
+                        }
+                        else if (tab == 4)
+                        {
+                            status = 2;
+                            passdata = { status: status };
+                            $("#div_Deleted").append('<div class="loading_partial"></div>');
+                            $("#div_Deleted").load('@Url.Action("OfferList", "PointOfSale")', passdata);
+                        }
+                    }
+                    else {
+                        alert("Save Error");
+                    }
+                }
+            });
+        }
+    });
+</script>*@
+
+

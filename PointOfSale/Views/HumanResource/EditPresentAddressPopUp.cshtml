@@ -1,0 +1,60 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" style="margin-bottom:4%;margin-top:2%;" id="divforPresentAddressEdit">
+    <div id="edit_user_present_address"></div>
+    <div class="k-edit-buttons k-state-default">
+        <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnPresentAddressUpdate"><span class="k-icon k-update"></span>Update</button>
+        <button type="reset" class="k-button k-button-icontext k-grid-update" id="btn_RefreshPresentAddress"><span class="k-icon k-i-refresh"></span>Refresh</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btn_CancelPresentAddress"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#edit_user_present_address").load('@Url.Action("EditPresentAddress", "HumanResource")?userId=' + '@ViewBag.UserId');
+    });
+    $("#btn_RefreshPresentAddress").click(function () {
+        $("#edit_user_present_address").empty();
+        $("#edit_user_present_address").append('<div class="tiny_loading"></div>');
+        $("#edit_user_present_address").load('@Url.Action("EditPresentAddress", "HumanResource")?userId=' + '@ViewBag.UserId');
+    });
+
+    $("#btn_CancelPresentAddress").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+    $("#btnPresentAddressUpdate").click(function () {
+        var sendData = {
+            UserId: $("#UserId").val(),
+            PreAddress: $("#PreAddress").val(),
+            PreAddressLine1: $("#PreAddressLine1").val(),
+            PreCountry: $("#PreCountry").val(),
+            PreDivisionId: $("#PreDivisionId").val(),
+            PreCity: $("#PreCity").val(),
+            PreState: $("#PreState").val(),
+            PreArea: $("#PreArea").val(),
+            PrePostalCode: $("#PrePostalCode").val(),
+            CreatedBy:userId
+        };
+        $.ajax({
+            url: '@Url.Action("PresentAddressUpdate", "HumanResource")',
+            type: 'Post',
+            data: sendData,
+            success: function (data) {
+                if (data === 'Error') {
+                    alert("Present address update was unsuccessful.");
+                }
+                else
+                {
+                    alert("Present address has been successfully updated.")
+                }
+                $("#div_user_PresentAddress_edit").data("kendoWindow").close();
+                $("#div_ryt_panel").empty();
+                $("#div_ryt_panel").append('<div class="loading_partial"></div>');
+                $("#div_ryt_panel").load('@Url.Action("_ShowUserInfo", "HumanResource")?userId=' + '@ViewBag.UserId' + '&isDisplay=false');
+            },
+            error: function (err) {
+                alert("Present address update was unsuccessful.");
+            }
+        });
+
+    });
+
+</script>

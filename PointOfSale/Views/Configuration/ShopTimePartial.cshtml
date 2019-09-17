@@ -1,0 +1,64 @@
+﻿@model PointOfSale.ModelViews.MiscFuncModel
+@Html.HiddenFor(a => a.MiscId)
+<div class="editor-field">
+    @if (Model.Is24Hours == true)
+     {
+        @Html.CheckBoxFor(model => model.Is24Hours, new { htmlattributes = new { @class = "k-textbox", @style = "width:100%", @checked = "checked" } }) <label for="Is24Hours">24 hours open</label>
+     }
+    else
+    {
+        @Html.CheckBoxFor(model => model.Is24Hours, new { htmlattributes = new { @class = "k-textbox", @style = "width:100%" } }) <label for="Is24Hours">24 hours open</label>
+    }
+</div>
+<div id="divTime">
+    <div class="editor-label"><label for="OfferName">Start Time</label></div>
+    <div class="editor-field">
+        @(Html.Kendo().TimePickerFor(m => m.StartTime)
+                        .HtmlAttributes(new { onkeydown = "javascript:return false;", style = "width: 100%; max-width:100%", required = "required", @validationMessage = "Please enter start time" })
+                        .Events(e => e.Change("startChange"))
+        )
+        @Html.ValidationMessageFor(model => model.StartTime, "", new { @class = "text-Danger" })
+    </div>
+    <div class="editor-label"><label for="EndTime">End Time</label></div>
+    <div class="editor-field">
+        @(Html.Kendo().TimePickerFor(m => m.EndTime)
+                        .HtmlAttributes(new { onkeydown = "javascript:return false;", style = "width: 100%; max-width:100%", required = "required", @validationMessage = "Please enter end time" })
+        )
+        @Html.ValidationMessageFor(model => model.EndTime, "", new { @class = "text-Danger" })
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        if ($("#Is24Hours").attr('checked')) {
+            $("#Is24Hours").val(true);
+            $("#divTime").hide();
+            $('#StartTime').prop('required', false);
+            $('#EndTime').prop('required', false);
+        }
+        else {
+            $("#Is24Hours").val(false);
+        }
+    });
+    $('#Is24Hours').change(function () {
+        if ($(this).is(":checked")) {
+            $('#Is24Hours').val(true);
+            $("#divTime").hide();
+            $('#StartTime').prop('required', false);
+            $('#EndTime').prop('required', false);
+        }
+        else
+        {
+            $('#Is24Hours').val(false);
+            $("#divTime").show();
+            $('#StartTime').prop('required', true);
+            $('#EndTime').prop('required', true);
+        }
+    });
+       //$("#StartTime").kendoTimePicker(
+       // {
+       //     format: "hh:mm tt",
+       //     parseFormats: ["HH:mm"]
+       // });
+
+</script>

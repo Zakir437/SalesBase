@@ -1,0 +1,164 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewPurchaseOrder>
+@using PointOfSale.Helpers
+@using System.Globalization;
+@{
+    var count = 0;
+}
+<style>
+    /* Dropdown Button */
+    /*.dropbtn {
+        background-color: #4CAF50;
+        color: white;
+        padding: 16px;
+        font-size: 16px;
+        border: none;
+    }*/
+
+    /* The container <div> - needed to position the dropdown content */
+    .dropdown {
+        position: relative;
+        display: inline-block;
+    }
+
+    /* Dropdown Content (Hidden by Default) */
+    .dropdown-content {
+        display: none;
+        position: absolute;
+        background-color: #f1f1f1;
+        min-width: 180px;
+        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+        z-index: 1;
+    }
+
+    /* Links inside the dropdown */
+    .dropdown-content a {
+        color: black;
+        padding: 12px 16px;
+        text-decoration: none;
+        display: block;
+    }
+
+    /* Change color of dropdown links on hover */
+    .dropdown-content a:hover {
+        background-color: #ddd;
+    }
+
+    /* Show the dropdown menu on hover */
+    .dropdown:hover .dropdown-content {
+        display: block;
+    }
+
+    /* Change the background color of the dropdown button when the dropdown content is shown */
+    .dropdown:hover .dropbtn {
+        background-color: #3e8e41;
+    }
+</style>
+
+@if (Model.Any() == true)
+{
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Voucher Name</th>
+            <th>Customer</th>
+            <th>Status</th>
+            <th>Total Amount</th>
+            <th>Delivery Date</th>
+            <th>Created By</th>
+            <th>Created Date</th>
+            <th>Comments</th>
+            <th></th>
+        </tr>
+        @foreach (var list in Model)
+        {
+            count++;
+            <tr>
+                <td>@count. </td>
+                <td>
+                    <a href="@Html.EncodedParam("PurchaseOrderDetails","Sales", new { id = list.Id, isView = true },null)" target="_blank">
+                        @list.VoucherName
+                    </a>
+                </td>
+                <td>@list.CustomerName</td>
+                <td>
+                    @if (list.Status == 1)
+                    {
+                        <span class="label label-primary">Pending</span>
+                    }
+                    else if (list.Status == 2)
+                    {
+                        <span class="label label-warning">Partial Approved</span>
+                    }
+                    else if (list.Status == 3)
+                    {
+                        <span class="label label-info">Approved</span>
+                    }
+                    else if (list.Status == 4)
+                    {
+                        <span class="label label-success">Completed</span>
+                    }
+                    else if (list.Status == 5)
+                    {
+                        <span class="label label-danger">Deleted</span>
+                    }
+                </td>
+                <td>
+                    @if(list.TotalAmount > 0)
+                     {
+                        <span>@list.TotalAmount.Value.ToString("C", new CultureInfo("bn-BD"))</span>
+                     }
+                    else
+                    {
+                        <span>N/A</span>
+                    }
+                </td>
+                <td>@Convert.ToDateTime(list.DeliveryDate).ToString("MMMM dd,yyyy hh:mm:ss tt")</td>
+                <td>@list.CreatedBy</td>
+                <td>@Convert.ToDateTime(list.CreatedDate).ToString("MMMM dd,yyyy")</td>
+                <td>@list.Comments</td>
+                <td>
+                    @if (list.Status < 4) //status 4 is complete
+                    {
+                        <a href="@Html.EncodedParam("PurchaseOrderDetails", "Sales", new { id = list.Id }, null)"><span class="btn btn-primary" data-toggle="tooltip" title="Edit purchase order" data-id="@list.Id"><i class="fa fa-pencil"></i></span></a>
+                    }
+                    @if (list.Status == 1 && list.Status != 2) //status 1 pending.......status 2 partial approved
+                    {
+                        <button class="btn btn-success btnapprovePurchaseOrder" data-toggle="tooltip" title="Approve Purchase Order" data-id="@list.Id"><i class="fa fa-check"></i></button>
+                    }
+                    @if (list.Status < 4 && list.Status != 2)
+                     {
+                        <button class="btn btn-danger btnDeletePurchaseOrder" data-id="@list.Id" data-toggle="tooltip" title="Delete purchase order"><i class="fa fa-trash"></i></button>
+                     }
+                    <div class="dropdown">
+                        <button class="btn bg-purple"><i class="fa fa-print"></i></button>
+                        <div class="dropdown-content">
+                            <a class="btnPoPrint" data-id="@list.Id" data-type="1">PO Print</a>
+                            <a class="btnPoPrint" data-id="@list.Id" data-type="2" >PO with finance</a>
+                            <a class="btnPoPrint" data-id="@list.Id" data-type="3">PO with sales order</a>
+                            <a class="btnPoPrint" data-id="@list.Id" data-type="4">PO and Sales and finance</a>
+                            <a class="btnPoPrint" data-id="@list.Id" data-type="5">Only finance</a>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        }
+    </table>
+}
+else
+{
+    <h3>There is no record to display</h3>
+}
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    })
+</script>
+
+
+
+
+
+
+
+
+

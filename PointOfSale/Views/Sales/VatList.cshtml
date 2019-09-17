@@ -1,0 +1,51 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewVat>
+@{
+    var count = 0;
+}
+@if (Model.Count() > 0)
+{
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Rate</th>
+            <th>CreatedBy</th>
+            <th>Created Date</th>
+            <th></th>
+        </tr>
+        @foreach (var list in Model)
+        {
+            count++;
+            <tr>
+                <td>@count.</td>
+                <td>@list.Name</td>
+                <td>@list.FirstName @list.LastName</td>
+                <td>@Convert.ToDateTime(list.CreatedDate).ToString("MMM dd yyyy")</td>
+                <th>
+                    <button class="btn btnVatEdit" style="background-color:#1c488e; color:white;" data-id="@list.VatId" data-toggle="tooltip" title="Edit Vat Information"><i class="fa fa-pencil-square-o"></i></button>
+                    @if (list.Status == 1)
+                    {
+                        <button type="button" data-id="@list.VatId" data-isactive="0" class="btn btn-danger inactivateVat" data-toggle="tooltip" title="Inactivate Vat Status">
+                            <i class="fa fa-stop" aria-hidden="true"></i>
+                        </button>
+                    }
+                    else
+                    {
+                        <button type="button" data-id="@list.VatId" data-isactive="1" class="btn btn-success activateVat" data-toggle="tooltip" title="Activate Vat Status">
+                            <i class="fa fa-play" aria-hidden="true"></i>
+                        </button>
+                        <span data-id="@list.VatId" style="cursor:pointer;" data-toggle="tooltip" title="Delete Vat" class="btn btn-danger btnVatDelete">
+                            <i class="fa fa-trash"></i>
+                        </span>
+                    }
+                </th>
+            </tr>
+        }
+    </table>
+}
+else
+{
+    <h3>There is no data to display</h3>
+}
+<script>
+    $('[data-toggle="tooltip"]').tooltip();
+</script>

@@ -1,0 +1,630 @@
+﻿@{
+    ViewBag.Title = "CreateWorkOrder";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+}
+<style>
+    .k-input {
+        height: 26px !important;
+    }
+    p {
+        margin: 4px;
+    }
+    hr {
+        margin: 0px;
+    }
+    .u_1 {
+        background-color: #578ebe !important;
+    }
+    .u_2 {
+        background-color: #67809F !important;
+    }
+    .u_3 {
+        background-color: #217ebd !important;
+    }
+
+    .u_4 {
+        background-color: #428bca !important;
+    }
+
+    #showItem {
+        color: #217ebd !important;
+        font-weight: 700;
+        font-size: 16px;
+    }
+
+    .s_1 {
+        background-color: #578ebe !important;
+    }
+
+    .s_2 {
+        background-color: #67809F !important;
+    }
+
+    .s_3 {
+        background-color: #217ebd !important;
+    }
+
+    .s_4 {
+        background-color: #428bca !important;
+    }
+
+    .padding_30px {
+        padding-right: 19% !important;
+    }
+
+    #ClearSearchBar:disabled {
+        opacity: 0.5 !important;
+        cursor: not-allowed;
+    }
+
+    #GoSearchBar:disabled {
+        opacity: 0.5 !important;
+        cursor: not-allowed;
+    }
+</style>
+<link href="~/Content/Inventory/InventoryList.css" rel="stylesheet" />
+<script src="~/Scripts/jquery.nailthumb.1.1.js"></script>
+<div id="Div_without_Cart">
+    @*<section class="content-header">
+        <ol class="breadcrumb">
+            <li><a><i class="fa fa-shopping-cart"></i> Inventory</a></li>
+            <li class="active"><a href="/Inventory/CreateWorkOrder"><i class="fa fa-list-ul"></i> Create Work-Order</a></li>
+        </ol>
+    </section>*@
+    <section class="content">
+        <div class="panel panel-info">
+            <div class="panel-heading" style="padding-bottom:46px;">
+                <div class="pull-left">
+                    <h4 class="uppercase">Create Work-Order</h4>
+                </div>
+                <div class="pull-right">
+                    <a class="btn btn-default" href="/Inventory/WorkOrder"><i class="fa fa-arrow-left"></i> Back</a>
+                </div>
+            </div>
+            <div class="panel-heading">
+                <ul class="nav nav-tabs">
+                    <li class="active" id="liForOrder"><a href="#tab1ForOrder" data-toggle="tab">Order</a></li>
+                    <li id="liForProducts"><a href="#tab2ForProducts" data-toggle="tab">Products</a></li>
+                    <li id="liForIndentVoucher"><a href="#tab3ForIndent" data-toggle="tab">Indent</a></li>
+                </ul>
+            </div>
+            <div class="panel-body">
+                <div class="row" style="margin:0px 0px 5px 0px;">
+                    <div class="tab-content">
+                        <div id="tab1ForOrder" class="tab-pane fade in active">
+                            <div id="div_Order"></div>
+                        </div>
+                        <div id="tab2ForProducts">
+                            <div class="row" style="margin:0px 0px 5px 0px;">
+                                @*<div class="col-md-4" style="padding-left:0px;">
+                                    @(Html.Kendo().MultiSelect()
+                                        .Name("ProductMultiSelect")
+                                        .DataTextField("Text")
+                                        .DataValueField("Value")
+                                        .Placeholder("Type product name...")
+                                        .AutoBind(false)
+                                        .Events(e => e.Change("onChangeProduct"))
+                                        .HtmlAttributes(new { style = "width: 100%;" })
+                                        .DataSource(source =>
+                                        {
+                                            source.Read(read =>
+                                            {
+                                                read.Action("GetProForMulti", "Inventory").Data("additionalInfoForPro"); ;
+                                            })
+                                            .ServerFiltering(true);
+                                        })
+                                        )
+                                    <span class="k-icon k-i-search" style="margin-top:-25px;float:right;margin-right:10px; position:relative">&nbsp;</span>
+                                </div>*@
+                                @*<div class="col-md-4">
+                                    @(Html.Kendo().DropDownList()
+                                    .Name("CategoryDropDown")
+                                    .DataTextField("Text")
+                                    .DataValueField("Value")
+                                    .OptionLabel("--Select category--")
+                                    .Filter("contains")
+                                    .AutoBind(false)
+                                    .DataSource(source =>
+                                    {
+                                        source.Read(read =>
+                                        {
+                                            read.Action("GetCategoryForDropdown", "Inventory");
+                                        })
+                                        .ServerFiltering(false);
+                                    })
+                                    .HtmlAttributes(new { style = "width:100%;" })
+                                    .Events(e => { e.Change("onChangeCategory"); })
+                                    )
+                                </div>*@
+                                @*<div class="col-md-4" style="padding-right:0px;">
+                                    @(Html.Kendo().DropDownList()
+                                    .Name("SubCategoryDropdown")
+                                    .HtmlAttributes(new { style = "width:100%" })
+                                    .OptionLabel("--Select Sub Category--")
+                                    .DataTextField("Text")
+                                    .DataValueField("Value")
+                                    .DataSource(source =>
+                                    {
+                                        source.Read(read =>
+                                        {
+                                            read.Action("GetSubCategoryInFullFillMent", "Inventory")
+                                                .Data("filterCategory");
+                                        })
+                                        .ServerFiltering(true);
+                                    })
+                                    .Enable(false)
+                                    .AutoBind(false)
+                                    .CascadeFrom("CategoryDropDown")
+                                    .Events(e =>
+                                    {
+                                        e.Change("onChangeSubCategory");
+                                    })
+                                            )
+                                    <script>
+                                        //filter sub category by category
+                                        function filterCategory() {
+                                            return {
+                                                tab: tab,
+                                                categoryId: $("#CategoryDropDown").val()
+                                            };
+                                        }
+                                    </script>
+                                </div>*@
+                            </div>
+                            <div id="div_Product"></div>
+                        </div>
+                        <div id="tab3ForIndent">
+                            <div id="div_Indent"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+<div id="showCart">Show Cart</div>
+<div id="divForAddtoCart">
+    <div class="header" id="CartDivHeader">
+        <div class="row">
+            <div class="col-xs-2">
+                <span style="float:left;margin-left:15px"><img src="~/Content/Icon/cart-icon.png" alt="Add to cart" style="height:25px;width:25px;"></span>
+            </div>
+            <div class="col-xs-5">
+                @*<span><span id="itemCount">0</span> ITEM</span>*@
+            </div>
+            <div class="col-xs-5">
+                <span style="float:right;margin-top:-2px" class="btn btn-default">
+                    Close
+                </span>
+            </div>
+        </div>
+    </div>
+    <div style="width:100%!important;" id="divSupplier">
+        @(Html.Kendo().DropDownList()
+                        .Name("Supplier")
+                        .OptionLabel("Type Supplier name...")
+                        .DataTextField("Text")
+                        .DataValueField("Value")
+                        .Filter("contains")
+                        .AutoBind(false)
+                        .HtmlAttributes(new { style = "width: 100%;", required = "required" })
+                        .DataSource(source =>
+                        {
+                            source.Read(read =>
+                            {
+                                read.Action("GetSupplierList", "Configuration");
+                            })
+                            .ServerFiltering(false);
+                        })
+            //.Events(e => e.Change("onChangeSupplier"))
+        )
+        <span class="field-validation-valid text-danger" data-valmsg-for="Supplier" data-valmsg-replace="true"></span>
+    </div>
+    <div id="DivForCartList" style="max-height:700px; overflow-y:auto">
+        <table class="table table-bordered table-striped table-responsive table-hover" id="tbl_Cart_Item"></table>
+    </div>
+    <div class="row" id="OrderForPurchase" style="position:fixed;bottom:60px!important;">
+        <div style="text-align:center!important;left:250%!important;position:relative!important;padding-bottom:2px!important;">
+            <button class="btn btn-primary text-center" id="btnPurchaseOrder">Order</button>
+        </div>
+    </div>
+</div>
+<!--Alert Modal Start-->
+<div class="modal modal-danger fade" id="modal-danger">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">Alert</h4>
+            </div>
+           
+            <div class="modal-body">
+                <p>Quantity can not be greater than <span id="alertQty">0</span></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline pull-left" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<!--Alert Modal End-->
+<div id="divOrderPayWin"></div>
+<script>
+    var tab = 1, status = 0, id = 0, indentId, indVoucher="", count = 20;
+    var windowHeight = 0;
+    var name = "", quantity = 0, productId = 0, distributeId = 0;
+    var isCartShow = false;
+    var itemPrice = 0, itemTotal = 0;
+    var selectedValue = "";
+    var supplierValidation;
+    var categoryId = 0;
+    $(document).ready(function () {
+        $("#liForInventory").addClass('active');
+        $("#liForWarehouse").addClass('active');
+
+        $("#liForOrder").click();
+
+        supplierValidation = $("#divSupplier").kendoValidator().data("kendoValidator");
+
+        var available_height = Metronic.getViewPort().height - $('.main-footer').outerHeight() - $('.main-header').outerHeight();
+        windowHeight = $(window).height() - $(".navbar-static-top").height();
+        $("#divForAddtoCart").css('min-height', available_height);
+    });
+
+    function clearBeforeClick() {
+        $("#div_Order").empty();
+        $("#div_Product").empty();
+        $("#div_Indent").empty();
+        if (isCartShow == true) {
+            $("#CartDivHeader").click();
+        }
+        $("#btnPurchaseOrder").prop('disabled', true);
+        $("#tbl_Cart_Item").empty();
+    }
+
+    $("#liForOrder").click(function () {
+        tab = 1;
+        clearBeforeClick();
+        $("#showCart").show();
+        $("#div_Order").append('<div class="loading_partial"></div>');
+        $("#div_Order").load('/Inventory/IndProListForWOCreate');
+    });
+
+    $("#liForProducts").click(function () {
+        tab = 2;
+        clearBeforeClick();
+        $("#showCart").hide();
+        $("#div_Product").append('<div class="loading_partial"></div>');
+        $("#div_Product").load('/Inventory/WorkOrderProductList');
+    });
+
+    $("#liForIndentVoucher").click(function () {
+        tab = 3;
+        clearBeforeClick();
+        $("#showCart").hide();
+        $("#div_Indent").append('<div class="loading_partial"></div>');
+        $("#div_Indent").load('/Inventory/IndentList?isWorkOrderList=true');
+    });
+
+    //******************************** show CART ******************************************************************
+    $("#showCart").click(function () {
+        isCartShow = true;
+        $("#showing_count_div").removeClass("col-xs-6").addClass("col-xs-4");
+        //$("#search_bar").removeClass("col-sm-12").addClass("col-sm-11");
+        $("#Div_without_Cart").addClass('padding_30px');
+        //$("#Div_without_Cart").addClass('col-lg-10 col-md-10 col-sm-9 col-xs-12 padding_30px');
+        $("#divForAddtoCart").addClass('col-md-2 col-sm-3 col-xs-12 noPadding');
+        $('#DivForCartList').css('min-height', windowHeight - $("#CartDivHeader").innerHeight() - 112);
+        $("#divForAddtoCart").show();
+        $("#DivForCartList").show();
+        //if (alllocId.length > 0) {
+        //    $("#OrderForPurchase").show();
+        //}
+        $("#showCart").hide();
+
+        $(window).resize(function () {
+            $('#DivForCartList').css('min-height', windowHeight - $("#CartDivHeader").innerHeight() - 112);
+        });
+    });
+
+    //******************************** HIDE CART ******************************************************************
+    $("#CartDivHeader").click(function () {
+        //$("#search_bar").removeClass("col-sm-11").addClass("col-sm-12");
+        $("#showing_count_div").removeClass("col-xs-4").addClass("col-xs-6");
+        $("#Div_without_Cart").removeClass('padding_30px');
+        //$("#Div_without_Cart").addClass('col-lg-12 col-md-12 col-sm-12 col-xs-12 noPadding');
+        $("#divForAddtoCart").hide();
+        $("#DivForCartList").hide();
+        $("#divForAddtoCart").removeClass('col-md-2 col-sm-3 col-xs-12 noPadding');
+        isCartShow = false;
+        $("#showCart").show();
+    });
+
+    //*****************************  ITEM ADD INTO CART **********************************************************
+    $("#div_Order").on("click", ".btnAddItem", function () {
+        id = $(this).data("id");
+        indentId = $(this).data("indid");
+        indVoucher = $(this).data("indvoucher");
+        name = $(this).data("name");
+        quantity = $(this).data("qty");
+        productId = $(this).data("productid");
+        distributeId = $(this).data("distributeid");
+
+        if (!isCartShow) {
+            $("#showing_count_div").removeClass("col-xs-6").addClass("col-xs-4");
+            //$("#search_bar").removeClass("col-sm-12").addClass("col-sm-11");
+            $("#Div_without_Cart").addClass('padding_30px');
+
+            //$("#Div_without_Cart").removeClass('form-horizontal col-lg-12 col-md-12 col-sm-12 col-xs-12');
+            //$("#Div_without_Cart").addClass('col-lg-10 col-md-10 col-sm-9 col-xs-12 padding_30px');
+            $("#divForAddtoCart").addClass('col-md-2 col-sm-3 col-xs-12 noPadding');
+            $('#DivForCartList').css('min-height', windowHeight - $("#CartDivHeader").innerHeight() - 112);
+            $("#divForAddtoCart").show();
+            $("#DivForCartList").show();
+
+            isCartShow = true;
+            $("#showCart").hide();
+            $('#DivForCartList').css('min-height', windowHeight - $("#CartDivHeader").innerHeight() - 112);
+        }
+        $("#tbl_Cart_Item").append('<tr id="cartItem_' + id + '" class="cartItems" data-id="' + id + '" data-indentid="' + indentId + '" data-productid="' + productId + '" data-distributeid="' + distributeId + '" data-productname="' + name + '">' +
+            '<td width="15%" style="padding: 0px!important;">' +
+            '<p class="cartItemUp" ' +
+            'data-qty="' + quantity + '" data-id="' + id + '" ' +
+            'data-showplus="true" style="cursor:pointer;text-align:center;margin-bottom:0px!important;">' +
+            '<i class="fa fa-caret-up "></i>' +
+            '</p>' +
+            '<p id="quentityInArrow_' + id + '" style="text-align:center;margin-bottom:0px!important;">1</p>' +
+            '<p class="cartItemDown" data-id="' + id + '"' +
+            'style="cursor:pointer;text-align:center;margin-bottom:0px!important;">' +
+            '<i class="fa fa-caret-down"></i>' +
+            '</p>' +
+            '</td>' +
+            '<td width="60%" style="padding: 5px 0px 5px 0px;"><span>' + name + ' | ' + indVoucher + '</span><br />' +
+            'Price : <input class="txt_itemPrice " style="width: 25% !important;" data-id="' + id + '" id="txt_itemPrice_' + id + '" type="text">Tk<br />' +
+            'Total : <span id="itemTotal_' + id + '">0.00</span>Tk' +
+            '</td>' +
+            '<td width="5%" style="padding: 18px 0px 0px 0px;">' +
+            '<h4> <i class="fa fa-times-circle cartItemRemove" data-id="' + id + '"></i> </h4>' +
+            '</td>' +
+            '</tr>');
+
+        $("#divForAddtoCart").show();
+        $("#DivForCartList").show();
+        $("#OrderForPurchase").show();
+
+        $("#btnPurchaseOrder").prop('disabled', false);
+
+        $(this).hide();
+        $("#qtyInList_" + id).empty();
+        $("#qtyInList_" + id).append(1);
+        $("#txt_quan_" + id).val(1);
+        $("#divForOrder_" + id).show();
+
+        //$("#spn_quan_" + loid).text(parseFloat($("#spn_quan_" + loid).text()) - 1);
+        //if (alllocId.length > 0) {
+        //    $("#btnRouteOrder").show();
+        //    $("#btnPurchaseOrder").show();
+        //}
+    });
+
+    //************************per price keypress allow only number************************
+    $("#DivForCartList").on('keypress', '.txt_itemPrice', function (event) {
+        if (event.which != 8 && isNaN(String.fromCharCode(event.which))) {
+            event.preventDefault(); //stop character from entering input
+        }
+    });
+
+    //*************************** REMOVE ITEM FROM CART **********************************************************
+    $("#DivForCartList").on("click", ".cartItemRemove", function () {
+        id = $(this).data("id");
+        $("#cartItem_" + id).remove();
+        $("#btnAddItem_" + id).show();
+        $("#divForOrder_" + id).hide();
+
+        $("#qtyInList_" + id).empty();
+        $("#qtyInList_" + id).append(1);
+
+        if ($(".cartItems").length == 0) {
+            $("#btnPurchaseOrder").prop('disabled', true);
+        }
+    });
+
+    //********************************* INCREASE ITEM QUANTITY ******************************************
+    $("#DivForCartList,#div_Order").on("click", ".cartItemPlus,.cartItemUp", function () {
+        id = $(this).data("id");
+        quantity = parseInt($($("#quentityInArrow_" + id)).text());
+        quantity++;
+        var maxQuantity = parseInt($(this).data("qty"));
+        if (quantity > maxQuantity) {
+
+            $("#alertQty").empty();
+            $("#alertQty").append(maxQuantity);
+
+            $('#modal-danger').modal('toggle');
+            quantity = maxQuantity;
+        }
+
+        $("#quentityInArrow_" + id).empty();
+        $("#quentityInArrow_" + id).append(quantity);
+
+        $("#qtyInList_" + id).empty();
+        $("#qtyInList_" + id).append(quantity);
+        $("#txt_quan_" + id).val(quantity);
+
+        calculateItemTotal(id);
+    });
+    //********************************* DECREASE ITEM QUANTITY ******************************************
+    $("#DivForCartList,#div_Order").on("click", ".cartItemMinus,.cartItemDown", function () {
+        id = $(this).data("id");
+        quantity = parseInt($($("#quentityInArrow_" + id)).text());
+        quantity--;
+        if (quantity == 0) {
+            $("#cartItem_" + id).remove();
+            $("#btnAddItem_" + id).show();
+            $("#divForOrder_" + id).hide();
+        }
+        else {
+            $("#quentityInArrow_" + id).empty();
+            $("#quentityInArrow_" + id).append(quantity);
+
+            $("#qtyInList_" + id).empty();
+            $("#qtyInList_" + id).append(quantity);
+            $("#txt_quan_" + id).val(quantity);
+
+            calculateItemTotal(id);
+        }
+        if ($(".cartItems").length == 0) {
+            $("#btnPurchaseOrder").prop('disabled', true);
+        }
+    });
+
+    //********************************* SHOW TEXT QUANTITY ******************************************
+    $("#div_Order").on("click", ".qtyInList", function () {
+        id = $(this).data("id");
+        quantity = parseInt($($("#quentityInArrow_" + id)).text());
+
+        $(this).hide();
+        $("#txt_quan_" + id).val(quantity);
+        $("#txt_quan_" + id).show();
+
+    });
+
+    //********************************* DECREASE/INCREASE ON TEXT QUANTITY CHANGE ******************************************
+    $("#div_Order").on("focusout", ".txt_quantity", function () {
+        id = $(this).data("id");
+        if ($("#txt_quan_" + id).val() > 0) {
+            quantity = parseInt($("#txt_quan_" + id).val());
+
+            var maxQuantity = parseInt($(this).data("max"));
+            if (quantity > maxQuantity) {
+
+                $("#alertQty").empty();
+                $("#alertQty").append(maxQuantity);
+
+                $('#modal-danger').modal('toggle');
+                quantity = maxQuantity;
+            }
+            $("#quentityInArrow_" + id).empty();
+            $("#quentityInArrow_" + id).append(quantity);
+            $("#qtyInList_" + id).empty();
+            $("#qtyInList_" + id).append(quantity);
+
+            $(this).hide();
+            $("#qtyInList_" + id).show();
+
+            calculateItemTotal(id);
+        }
+        else {
+            $("#cartItem_" + id).remove();
+            $("#btnAddItem_" + id).show();
+            $("#divForOrder_" + id).hide();
+
+            $("#qtyInList_" + id).empty();
+            $("#qtyInList_" + id).append(1);
+        }
+    });
+
+    //******************************per item price change*******************************************
+    $("#DivForCartList").on('focusout', '.txt_itemPrice', function () {
+        id = parseInt($(this).data("id"));
+        calculateItemTotal(id);
+    });
+
+    function calculateItemTotal(id) {
+        itemPrice = 0;
+        if ($("#txt_itemPrice_" + id).val() > 0) {
+            itemPrice = parseInt($("#txt_itemPrice_" + id).val());
+        }
+        quantity = parseInt($("#quentityInArrow_" + id).text());
+        itemTotal = itemPrice * quantity;
+        $("#itemTotal_" + id).empty();
+        $("#itemTotal_" + id).append(itemTotal.toFixed(2));
+    }
+
+    //******************************work order save*****************************
+    $("#btnPurchaseOrder").click(function () {
+        if (supplierValidation.validate()) {
+            var orderData = [];
+            $(".cartItems").each(function () {
+                id = parseInt($(this).data("id"));
+                orderData.push({
+                    IndentId: parseInt($(this).data("indentid")),
+                    ProductId: parseInt($(this).data("productid")),
+                    DistributeId: $(this).data("distributeid"),
+                    ProductName: $(this).data("productname"),
+                    Quantity: parseInt($("#quentityInArrow_" + id).text()),
+                    PeritemCost: ($("#txt_itemPrice_" + id).val() > 0 ? parseInt($("#txt_itemPrice_" + id).val()) : 0),
+                    Cost: parseInt($("#itemTotal_" + id).text())
+                });
+            });
+            $.ajax({
+                url: '/Inventory/WorkOrderSave',
+                type: 'POST',
+                data: JSON.stringify({ UserId: userId, ImportData: orderData, SupplierId: $("#Supplier").val() }),
+                contentType: 'application/json',
+                success: function (data) {
+                    if (data == "success") {
+                        window.location.href = '/Inventory/WorkOrder';
+                        //window.location.reload();
+                    }
+                    else {
+                        alert("Save error...");
+                    }
+                }
+            });
+        }
+    });
+
+    //****************************Product multiselect***********************************
+    function onChangeProduct()
+    {
+        selectedValue = this.value();
+        if (selectedValue.length > 0)
+        {
+            clearBeforeClick();
+            $("#div_Product").append('<div class="loading_partial"></div>');
+            $("#div_Product").load('/Inventory/WorkOrderProductList?selectedValue=' + selectedValue);
+        }
+        else
+        {
+            $("#liForProducts").click();
+        }
+    }
+
+    function additionalInfoForPro()
+    {
+        return {
+            text: ($.trim($("#ProductMultiSelect").data("kendoMultiSelect").input.val()) == "Type product name..." ? "" : $.trim($("#ProductMultiSelect").data("kendoMultiSelect").input.val()))
+        }
+    }
+
+    //*********************Category Multiselect*************************************
+    function onChangeCategory()
+    {
+        categoryId = this.value();
+        if (categoryId > 0)
+        {
+
+        }
+        else
+        {
+            
+        }
+        //alert(this.value());
+    }
+
+    function additionalInfoForCategory() {
+        return {
+            //text: $("#").val()
+        }
+    }
+
+
+
+</script>
+
+

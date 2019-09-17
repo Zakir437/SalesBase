@@ -1,0 +1,251 @@
+﻿@{
+    ViewBag.Title = "Offer";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+    long couponCount = ViewBag.CouponCount;
+}
+<style>
+    .k-input {
+        height: 26px !important;
+    }
+
+    .padding {
+        padding-left: 0px;
+        padding-bottom: 5px;
+    }
+
+    .noPadding-Right {
+        padding-right: 0px;
+    }
+
+    .row {
+        margin: 0px;
+        margin-bottom: 5px;
+    }
+</style>
+<section class="content">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4 class="uppercase">Offer</h4>
+            </div>
+        </div>
+        <div class="panel-body">
+            <a class="btn btn-success" href="/Offer/OfferCreate"><i class="fa fa-plus-circle"></i> Add Offer</a>
+        </div>
+        <div class="panel-heading">
+            <ul class="nav nav-tabs StatusTab">
+                <li class="active" id="liForDiscount"><a href="#tab1ForDiscount" data-toggle="tab">Discount</a></li>
+                <li id="liForCoupon"><a href="#tab2ForCoupon" data-toggle="tab">Coupon</a></li>
+                <li id="liForPoints"><a href="#tab3Points" data-toggle="tab">Points</a></li>
+            </ul>
+        </div>
+        <div class="panel-body" style="border:none!important;">
+            <div class="tab-content">
+                <div class="tab-pane fade in active" id="tab1ForDiscount">
+                    <div id="div_discount"></div>
+                </div>
+                <div id="tab2ForCoupon" class="tab-pane fade">
+                    <div id="div_coupon"></div>
+                </div>
+                <div id="tab3Points" class="tab-pane fade">
+                    <div id="div_points"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<script id="temp_win_delete_entry" type="text/x-kendo-template">
+    <div style="padding:1em;">
+        <p style="font-size: 14px; padding: 10px"> #=msg# </p>
+        <div style="text-align: right;">
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btn_delete_Entry_noty_ok"><span class="k-icon k-update"></span>OK</button>
+            <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btn_delete_Entry_noty_cancel"><span class="k-icon k-cancel"></span>Cancel</button>
+        </div>
+    </div>
+</script>
+
+<script id="temp_win_Active_All" type="text/x-kendo-template">
+    <div style="padding:1em;">
+        <p style="font-size: 14px; padding: 10px"> #=msg# </p>
+        <div style="text-align: right;">
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btn_Active_All_ok"><span class="k-icon k-update"></span>OK</button>
+            <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btn_Active_All_cancel"><span class="k-icon k-cancel"></span>Cancel</button>
+        </div>
+    </div>
+</script>
+
+<script id="temp_win_inactive_All" type="text/x-kendo-template">
+    <div style="padding:1em;">
+        <p style="font-size: 14px; padding: 10px"> #=msg# </p>
+        <div style="text-align: right;">
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btn_inactive_All_ok"><span class="k-icon k-update"></span>OK</button>
+            <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btn_inactive_All_cancel"><span class="k-icon k-cancel"></span>Cancel</button>
+        </div>
+    </div>
+</script>
+
+<script id="temp_win_delete_All" type="text/x-kendo-template">
+    <div style="padding:1em;">
+        <p style="font-size: 14px; padding: 10px"> #=msg# </p>
+        <div style="text-align: right;">
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btn_delete_All_ok"><span class="k-icon k-update"></span>OK</button>
+            <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btn_delete_All_cancel"><span class="k-icon k-cancel"></span>Cancel</button>
+        </div>
+    </div>
+</script>
+<div id="divDiscItemEditWin"></div>
+<div id="divValidityEditWin"></div>
+<div id="divAddDiscountWin"></div>
+<div id="divDiscountWin"></div>
+<div id="divAddCouponWin"></div>
+
+<script>
+    var tab = 0, discTab = 0, subOfferId = 0;
+    var id = 0, status = 0, selectedIds = [], sortTypeId = 1, selectedOne = "", sortById = 0, count = 10, multiSelectIds = "";
+    var subCategoryId = 0, categoryId = 0;
+    $(document).ready(function () {
+        $("#liForSalesMenu").addClass('active');
+        $("#liForOffers").addClass('active');
+
+        $("#liForDiscount").click();
+    });
+
+    function clearBeforeClick()
+    {
+        $("#divDiscItemEditWin").empty();
+        $("#divValidityEditWin").empty();
+        $("#divAddDiscountWin").empty();
+        $("#divDiscountWin").empty();
+        $("#divAddCouponWin").empty();
+
+
+        $("#div_discount").empty();
+        $("#div_coupon").empty();
+        $("#div_points").empty();
+    }
+
+    $("#liForDiscount").click(function () {
+        clearBeforeClick();
+        tab = 1;
+        $("#div_discount").append('<div class="loading_partial"></div>');
+        $("#div_discount").load('/Offer/DiscountTab');
+
+        $("#liForItem").click();
+    });
+
+    $("#liForCoupon").click(function () {
+        clearBeforeClick();
+        tab = 2;
+        $("#div_coupon").append('<div class="loading_partial"></div>');
+        $("#div_coupon").load('/Offer/CouponTab');
+    });
+
+    $("#liForPoints").click(function () {
+        clearBeforeClick();
+        tab = 3;
+        $("#div_points").append('<div class="loading_partial"></div>');
+        $("#div_points").load('/Offer/PointsTab');
+    });
+
+    function loadCouponList() {
+        $("#divCouponList").empty();
+        $("#divCouponList").append('<div class="loading_partial"></div>');
+        $("#divCouponList").load('/Offer/CouponList?subOfferId=' + subOfferId + '&sortTypeId=' + sortTypeId + '&sortBy=' + sortById + '&selectedIds=' + multiSelectIds + '&count=' + count);
+        if (multiSelectIds == "")
+        {
+            loadOfferMultInCoupon();
+        }
+        actionButtonInCoupon();
+
+        $("#btnSeeMore").hide();
+        if (sortTypeId == 1 && subOfferId == 0 && multiSelectIds == "") {
+            if (@couponCount > count)
+            {
+                $("#btnSeeMore").show();
+            }
+        }
+        else {
+            count = 10;
+        }
+    }
+
+    function loadOfferMultInCoupon()
+    {
+        $("#OfferMultiSelect").data("kendoMultiSelect").value("");
+        $("#OfferMultiSelect").data("kendoMultiSelect").dataSource.read();
+    }
+    //******************** Coupon List Type change*******************************
+    function onChangeListType()
+    {
+        subOfferId = 0;
+        if (this.value() > 0)
+        {
+            subOfferId = this.value();
+        }
+        multiSelectIds = "";
+        loadCouponList();
+    }
+
+    //****************************Sort Type Change on coupon list ************************************
+    function onChangeSortTypeInCoupon() {
+        sortTypeId = this.value();
+        count = 10;
+        sortById = 0;
+        selectedIds = [];
+        multiSelectIds = "";
+        loadCouponList();
+        $("#SortByDropdown").data("kendoDropDownList").value("");
+    }
+
+    //*************************Onchange sort by on coupon list*************************************
+    function onChangeSortByInCoupon() {
+        sortById = 0;
+        if (this.value() > 0) {
+            sortById = this.value();
+        }
+        loadCouponList();
+    }
+
+    //********************** coupon offer multiselect ********************************
+    function additionInfoCouponOffer() {
+        return {
+            subOfferId: subOfferId,
+            sortTypeId: sortTypeId
+        }
+    }
+
+    function onChangeCouponOffer() {
+        multiSelectIds = "";
+        multiSelectIds = this.value();
+        loadCouponList();
+    }
+
+    function actionButtonInCoupon() {
+        $("#divSelectedActionButton").hide();
+
+        $("#btnActiveSelected").hide();
+        $("#btnInactiveSelected").hide();
+        $("#btnDeleteSelected").hide();
+
+        if ($("#divCouponList .check:checked").length > 0) {
+            $("#divSelectedActionButton").show();
+            if (sortTypeId == 1) {
+                $("#btnInactiveSelected").show();
+            }
+            else if (sortTypeId == 2) {
+                $("#btnActiveSelected").show();
+                $("#btnDeleteSelected").show();
+            }
+            else if (sortTypeId == 3) {
+                $("#btnActiveSelected").show();
+            }
+        }
+    }
+
+</script>
+
+
+
+
+
+

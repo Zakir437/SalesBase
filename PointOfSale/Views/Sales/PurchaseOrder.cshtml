@@ -1,0 +1,671 @@
+﻿@{
+    ViewBag.Title = "PurchaseOrder";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+    long countAll = ViewBag.CountAll;
+    long countPending = ViewBag.CountPending;
+    long countPartial = ViewBag.CountPartial;
+    long countApproved = ViewBag.CountApproved;
+    long countCompleted = ViewBag.CountCompleted;
+    long countDeleted = ViewBag.CountDeleted;
+}
+<style>
+    .k-input {
+        height: 26px !important;
+    }
+    p {
+        margin: 10px;
+    }
+    hr {
+        margin: 0px;
+    }
+    a{
+        cursor:pointer;
+    }
+</style>
+<section class="content">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4 class="uppercase">Purchase Order History</h4>
+            </div>
+        </div>
+        <p>
+            <a class="btn btn-success" href="/Sales/PurchaseOrderCreate"><i class="fa fa-plus-circle" aria-hidden="true"></i> ADD NEW ORDER</a>
+        </p>
+        <div class="panel-heading">
+            <ul class="nav nav-tabs StatusTab">
+                <li class="active" id="liForAll"><a href="#tab1ForAll" data-toggle="tab">All</a></li>
+                <li id="liForPending"><a href="#tab2ForPending" data-toggle="tab">Pending Voucher</a></li>
+                <li id="liForPartialApprove"><a href="#tab3ForPartialApprove" data-toggle="tab">Partial Approved Voucher</a></li>
+                <li id="liForApproved"><a href="#tab4ForApproved" data-toggle="tab">Approved Voucher</a></li>
+                <li id="liForCompleted"><a href="#tab5ForCompleted" data-toggle="tab">Completed Voucher</a></li>
+                <li id="liForDelete"><a href="#tab6DeleteList" data-toggle="tab">Deleted</a></li>
+            </ul>
+        </div>
+        <div class="panel-body" style="border:none!important;">
+            <div class="row" style="margin : 0px; margin-bottom:5px;">
+                <div class="pull-left" style="max-width: 48%!important; width:100%;">
+                    @(Html.Kendo().MultiSelect()
+                        .Name("PurchaseOrderMultiselect")
+                        .DataTextField("Text")
+                        .DataValueField("Value")
+                        .Placeholder("Type voucher name...")
+                        .AutoBind(false)
+                        .Filter("contains")
+                        .Events(e => e.Change("onChangeVoucher"))
+                        .HtmlAttributes(new { style = "width: 100%;" })
+                        .DataSource(source =>
+                        {
+                            source.Read(read =>
+                            {
+                                read.Action("GetPurchaseOrderVoucherList", "Sales").Data("additionalInfo");
+                            })
+                            .ServerFiltering(false);
+                        })
+                    )
+                    <span class="k-icon k-i-search" style="margin-top:-25px;float:right;margin-right:10px; position:relative">&nbsp;</span>
+                </div>
+                <div class="pull-right" style="max-width: 48%!important;">
+                    <div class="pull-left" style="padding: 5px 10px;padding-right:5px!important;" id="show_Days_Title"></div>
+                    <div class="btn-group btn-group-devided pull-right" data-toggle="buttons">
+                        <div id="reportrange" class="pull-right" style="background: #fff; cursor: pointer; padding: 5px 10px; border: 1px solid #ccc; width: 100%">
+                            <span></span> <b class="caret"></b>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-content">
+                <div class="tab-pane fade in active" id="tab1ForAll">
+                    <div id="div_All"></div>
+                </div>
+                <div id="tab2ForPending" class="tab-pane fade">
+                    <div id="div_Pending"></div>
+                </div>
+                <div id="tab3ForPartialApprove" class="tab-pane fade">
+                    <div id="div_PartialApproved"></div>
+                </div>
+                <div id="tab4ForApproved">
+                    <div id="div_Approved"></div>
+                </div>
+                <div id="tab5ForCompleted">
+                    <div id="div_Completed"></div>
+                </div>
+                <div id="tab6DeleteList">
+                    <div id="div_Deleted"></div>
+                </div>
+            </div>
+            <p class="text-center">
+                <button class="btn btn-primary" id="btnSeeMore"><i class="fa fa-arrow-down"></i> See more</button>
+            </p>
+        </div>
+    </div>
+</section>
+<script id="temp_win_voucher_approved" type="text/x-kendo-template">
+    <div style="padding:1em;">
+        <p style="font-size: 14px; padding: 10px"> #=msg# </p>
+        <div style="text-align: right;">
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btn_approve_noty_ok"><span class="k-icon k-update"></span>OK</button>
+            <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btn_approve_noty_cancel"><span class="k-icon k-cancel"></span>Cancel</button>
+        </div>
+    </div>
+</script>
+<script id="temp_win_voucher_delete" type="text/x-kendo-template">
+    <div style="padding:1em;">
+        <p style="font-size: 14px; padding: 10px"> #=msg# </p>
+        <div style="text-align: right;">
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btn_del_noty_ok"><span class="k-icon k-update"></span>OK</button>
+            <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btn_del_noty_cancel"><span class="k-icon k-cancel"></span>Cancel</button>
+        </div>
+    </div>
+</script>
+<script>
+    var tab = 1, status = 0, id = 0, count = 10;
+    var days = 0, from = null, to = null;
+    var passdata = '';
+    var start = moment();
+    var end = moment().subtract(1, 'days');
+    $(document).ready(function () {
+        $("#liForSalesMenu").addClass('active');
+        $("#liForPurchaseOrder").addClass('active');
+
+        $('.ranges li').first().click();
+    });
+
+
+    function clearBeforeClick() {
+        $("#div_All").empty();
+        $("#div_Pending").empty();
+        $("#div_PartialApproved").empty();
+        $("#div_Approved").empty();
+        $("#div_Completed").empty();
+        $("#div_Deleted").empty();
+
+        $('#PurchaseOrderMultiselect').data('kendoMultiSelect').value("");
+    }
+    $("#liForAll").click(function () {
+        tab = 1;
+        status = 0;
+        clearBeforeClick();
+        $('.ranges li').first().click();
+    });
+    $("#liForPending").click(function () {
+        clearBeforeClick();
+        tab = 2; status = 1;
+        $('.ranges li').first().click();
+    });
+
+    $("#liForPartialApprove").click(function () {
+        clearBeforeClick();
+        tab = 3; status = 2;
+        $('.ranges li').first().click();
+    });
+
+    $("#liForApproved").click(function () {
+        clearBeforeClick();
+        tab = 4; status = 3;
+        $('.ranges li').first().click();
+    });
+
+    $("#liForCompleted").click(function () {
+        clearBeforeClick();
+        tab = 5; status = 4;
+        $('.ranges li').first().click();
+    });
+
+    $("#liForDelete").click(function () {
+        clearBeforeClick();
+        tab = 6; status = 5;
+        $('.ranges li').first().click();
+    });
+
+     @***************DateRange Start******************@
+    $('#reportrange').daterangepicker({
+        startDate: start,
+        endDate: end,
+        ranges: {
+            'Select Date': [moment(), moment().subtract(1, 'days')],
+            'Today': [moment(), moment()],
+            'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+            'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+        }
+    }, cb);
+    cb(start, end);
+    start = moment(); end = moment();
+    $(".applyBtn").click(function () {
+        from = $("input[name*='daterangepicker_start']").val();
+        to = $("input[name*='daterangepicker_end']").val();
+        btn_CustomDate(from, to);
+    });
+
+    $('.ranges').on("click", "li", function () {
+        var day = $(this).text();
+        if (day == "Select Date") {
+            btn_All();
+        } else {
+            if (day == "Today") {
+                btn_today();
+            } else if (day == "Last 7 Days") {
+                btn_last_seven();
+            } else if (day == "Last 30 Days") {
+                btn_last_thirty();
+            }
+        }
+    });
+    function cb(start, end) {
+        if (start == null && end == null) {
+            $('#reportrange span').html("Select Date");
+            return;
+        }
+        else if ((!start._isValid && !end._isValid)) {
+            $('#reportrange span').html("Select Date");
+            return;
+        } else if (start._d > end._d) {
+            $('#reportrange span').html("Select Date");
+            return;
+        }
+        $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+    }
+    function btn_today() {
+        days = 1;
+        from = null;
+        to = null;
+        $("#btnSeeMore").hide();
+        $('#show_Days_Title').html("Today");
+        passdata = { days: 1, status: status };
+        if (tab == 1)
+        {
+            $("#div_All").append('<div class="loading_partial"></div>');
+            $("#div_All").load('@Url.Action("PurchaseOrderList", "Sales")', passdata);
+        }
+        else if (tab == 2)
+        {
+            $("#div_Pending").append('<div class="loading_partial"></div>');
+            $("#div_Pending").load('@Url.Action("PurchaseOrderList", "Sales")', passdata);
+        }
+        else if (tab == 3)
+        {
+            $("#div_PartialApproved").append('<div class="loading_partial"></div>');
+            $("#div_PartialApproved").load('@Url.Action("PurchaseOrderList", "Sales")', passdata);
+        }
+        else if (tab == 4)
+        {
+            $("#div_Approved").append('<div class="loading_partial"></div>');
+            $("#div_Approved").load('@Url.Action("PurchaseOrderList", "Sales")', passdata);
+        }
+        else if (tab == 5)
+        {
+            $("#div_Completed").append('<div class="loading_partial"></div>');
+            $("#div_Completed").load('@Url.Action("PurchaseOrderList", "Sales")', passdata);
+        }
+        else if (tab == 6)
+        {
+            $("#div_Deleted").append('<div class="loading_partial"></div>');
+            $("#div_Deleted").load('@Url.Action("PurchaseOrderList", "Sales")', passdata);
+        }
+        $('#PurchaseOrderMultiselect').data('kendoMultiSelect').dataSource.read();
+    }
+    function btn_last_seven() {
+        days = 7;
+        from = null;
+        to = null;
+        $("#btnSeeMore").hide();
+        $('#show_Days_Title').html("Last 7 Days");
+        passdata = { days: 7, status: status };
+        if (tab == 1)
+        {
+            $("#div_All").append('<div class="loading_partial"></div>');
+            $("#div_All").load('@Url.Action("PurchaseOrderList", "Sales")', passdata);
+        }
+        else if (tab == 2)
+        {
+            $("#div_Pending").append('<div class="loading_partial"></div>');
+            $("#div_Pending").load('@Url.Action("PurchaseOrderList", "Sales")', passdata);
+        }
+        else if (tab == 3)
+        {
+            $("#div_PartialApproved").append('<div class="loading_partial"></div>');
+            $("#div_PartialApproved").load('@Url.Action("PurchaseOrderList", "Sales")', passdata);
+        }
+        else if (tab == 4)
+        {
+            $("#div_Approved").append('<div class="loading_partial"></div>');
+            $("#div_Approved").load('@Url.Action("PurchaseOrderList", "Sales")', passdata);
+        }
+        else if (tab == 5)
+        {
+            $("#div_Completed").append('<div class="loading_partial"></div>');
+            $("#div_Completed").load('@Url.Action("PurchaseOrderList", "Sales")', passdata);
+        }
+        else if (tab == 6)
+        {
+            $("#div_Deleted").append('<div class="loading_partial"></div>');
+            $("#div_Deleted").load('@Url.Action("PurchaseOrderList", "Sales")', passdata);
+        }
+        $('#PurchaseOrderMultiselect').data('kendoMultiSelect').dataSource.read();
+    }
+    function btn_last_thirty() {
+        days = 30;
+        from = null;
+        to = null;
+        $("#btnSeeMore").hide();
+        $('#show_Days_Title').html("Last 30 Days");
+        passdata = { days: 30, status: status };
+        if (tab == 1)
+        {
+            $("#div_All").append('<div class="loading_partial"></div>');
+            $("#div_All").load('@Url.Action("PurchaseOrderList", "Sales")', passdata);
+        }
+        else if (tab == 2)
+        {
+            $("#div_Pending").append('<div class="loading_partial"></div>');
+            $("#div_Pending").load('@Url.Action("PurchaseOrderList", "Sales")', passdata);
+        }
+        else if (tab == 3)
+        {
+            $("#div_PartialApproved").append('<div class="loading_partial"></div>');
+            $("#div_PartialApproved").load('@Url.Action("PurchaseOrderList", "Sales")', passdata);
+        }
+        else if (tab == 4)
+        {
+            $("#div_Approved").append('<div class="loading_partial"></div>');
+            $("#div_Approved").load('@Url.Action("PurchaseOrderList", "Sales")', passdata);
+        }
+        else if (tab == 5)
+        {
+            $("#div_Completed").append('<div class="loading_partial"></div>');
+            $("#div_Completed").load('@Url.Action("PurchaseOrderList", "Sales")', passdata);
+        }
+        else if (tab == 6)
+        {
+            $("#div_Deleted").append('<div class="loading_partial"></div>');
+            $("#div_Deleted").load('@Url.Action("PurchaseOrderList", "Sales")', passdata);
+        }
+        $('#PurchaseOrderMultiselect').data('kendoMultiSelect').dataSource.read();
+    }
+    function btn_All() {
+        days = 0;
+        from = null;
+        to = null;
+        count = 10;
+        $('#show_Days_Title').html("");
+        $('#reportrange span').html("Select Date");
+        $("#btnSeeMore").hide();
+        passdata = { count: count, status: status };
+        if (tab == 1)
+        {
+            if (@countAll > count)
+            {
+                $("#btnSeeMore").show();
+            }
+            $("#div_All").append('<div class="loading_partial"></div>');
+            $("#div_All").load('@Url.Action("PurchaseOrderList", "Sales")', passdata);
+        }
+        else if (tab == 2)
+        {
+            if (@countPending > count)
+            {
+                $("#btnSeeMore").show();
+            }
+            $("#div_Pending").append('<div class="loading_partial"></div>');
+            $("#div_Pending").load('@Url.Action("PurchaseOrderList", "Sales")', passdata);
+        }
+        else if (tab == 3)
+        {
+            if (@countPartial > count)
+            {
+                $("#btnSeeMore").show();
+            }
+            $("#div_PartialApproved").append('<div class="loading_partial"></div>');
+            $("#div_PartialApproved").load('@Url.Action("PurchaseOrderList", "Sales")', passdata);
+        }
+        else if (tab == 4)
+        {
+            if (@countApproved > count)
+            {
+                $("#btnSeeMore").show();
+            }
+            $("#div_Approved").append('<div class="loading_partial"></div>');
+            $("#div_Approved").load('@Url.Action("PurchaseOrderList", "Sales")', passdata);
+        }
+        else if (tab == 5)
+        {
+            if (@countCompleted > count)
+            {
+                $("#btnSeeMore").show();
+            }
+            $("#div_Completed").append('<div class="loading_partial"></div>');
+            $("#div_Completed").load('@Url.Action("PurchaseOrderList", "Sales")', passdata);
+        }
+        else if (tab == 6)
+        {
+            if (@countDeleted > count)
+            {
+                $("#btnSeeMore").show();
+            }
+            $("#div_Deleted").append('<div class="loading_partial"></div>');
+            $("#div_Deleted").load('@Url.Action("PurchaseOrderList", "Sales")', passdata);
+        }
+        $('#PurchaseOrderMultiselect').data('kendoMultiSelect').dataSource.read();
+    }
+    function btn_CustomDate(from, to) {
+        days = 0;
+        $("#btnSeeMore").hide();
+        passdata = { from: new Date(from).toISOString(), to: new Date(to).toISOString() };
+        $('#show_Days_Title').html("Custom Range");
+        if (tab == 1)
+        {
+            $("#div_All").append('<div class="loading_partial"></div>');
+            $("#div_All").load('@Url.Action("PurchaseOrderList", "Sales")', passdata);
+        }
+        else if (tab == 2)
+        {
+            $("#div_Pending").append('<div class="loading_partial"></div>');
+            $("#div_Pending").load('@Url.Action("PurchaseOrderList", "Sales")', passdata);
+        }
+        else if (tab == 3)
+        {
+            $("#div_PartialApproved").append('<div class="loading_partial"></div>');
+            $("#div_PartialApproved").load('@Url.Action("PurchaseOrderList", "Sales")', passdata);
+        }
+        else if (tab == 4)
+        {
+            $("#div_Approved").append('<div class="loading_partial"></div>');
+            $("#div_Approved").load('@Url.Action("PurchaseOrderList", "Sales")', passdata);
+        }
+        else if (tab == 5)
+        {
+            $("#div_Completed").append('<div class="loading_partial"></div>');
+            $("#div_Completed").load('@Url.Action("PurchaseOrderList", "Sales")', passdata);
+        }
+        else if (tab == 6)
+        {
+            $("#div_Deleted").append('<div class="loading_partial"></div>');
+            $("#div_Deleted").load('@Url.Action("PurchaseOrderList", "Sales")', passdata);
+        }
+        $('#PurchaseOrderMultiselect').data('kendoMultiSelect').dataSource.read();
+    }
+    @***************DateRange End******************@
+
+    @***************Voucher multiselect******************@
+    function onChangeVoucher()
+    {
+        var selectedId = "";
+        selectedId = this.value();
+        if (selectedId.length > 0)
+        {
+            passdata = { selectedId: selectedId.toString() };
+            if (tab == 1)
+            {
+                $("#div_All").append('<div class="loading_partial"></div>');
+                $("#div_All").load('@Url.Action("PurchaseOrderList", "Sales")', passdata);
+            }
+            else if (tab == 2)
+            {
+                $("#div_Pending").append('<div class="loading_partial"></div>');
+                $("#div_Pending").load('@Url.Action("PurchaseOrderList", "Sales")', passdata);
+            }
+            else if (tab == 3)
+            {
+                $("#div_PartialApproved").append('<div class="loading_partial"></div>');
+                $("#div_PartialApproved").load('@Url.Action("PurchaseOrderList", "Sales")', passdata);
+            }
+            else if (tab == 4)
+            {
+                $("#div_Approved").append('<div class="loading_partial"></div>');
+                $("#div_Approved").load('@Url.Action("PurchaseOrderList", "Sales")', passdata);
+            }
+            else if (tab == 5)
+            {
+                $("#div_Completed").append('<div class="loading_partial"></div>');
+                $("#div_Completed").load('@Url.Action("PurchaseOrderList", "Sales")', passdata);
+            }
+            else if (tab == 6)
+            {
+                $("#div_Deleted").append('<div class="loading_partial"></div>');
+                $("#div_Deleted").load('@Url.Action("PurchaseOrderList", "Sales")', passdata);
+            }
+        }
+        else
+        {
+            $('.ranges li').first().click();
+        }
+    }
+
+    function additionalInfo()
+    {
+        return {
+            status: status,
+            days: days,
+            from: (from != null ? new Date(from).toISOString() : null),
+            to: (to != null ? new Date(to).toISOString() : null),
+            text: ($.trim($("#PurchaseOrderMultiselect").data("kendoMultiSelect").input.val()) == "Type voucher name..." ? "" : $.trim($("#PurchaseOrderMultiselect").data("kendoMultiSelect").input.val()))
+        }
+    }
+    //See more data
+    $("#btnSeeMore").click(function () {
+        count = count + 10;
+        passdata = { count: count, status: status };
+        $("#btnSeeMore").hide();
+        if (tab == 1)
+        {
+            if (@countAll > count)
+            {
+                $("#btnSeeMore").show();
+            }
+            $("#div_All").append('<div class="loading_partial"></div>');
+            $("#div_All").load('@Url.Action("PurchaseOrderList", "Sales")', passdata);
+        }
+        else if (tab == 2)
+        {
+            if (@countPending > count)
+            {
+                $("#btnSeeMore").show();
+            }
+            $("#div_Pending").append('<div class="loading_partial"></div>');
+            $("#div_Pending").load('@Url.Action("PurchaseOrderList", "Sales")', passdata);
+        }
+        else if (tab == 3)
+        {
+            if (@countPartial > count)
+            {
+                $("#btnSeeMore").show();
+            }
+            $("#div_PartialApproved").append('<div class="loading_partial"></div>');
+            $("#div_PartialApproved").load('@Url.Action("PurchaseOrderList", "Sales")', passdata);
+        }
+        else if (tab == 4)
+        {
+            if (@countApproved > count)
+            {
+                $("#btnSeeMore").show();
+            }
+            $("#div_Approved").append('<div class="loading_partial"></div>');
+            $("#div_Approved").load('@Url.Action("PurchaseOrderList", "Sales")', passdata);
+        }
+        else if (tab == 5)
+        {
+            if (@countCompleted > count)
+            {
+                $("#btnSeeMore").show();
+            }
+            $("#div_Completed").append('<div class="loading_partial"></div>');
+            $("#div_Completed").load('@Url.Action("PurchaseOrderList", "Sales")', passdata);
+        }
+        else if (tab == 6)
+        {
+            if (@countDeleted > count)
+            {
+                $("#btnSeeMore").show();
+            }
+            $("#div_Deleted").append('<div class="loading_partial"></div>');
+            $("#div_Deleted").load('@Url.Action("PurchaseOrderList", "Sales")', passdata);
+        }
+    });
+
+    //*******************************  APPROVE VOUCHER btn work*****************************************
+    $("#div_All,#div_Pending").on("click", ".btnapprovePurchaseOrder", function () {
+        id = parseInt($(this).data("id"));
+        var kendoWindow = $("<div/>").kendoWindow({
+            actions: ["Close"],
+            title: "Alert",
+            resizable: false,
+            width: "30%",
+            modal: true,
+            close: onWindowClose
+        });
+        msg = "Are you sure want to approve this voucher?";
+        var template = kendo.template($("#temp_win_voucher_approved").html());
+        kendoWindow.data("kendoWindow").content(template).center().open();
+        document.documentElement.style.overflow = 'hidden';
+        document.body.scroll = "no";
+
+        kendoWindow.find("#btn_approve_noty_cancel").click(function () {
+            kendoWindow.data("kendoWindow").close();
+        }).end();
+        kendoWindow.find("#btn_approve_noty_ok").click(function () {
+            kendoWindow.data("kendoWindow").close();
+            //notification.show({ message: "Approving...", showTime: startTime() }, "upload-progress");
+            $.ajax({
+                url: '@Url.Action("PurchaseOrderStatusChange", "Sales")',
+                type: 'Post',
+                data: { id: id, CreatedBy: userId, status: 3 },
+                success: function (data) {
+                    //notification.hide(); notification.setOptions({ autoHideAfter: 5000 });
+                    if (data == "success")
+                    {
+                        //notification.show({ message: "Indent has been successfully approved.", showTime: startTime() }, "upload-success");
+                        //location.reload();
+                        $('.ranges li').first().click();
+                    }
+                    else
+                    {
+                        alert("Save error...");
+                        //notification.show({ message: "Indent approved was unsuccessful.", showTime: startTime() }, "upload-error");
+                    }
+                },
+                error: function (err) {
+                    alert("Save error...");
+                    //notification.hide(); notification.setOptions({ autoHideAfter: 5000 });
+                    //notification.show({ message: "Error occurred.", showTime: startTime() }, "upload-warning");
+                }
+
+            });
+        }).end();
+    });
+
+    //*******************************  Delete voucher *****************************************
+    $("#div_All,#div_Pending ,#div_Approved").on("click", ".btnDeletePurchaseOrder", function () {
+        id = $(this).data("id");
+        var kendoWindow = $("<div/>").kendoWindow({
+            actions: ["Close"],
+            title: "Alert",
+            resizable: false,
+            width: "30%",
+            modal: true,
+            close: onWindowClose
+        });
+        msg = "Are you sure you want to delete this voucher? It may cause problem in your system.";
+        var template = kendo.template($("#temp_win_voucher_delete").html());
+        kendoWindow.data("kendoWindow").content(template).center().open();
+        document.documentElement.style.overflow = 'hidden';
+        document.body.scroll = "no";
+
+        kendoWindow.find("#btn_del_noty_cancel").click(function () {
+            kendoWindow.data("kendoWindow").close();
+        }).end();
+
+        kendoWindow.find("#btn_del_noty_ok").click(function () {
+            kendoWindow.data("kendoWindow").close();
+            deleteVoucher(id);
+        }).end();
+    });
+
+    function deleteVoucher(id) {
+        //notification.show({ message: "Indent voucher is deleting...", showTime: startTime() }, "upload-progress");
+        $.ajax({
+            url: '@Url.Action("PurchaseOrderStatusChange", "Sales")',
+            type: 'Post',
+            data: { id: id, CreatedBy: userId, status : 5 },
+            success: function (data) {
+                //notification.hide(); notification.setOptions({ autoHideAfter: 5000 });
+                if (data === "success") {
+                    $('.ranges li').first().click();
+                    //notification.show({ message: "Indent voucher has been successfully deleted.", showTime: startTime() }, "upload-success");
+                }
+                else
+                {
+                    alert("Save error...");
+                    //notification.show({ message: "Indent voucher deletion was unsuccessful", showTime: startTime() }, "upload-error");
+                }
+            }
+        });
+    };
+
+    //**************************************Purchase order Print****************************************
+    $("#div_All,#div_Pending ,#div_Approved,#div_PartialApproved,#div_Completed,#div_Deleted ").on('click', '.btnPoPrint', function () {
+        var data = "poId=" + $(this).data("id") + "?type=" + $(this).data("type");
+        window.open('@Url.Action("PO_Print", "Sales")?q=' + getDataEncrypted(data), '_blank');
+    });
+
+</script>
+

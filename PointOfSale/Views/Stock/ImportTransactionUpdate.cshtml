@@ -1,0 +1,53 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin-bottom:4%;margin-top:2%;">
+    <div id="divImportTransactionForm"></div>
+    <div class="k-edit-buttons k-state-default" style="margin-left:30px;">
+        <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnImportTransactionUpdate"><span class="k-icon k-update"></span>Update</button>
+        <button type="reset" class="k-button k-button-icontext k-grid-update" id="btnRefresh"><span class="k-icon k-i-refresh"></span>Refresh</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+         $("#divImportTransactionForm").empty();
+         $("#divImportTransactionForm").load('@Url.Action("ImportTransactionUpdatePartial", "Stock")?importTransactionId=' + '@ViewBag.ImportTransactionId');
+    });
+    $("#btnRefresh").click(function () {
+        $("#divImportTransactionForm").empty();
+        $("#divImportTransactionForm").load('@Url.Action("ImportTransactionUpdatePartial", "Stock")?importTransactionId=' + '@ViewBag.ImportTransactionId');
+    });
+    $("#btnCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+
+    var validation = $("#divImportTransactionForm").kendoValidator().data("kendoValidator");
+
+    $("#btnImportTransactionUpdate").click(function () {
+        if (validation.validate())
+        {
+            var sendData = {
+                ImportTransactionId: $("#ImportTransactionId").val(),
+                Quantity: $("#Quantity").val(),
+                Cost: $("#Cost").val()
+            }
+            $.ajax({
+                url: '@Url.Action("ImportUpdate","Stock")',
+                type: "POST",
+                data: sendData,
+                success: function (data)
+                {
+                    if (data == "success")
+                    {
+                        $("#divTransactionWin").data("kendoWindow").close();
+                        window.location.reload();
+                    }
+                    else {
+                        alert("Update error...");
+                    }
+                }
+
+            });
+        }
+    });
+
+</script>

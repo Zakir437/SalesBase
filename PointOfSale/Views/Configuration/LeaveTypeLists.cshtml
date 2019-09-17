@@ -1,0 +1,71 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewLeaveType>
+@using PointOfSale.Helpers
+@{
+    var count = 0;
+}
+@if (Model.Any())
+{
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Name</th>
+            <th>Created By</th>
+            <th>Created Date</th>
+            <th>Updated By</th>
+            <th>Updated Date</th>
+            <th></th>
+        </tr>
+        @foreach (var list in Model)
+        {
+            count++;
+            <tr>
+                <td>@count. </td>
+                <td>@list.Name</td>
+                <td>@list.CreatedBy</td>
+                <td>@Convert.ToDateTime(list.CreatedDate).ToString("MMM dd yyyy")</td>
+                <td>@list.UpdatedBy</td>
+                @if (list.UpdatedDate != null)
+                 {
+                    <td>@Convert.ToDateTime(list.UpdatedDate).ToString("MMM dd yyyy")</td>
+                 }
+                else
+                {
+                    <td>Not yet updated</td>
+                }
+                <td>
+                    <button class="btn btn-primary btnLeaveEdit" data-id="@list.Id" data-toggle="tooltip" title="Edit Leave Type"><i class="fa fa-pencil-square-o"></i></button>
+                    @if (list.Status == 1)
+                    {
+                        <button type="button" data-id="@list.Id" data-isactive="0" class="btn btn-danger inactivateLeaveType" data-toggle="tooltip" title="Inactivate Leave Type">
+                            <i class="fa fa-stop" aria-hidden="true"></i>
+                        </button>
+                    }
+                    else if(list.Status == 0)
+                    {
+                        <button type="button" data-id="@list.Id" data-isactive="1" class="btn btn-success activateLeaveType" data-toggle="tooltip" title="Activate Leave Type">
+                            <i class="fa fa-play" aria-hidden="true"></i>
+                        </button>
+                        <span data-id="@list.Id" style="cursor:pointer;" data-toggle="tooltip" title="Delete Leave Type" class="btn btn-danger btnDeleteLeaveType">
+                            <i class="fa fa-trash"></i>
+                        </span>
+                    }
+                    else if (list.Status == 2)
+                    {
+                        <button type="button" data-id="@list.Id" data-isactive="1" class="btn btn-success activateLeaveType" data-toggle="tooltip" title="Activate Leave Type">
+                            <i class="fa fa-play" aria-hidden="true"></i>
+                        </button>
+                    }
+                </td>
+            </tr>
+        }
+    </table>
+}
+else
+{
+    <h4>There is no record to display</h4>
+}
+
+<script>
+    $('[data-toggle="tooltip"]').tooltip();
+</script>
+

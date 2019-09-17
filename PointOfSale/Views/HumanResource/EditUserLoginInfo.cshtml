@@ -1,0 +1,68 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" style="margin-bottom:4%;margin-top:2%;" id="divforPresentAddressEdit">
+    <div id="divEditLoginInfo"></div>
+    <div class="k-edit-buttons k-state-default" style="margin-left:30px;">
+        <button type="reset" class="k-button k-button-icontext k-grid-update" id="btnLoginEditRefresh"><span class="k-icon k-i-refresh"></span>Refresh</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnLoginEditCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+     $(document).ready(function () {
+         $("#divEditLoginInfo").load('@Url.Action("_EditUserLoginInfo", "HumanResource")?userId=' + '@ViewBag.UserId');
+    });
+    $("#btnLoginEditRefresh").click(function () {
+        $("#divEditLoginInfo").empty();
+        $("#divEditLoginInfo").append('<div class="tiny_loading"></div>');
+        $("#divEditLoginInfo").load('@Url.Action("_EditUserLoginInfo", "HumanResource")?userId=' + '@ViewBag.UserId');
+    });
+
+    $("#btnLoginEditCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+
+    $("#divEditLoginInfo").on('click', '.btnUsernameSave', function () {
+        if (userNameValidation.validate())
+        {
+            $.ajax({
+                url: '@Url.Action("UpdateLoginInfo", "HumanResource")',
+                type: 'POST',
+                data: { userId: $("#UserId").val(), username: $("#Username").val(), createdBy: userId },
+                success: function (data)
+                {
+                    if (data == "error")
+                    {
+                        alert("Username save error.");
+                    }
+                    else
+                    {
+                        $("#btnLoginEditRefresh").click();
+                    }
+                }
+            })
+        }
+    });
+
+    $("#divEditLoginInfo").on('click', '.btnPasswordSave', function () {
+        if (passwordValidation.validate())
+        {
+            $.ajax({
+                url: '@Url.Action("UpdateLoginInfo", "HumanResource")',
+                type: 'POST',
+                data: { userId: $("#UserId").val(), password: $("#Password").val(), createdBy: userId },
+                success: function (data)
+                {
+                    if (data == "error")
+                    {
+                        alert("Update error.");
+                    }
+                    else
+                    {
+                        $("#btnLoginEditRefresh").click();
+                    }
+                }
+            })
+        }
+    });
+
+
+
+</script>

@@ -1,0 +1,83 @@
+﻿@{
+    ViewBag.Title = "DiscountPrint";
+    Layout = "~/Views/Shared/_LayoutPrintPage.cshtml";
+}
+<section class="content-header" style="text-align:center;">
+    <div class="row">
+        <div class="col-xs-3"></div>
+        <div class="col-xs-6">
+            @if (ViewBag.Type == 3 || ViewBag.Type == 5)
+            {
+                <h3>Delivery Charge Discount</h3>
+            }
+            else if (ViewBag.Type == 4 || ViewBag.Type == 6)
+            {
+                <h3>Amount Discount</h3>
+            }
+            <p>Sales Base</p>
+        </div>
+        <div class="col-xs-3">
+            <button class="btn btn-default pull-right" id="btnPrint" style="margin-top:10px;"><i class="fa fa-print"></i>Print</button>
+        </div>
+    </div>
+    <hr />
+</section>
+<div class="row">
+    <div class="col-xs-offset-6 col-xs-6 text-left">
+        <p>
+            Generate By : @HttpContext.Current.Request.Cookies["CookieUserInfo"].Values["UserName"]<br>
+            Generate Date : @DateTime.Now.ToString("MMM dd yyyy hh:mm:ss tt") <br>
+        </p>
+    </div>
+    <div class="col-xs-offset-6 col-xs-6 text-right">
+
+    </div>
+</div>
+<div class="row">
+    <div class="col-xs-12">
+        <div id="divDiscList"></div>
+    </div>
+</div>
+<script>
+    var passdata = '';
+    $(document).ready(function () {
+        passdata = {
+            sortTypeId: '@ViewBag.SortTypeId',
+            sortBy: '@ViewBag.SortById',
+            selectedIds: '@ViewBag.SelectedIds',
+            count : '@ViewBag.Count',
+            isPrint : true,
+        };
+
+        if('@ViewBag.Type' == 3) // delivery charge discount with coupon
+        {
+            $("#divDiscList").empty();
+            $("#divDiscList").append('<div class="loading_partial"></div>');
+            $("#divDiscList").load('/Offer/DChargeCouponList', passdata);
+        }
+        else if ('@ViewBag.Type' == 4) // amount discount with coupon
+        {
+            $("#divDiscList").empty();
+            $("#divDiscList").append('<div class="loading_partial"></div>');
+            $("#divDiscList").load('/Offer/AmountCouponList', passdata);
+        }
+        else if ('@ViewBag.Type' == 5) // delivery charge discount
+        {
+            $("#divDiscList").empty();
+            $("#divDiscList").append('<div class="loading_partial"></div>');
+            $("#divDiscList").load('/Offer/DChargeDiscountList', passdata);
+        }
+        else if ('@ViewBag.Type' == 6) // amount discount 
+        {
+            $("#divDiscList").empty();
+            $("#divDiscList").append('<div class="loading_partial"></div>');
+            $("#divDiscList").load('/Offer/AmountDiscountList', passdata);
+        }
+       
+    });
+    $("#btnPrint").click(function () {
+        $("#btnPrint").hide();
+        window.print();
+        $("#btnPrint").show();
+    });
+</script>

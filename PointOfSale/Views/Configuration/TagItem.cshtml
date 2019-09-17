@@ -1,0 +1,202 @@
+﻿@model PointOfSale.Models.ViewTag
+@{
+    ViewBag.Title = "TagItem";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+}
+<section class="content-header">
+    <h1>
+        Tag Items
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="/Inventory/Dashboard"><i class="fa fa-dashboard"></i> Inventory</a></li>
+        <li><a href="#"><i class="fa fa-cog"></i> Configuration</a></li>
+        <li><a href="/Configuration/Tag"><i class="fa fa-list-ul"></i> Tag</a></li>
+        <li class="active">Tag Items</li>
+    </ol>
+</section>
+<section class="content">
+    <div class="panel panel-info" style="margin-top:20px;">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4 class="uppercase">Tag Items</h4>
+            </div>
+            <div class="pull-right">
+                <a class="btn btn-default" href="/Configuration/Tag"><i class="fa fa-arrow-left"></i> Back</a>
+            </div>
+        </div>
+        <div class="panel-body">
+            <dl class="dl-horizontal">
+                <dt>Tag Name</dt>
+                <dd>@Model.TagName</dd>
+                <dt>Created By</dt>
+                <dd>@Model.CreatedBy</dd>
+                <dt>Created Date</dt>
+                <dd>@Convert.ToDateTime(Model.CreatedDate).ToString("MMM dd,yyyy")</dd>
+                @if (Model.UpdatedDate != null)
+                {
+                    <dt>Updated By</dt>
+                    <dd>@Model.UpdatedBy</dd>
+                    <dt>Updated Date</dt>
+                    <dd>@Convert.ToDateTime(Model.UpdatedDate).ToString("MMM dd,yyyy")</dd>
+                }
+            </dl>
+        </div>
+        <hr style="margin:0;" />
+        <div class="panel-body">
+            <div class="row" style="margin: 0;">
+                <div class="col-md-6">
+                    <div id="divProductAutoComplete">
+                        @(Html.Kendo().AutoComplete()
+                            .Name("productsAutoComplete")
+                            .Placeholder("Type product name...")
+                            .HtmlAttributes(new { style = "width:100%; max-width:100%" })
+                            .MinLength(3)
+                            .DataTextField("Text")
+                            .Filter("contains")
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("GetProductListForText", "PointOfSale").Data("additionInfo");
+                                })
+                               .ServerFiltering(true);
+                            })
+                            .Events(e =>
+                            {
+                                e.Change("onChangeProduct").Select("onSelectProduct");
+                            })
+                        )
+                        <span class="k-icon k-i-search" style="margin-top:-25px;float:right;margin-right:10px; position:relative">&nbsp;</span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                </div>
+            </div>
+            <div class="row" style="margin:0; margin-top:5px;">
+                <div class="col-md-12">
+                    <div id="divTagItemList"></div>
+                    <div class="text-right">
+                        <button class="btn btn-default" id="btnTagItemSave">Save</button>
+                        <button class="btn btn-default" id="btnTagItemRefresh">Refresh</button>
+                        <a class="btn btn-default" href="/Configuration/Tag">Cancel</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<script>
+    var selectedOne, productId = 0, id = 0, deleteItemIds = [];
+    $(document).ready(function () {
+        //$('[data-toggle="tooltip"]').tooltip();
+
+        $("#liForInventory").addClass('active');
+        $("#liForInventoryConfig").addClass('active');
+        $("#liForTag").addClass('active');
+
+        $("#divTagItemList").append('<div class="loading_partial"></div>');
+        $("#divTagItemList").load('@Url.Action("TagItemList", "Configuration")?id=' + '@Model.Id');
+    });
+
+    $("#btnTagItemRefresh").click(function () {
+        location.reload();
+    });
+
+    //*******************Product Autocomplete**************
+    function onChangeProduct() {
+        $("#productsAutoComplete").data("kendoAutoComplete").value("");
+    }
+    function onSelectProduct(e) {
+        selectedOne = this.dataItem(e.item.index());
+        productId = selectedOne.Value;
+        $.ajax({
+            url: '/PointOfSale/GetProductInfoById',
+            type: "GET",
+            data: { productId: productId },
+            success: function (data) {
+                if (data === "error") {
+                    alert("Product not found");
+                    return 0;
+                }
+                else {
+                    $(data).each(function (index, item) {
+                        if ($("#emptyRow").length == 1) {
+                            $("#emptyRow").hide();
+                            $("#btnTagItemSave").prop('disabled', false);
+                        }
+                        count++;
+                        $("#tblTagItems").append('<tr id="tagItem_' + count + '" class="tagItem" data-id="' + count + '" data-productid="' + productId + '" data-transid="0">' +
+                            '<td>' + item.ProductName + '</td>' +
+                            '<td>' + item.Price + '</td>' +
+                            '<td>' +
+                            '<span class="btnCancelItem" data-id="' + count + '" data-toggle="tooltip" title="Cancel item"><i class="fa fa-times" aria-hidden="true" style="font-size:24px;cursor:pointer"></i></span>' +
+                            '</td>' +
+                            '</tr > ');
+                    });
+                }
+            }
+        });
+    }
+    //product autocomplete additional info
+    function additionInfo() {
+        var ids = [];
+        var totalIds = "";
+        var selectedId = "";
+        $(".tagItem").each(function () {
+            selectedId = $(this).data("productid");
+            ids.push(selectedId);
+        });
+        totalIds = ids.join(",");
+        return {
+            ids: totalIds,
+            text: $("#productsAutoComplete").val()
+        }
+    }
+    //cancel item
+    $("#divTagItemList").on('click', '.btnCancelItem', function () {
+        var transId = parseInt($(this).data("transid"));
+        if (transId > 0)
+        {
+            deleteItemIds.push(transId);
+        }
+        id = parseInt($(this).data("id"));
+        $("#tagItem_" + id).remove();
+
+        var row_count = $('#tblTagItems').find('tr').length;
+        if (row_count == 2)
+        {
+            $("#emptyRow").show();
+            $("#btnTagItemSave").prop('disabled', true);
+        }
+    });
+
+    //Tagitem Save
+    $("#btnTagItemSave").click(function () {
+        var tagItem = [];
+        $('.tagItem').each(function () {
+            id = parseInt($(this).data("id"));
+            tagItem.push({
+                Id: parseInt($(this).data("transid")),
+                TagId: '@Model.Id',
+                OwnerId: parseInt($(this).data("productid")),
+            });
+        });
+        $.ajax({
+            url: '/Configuration/TagItemSave',
+            type: "POST",
+            data: JSON.stringify({ items: tagItem, tagId : '@Model.Id', deleteItemIds: deleteItemIds, CreatedBy : userId }),
+            contentType: 'application/json',
+            success: function (data)
+            {
+                if (data == "success")
+                {
+                    location.href = '/Configuration/Tag';
+                }
+                else {
+                    alert("Save error...");
+                }
+            }
+        });
+    });
+
+</script>

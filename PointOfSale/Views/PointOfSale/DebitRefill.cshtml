@@ -1,0 +1,91 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin-bottom:4%;margin-top:2%;">
+    <div id="divDebitRefillForm"></div>
+    <div class="k-edit-buttons k-state-default" style="margin-left:30px;">
+        <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnDebitRefillConfirm"><span class="k-icon k-update"></span>Confirm</button>
+        <button type="reset" class="k-button k-button-icontext k-grid-update" id="btnDebitRefillRefresh"><span class="k-icon k-i-refresh"></span>Refresh</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnDebitRefillCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#divDebitRefillForm").append('<div class="tiny_loading"></div>');
+        $("#divDebitRefillForm").load('@Url.Action("DebitRefillPartial", "PointOfSale")?customerId=' + '@ViewBag.CustomerId');
+    });
+    $("#btnDebitRefillRefresh").click(function () {
+        $("#divDebitRefillForm").empty();
+        $("#divDebitRefillForm").append('<div class="tiny_loading"></div>');
+        $("#divDebitRefillForm").load('@Url.Action("DebitRefillPartial", "PointOfSale")?customerId=' + '@ViewBag.CustomerId');
+    });
+
+    $("#btnDebitRefillCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+
+    var validation = $("#divDebitRefillForm").kendoValidator({
+    }).data("kendoValidator");
+
+    $("#btnDebitRefillConfirm").click(function () {
+        if (validation.validate())
+        {
+            $(this).prop('disabled', true);
+            $("#btnAccountRefill").hide();
+            debitRefill = parseFloat($("#DebitPay").val());
+            $("#emptyCartPlaceholder").hide();
+            $("#cartListContainer").prepend('<li class="singleCartItem" id="cartItem_DebitRefill" data-id="0" data-type="3">' +
+                '<span style="font-size:13px; font-weight:bold;">Debit Refill</span> | ' +
+                '<span class="itemCancel pull-right" data-id="0" data-type="3">' +
+                ' <span class="fa fa-times-circle"></span>' +
+                '</span>' +
+                '<span class="subitemPrice" data-id="0" data-price="' + debitRefill.toFixed(2) +'" data-type="3" id="spanDebitRefill">' + debitRefill.toFixed(2) + '</span>' +
+                'Tk' +
+                '</li>');
+            calculateCartAmount();
+            //totalPrice = 0.00;
+            //$(".subitemPrice").each(function () {
+            //    totalPrice = totalPrice + parseFloat($(this).text());
+            //});
+            //$(".totalItemPrice").empty();
+            //$(".totalItemPrice").append(totalPrice.toFixed(2) + '<i class="taka">Tk</i>');
+
+            ////if discount active
+            //if ($("#totalAmount").length == 1) {
+            //    totalPrice = parseFloat($("#totalAmount").text());
+            //    totalPrice = totalPrice + debitRefill;
+            //    $("#totalAmount").empty();
+            //    $("#totalAmount").append(totalPrice.toFixed(2));
+            //}
+            ////if tax active
+            //if (taxStatus == 1)
+            //{
+            //    if ($("#taxRateRow").length == 1)
+            //    {
+            //        totalPrice = parseFloat($("#priceWithVat").text());
+            //        totalPrice = totalPrice + debitRefill;
+            //        $("#priceWithVat").empty();
+            //        $("#priceWithVat").append(totalPrice.toFixed(2));
+            //    }
+            //    else
+            //    {
+            //        $(".summaryTbl").append('<tr class="totalCartPriceRow" id="taxRateRow">' +
+            //            '<td>Tax(' + taxIcon + ')</td>' +
+            //            '<td>' +
+            //            taxRate + '%(<span id="taxAmount">' + 0.00 + '</span>)Tk' +
+            //            '</td>' +
+            //            '</tr>' +
+            //            '<tr class="totalCartPriceRow" id="priceWithVatRow">' +
+            //            '<td id="divTotal">Total Amount</td>' +
+            //            '<td>' +
+            //            '<span id="priceWithVat">' + totalPrice.toFixed(2) + '</span>Tk' +
+            //            '</td>' +
+            //            '</tr>');
+            //    }
+            //}
+            $("#divDebitRefillWin").data("kendoWindow").close();
+        }
+    });
+</script>
+
+
+
+
+

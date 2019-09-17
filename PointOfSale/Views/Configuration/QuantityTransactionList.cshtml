@@ -1,0 +1,102 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewImportTransaction>
+@using System.Globalization;
+@{
+    PointOfSale.Models.PointOfSale_DBEntities db = new PointOfSale.Models.PointOfSale_DBEntities();
+    var count = 0;
+    decimal avgPrice = 0;
+    decimal avgPriceFromOther = 0;
+    var productId = Model.FirstOrDefault().ProductId;
+    var supplierId = Model.FirstOrDefault().SupplierId;
+    var distributeId = Model.FirstOrDefault().DistributeId;
+    if(Model.Any())
+    {
+        avgPrice = Model.Sum(a => a.PeritemCost) / Model.Count();
+    }
+    var importList = db.ViewImportTransactions.Where(a => a.ProductId == productId && a.DistributeId == distributeId && a.SupplierId != supplierId).ToList();
+    if(importList.Any())
+    {
+        avgPriceFromOther = importList.Sum(a => a.PeritemCost) / importList.Count();
+    }
+}
+@if (Model.Any() == true)
+{
+    <div class="pull-right">
+        <label>Avg Price : @avgPrice.ToString("C", new CultureInfo("bn-BD"))</label>
+    </div>
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Date</th>
+            <th>Quantity</th>
+            <th>Peritem cost</th>
+            <th>Total</th>
+        </tr>
+        @foreach (var list in Model)
+         {
+            count++;
+            <tr>
+                <td>@count. </td>
+                <td>@Convert.ToDateTime(list.Date).ToString("MMM dd yyyy")</td>
+                <td>@list.Quantity</td>
+                <td>@list.PeritemCost.ToString("C", new CultureInfo("bn-BD"))</td>
+                <td>@list.Cost.ToString("C", new CultureInfo("bn-BD"))</td>
+            </tr>
+         }
+        <tr style="font-weight:bold">
+            <td></td>
+            <td colspan="3" style="text-align:center">Total</td>
+            <td>@Model.Sum(a => a.Cost).ToString("C", new CultureInfo("bn-BD"))</td>
+        </tr>
+    </table>
+}
+else
+{
+    <h3>There is no record to display</h3>
+}
+@if (importList.Any() == true)
+{
+    <div class="pull-left">
+        <label>Other Supplier Reference</label>
+    </div>
+    <div class="pull-right">
+        <label>Avg Price : @avgPriceFromOther.ToString("C", new CultureInfo("bn-BD"))</label>
+    </div>
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Supplier Name</th>
+            <th>Quantity</th>
+            <th>Peritem cost</th>
+            <th>Total</th>
+        </tr>
+        @foreach (var list in importList)
+        {
+            count++;
+            <tr>
+                <td>@count. </td>
+                <td>@list.SupplierName</td>
+                <td>@list.Quantity</td>
+                <td>@list.PeritemCost.ToString("C", new CultureInfo("bn-BD"))</td>
+                <td>@list.Cost.ToString("C", new CultureInfo("bn-BD"))</td>
+            </tr>
+        }
+        <tr style="font-weight:bold">
+            <td></td>
+            <td colspan="3" style="text-align:center">Total</td>
+            <td>@importList.Sum(a => a.Cost).ToString("C", new CultureInfo("bn-BD"))</td>
+        </tr>
+    </table>
+}
+else
+{
+    <h3>There is no record to display</h3>
+}
+
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    });
+</script>
+
+
+

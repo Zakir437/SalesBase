@@ -1,0 +1,324 @@
+﻿@{
+    ViewBag.Title = "WHWaste";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+    long countNumber = ViewBag.WasteCount;
+}
+<style>
+    .k-input {
+        height: 26px !important;
+    }
+
+    p {
+        margin: 10px;
+    }
+    hr{
+        margin:0px;
+    }
+</style>
+<section class="content">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4 class="uppercase">WH Waste Products</h4>
+            </div>
+            <div class="pull-right">
+                <a class="btn btn-default" href="/Inventory/Warehouse"><i class="fa fa-arrow-left"></i> Back</a>
+            </div>
+        </div>
+        <p>
+            <a class="btn btn-success" href="/Inventory/WarehouseWasteCreate"><i class="fa fa-plus-circle"></i> Waste Create</a>
+        </p>
+        <hr />
+        <div class="panel-body" style="border:none!important;">
+            <div class="row" style="margin:0px 0px 5px 0px;">
+                <div class="pull-left" style="max-width: 48%!important; width:100%;">
+                    @(Html.Kendo().DropDownList()
+                            .Name("SupplierDropdown")
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .AutoBind(false)
+                            .Filter("contains")
+                            .OptionLabel("Select supplier...")
+                            .Events(e => e.Change("onChangeSupplier"))
+                            .HtmlAttributes(new { style = "width: 100%;" })
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("GetSupplierList", "Inventory");
+                                })
+                                .ServerFiltering(true);
+                            })
+                    )
+                </div>
+                <div class="pull-right">
+                    <div class="pull-left" style="padding: 5px 10px;padding-right:5px!important;" id="show_Days_Title"></div>
+                    <button class="btn btn-primary btnPrint pull-right" style="height:32px;" data-toggle="tooltip" title="Print"><i class="fa fa-print"></i></button>
+                    <div class="btn-group btn-group-devided pull-right" data-toggle="buttons" style="padding-right:5px;">
+                        <div id="reportrange" class="pull-right" style="background: #fff; cursor: pointer; padding: 5px 10px; border: 1px solid #ccc; width: 100%">
+                            <span></span> <b class="caret"></b>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="divList" style="overflow-x:auto"></div>
+            <p class="text-center">
+                <button class="btn btn-primary" id="btnSeeMore"><i class="fa fa-arrow-down"></i> See more</button>
+            </p>
+        </div>
+    </div>
+</section>
+<script id="temp_win_invalid" type="text/x-kendo-template">
+    <div style="padding:1em;">
+        <p style="font-size: 14px; padding: 10px"> #=msg# </p>
+        <div style="text-align: right;">
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btn_invalid_ok"><span class="k-icon k-update"></span>OK</button>
+            <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btn_invalid_cancel"><span class="k-icon k-cancel"></span>Cancel</button>
+        </div>
+    </div>
+</script>
+<script id="temp_win_complete" type="text/x-kendo-template">
+    <div style="padding:1em;">
+        <p style="font-size: 14px; padding: 10px"> #=msg# </p>
+        <div style="text-align: right;">
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btn_complete_ok"><span class="k-icon k-update"></span>OK</button>
+            <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btn_complete_cancel"><span class="k-icon k-cancel"></span>Cancel</button>
+        </div>
+    </div>
+</script>
+<div id="divInvalidAlertWin"></div>
+<script>
+    var id = 0;
+    var days = 0, from = null, to = null, supplierId = 0;
+    var passdata = '';
+    var start = moment();
+    var end = moment().subtract(1, 'days');
+    $(document).ready(function () {
+        $("#liForInventory").addClass('active');
+        $("#liForWarehouse").addClass('active');
+
+        $('.ranges li').first().click();
+    });
+    @***************DateRange Start******************@
+    $('#reportrange').daterangepicker({
+        startDate: start,
+        endDate: end,
+        ranges: {
+            'Select Date': [moment(), moment().subtract(1, 'days')],
+            'Today': [moment(), moment()],
+            'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+            'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+        }
+    }, cb);
+    cb(start, end);
+    start = moment(); end = moment();
+    $(".applyBtn").click(function () {
+        from = $("input[name*='daterangepicker_start']").val();
+        to = $("input[name*='daterangepicker_end']").val();
+        btn_CustomDate(from, to);
+    });
+
+    $('.ranges').on("click", "li", function () {
+        var day = $(this).text();
+        if (day == "Select Date") {
+            btn_All();
+        } else {
+            if (day == "Today") {
+                btn_today();
+            } else if (day == "Last 7 Days") {
+                btn_last_seven();
+            } else if (day == "Last 30 Days") {
+                btn_last_thirty();
+            }
+        }
+    });
+    function cb(start, end) {
+        if (start == null && end == null) {
+            $('#reportrange span').html("Select Date");
+            return;
+        }
+        else if ((!start._isValid && !end._isValid)) {
+            $('#reportrange span').html("Select Date");
+            return;
+        } else if (start._d > end._d) {
+            $('#reportrange span').html("Select Date");
+            return;
+        }
+        $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+    }
+    function btn_today() {
+        days = 1;
+        from = null;
+        to = null;
+        $(".btnPrint").prop("disabled", false);
+        $("#btnSeeMore").hide();
+        $('#show_Days_Title').html("Today");
+        passdata = { days: 1, supplierId: supplierId };
+        $("#divList").empty();
+       $("#divList").append('<div class="loading_partial"></div>');
+        $("#divList").load('/Inventory/WHWasteList', passdata);
+    }
+    function btn_last_seven() {
+        days = 7;
+        from = null;
+        to = null;
+        $(".btnPrint").prop("disabled", false);
+        $("#btnSeeMore").hide();
+        $('#show_Days_Title').html("Last 7 Days");
+        passdata = { days: 7, supplierId: supplierId };
+        $("#divList").empty();
+        $("#divList").append('<div class="loading_partial"></div>');
+        $("#divList").load('/Inventory/WHWasteList', passdata);
+
+    }
+    function btn_last_thirty() {
+        days = 30;
+        from = null;
+        to = null;
+        $(".btnPrint").prop("disabled", false);
+        $("#btnSeeMore").hide();
+        $('#show_Days_Title').html("Last 30 Days");
+        passdata = { days: 30, supplierId: supplierId };
+        $("#divList").empty();
+        $("#divList").append('<div class="loading_partial"></div>');
+        $("#divList").load('/Inventory/WHWasteList', passdata);
+
+    }
+    function btn_All() {
+        days = 0;
+        from = null;
+        to = null;
+        count = 10;
+        $(".btnPrint").prop("disabled", true);
+        $("#btnSeeMore").hide();
+        $('#show_Days_Title').html("");
+        $('#reportrange span').html("Select Date");
+        passdata = { count: count, supplierId: supplierId };
+        if(@countNumber > count)
+        {
+            $("#btnSeeMore").show();
+        }
+        $("#divList").empty();
+        $("#divList").append('<div class="loading_partial"></div>');
+        $("#divList").load('/Inventory/WHWasteList', passdata);
+    }
+    function btn_CustomDate(from, to) {
+        days = 0;
+        $(".btnPrint").prop("disabled", false);
+        $("#btnSeeMore").hide();
+        passdata = { from: new Date(from).toISOString(), to: new Date(to).toISOString(), supplierId: supplierId };
+        $('#show_Days_Title').html("Custom Range");
+
+        $("#divList").empty();
+        $("#divList").append('<div class="loading_partial"></div>');
+        $("#divList").load('/Inventory/WHWasteList', passdata);
+    }
+    @***************DateRange End******************@
+
+    function onChangeSupplier()
+    {
+        supplierId = 0;
+        if (this.value() > 0)
+        {
+            supplierId = this.value();
+        }
+        $('.ranges li').first().click();
+    }
+
+    //See more data
+    $("#btnSeeMore").click(function () {
+        count = count + 10;
+        passdata = { count: count, supplierId: supplierId };
+        if(count >= @countNumber)
+        {
+            $("#btnSeeMore").hide();
+        }
+        $("#divList").empty();
+        $("#divList").append('<div class="loading_partial"></div>');
+        $("#divList").load('/Inventory/WHWasteList', passdata);
+    });
+
+
+
+    //**********************Print*************************************
+    $(".btnPrint").click(function () {
+        var data = "days=" + days + "?from=" + new Date(from).toISOString() + "?to=" + new Date(to).toISOString() + "?isWHWastePrint=true" + "?supplierId=" + supplierId;
+        window.open('/Inventory/WastePrint?q=' + getDataEncrypted(data), '_blank');
+    });
+
+
+    //****************************invalid*******************
+
+    $("#divList").on('click', '.btnInvalid', function () {
+        id = parseInt($(this).data('id'));
+
+        $("#divInvalidAlertWin").empty();
+        $("#divInvalidAlertWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 724,
+            height: 287,
+            title: 'Alert',
+            resizable: false,
+            close: onWindowClose
+        });
+        var invalidWin = $("#divInvalidAlertWin").data("kendoWindow");
+        invalidWin.refresh('/Inventory/WasteInvalid?id=' + id);
+        invalidWin.center().open();
+        document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+        document.body.scroll = "no";
+    });
+
+    //***********************complete*********************************
+    $("#divList").on('click', '.btnComplete', function () {
+        id = parseInt($(this).data('id'));
+        var kendoWindow = $("<div/>").kendoWindow({
+            actions: ["Close"],
+            title: "Alert",
+            resizable: false,
+            width: "30%",
+            modal: true,
+            close: onWindowClose
+        });
+        msg = "Are you sure want to complete this transaction ?";
+        var template = kendo.template($("#temp_win_complete").html());
+        kendoWindow.data("kendoWindow").content(template).center().open();
+        document.documentElement.style.overflow = 'hidden';
+        document.body.scroll = "no";
+
+        kendoWindow.find("#btn_complete_cancel").click(function () {
+            kendoWindow.data("kendoWindow").close();
+        }).end();
+
+        kendoWindow.find("#btn_complete_ok").click(function () {
+            kendoWindow.data("kendoWindow").close();
+            complete(id);
+        }).end();
+    });
+
+    function complete(id) {
+        $.ajax({
+            url: '/Inventory/WasteStatusChange',
+            type: 'Post',
+            data: { id: id, CreatedBy: userId, status: 2 },
+            success: function (data) {
+                if (data == "success") {
+                    $('.ranges li').first().click();
+                }
+                else {
+                    alert("Save error...");
+                }
+            },
+            error: function (err) {
+                alert("Save error...");
+            }
+        });
+    }
+
+</script>
+
+
+
+

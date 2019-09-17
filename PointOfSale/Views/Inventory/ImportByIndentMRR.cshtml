@@ -1,0 +1,257 @@
+﻿@{
+    ViewBag.Title = "ImportByIndentMRR";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+    long allCount = ViewBag.AllCount;
+    long pendingCount = ViewBag.PendingCount;
+    long completedCount = ViewBag.CompletedCount;
+}
+<style>
+    .k-input {
+        height: 26px !important;
+    }
+    p {
+        margin: 10px;
+    }
+</style>
+<section class="content">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4 class="uppercase">Import By Indent MRR</h4>
+            </div>
+            <div class="pull-right">
+                <a class="btn btn-default" href="/Stock/ImportHistory"><i class="fa fa-arrow-left"></i> Back</a>
+            </div>
+        </div>
+        <div class="panel-heading">
+            <ul class="nav nav-tabs">
+                <li class="active" id="liForAll"><a href="#tab1ForAll" data-toggle="tab">All</a></li>
+                <li id="liForPending"><a href="#tab2ForPending" data-toggle="tab">Pending</a></li>
+                <li id="liForCompleted"><a href="#tab3ForCompleted" data-toggle="tab">Completed</a></li>
+            </ul>
+        </div>
+        <div class="panel-body" style="border:none!important;">
+            <div class="row" style="margin:0px;">
+                <div class="pull-left" style="max-width: 48%!important; margin-bottom:5px; width:100%;">
+                    @(Html.Kendo().MultiSelect()
+                        .Name("MRRMultiselect")
+                        .DataTextField("Text")
+                        .DataValueField("Value")
+                        .Placeholder("Type voucher name...")
+                        .AutoBind(false)
+                        .Events(e => e.Change("onChangeMRR"))
+                        .HtmlAttributes(new { style = "width: 100%;" })
+                        .DataSource(source =>
+                        {
+                            source.Read(read =>
+                            {
+                                read.Action("GetMRRList", "Inventory").Data("additionalInfoForMRR"); ;
+                            })
+                            .ServerFiltering(true);
+                        })
+                    )
+                    <span class="k-icon k-i-search" style="margin-top:-25px;float:right;margin-right:10px; position:relative">&nbsp;</span>
+                </div>
+            </div>
+            <div class="tab-content">
+                <div class="tab-pane fade in active" id="tab1ForAll">
+                    <div id="div_All"></div>
+                </div>
+                <div id="tab2ForPending">
+                    <div id="div_Pending"></div>
+                </div>
+                <div id="tab3ForCompleted">
+                    <div id="div_Completed"></div>
+                </div>
+            </div>
+            <p class="text-center">
+                <button class="btn btn-primary" id="btnSeeMore"><i class="fa fa-arrow-down"></i> See more</button>
+            </p>
+        </div>
+    </div>
+</section>
+<script id="temp_win_voucherConfirm" type="text/x-kendo-template">
+    <div style="padding:1em;">
+        <p style="font-size: 14px; padding: 10px"> #=msg# </p>
+        <div style="text-align: right;">
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btn_VoucherConfirm_noty_ok"><span class="k-icon k-update"></span>OK</button>
+            <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btn_VoucherConfirm_noty_cancel"><span class="k-icon k-cancel"></span>Cancel</button>
+        </div>
+    </div>
+</script>
+<script>
+    var id = 0, count = 10, status = 0;
+    $(document).ready(function () {
+        $("#liForInventory").addClass('active');
+        $("#liForStock").addClass('active');
+
+        $("#liForAll").click();
+    });
+
+    //**************************MRR multi select*****************
+    function onChangeMRR() {
+        var selectedId = "";
+        selectedId = this.value();
+        $("#btnSeeMore").hide();
+        if (selectedId.length > 0) {
+
+            if (tab == 1)
+            {
+                $("#div_All").empty();
+                $("#div_All").append('<div class="loading_partial"></div>');
+                $("#div_All").load('/Inventory/IndentMRRList?selectedId=' + selectedId);
+            }
+            else if (tab == 2)
+            {
+                $("#div_Pending").empty();
+                $("#div_Pending").append('<div class="loading_partial"></div>');
+                $("#div_Pending").load('/Inventory/IndentMRRList?selectedId=' + selectedId);
+            }
+            else if (tab == 3)
+            {
+                $("#div_Completed").empty();
+                $("#div_Completed").append('<div class="loading_partial"></div>');
+                $("#div_Completed").load('/Inventory/IndentMRRList?selectedId=' + selectedId);
+            }
+        }
+        else
+        {
+            if (tab == 1)
+            {
+                $("#liForAll").click();
+            }
+            else if (tab == 2)
+            {
+                $("#liForPending").click();
+            }
+            else if (tab == 3)
+            {
+                $("#liForCompleted").click();
+            }
+        }
+    }
+    function additionalInfoForMRR() {
+        return {
+            status: status,
+            text: ($.trim($("#MRRMultiselect").data("kendoMultiSelect").input.val()) == "Type voucher name..." ? "" : $.trim($("#MRRMultiselect").data("kendoMultiSelect").input.val()))
+        }
+    }
+
+    function clearBeforeClick() {
+        count = 10;
+        $("#div_All").empty();
+        $("#div_Pending").empty();
+        $("#div_Completed").empty();
+
+        $("#btnSeeMore").hide();
+
+        $("#MRRMultiselect").data("kendoMultiSelect").dataSource.read();
+    }
+    //**************************************all list***********************************
+     $("#liForAll").click(function () {
+         tab = 1, status = 0;
+        clearBeforeClick();
+        if (@allCount > count)
+        {
+            $("#btnSeeMore").show();
+        }
+        $("#div_All").append('<div class="loading_partial"></div>');
+        $("#div_All").load('/Inventory/IndentMRRList?count=' + count);
+    });
+    //**************************************pending List***********************************
+     $("#liForPending").click(function () {
+         tab = 2, status = 1;
+        clearBeforeClick();
+        if (@pendingCount > count)
+        {
+            $("#btnSeeMore").show();
+        }
+        $("#div_Pending").append('<div class="loading_partial"></div>');
+        $("#div_Pending").load('/Inventory/IndentMRRList?count=' + count + '&status=' + status);
+    });
+    //**************************************completed List***********************************
+     $("#liForCompleted").click(function () {
+         tab = 3, status = 2;
+        clearBeforeClick();
+        if (@completedCount > count)
+        {
+            $("#btnSeeMore").show();
+        }
+        $("#div_Completed").append('<div class="loading_partial"></div>');
+        $("#div_Completed").load('/Inventory/IndentMRRList?count=' + count + '&status=' + status);
+     });
+
+     //******************************See more data***********************************
+    $("#btnSeeMore").click(function () {
+        count = count + 10;
+        $(this).hide();
+        if (tab == 1)
+        {
+            if (@allCount > count) {
+                $(this).show();
+            }
+            $("#div_All").empty();
+            $("#div_All").append('<div class="loading_partial"></div>');
+            $("#div_All").load('/Inventory/IndentMRRList?count=' + count);
+        }
+        else if (tab == 2)
+        {
+            if (@pendingCount > count) {
+                $(this).show();
+            }
+            $("#div_Pending").empty();
+            $("#div_Pending").append('<div class="loading_partial"></div>');
+            $("#div_Pending").load('/Inventory/IndentMRRList?count=' + count + '&status=' + status);
+        }
+        else if (tab == 3)
+        {
+            if (@completedCount > count) {
+                $("#btnSeeMore").show();
+            }
+            $("#div_Completed").empty();
+            $("#div_Completed").append('<div class="loading_partial"></div>');
+            $("#div_Completed").load('/Inventory/IndentMRRList?count=' + count + '&status=' + status);
+        }
+    });
+
+    $("#div_All,#div_Pending").on("click", ".btnImportConfirm", function (e) {
+        id = $(this).data("id");
+        var kendoWindow = $("<div />").kendoWindow({
+            actions: ["Close"],
+            title: "Alert",
+            resizable: false,
+            width: "30%",
+            modal: true,
+            close: onWindowClose
+        });
+        msg = "Are you sure want to import this MRR?";
+        var template = kendo.template($("#temp_win_voucherConfirm").html());
+        kendoWindow.data("kendoWindow").content(template).center().open();
+        document.documentElement.style.overflow = 'hidden';
+        document.body.scroll = "no";
+        kendoWindow.find("#btn_VoucherConfirm_noty_cancel").click(function () {
+            kendoWindow.data("kendoWindow").close();
+        }).end();
+        kendoWindow.find("#btn_VoucherConfirm_noty_ok").click(function () {
+            $.ajax({
+                url: '/Inventory/IndentMRRImportSave',
+                type: 'POST',
+                data: { mrrId: id, createdBy : userId },
+                success: function (data) {
+                    if (data == "success") {
+                        window.location.reload();
+                    }
+                    else {
+                        alert("error");
+                    }
+                }
+            });
+            kendoWindow.data("kendoWindow").close();
+        }).end();
+    });
+
+</script>
+
+
+
+

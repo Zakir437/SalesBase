@@ -1,0 +1,44 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin-bottom:4%;margin-top:2%;">
+    <div id="divAssociateForm"></div>
+    <div class="k-edit-buttons k-state-default" style="margin-left:30px;">
+        <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnAssociateSet"><span class="k-icon k-update"></span>Confirm</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnAssociateCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#divAssociateForm").append('<div class="tiny_loading"></div>');
+        $("#divAssociateForm").load('@Url.Action("SetAssociatePartial", "PointOfSale")');
+        id = parseInt(@ViewBag.Id);
+    });
+    $("#btnAssociateCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+        $("#checkBorrow_" + id).attr('checked', false);
+    });
+
+    var validation = $("#divAssociateForm").kendoValidator({
+    }).data("kendoValidator");
+
+    $("#btnAssociateSet").click(function () {
+
+        if (validation.validate())
+        {
+            associateId = 0;
+            associateId = parseInt($("#AssociateId").val());
+            if(associateId > 0)
+            {
+                $("#checkBorrow_" + id).attr('data-associateid', associateId);
+            }
+            else
+            {
+                $("#checkBorrow_" + id).attr('checked', false);
+                $("#checkBorrow_" + id).attr('data-associateid', 0);
+            }
+            $(this).closest(".k-window-content").data("kendoWindow").close();
+        }
+    });
+</script>
+
+
+
+

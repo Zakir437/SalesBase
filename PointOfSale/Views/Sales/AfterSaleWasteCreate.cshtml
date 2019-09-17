@@ -1,0 +1,276 @@
+﻿@model PointOfSale.Models.ViewAfterSaleService
+@{
+    ViewBag.Title = "AfterSaleWasteCreate";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+}
+<section class="content">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4 class="uppercase">After Sale Waste Create</h4>
+            </div>
+            <div class="pull-right">
+                <a class="btn btn-default" href="/Sales/SaleService"><i class="fa fa-arrow-left"></i> Back</a>
+            </div>
+        </div>
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-md-12">
+                    <div id="divWasteList" style="width:100%!important;">
+                        <table class="table table-bordered" id="wasteTbl">
+                            <tr>
+                                <th>Product Name</th>
+                                <th width="150px;">Quantity</th>
+                                <th>Waste Type</th>
+                                <th>Comments</th>
+                            </tr>
+                            @if (Model != null)
+                             {
+                                <tr>
+                                    <td>@Model.ProductName</td>
+                                    <td>1</td>
+                                    <td>
+                                        @(Html.Kendo().DropDownList()
+                                            .Name("WasteTypeDropDown")
+                                            .DataTextField("Text")
+                                            .DataValueField("Value")
+                                            .AutoBind(false)
+                                            .Filter("contains")
+                                            .OptionLabel("--Select type--")
+                                            .HtmlAttributes(new { style = "width: 100%;", required="required", validationMessage="*" })
+                                            .DataSource(source =>
+                                            {
+                                                source.Read(read =>
+                                                {
+                                                    read.Action("GetWasteTypeList", "Sales").Data("additionData");
+                                                })
+                                                .ServerFiltering(false);
+                                            })
+                                        )
+                                        <span class="field-validation-valid text-danger" data-valmsg-for="WasteTypeDropDown" data-valmsg-replace="true"></span>
+                                    </td>
+                                    <td>
+                                        <input type="text" placeholder="Comments" class="k-textbox" style="width: 100%;" id="comment" name="comment" />
+                                    </td>
+                                </tr>
+                             }
+                            else
+                            {
+                                <tr id="emptyRow">
+                                    <td colspan="4">
+                                        <h3>There is no product</h3>
+                                    </td>
+                                </tr>
+                            }
+                           
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="row" style="margin:0;">
+                <div class="text-right">
+                    <button type="button" class="btn btn-success" id="btnWasteProductSave"><i class="fa fa-save"></i> Save</button>
+                    <button type="button" class="btn btn-info" id="btnRefresh"><i class="fa fa-refresh"></i> Refresh</button>
+                    <a class="btn btn-warning" href="/Sales/SaleService"><i class="fa fa-times"></i> Cancel</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<script id="temp_win_Waste_Alert" type="text/x-kendo-template">
+    <div style="padding:1em;">
+        @*<p style="font-size: 14px; padding: 10px"> #=msg# </p>*@
+        <div style="padding-left:40%;">
+            <div class="radio">
+                <label><input type="radio" name="optradio" id="checkCash" checked>Cash</label>
+            </div>
+            <div class="radio">
+                <label><input type="radio" name="optradio" id="checkReplace">Replace</label>
+            </div>
+        </div>
+        <div style="text-align: right;">
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btn_alert_ok"><span class="k-icon k-update"></span>OK</button>
+            <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btn_alert_cancel"><span class="k-icon k-cancel"></span>Cancel</button>
+        </div>
+    </div>
+</script>
+<div id="divWastePayWin"></div>
+<script>
+    var servicesProId = 0, productName = "";
+    var validation;
+    $(document).ready(function () {
+        $("#liForServicesList").click();
+        $("#liForSalesMenu").addClass('active');
+        $("#liForAfterSaleService").addClass('active');
+
+        //$("#btnWasteProductSave").prop('disabled', true);
+        validation = $("#divWasteList").kendoValidator().data("kendoValidator");
+    });
+
+    $("#btnRefresh").click(function () {
+        window.location.reload();
+    });
+
+    function additionData()
+    {
+        return {
+            type : 2
+        }
+    }
+
+    //*********************Waste product save ***************
+    $("#btnWasteProductSave").click(function () {
+        if (validation.validate()) {
+
+             var kendoWindow = $("<div/>").kendoWindow({
+                actions: ["Close"],
+                title: "Alert",
+                resizable: false,
+                width: "30%",
+                modal: true,
+                close: onWindowClose
+            });
+
+            var template = kendo.template($("#temp_win_Waste_Alert").html());
+            kendoWindow.data("kendoWindow").content(template).center().open();
+            document.documentElement.style.overflow = 'hidden';
+            document.body.scroll = "no";
+
+            kendoWindow.find("#btn_alert_cancel").click(function () {
+                kendoWindow.data("kendoWindow").close();
+            }).end();
+
+            kendoWindow.find("#btn_alert_ok").click(function () {
+                kendoWindow.data("kendoWindow").close();
+                if (kendoWindow.find("#checkCash").is(":checked"))
+                {
+                    //cash
+                    $("#divWastePayWin").empty();
+                    $("#divWastePayWin").kendoWindow({
+                        actions: ["Close"],
+                        draggable: false,
+                        modal: true,
+                        visible: false,
+                        width: 767,
+                        height: 280,
+                        title: 'Pay',
+                        resizable: false,
+                        close: onWindowClose
+                    });
+                    var wastePayWin = $("#divWastePayWin").data("kendoWindow");
+                    wastePayWin.refresh('/Sales/WastePayWin?id=' + '@Model.Id');
+                    wastePayWin.center().open().maximize();
+                }
+                else
+                {
+                    //replace product
+                    $.ajax({
+                        url: '/Sales/CheckProductAvailablity',
+                        type: 'POST',
+                        data: {
+                            Id: '@Model.Id'
+                        },
+                        success: function (data) {
+                            if (data == true)
+                            {
+
+                                  $.ajax({
+                                    url: '/Sales/AfterSaleWasteSave',
+                                    type: 'POST',
+                                    data: JSON.stringify({
+                                        Id: '@Model.Id',
+                                        WasteTypeId: $("#WasteTypeDropDown").val(),
+                                        Comment: $("#comment").val(),
+                                        CreatedBy: userId,
+                                        IsReplace : true
+                                    }),
+                                    contentType: 'application/json',
+                                    success: function (data) {
+                                        if (data == "success") {
+                                            window.location.href = '/Sales/SaleService';
+                                        }
+                                        else {
+                                            alert("Save error...");
+                                        }
+                                    }
+                                });
+                            }
+                            else
+                            {
+                                alert("Product not available. Please pay cash.")
+                            }
+                        }
+                    });
+                }
+            }).end();
+
+
+        }
+    });
+
+    $("#divWastePayWin").on('click', '#btnPay', function () {
+        var payments = [];
+        $(".amountInTransaction").each(function () {
+            if ($(this).data("id") == 1) //cash
+            {
+                payments.push({
+                    PaymentTypeId: 1,
+                    PaymentBodyId: parseInt($(this).data("cashbodyid")),
+                    AmountPaid: cashAmount
+                });
+            }
+            else if ($(this).data("id") == 2) // card
+            {
+                payments.push({
+                    PaymentTypeId: 2,
+                    PaymentBodyId: parseInt($(this).data("cardbodyid")),
+                    AmountPaid: parseFloat($(this).data("cardamount")),
+                    TransactionNo: $(this).data("transactionno")
+                });
+            }
+            else if ($(this).data("id") == 3) // bkash
+            {
+                payments.push({
+                    PaymentTypeId: 3,
+                    PaymentBodyId: parseInt($(this).data("bkashbodyid")),
+                    AmountPaid: parseFloat($(this).data("bkashamount")),
+                    TransactionNo: $(this).data("transactionno")
+                });
+            }
+            else if ($(this).data("id") == 4) //debit
+            {
+                payments.push({
+                    PaymentTypeId: 8,
+                    PaymentBodyId: 17,
+                    AmountPaid: parseFloat($(this).data("debitamount")),
+                });
+            }
+        });
+
+        $.ajax({
+            url: '/Sales/AfterSaleWasteSave',
+            type: 'POST',
+            data: JSON.stringify({
+                Id: '@Model.Id',
+                WasteTypeId: $("#WasteTypeDropDown").val(),
+                Comment: $("#comment").val(),
+                CreatedBy: userId,
+                Payments: payments
+            }),
+            contentType: 'application/json',
+            success: function (data) {
+                if (data == "success") {
+                    window.location.href = '/Sales/SaleService';
+                }
+                else {
+                    alert("Save error...");
+                }
+            }
+        });
+    });
+
+
+
+
+
+</script>

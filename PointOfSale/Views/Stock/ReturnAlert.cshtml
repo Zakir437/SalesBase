@@ -1,0 +1,25 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewStockProduct>
+<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin-bottom:4%;margin-top:2%;">
+    <div id="divRefundCreate">
+            @if (Model.Any())
+             {
+                <span>Available products for return in stock:</span>
+                <ul style="margin-left:40px;">
+                    @foreach (var list in Model)
+                     {
+                       <li>@list.ProductName | @list.Quantity</li>
+                     }
+                </ul>
+             }
+            <span>Are you sure want to return this import?</span>
+    </div>
+    <div class="k-edit-buttons k-state-default">
+        <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnRefundConfirm"><span class="k-icon k-update"></span>Confirm</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnReturnAlertCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+    $("#btnReturnAlertCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+</script>

@@ -1,0 +1,239 @@
+﻿@{
+    ViewBag.Title = "TemporaryTransaction";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+    PointOfSale.Models.PointOfSale_DBEntities db = new PointOfSale.Models.PointOfSale_DBEntities();
+    // methodId = 2 for salary account
+    int transCount = 0;
+    if (db.PaymentTransactions.Any(a => a.MethodId == 2 && a.Type == 6 && a.Status == false))
+    {
+        transCount = db.PaymentTransactions.Where(a => a.MethodId == 2 && a.Type == 6 && a.Status == false).Count();
+    }
+}
+@*<section class="content-header">
+    <h1>
+        Temporary Transaction
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-money"></i> Accounts</a></li>
+        <li><a href="/Accounting/PaySalary"><i class="fa fa-list-ul"></i> Payroll</a></li>
+        <li class="active">Temporary Transaction</li>
+    </ol>
+</section>*@
+<section class="content">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4>Temporary Transaction</h4>
+            </div>
+            <div class="pull-right">
+                <a class="btn btn-default" href="/Accounting/PaySalary"><i class="fa fa-arrow-left"></i> Back</a>
+            </div>
+        </div>
+        <div class="panel-body">
+            <div class="col-md-4">
+                <dl class="dl-horizontal">
+                    <dt>Total Amount</dt>
+                    <dd><span id="divTotalAmount"></span>Tk</dd>
+                </dl>
+            </div>
+        </div>
+        <hr />
+        <div class="panel-body" style="padding:0px 15px 3px 15px;">
+            <div class="pull-right" style="max-width: 100%!important;">
+                <div class="pull-left" style="padding: 5px 10px;padding-right:5px!important;" id="show_Days_Title"></div>
+                <button class="btn btn-primary btnProductDetailsPrint pull-right" style="height:32px; display:none"><i class="fa fa-print"></i></button>
+                <button class="btn btn-primary btnPrint pull-right" style="height:32px;"><i class="fa fa-print"></i></button>
+                <div class="btn-group btn-group-devided pull-right" data-toggle="buttons" style="padding-right:5px;">
+                    <div id="reportrange" class="pull-right" style="background: #fff; cursor: pointer; padding: 5px 10px; border: 1px solid #ccc; width: 100%">
+                        <span></span> <b class="caret"></b>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="panel-body" style="padding:0px 15px;">
+            <div id="divPaymentList" style="padding-top:5px;"></div>
+            <div class="text-center" style="margin-bottom:10px">
+                <button class="btn btn-primary" id="btnSeeMore"><i class="fa fa-arrow-down"></i> See more</button>
+            </div>
+        </div>
+    </div>
+</section>
+<script>
+    var methodId = 0, inout = 0, day="";
+    var count = 20;
+    var days = 0, from = null, to = null;
+    var passdata = '';
+    var start = moment();
+    var end = moment().subtract(1, 'days');
+    $(document).ready(function () {
+        $("#liForAccount").addClass('active');
+        $("#liForPayroll").addClass('active');
+        $('.ranges li').first().click();
+    });
+    function onInOutChange()
+    {
+        inout = this.value();
+        if (from != null && to != null)
+        {
+            btn_CustomDate(from, to)
+        }
+        else if (day == "Select Date")
+        {
+            btn_All();
+        }
+        else
+        {
+            if (day == "Today")
+            {
+                btn_today();
+            } else if (day == "Last 7 Days")
+            {
+                btn_last_seven();
+            } else if (day == "Last 30 Days")
+            {
+                btn_last_thirty();
+            }
+        }
+       // $('.ranges li').select.click();
+    }
+    @***************DateRange Start******************@
+    $('#reportrange').daterangepicker({
+        startDate: start,
+        endDate: end,
+        ranges: {
+            'Select Date': [moment(), moment().subtract(1, 'days')],
+            'Today': [moment(), moment()],
+            'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+            'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+        }
+    }, cb);
+    cb(start, end);
+    start = moment(); end = moment();
+    $(".applyBtn").click(function () {
+        from = $("input[name*='daterangepicker_start']").val();
+        to = $("input[name*='daterangepicker_end']").val();
+        btn_CustomDate(from, to);
+    });
+
+    $('.ranges').on("click", "li", function () {
+        day = $(this).text();
+
+        if (day == "Select Date")
+        {
+            btn_All();
+        }
+        else {
+            if (day == "Today") {
+                btn_today();
+            } else if (day == "Last 7 Days") {
+                btn_last_seven();
+            } else if (day == "Last 30 Days") {
+                btn_last_thirty();
+            }
+        }
+    });
+    function cb(start, end) {
+        if (start == null && end == null) {
+            $('#reportrange span').html("Select Date");
+            return;
+        }
+        else if ((!start._isValid && !end._isValid)) {
+            $('#reportrange span').html("Select Date");
+            return;
+        } else if (start._d > end._d) {
+            $('#reportrange span').html("Select Date");
+            return;
+        }
+        $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+    }
+    function btn_today()
+    {
+        days = 1;
+        from = null;
+        to = null;
+        $(".btnPrint").prop("disabled", false);
+        $("#btnSeeMore").hide();
+        $('#show_Days_Title').html("Today");
+        passdata = { days: 1, isInactive: true };
+        $("#divPaymentList").empty();
+        $("#divPaymentList").append('<div class="loading_partial"></div>');
+        $("#divPaymentList").load('@Url.Action("SalaryPaymentTransaction", "Accounting")', passdata);
+    }
+    function btn_last_seven()
+    {
+        days = 7;
+        from = null;
+        to = null;
+        $(".btnPrint").prop("disabled", false);
+        $("#btnSeeMore").hide();
+        $('#show_Days_Title').html("Last 7 Days");
+        passdata = { days: 7, isInactive: true };
+        $("#divPaymentList").empty();
+        $("#divPaymentList").append('<div class="loading_partial"></div>');
+        $("#divPaymentList").load('@Url.Action("SalaryPaymentTransaction", "Accounting")', passdata);
+    }
+    function btn_last_thirty()
+    {
+        days = 30;
+        from = null;
+        to = null;
+        $(".btnPrint").prop("disabled", false);
+        $("#btnSeeMore").hide();
+        $('#show_Days_Title').html("Last 30 Days");
+        passdata = { days: 30,isInactive: true };
+        $("#divPaymentList").empty();
+        $("#divPaymentList").append('<div class="loading_partial"></div>');
+        $("#divPaymentList").load('@Url.Action("SalaryPaymentTransaction", "Accounting")', passdata);
+    }
+    function btn_All()
+    {
+        days = 0;
+        from = null;
+        to = null;
+        count = 20;
+        $(".btnPrint").prop("disabled", true);
+        $("#btnSeeMore").hide();
+        $('#show_Days_Title').html("");
+        $('#reportrange span').html("Select Date");
+        passdata = {count: count, isInactive : true};
+        if (@transCount > count)
+        {
+            $("#btnSeeMore").show();
+        }
+        $("#divPaymentList").empty();
+        $("#divPaymentList").append('<div class="loading_partial"></div>');
+        $("#divPaymentList").load('@Url.Action("SalaryPaymentTransaction", "Accounting")', passdata);
+    }
+    function btn_CustomDate(from, to)
+    {
+        days = 0;
+        $(".btnPrint").prop("disabled", false);
+        $("#btnSeeMore").hide();
+        passdata = { from: new Date(from).toISOString(), to: new Date(to).toISOString(), isInactive: true};
+        $('#show_Days_Title').html("Custom Range");
+        $("#divPaymentList").empty();
+        $("#divPaymentList").append('<div class="loading_partial"></div>');
+        $("#divPaymentList").load('@Url.Action("SalaryPaymentTransaction", "Accounting")', passdata);
+    }
+    @***************DateRange End******************@
+    //Payment transaction Print
+    $(".btnPrint").click(function () {
+        var data = "days=" + days + "?from=" + from + "?to=" + to + "?isInactive=true";
+        window.open('@Url.Action("SalaryPaymentTransactionPrint", "Accounting")?q=' + getDataEncrypted(data), '_blank');
+    });
+     //See more data
+    $("#btnSeeMore").click(function () {
+        count = count + 20;
+        passdata = { count: count, isInactive: true  };
+        if (count >= @transCount)
+        {
+            $("#btnSeeMore").hide();
+        }
+        $("#divPaymentList").empty();
+        $("#divPaymentList").append('<div class="loading_partial"></div>');
+        $("#divPaymentList").load('@Url.Action("SalaryPaymentTransaction", "Accounting")', passdata);
+    });
+
+
+
+</script>

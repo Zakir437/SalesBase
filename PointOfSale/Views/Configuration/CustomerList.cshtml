@@ -1,0 +1,94 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewCustomer>
+@using PointOfSale.Helpers
+@{
+    var count = 0;
+}
+@if (Model.Count() > 0)
+{
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Name</th>
+            <th>E-mail</th>
+            <th>Phone</th>
+            <th>Credit Allow</th>
+            <th>Credit Limit</th>
+            <th>Debit Limit</th>
+            <th>Card</th>
+            <th></th>
+        </tr>
+        @foreach (var list in Model)
+        {
+            count++;
+            <tr>
+                <td>@count . </td>
+                <td>
+                    <a href="@Html.EncodedParam("CustomerInvoiceInfo", "Configuration", new { customerId = list.CustomerId}, null)">@list.Name</a>
+                </td>
+                <td>@list.Email</td>
+                <td>@list.Phone</td>
+                <td>
+                    @if(list.IsCreditAllowed == true)
+                     {
+                        <span>Yes</span>
+                     }
+                    else
+                    {
+                        <span>No</span>
+                    }
+                </td>
+                <td>@list.CreditLimit</td>
+                <td>
+                    @if(list.DebitLimitId > 0)
+                     {
+                        <span>@list.DebitLimit (@list.DebitAmount)</span>
+                    }
+                    else
+                    {
+                        <span>N/A</span>
+                    }
+                </td>
+                <td>@list.MembershipNumber</td>
+                <td>
+                    @if (list.DebitLimitId > 0)
+                     {
+                        <button class="btn btn-info btnDebitLimitEdit" data-debitid="@list.DebitLimitId" data-toggle="tooltip" title="Edit debit limit"><i class="fa fa-pencil-square-o"></i></button>
+                        <button class="btn btn-success btnDebitAmountEdit" data-debitid="@list.DebitLimitId" data-toggle="tooltip" title="Edit debit amount"><i class="fa fa-pencil-square-o"></i></button>
+                     }
+                    else
+                    {
+                        <button class="btn btn-info btnDebitLimitCreate" data-id="@list.CustomerId" data-toggle="tooltip" title="Create debit limit"><i class="fa fa-pencil-square-o"></i></button>
+                    }
+                    <button class="btn btn-primary btnCustomerEdit" data-id="@list.CustomerId" data-toggle="tooltip" title="Edit Customer Information"><i class="fa fa-pencil-square-o"></i></button>
+                    @if (list.Status == true)
+                     {
+                        <button type="button" data-id="@list.CustomerId" data-isactive="0" class="btn btn-danger inactivateCustomer" data-toggle="tooltip" title="Inactivate Customer">
+                            <i class="fa fa-stop" aria-hidden="true"></i>
+                        </button>
+                     }
+                    else
+                    {
+                        <button type="button" data-id="@list.CustomerId" data-isactive="1" class="btn btn-success activateCustomer" data-toggle="tooltip" title="Activate Customer">
+                            <i class="fa fa-play" aria-hidden="true"></i>
+                        </button>
+                       
+                    }
+                    @if (@list.Status == false)
+                     {
+                        <span data-id="@list.CustomerId" style="cursor:pointer;" data-toggle="tooltip" title="Delete Customer" class="btn btn-danger btnCustomerDelete">
+                            <i class="fa fa-trash"></i>
+                        </span>
+                     }
+                </td>
+            </tr>
+        }
+    </table>
+}
+else
+{
+    <h4>There is no record to display</h4>
+}
+
+<script>
+    $('[data-toggle="tooltip"]').tooltip();
+</script>

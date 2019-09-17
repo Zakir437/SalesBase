@@ -1,0 +1,55 @@
+﻿@{
+    ViewBag.Title = "OfferCreate";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+}
+<style>
+    .btnBox {
+        height: 200px;
+        width: 100%;
+        border: 1px solid #808080;
+        margin-bottom: 15px;
+    }
+    h1 {
+        padding: 50px 0px;
+    }
+</style>
+<div class="content">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4 class="uppercase">Offer Create</h4>
+            </div>
+            <div class="pull-right">
+                <a class="btn btn-default" href="/Offer/Offer">
+                    <i class="fa fa-arrow-left"></i> Back
+                </a>
+            </div>
+        </div>
+        <div class="panel-body">
+            <div class="col-md-4">
+                <a class="btn btn-default btnBox" href="/Offer/CouponOffer" data-toggle="tooltip" title="Create Coupon">
+                    <h1>Coupon</h1>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a class="btn btn-default btnBox" href="/Offer/DiscountOfferType" data-toggle="tooltip" title="Create discount offer">
+                    <h1>Discount</h1>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a class="btn btn-default btnBox" href="/Offer/Points" data-toggle="tooltip" title="Create Product Points">
+                    <h1>Points</h1>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#liForSalesMenu").addClass('active');
+        $("#liForOffers").addClass('active');
+
+        $('[data-toggle="tooltip"]').tooltip();
+    })
+</script>
+

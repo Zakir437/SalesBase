@@ -1,0 +1,424 @@
+﻿@{
+    ViewBag.Title = "Offer";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+}
+@*<section class="content-header">
+    <h1>
+        Offer
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-user"></i> HR</a></li>
+        <li class="active">System-User</li>
+    </ol>
+</section>*@
+<section class="content">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4 class="uppercase">Offer</h4>
+            </div>
+            <div class="pull-right">
+                <a class="btn btn-default btnBox" href="/PointOfSale/OfferCreate">
+                    Offer Create
+                </a>
+            </div>
+        </div>
+        <div class="panel-heading">
+            <ul class="nav nav-tabs">
+                <li class="active" id="liForAll"><a href="#tab1liForAll" data-toggle="tab">All</a></li>
+                <li id="liForProduct"><a href="#tab2liForProduct" data-toggle="tab">Products</a></li>
+                <li id="liForOffer"><a href="#tab3liForOffer" data-toggle="tab">Offers</a></li>
+                <li id="liForEvent"><a href="#tab4Event" data-toggle="tab">Events</a></li>
+                <li id="liForCoupon"><a href="#tab5Event" data-toggle="tab">Coupon</a></li>
+            </ul>
+        </div>
+        <div class="panel-body" style="border:none!important;">
+            <div class="tab-content">
+                <div class="tab-pane fade in active" id="tab1liForAll">
+                    <div id="div_All" style="overflow-x:auto"></div>
+                </div>
+                <div id="tab2liForProduct">
+                    <div id="div_Products" style="overflow-x:auto"></div>
+                </div>
+                <div id="tab3liForOffer" class="tab-pane fade">
+                    <div id="div_Offers" style="overflow-x:auto"></div>
+                </div>
+                <div id="tab4Event">
+                    <div id="div_Events" style="overflow-x:auto"></div>
+                </div>
+                <div id="tab5Event">
+                    <div id="div_Coupon" style="overflow-x:auto"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<div id="divCouponWin"></div>
+<div id="divOfferCreateWin"></div>
+<div id="divEventCreateWin"></div>
+
+<script>
+    var tab = 0, selectedOne = "", productId = 0, offerId = 0, offerItemId = 0, eventId = 0, passdata, date = new Date(), sorterType = 0;
+    var isSingleOffer = false;
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+
+        $("#liForSalesMenu").addClass('active');
+        $("#liForOffer").addClass('active');
+
+        $("#liForAll").click();
+
+        $("#liForOffer").addClass('active');
+    });
+
+    //Filter by product
+    function onChangeProduct()
+    {
+        selectedOne = "";
+        selectedOne = this.value();
+        if (selectedOne.length > 0)
+        {
+            productId = parseInt(selectedOne);
+        }
+        else {
+            productId = 0;
+        }
+        if (tab == 1)
+        {
+            $("#OfferDropdown").data("kendoDropDownList").value("");
+            $("#EventDropdown").data("kendoDropDownList").value("");
+            $("#specificDate").val("");
+
+            $("#divOfferItemList").empty();
+            $("#divOfferItemList").append('<div class="loading_partial"></div>');
+            $("#divOfferItemList").load('@Url.Action("OfferProductList", "PointOfSale")?isSingleOffer' + isSingleOffer + '&productId=' + productId);
+        }
+        if (tab == 2) {
+            $("#specificDate").val("");
+
+            $("#divSingleOfferItemList").empty();
+            $("#divSingleOfferItemList").append('<div class="loading_partial"></div>');
+            $("#divSingleOfferItemList").load('@Url.Action("OfferProductList", "PointOfSale")?isSingleOffer=' + isSingleOffer + '&productId=' + productId);
+        }
+        else if (tab == 3) {
+            $("#OfferDropdown").data("kendoDropDownList").value("");
+            $("#specificDate").val("");
+
+            $("#divOfferList").empty();
+            $("#divOfferList").append('<div class="loading_partial"></div>');
+            $("#divOfferList").load('@Url.Action("OfferList", "PointOfSale")?productId=' + productId);
+        }
+        else if (tab == 4) {
+            $("#OfferDropdown").data("kendoDropDownList").value("");
+            $("#EventDropdown").data("kendoDropDownList").value("");
+            $("#specificDate").val("");
+
+            $("#divEventList").empty();
+            $("#divEventList").append('<div class="loading_partial"></div>');
+            $("#divEventList").load('@Url.Action("EventList", "PointOfSale")?productId=' + productId);
+        }
+        else if (tab == 5) {
+            if (productId > 0)
+            {
+                $("#divCouponOffertList").empty();
+                $("#divCouponOffertList").append('<div class="loading_partial"></div>');
+                $("#divCouponOffertList").load('@Url.Action("OfferProductList", "PointOfSale")?productId=' + productId + '&isCouponOffer=true');
+            }
+            else {
+                $("#divCouponOffertList").empty();
+                $("#divCouponOffertList").append('<div class="loading_partial"></div>');
+                $("#divCouponOffertList").load('@Url.Action("OfferProductList", "PointOfSale")?isCouponOffer=true');
+            }
+        }
+    }
+
+    //filter by offers
+    function onChangeOffer()
+    {
+        selectedOne = "";
+        selectedOne = this.value();
+        if (selectedOne.length > 0)
+        {
+            offerId = parseInt(selectedOne);
+        }
+        else {
+            offerId = 0;
+        }
+        if (tab == 1)
+        {
+            $("#ProductDropdown").data("kendoDropDownList").value("");
+            $("#EventDropdown").data("kendoDropDownList").value("");
+            $("#specificDate").val("");
+
+            $("#divOfferItemList").empty();
+            $("#divOfferItemList").append('<div class="loading_partial"></div>');
+            $("#divOfferItemList").load('@Url.Action("OfferProductList", "PointOfSale")?isSingleOffer' + isSingleOffer + '&offerId=' + offerId);
+        }
+        if (tab == 3)
+        {
+            $("#ProductDropdown").data("kendoDropDownList").value("");
+            $("#specificDate").val("");
+
+            $("#divOfferList").empty();
+            $("#divOfferList").append('<div class="loading_partial"></div>');
+            $("#divOfferList").load('@Url.Action("OfferList", "PointOfSale")?offerId=' + offerId);
+        }
+        else if (tab == 4)
+        {
+            $("#ProductDropdown").data("kendoDropDownList").value("");
+            $("#EventDropdown").data("kendoDropDownList").value("");
+            $("#specificDate").val("");
+
+            $("#divEventList").empty();
+            $("#divEventList").append('<div class="loading_partial"></div>');
+            $("#divEventList").load('@Url.Action("EventList", "PointOfSale")?offerId=' + offerId);
+        }
+    }
+    //filter by event
+    function onChangeEvent()
+    {
+        selectedOne = "";
+        selectedOne = this.value();
+        if (selectedOne.length > 0)
+        {
+            eventId = parseInt(selectedOne);
+        }
+        else {
+            eventId = 0;
+        }
+        if (tab == 1)
+        {
+            $("#ProductDropdown").data("kendoDropDownList").value("");
+            $("#OfferDropdown").data("kendoDropDownList").value("");
+            $("#specificDate").val("");
+
+            $("#divOfferItemList").empty();
+            $("#divOfferItemList").append('<div class="loading_partial"></div>');
+            $("#divOfferItemList").load('@Url.Action("OfferProductList", "PointOfSale")?isSingleOffer' + isSingleOffer + '&eventId=' + eventId);
+        }
+        else if (tab == 4)
+        {
+            $("#ProductDropdown").data("kendoDropDownList").value("");
+            $("#OfferDropdown").data("kendoDropDownList").value("");
+            $("#specificDate").val("");
+
+            $("#divEventList").empty();
+            $("#divEventList").append('<div class="loading_partial"></div>');
+            $("#divEventList").load('@Url.Action("EventList", "PointOfSale")?eventId=' + eventId);
+        }
+    }
+
+    //filter by date
+    function onChangeDate()
+    {
+        selectedOne = "";
+        selectedOne = this.value();
+        if (selectedOne != null)
+        {
+            date = new Date(selectedOne).toISOString();
+        }
+        else {
+            date = null;
+        }
+        if (tab == 1)
+        {
+            $("#ProductDropdown").data("kendoDropDownList").value("");
+            $("#OfferDropdown").data("kendoDropDownList").value("");
+            $("#EventDropdown").data("kendoDropDownList").value("");
+
+            $("#divOfferItemList").empty();
+            $("#divOfferItemList").append('<div class="loading_partial"></div>');
+            $("#divOfferItemList").load('@Url.Action("OfferProductList", "PointOfSale")?isSingleOffer' + isSingleOffer + '&date=' + date);
+        }
+        if (tab == 2)
+        {
+            $("#ProductDropdown").data("kendoDropDownList").value("");
+
+            $("#divSingleOfferItemList").empty();
+            $("#divSingleOfferItemList").append('<div class="loading_partial"></div>');
+            $("#divSingleOfferItemList").load('@Url.Action("OfferProductList", "PointOfSale")?isSingleOffer=' + isSingleOffer + '&date=' + date);
+        }
+        if (tab == 3)
+        {
+            $("#ProductDropdown").data("kendoDropDownList").value("");
+            $("#OfferDropdown").data("kendoDropDownList").value("");
+
+            $("#divOfferList").empty();
+            $("#divOfferList").append('<div class="loading_partial"></div>');
+            $("#divOfferList").load('@Url.Action("OfferList", "PointOfSale")?date=' + date);
+        }
+        else if (tab == 4)
+        {
+            $("#ProductDropdown").data("kendoDropDownList").value("");
+            $("#OfferDropdown").data("kendoDropDownList").value("");
+            $("#EventDropdown").data("kendoDropDownList").value("");
+
+            $("#divEventList").empty();
+            $("#divEventList").append('<div class="loading_partial"></div>');
+            $("#divEventList").load('@Url.Action("EventList", "PointOfSale")?date=' + date);
+        }
+    }
+
+    function clearBeforeClick()
+    {
+        $("#div_All").empty();
+        $("#div_Products").empty();
+        $("#div_Offers").empty();
+        $("#div_Events").empty();
+        $("#div_Coupon").empty();
+    }
+    $("#liForAll").click(function () {
+        clearBeforeClick();
+        tab = 1;
+        isSingleOffer = false;
+
+        $("#div_All").append('<div class="loading_partial"></div>');
+        $("#div_All").load('@Url.Action("OfferItemTab", "PointOfSale")');
+    });
+
+    $("#liForProduct").click(function () {
+        clearBeforeClick();
+        tab = 2;
+        isSingleOffer = true;
+        $("#div_Products").append('<div class="loading_partial"></div>');
+        $("#div_Products").load('@Url.Action("SingleOfferItemTab", "PointOfSale")');
+    });
+    $("#liForOffer").click(function () {
+        clearBeforeClick();
+        tab = 3;
+        $("#div_Offers").append('<div class="loading_partial"></div>');
+        $("#div_Offers").load('@Url.Action("OfferTab", "PointOfSale")');
+    });
+
+    $("#liForEvent").click(function () {
+        clearBeforeClick();
+        tab = 4;
+        $("#div_Events").append('<div class="loading_partial"></div>');
+        $("#div_Events").load('@Url.Action("EventTab", "PointOfSale")');
+    });
+
+    $("#liForCoupon").click(function () {
+        clearBeforeClick();
+        tab = 5;
+        $("#div_Coupon").append('<div class="loading_partial"></div>');
+        $("#div_Coupon").load('@Url.Action("CouponTab", "PointOfSale")');
+    });
+
+    //Edit offer coupon
+    $("#div_Offers").on('click', '.btnEditCoupon', function () {
+        offerId = parseInt($(this).data("id"));
+        $("#divCouponWin").empty();
+        $("#divCouponWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 767,
+            height: 242,
+            title: 'Coupon',
+            resizable: false,
+            close: onWindowClose
+        });
+        var couponWin = $("#divCouponWin").data("kendoWindow");
+        couponWin.refresh('/PointOfSale/CouponCreatePartial?offerId=' + offerId);
+        couponWin.center().open();
+        document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+        document.body.scroll = "no";
+    });
+
+    //Edit event coupon
+    $("#div_Events").on('click', '.btnEditCoupon', function () {
+        eventId = parseInt($(this).data("id"));
+        $("#divCouponWin").empty();
+        $("#divCouponWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 767,
+            height: 242,
+            title: 'Coupon',
+            resizable: false,
+            close: onWindowClose
+        });
+        var couponWin = $("#divCouponWin").data("kendoWindow");
+        couponWin.refresh('/PointOfSale/CouponCreatePartial?eventId=' + eventId);
+        couponWin.center().open();
+        document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+        document.body.scroll = "no";
+    });
+
+    //Edit single offeritem coupon
+    $("#div_Products,#div_All,#div_Coupon").on('click', '.btnEditCoupon', function () {
+        offerItemId = parseInt($(this).data("id"));
+        $("#divCouponWin").empty();
+        $("#divCouponWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 767,
+            height: 242,
+            title: 'Coupon',
+            resizable: false,
+            close: onWindowClose
+        });
+        var couponWin = $("#divCouponWin").data("kendoWindow");
+        couponWin.refresh('/PointOfSale/CouponCreatePartial?offerItemId=' + offerItemId);
+        couponWin.center().open();
+        document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+        document.body.scroll = "no";
+    });
+
+    //Edit offer
+    $("#div_Offers").on('click', '.btnOfferEdit', function () {
+        offerId = parseInt($(this).data("id"));
+        $("#divOfferCreateWin").empty();
+        $("#divEventCreateWin").empty();
+        $("#divOfferCreateWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 767,
+            height: 346,
+            title: 'Offer',
+            resizable: false,
+            close: onWindowClose
+        });
+        var offerCreateWin = $("#divOfferCreateWin").data("kendoWindow");
+        offerCreateWin.refresh('/PointOfSale/OfferEdit?id=' + offerId);
+        offerCreateWin.center().open();
+        document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+        document.body.scroll = "no";
+    });
+
+    //Edit event
+    $("#div_Events").on('click', '.btnEventEdit', function () {
+        var subId = parseInt($(this).data("subid"));
+        eventId = parseInt($(this).data("id"));
+        $("#divEventCreateWin").empty();
+        $("#divOfferCreateWin").empty();
+        $("#divEventCreateWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 767,
+            height: 349,
+            title: 'Event',
+            resizable: false,
+            close: onWindowClose
+        });
+        var eventCreateWin = $("#divEventCreateWin").data("kendoWindow");
+        eventCreateWin.refresh('/PointOfSale/EventCreate?id=' + eventId + '&subId=' + subId);
+        eventCreateWin.center().open();
+        document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+        document.body.scroll = "no";
+    });
+
+
+
+
+
+</script>

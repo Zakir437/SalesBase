@@ -1,0 +1,28 @@
+﻿@model PointOfSale.Models.ViewOrderTransaction
+<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin-bottom:4%;margin-top:2%;">
+    <h3 class="text-center">Sorry, This product service is expired. <br /></h3>
+    <div style="margin-left:170px;">
+        <div class="dl-horizontal">
+            <dl>
+                <dt>Product</dt>
+                <dd>@Model.ProductName</dd>
+                <dt>Order Date</dt>
+                <dd>@Convert.ToDateTime(Model.OrderDate).ToString("MMM dd,yyyy")</dd>
+                <dt>Service Expire Date</dt>
+                <dd>@Convert.ToDateTime(ViewBag.ExpireDate).ToString("MMM dd,yyyy")</dd>
+            </dl>
+        </div>
+    </div>
+    <div class="k-edit-buttons k-state-default" style="margin-left:30px;">
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+    $("#btnCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+</script>
+
+
+
+

@@ -1,0 +1,28 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewWasteTransaction>
+@{
+    var count = 0;
+    var wasteList = Model.GroupBy(a=> new { a.ProductId, a.DistributeId }).Select(a=> new { a.FirstOrDefault().ProductName, a.FirstOrDefault().ProductId, Qauntity = a.Sum(s => s.Quantity) });
+}
+@if (Model.Any())
+{
+    <table class="table table-bordered table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Product Name</th>
+            <th>Quantity</th>
+        </tr>
+        @foreach (var list in wasteList.OrderBy(a=>a.ProductName))
+        {
+            count++;
+            <tr>
+                <td>@count.</td>
+                <td>@list.ProductName</td>
+                <td>@list.Qauntity</td>
+            </tr>
+        }
+    </table>
+}
+else
+{
+    <h3>There is no record to display</h3>
+}

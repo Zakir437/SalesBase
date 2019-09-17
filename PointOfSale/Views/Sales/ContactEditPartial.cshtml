@@ -1,0 +1,37 @@
+﻿@model PointOfSale.ModelViews.Sales.ServiceCustomerModelView
+@Html.HiddenFor(a => a.CustomerId)
+<div class="editor-label"><label for="FirstName">First Name</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.FirstName, new { htmlattributes = new { @class = "k-textbox form-control", @style = "width:100%; max-width:100%" } })
+    @Html.ValidationMessageFor(model => model.FirstName, "", new { @class = "text-Danger" })
+</div>
+<div class="editor-label"><label for="LastName">Last Name</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.LastName, new { htmlattributes = new { @class = "k-textbox", @style = "width:100%; max-width:100%" } })
+    @Html.ValidationMessageFor(model => model.LastName, "", new { @class = "text-Danger" })
+</div>
+<div class="editor-label"><label for="Email">E-mail</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.Email, new { htmlattributes = new { @class = "k-textbox", @style = "width:100%; max-width:100%" } })
+    @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-Danger" })
+</div>
+<div class="editor-label"><label for="Mobile">Mobile</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.Mobile, new { htmlattributes = new { @class = "k-textbox", @style = "width:100%; max-width:100%" } })
+    @Html.ValidationMessageFor(model => model.Mobile, "", new { @class = "text-Danger" })
+</div>
+<div class="editor-label"><label for="AlternateMobile">Alternate Mobile</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.AlternateMobile, new { htmlattributes = new { @class = "k-textbox", @style = "width:100%; max-width:100%" } })
+    @Html.ValidationMessageFor(model => model.AlternateMobile, "", new { @class = "text-Danger" })
+</div>
+<div class="editor-label"><label for="AddressLine1">AddressLine1</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.AddressLine1, new { htmlattributes = new { @class = "k-textbox", rows = "4", @style = "width:100%; max-width:100%" } })
+    @Html.ValidationMessageFor(model => model.AddressLine1, "", new { @class = "text-Danger" })
+</div>
+<div class="editor-label"><label for="AddressLine2">AddressLine2</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.AddressLine2, new { htmlattributes = new { @class = "k-textbox", rows="4", @style = "width:100%; max-width:100%" } })
+    @Html.ValidationMessageFor(model => model.AddressLine2, "", new { @class = "text-Danger" })
+</div>

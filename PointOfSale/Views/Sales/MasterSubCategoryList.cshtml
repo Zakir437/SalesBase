@@ -1,0 +1,87 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewMasterProductCategory>
+@{
+    var count = 0;
+}
+@if (ViewBag.IsView == false)
+{
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped" id="tblSubCategory">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th></th>
+            </tr>
+            <tr id="emptyRow">
+                <td colspan="3">
+                    <h4>There is no record to display</h4>
+                    <script>
+                        $("#btnMasterCategorySave").prop('disabled', true);
+                    </script>
+                </td>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Any())
+            {
+                foreach (var list in Model)
+                {
+                    count++;
+                    <tr id="subCategory_@count" class="subCategory" data-id="@count" data-categoryid="@list.CategoryId" data-subcategoryid="@list.SubCategoryId" data-transid="@list.MasterSubCategoryId">
+                        <td>@list.SubCategoryName</td>
+                        <td>
+                            <span class="btnCancelItem" data-toggle="tooltip" title="Cancel item" data-transid="@list.MasterSubCategoryId" data-id="@count"><i class="fa fa-times" aria-hidden="true" style="font-size:24px;cursor:pointer"></i></span>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Category</th>
+            <th>Sub Category</th>
+        </tr>
+        @if (Model.Any())
+        {
+            foreach (var list in Model)
+            {
+                count++;
+                <tr>
+                    <td>@count.</td>
+                    <td>@list.CategoryName</td>
+                    <td>@list.SubCategoryName</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="3">
+                    <h4>There is no record to display</h4>
+                </td>
+            </tr>
+        }
+    </table>
+}
+<script>
+    $(document).ready(function () {
+        count = @count;
+        if (count > 0)
+        {
+            $("#emptyRow").hide();
+            $("#btnMasterCategorySave").prop('disabled', false);
+        }
+        $('[data-toggle="tooltip"]').tooltip();
+    })
+</script>
+
+
+
+
+
+
+
+

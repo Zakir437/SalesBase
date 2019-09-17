@@ -1,0 +1,546 @@
+﻿@model PointOfSale.Models.ViewUserList
+@{
+    ViewBag.Title = "UserInfoDetails";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+}
+<link href="~/Content/Employee/profile.css" rel="stylesheet" />
+@*<section class="content-header">
+    <h1>
+        User Information
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-users"></i> HR</a></li>
+        <li><a href="/HumanResource/AllUserLists"><i class="fa fa-list-ul"></i> User</a></li>
+        <li class="active">User Information</li>
+    </ol>
+</section>*@
+<section class="content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-info">
+                <div class="panel-heading" style="padding-bottom:46px;">
+                    <div class="pull-left">
+                        <h4 class="uppercase">User Information</h4>
+                    </div>
+                    <div class="pull-right">
+                        <a class="btn btn-default" href="/HumanResource/AllUserLists"><i class="fa fa-arrow-left"></i> Back</a>
+                    </div>
+                </div>
+                <div class="panel-body" style="padding:0px">
+                    <div class="row profile">
+                        <div class="col-md-2 col-sm-3">
+                            <div class="profile-sidebar" style="border:1px solid #ddd;">
+                                <div class="profile-userpic">
+                                    <span class="btn_Dis" id="btn_EditPicture" style="margin-top:-20px;"><span><i class="fa fa-pencil"></i></span></span>
+                                    @if (Model.Picture != null)
+                                    {
+                                        <span id="Edit_Picture"><img src="~/Images/UserPicture/Original/@Model.Picture" class="img-responsive" alt=""></span>
+                                    }
+                                    else
+                                    {
+                                        <span id="Edit_Picture"><img src="~/Images/Icon/blank-person.jpg" class="img-responsive" alt=""></span>
+                                    }
+                                </div>
+                                <div class="profile-usertitle">
+                                    <div class="profile-usertitle-name">@Model.Title @Model.FirstName @Model.MiddleName @Model.LastName</div>
+                                    @*<div class="profile-usertitle-job">@Model.Designation</div>*@
+                                    <div class="profile-usertitle-job">
+                                        Status :
+                                        @if (Model.Status == 1)
+                                        {
+                                            <span class="text-center text-success">Active</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-center text-warning">Incomplete</span>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="profile-usermenu">
+                                    <ul class="nav">
+                                        <li class="active" id="li_Over">
+                                            <a href="javascript:;">
+                                                <i class="fa fa-home"></i>
+                                                Personal Info
+                                            </a>
+                                        </li>
+                                        <li id="li_JoinDate">
+                                            <a href="javascript:;">
+                                                <i class="fa fa-calendar"></i>
+                                                Join Date
+                                                @if (Model.JoinDate != null)
+                                                {
+                                                    <span class="status_icon">
+                                                        <span class="label label-sm label-icon label-success">
+                                                            <i class="fa fa-check"></i>
+                                                        </span>
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="status_icon">
+                                                        <span class="label label-sm label-icon label-warning">
+                                                            <i class="fa fa-warning"></i>
+                                                        </span>
+                                                    </span>
+                                                }
+                                            </a>
+                                        </li>
+                                        <li id="li_Attendance">
+                                            <a href="javascript:;">
+                                                <i class="fa fa-calendar"></i>
+                                                Attendance
+                                            </a>
+                                        </li>
+                                        <li id="li_Working">
+                                            <a href="javascript:;">
+                                                <i class="fa fa-calendar"></i>
+                                                Working Schedule
+                                                @if (Model.WorkingScheduleId > 0)
+                                                {
+                                                    <span class="status_icon">
+                                                        <span class="label label-sm label-icon label-success">
+                                                            <i class="fa fa-check"></i>
+                                                        </span>
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="status_icon">
+                                                        <span class="label label-sm label-icon label-warning">
+                                                            <i class="fa fa-warning"></i>
+                                                        </span>
+                                                    </span>
+                                                }
+                                            </a>
+                                        </li>
+                                        <li id="li_salary">
+                                            <a href="javascript:;">
+                                                <i class="fa fa-money"></i>
+                                                Salary
+                                                @if (Model.SalaryPackageId > 0)
+                                                {
+                                                    <span class="status_icon">
+                                                        <span class="label label-sm label-icon label-success">
+                                                            <i class="fa fa-check"></i>
+                                                        </span>
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="status_icon">
+                                                        <span class="label label-sm label-icon label-warning">
+                                                            <i class="fa fa-warning"></i>
+                                                        </span>
+                                                    </span>
+                                                }
+                                            </a>
+                                        </li>
+                                        @*<li id="li_personnel">
+                                                <a href="javascript:;">
+                                                    <i class="fa fa-info"></i>
+                                                    Personnel
+                                                </a>
+                                            </li>*@
+                                        @*<li id="li_card">
+                                                <a href="javascript:;">
+                                                    <i class="fa fa-money"></i>
+                                                    Employee Card
+                                                </a>
+                                            </li>
+                                            <li id="li_salary">
+                                                <a href="javascript:;">
+                                                    <i class="fa fa-money"></i>
+                                                    Salary
+                                                    @if (Model.SalaryPackageId > 0)
+                                                    {
+                                                        <span class="status_icon">
+                                                            <span class="label label-sm label-icon label-success">
+                                                                <i class="fa fa-check"></i>
+                                                            </span>
+                                                        </span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="status_icon">
+                                                            <span class="label label-sm label-icon label-warning">
+                                                                <i class="fa fa-warning"></i>
+                                                            </span>
+                                                        </span>
+                                                    }
+                                                </a>
+                                            </li>
+                                            <li id="li_Working">
+                                                <a href="javascript:;">
+                                                    <i class="fa fa-calendar"></i>
+                                                    Working Schedule
+                                                    @if (Model.WorkingScheduleId > 0)
+                                                    {
+                                                        <span class="status_icon">
+                                                            <span class="label label-sm label-icon label-success">
+                                                                <i class="fa fa-check"></i>
+                                                            </span>
+                                                        </span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="status_icon">
+                                                            <span class="label label-sm label-icon label-warning">
+                                                                <i class="fa fa-warning"></i>
+                                                            </span>
+                                                        </span>
+                                                    }
+                                                </a>
+                                            </li>
+                                            <li id="li_holiday">
+                                                <a href="javascript:;">
+                                                    <i class="fa fa-tree"></i>
+                                                    Holiday
+                                                    @if (Model.HolidayPackId > 0)
+                                                    {
+                                                        <span class="status_icon">
+                                                            <span class="label label-sm label-icon label-success">
+                                                                <i class="fa fa-check"></i>
+                                                            </span>
+                                                        </span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="status_icon">
+                                                            <span class="label label-sm label-icon label-warning">
+                                                                <i class="fa fa-warning"></i>
+                                                            </span>
+                                                        </span>
+                                                    }
+
+                                                </a>
+                                            </li>
+                                            <li id="li_Attendance">
+                                                <a href="javascript:;">
+                                                    <i class="fa fa-calendar"></i>
+                                                    Attendance
+                                                </a>
+                                            </li>
+                                            <li id="li_documents">
+                                                <a href="javascript:;">
+                                                    <i class="fa fa-file"></i>
+                                                    Documents
+                                                </a>
+                                            </li>
+                                            <li id="li_performance">
+                                                <a href="javascript:;">
+                                                    <i class="fa fa-file"></i>
+                                                    Performance
+                                                </a>
+                                            </li>
+                                            <li id="li_reset_pass">
+                                                <a href="javascript:;">
+                                                    <i class="fa fa-key"></i>
+                                                    Reset Password
+                                                </a>
+                                            </li>*@
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-10 col-sm-9">
+                            <div class="profile-content" style="padding:0 15px !important">
+                                <div class="row" id="div_ryt_panel"></div>
+                                @*<div class="loading_half"></div>*@
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<div id="div_user_Pic_edit"></div>
+<div id="div_user_basic_info_edit"></div>
+<div id="div_user_permanentAddress_edit"></div>
+<div id="div_user_PresentAddress_edit"></div>
+<div id="div_national_id_image"></div>
+<div id="win_user_contactInfo_edit"></div>
+<script>
+    $(document).ready(function () {
+        $("#liForAccount").addClass('active');
+        $("#liForPayroll").addClass('active');
+
+        $('[data-toggle="tooltip"]').tooltip();
+        $("#div_ryt_panel").append('<div class="loading_half"></div>');
+        $("#div_ryt_panel").load('@Url.Action("_ShowUserInfo", "HumanResource")?userId=' + @Model.UserId + '&isDisplay=' + '@ViewBag.IsDisplay');
+        $("#div_ryt_panel").css("padding", "20px");
+        if ('@ViewBag.IsDisplay' === 'True') {
+            $('.btn_Dis').hide();
+        }
+    });
+    //***************************** Edit Picture *********************
+    $("#btn_EditPicture").click(function () {
+        $("#div_user_Pic_edit").empty();
+        $("#div_user_Pic_edit").kendoWindow({
+            actions: ["Close"],
+            visible: false,
+            modal: true,
+            title: 'Edit User Image',
+            width: "50%",
+            height: "50%",
+            content: "/HumanResource/_EditUserImage?userId=" + @Model.UserId,
+            close: onWindowClose
+        });
+        $("#div_user_Pic_edit").data("kendoWindow").center().open();
+        document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+        document.body.scroll = "no";
+    });
+
+    //********************************Edit User Basic Information **********************************************
+    $("#div_ryt_panel").on("click", "#btn_EditPersonalInfo", function (e) {
+        e.preventDefault();
+        $("#div_user_basic_info_edit").empty();
+        $("#div_user_basic_info_edit").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: '60%',
+            height: 613,
+            title: 'Edit User Basic Info',
+            close: onWindowClose
+        });
+        $("#div_user_basic_info_edit").html('<div class="tiny_loading"></div>');
+        var div_user_basic_info_edit = $("#div_user_basic_info_edit").data("kendoWindow");
+        div_user_basic_info_edit.refresh({ url: "/HumanResource/EditBasicInformationPopUp?userId=" + @Model.UserId });
+        div_user_basic_info_edit.center().open();
+        document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+        document.body.scroll = "no";
+    });
+    //********************************Edit User contact Information **********************************************
+    $("#div_ryt_panel").on("click", "#btn_EditContactInfo", function (e) {
+        e.preventDefault();
+        $("#win_user_contactInfo_edit").empty();
+        $("#win_user_contactInfo_edit").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 614,
+            height: 236,
+            title: ' Edit Contact Info',
+            close: onWindowClose,
+            resizable:false
+        });
+        $("#win_user_contactInfo_edit").html('<div class="tiny_loading"></div>');
+        var div_user_contactInfo_edit = $("#win_user_contactInfo_edit").data("kendoWindow");
+        div_user_contactInfo_edit.refresh({ url: "/HumanResource/EditContactInfoPopUp?userId=" + @Model.UserId });
+        div_user_contactInfo_edit.center().open();
+        document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+        document.body.scroll = "no";
+    });
+
+    //********************************Edit Permanent Address Information **********************************************
+    function onChangeOfParCountry(e) {
+        e.preventDefault();
+        var coun = $("#ParCountry").val();
+        var div = $("#ParDivisionId").val();
+        var sta = $("#ParState").val();
+        if (coun == "BD") {
+            $("#DivForUserPerDivision").show();
+            $("#DivForUserPerState").hide();
+            $("#ParState").val('');
+            $("#ParDivisionId").val(div);
+        }
+        else {
+            $("#DivForUserPerDivision").hide();
+            $("#DivForUserPerState").show();
+            $("#ParDivisionId").val('');
+            $("#ParState").val(sta);
+        }
+    };
+
+    $("#div_ryt_panel").on("click", "#btn_EditPermanentAddress", function (e) {
+        e.preventDefault();
+        $("#div_user_permanentAddress_edit").empty();
+        $("#div_user_permanentAddress_edit").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: '60%',
+            height: 544,
+            title: ' Edit User Permanent Address',
+            close: onWindowClose
+        });
+        $("#div_user_permanentAddress_edit").html('<div class="tiny_loading"></div>');
+        var user_permanentAddress_edit = $("#div_user_permanentAddress_edit").data("kendoWindow");
+        user_permanentAddress_edit.refresh({ url: "/HumanResource/EditPermanentAddressPopUp?userId=" + @Model.UserId });
+        user_permanentAddress_edit.center().open();
+        document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+        document.body.scroll = "no";
+    });
+    //**************************** edit present address *************************************
+    function onChangeOfPreCountry(e) {
+        e.preventDefault();
+        var coun = $("#PreCountry").val();
+        var div = $("#PreDivisionId").val();
+        var sta = $("#PreState").val();
+        if (coun == "BD") {
+            $("#DivForUserPreDivision").show();
+            $("#DivForUserPreState").hide();
+            $("#PreState").val('');
+            $("#PreDivisionId").val(div);
+        }
+        else {
+            $("#DivForUserPreDivision").hide();
+            $("#DivForUserPreState").show();
+            $("#PreDivisionId").val('');
+            $("#PreState").val(sta);
+        }
+    }
+    $("#div_ryt_panel").on("click", "#btn_EditPresentAddress", function (e) {
+        e.preventDefault();
+        $("#div_user_PresentAddress_edit").empty();
+        $("#div_user_PresentAddress_edit").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: '60%',
+            height: '50%',
+            title: ' Edit User Present Address',
+            close: onWindowClose
+        });
+        $("#div_user_PresentAddress_edit").html('<div class="tiny_loading"></div>');
+        var user_presentAddress_edit = $("#div_user_PresentAddress_edit").data("kendoWindow");
+        user_presentAddress_edit.refresh({ url: "/HumanResource/EditPresentAddressPopUp?userId=" + @Model.UserId });
+        user_presentAddress_edit.center().open();
+        document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+        document.body.scroll = "no";
+    });
+
+     $("#div_ryt_panel").on("click", "#ShowNationalId", function (e) {
+        $("#div_national_id_image").empty();
+        $("#div_national_id_image").html('<div class="win_loading_half"></div>');
+        $("#div_national_id_image").kendoWindow({
+            actions: ["Close"],
+            visible: false,
+            modal: true,
+            width: "50%",
+            position: { top: '50%', left: '50%' },
+            title: 'National Id Images',
+            content: "/HumanResource/DisplayNationalIdImages?userId=" + @Model.UserId,
+            close: onWindowClose
+        });
+        $("#div_national_id_image").data("kendoWindow").center().open();
+        document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+        document.body.scroll = "no";
+    });
+
+    //******************************** Left Side Overview Click ************************************
+    $("#li_Over").click(function () {
+        $("#li_Over").addClass("active");
+        $("#li_JoinDate").removeClass("active");
+        $("#li_Attendance").removeClass("active");
+
+        //$("#li_AssignSalary").removeClass('active');
+        $("#li_salary").removeClass("active");
+        //$("#li_holiday").removeClass("active");
+        $("#li_Working").removeClass("active");
+        //$("#li_Rating").removeClass("active");
+        //$("#li_documents").removeClass("active");
+        //$("#li_performance").removeClass("active");
+
+        $("#div_ryt_panel").empty();
+        $("#div_ryt_panel").append('<div class="loading_half"></div>');
+        $("#div_ryt_panel").load('@Url.Action("_ShowUserInfo", "HumanResource")?userId=' + @Model.UserId + '&isDisplay=' + '@ViewBag.IsDisplay');
+        $("#div_ryt_panel").css("padding", "20px");
+
+        @*$("#h4title").empty();
+        $("#h4title").append('Showing Details of <label style="font-weight:bold">@Model.UserName</label>');
+        $("#div_ryt_panel").empty();
+        $("#div_ryt_panel").append('<div class="loading_half"></div>');
+        $("#div_ryt_panel").css("padding", "20px");
+        $("#div_ryt_panel").load('@Url.Action("_ShowEmpInfo", "HumanResource")?UserId=' + EmpId + '&isDisplay=' + isDisplay);*@
+    });
+
+
+    //******************************** Left Side Personal Click ************************************
+    $("#li_JoinDate").click(function () {
+        $("#li_JoinDate").addClass("active");
+        $("#li_Attendance").removeClass("active");
+        $("#li_Over").removeClass("active");
+        //$("#li_AssignSalary").removeClass('active');
+        $("#li_salary").removeClass("active");
+        //$("#li_holiday").removeClass("active");
+        $("#li_Working").removeClass("active");
+        //$("#li_Rating").removeClass("active");
+        //$("#li_documents").removeClass("active");
+        //$("#li_performance").removeClass("active");
+
+        $("#div_ryt_panel").empty();
+        $("#div_ryt_panel").append('<div class="loading_half"></div>');
+        $("#div_ryt_panel").css("padding", "0px");
+        $("#div_ryt_panel").load('@Url.Action("_JoinDateTab", "HumanResource")?userId=' + @Model.UserId + '&isDisplay=' + '@ViewBag.IsDisplay');
+    });
+
+    //******************************** Left Side Attendance Click ************************************
+    $("#li_Attendance").click(function () {
+        $("#li_Attendance").addClass("active");
+        $("#li_Over").removeClass("active");
+        $("#li_JoinDate").removeClass("active");
+
+        //$("#li_AssignSalary").removeClass('active');
+        $("#li_salary").removeClass("active");
+        //$("#li_holiday").removeClass("active");
+        $("#li_Working").removeClass("active");
+        //$("#li_Rating").removeClass("active");
+        //$("#li_documents").removeClass("active");
+
+        @*$("#h4title").empty();
+        $("#h4title").append('Showing Attendence of <label style="font-weight:bold">@Model.UserName</label>');*@
+
+        $("#div_ryt_panel").empty();
+        $("#div_ryt_panel").append('<div class="loading_half"></div>');
+        $("#div_ryt_panel").css("padding", "0px");
+        $("#div_ryt_panel").load('@Url.Action("_UserAttendanceTab", "HumanResource")?userId=' + @Model.UserId);
+    });
+
+    //******************************** Left Side Working Schedule Click ************************************
+    $("#li_Working").click(function () {
+        $("#li_Over").removeClass("active");
+        $("#li_JoinDate").removeClass("active");
+        //$("#li_AssignSalary").removeClass('active');
+        $("#li_salary").removeClass("active");
+        $("#li_Attendance").removeClass("active");
+        //$("#li_holiday").removeClass("active");
+        $("#li_Working").addClass("active");
+        //$("#li_Rating").removeClass("active");
+        //$("#li_documents").removeClass("active");
+
+        @*$("#h4title").empty();
+        $("#h4title").append('Showing Working Schedule Details of <label style="font-weight:bold">@Model.UserName</label>');*@
+
+        $("#div_ryt_panel").empty();
+        $("#div_ryt_panel").append('<div class="loading_half"></div>');
+        $("#div_ryt_panel").css("padding", "0px");
+        $("#div_ryt_panel").load('@Url.Action("_WorkingScheduleTab", "HumanResource")?scheduleId=' + '@Model.WorkingScheduleId' + '&isDisplay=' + '@ViewBag.IsDisplay');
+    });
+    //******************************** Left Side Salary Click ************************************
+    $("#li_salary").click(function () {
+        $("#li_salary").addClass("active");
+        //$("#li_AssignSalary").removeClass('active');
+        $("#li_Over").removeClass("active");
+        $("#li_JoinDate").removeClass("active");
+        $("#li_Attendance").removeClass("active");
+        //$("#li_holiday").removeClass("active");
+        $("#li_Working").removeClass("active");
+        //$("#li_Rating").removeClass("active");
+        //$("#li_documents").removeClass("active");
+
+        @*$("#h4title").empty();
+        $("#h4title").append('Showing Salary Details of <label style="font-weight:bold">@Model.UserName</label>');*@
+        $("#div_ryt_panel").empty();
+        $("#div_ryt_panel").append('<div class="loading_half"></div>');
+        $("#div_ryt_panel").css("padding", "0px");
+        $("#div_ryt_panel").load('@Url.Action("_UserSalaryTab", "HumanResource")?userId=' + @Model.UserId + '&salaryPackageId=' + '@Model.SalaryPackageId' + '&isDisplay=' + '@ViewBag.IsDisplay');
+    });
+
+</script>

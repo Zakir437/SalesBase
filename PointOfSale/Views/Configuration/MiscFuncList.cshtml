@@ -1,0 +1,263 @@
+﻿@model IEnumerable<PointOfSale.Models.MiscFuntion>
+@{
+    var count = 0;
+}
+@if (Model.Count() > 0)
+{
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Name</th>
+            <th></th>
+        </tr>
+        @foreach (var list in Model)
+         {
+            count++;
+            <tr>
+                <td>@count.</td>
+                <td>
+                    @if (list.Id == 2)
+                    {
+                        <span>Tax (@list.TaxRate%)</span>
+                    }
+                    else if (list.Id == 3)
+                    {
+                        <span>Minimum Quantity (@list.MinimumQuantity%)</span>
+                    }
+                    else if(list.Id == 5)
+                    {
+                        <span>@list.Name (@list.SalaryPayDay)</span>
+                    }
+                    else if (list.Id == 7)
+                    {
+                        <span>@list.Name (@list.Age)</span>
+                    }
+                    else if(list.Id == 12)
+                    {
+                        <span>@list.Name (@list.Value)</span>
+                    }
+                    else if(list.Id == 13)
+                    {
+                        if(list.Status == true)
+                        {
+                            <span>@list.Name (Auto)</span>
+                        }
+                        else
+                        {
+                            <span>@list.Name (Manual)</span>
+                        }
+                    }
+                    else
+                    {
+                        <span>@list.Name</span>
+                    }
+                </td>
+                <td>
+                    @if (list.Id == 2)
+                     {
+                        <button class="btn btn-primary btnTaxEdit" data-id="@list.Id" data-toggle="tooltip" title="Edit tax rate"><i class="fa fa-pencil-square-o"></i></button>
+                        if (list.Status == true)
+                        {
+                            <input id="tax" checked type="checkbox" data-id="@list.Id">
+                        }
+                        else
+                        {
+                            <input id="tax" type="checkbox" data-id="@list.Id">
+                        }
+                     }
+                    else if (list.Id == 3)
+                    {
+                        <button class="btn btn-primary btnMiniQuantityEdit" data-id="@list.Id" data-toggle="tooltip" title="Edit minimum quantity percentage"><i class="fa fa-pencil-square-o"></i></button>
+                        @*if (list.Status == true)
+                        {
+                            <input id="miniQuantity" checked type="checkbox" data-id="@list.Id">
+                        }
+                        else
+                        {
+                            <input id="miniQuantity" type="checkbox" data-id="@list.Id">
+                        }*@
+                    }
+                    else if (list.Id == 4)
+                    {
+                        <button class="btn btn-primary btnTaxFunctionEdit" data-id="@list.Id" data-toggle="tooltip" title="Edit Tax Function"><i class="fa fa-pencil-square-o"></i></button>
+                    }
+                    else if (list.Id == 5)
+                    {
+                        <button class="btn btn-primary btnSalaryPayDayEdit" data-id="@list.Id" data-toggle="tooltip" title="Edit Salary Pay Day"><i class="fa fa-pencil-square-o"></i></button>
+                        @*<input id="toggle-one" checked ifpe="checkbox">*@
+                    }
+                    else if (list.Id == 6)
+                    {
+                        <button class="btn btn-primary btnShopTimeEdit" data-id="@list.Id" data-toggle="tooltip" title="Edit shop time"><i class="fa fa-pencil-square-o"></i></button>
+                    }
+                    else if (list.Id == 7)
+                    {
+                        <button class="btn btn-primary btnAgeRestrictedEdit" data-id="@list.Id" data-toggle="tooltip" title="Edit restricted age"><i class="fa fa-pencil-square-o"></i></button>
+                    }
+                    else if (list.Id == 8)
+                    {
+                        <button class="btn btn-primary btnPointsEdit" data-id="@list.Id" data-toggle="tooltip" title="Edit Redeem Points Value"><i class="fa fa-pencil-square-o"></i></button>
+                    }
+                    else if (list.Id == 9)
+                    {
+                        <button class="btn btn-primary btnPointsEdit" data-id="@list.Id" data-toggle="tooltip" title="Edit Sales Points Value"><i class="fa fa-pencil-square-o"></i></button>
+                    }
+                    else if (list.Id == 10)
+                    {
+                        if (list.Status == true)
+                        {
+                            <input id="IsDebitPayByCredit" checked type="checkbox" data-id="@list.Id">
+                        }
+                        else
+                        {
+                            <input id="IsDebitPayByCredit" type="checkbox" data-id="@list.Id">
+                        }
+                    }
+                    else if (list.Id == 12)
+                    {
+                        <button class="btn btn-primary btnGenerateCountEdit" data-id="@list.Id" data-toggle="tooltip" title="Edit Generate Count Value"><i class="fa fa-pencil-square-o"></i></button>
+                    }
+                    else if (list.Id == 13)
+                    {
+                        <button class="btn btn-primary btnDeliveryChargeFuncEdit" data-id="@list.Id" data-toggle="tooltip" title="Delivery Charge Function Edit"><i class="fa fa-pencil-square-o"></i></button>
+                    }
+                </td>
+            </tr>
+         }
+    </table>
+}
+else
+{
+    <h4>There is no record to display</h4>
+}
+
+<script>
+    $('[data-toggle="tooltip"]').tooltip();
+    $(function () {
+        $('#toggle-one').bootstrapToggle({
+            on: 'Enabled',
+            off: 'Disabled'
+        });
+    });
+
+    //Debit pay by Credit on/off function
+    $(function () {
+        $('#IsDebitPayByCredit').bootstrapToggle({
+            on: 'on',
+            off: 'off'
+        });
+    });
+     //tax status change start
+    $('#IsDebitPayByCredit').change(function () {
+        miscId = $(this).data("id");
+        if ($(this).is(":checked")) {
+            status = 1;
+        }
+        else
+        {
+            status = 0;
+        }
+        $.ajax({
+            url: '@Url.Action("MiscFuncStatusChange", "Configuration")',
+            type: 'POST',
+            data: { miscId: miscId, status: status },
+            success: function (data)
+            {
+                if (data == "success")
+                {
+                   
+                }
+                else
+                {
+                    alert("status update error...");
+                }
+            }
+        });
+    });
+
+
+    //Tax on / off toggle function start
+    $(function () {
+        $('#tax').bootstrapToggle({
+            on: 'on',
+            off: 'off'
+        });
+    });
+
+    //Tax on / off toggle function end
+
+    //tax status change start
+    $('#tax').change(function () {
+        var taxId = $(this).data("id");
+        if ($(this).is(":checked")) {
+            status = 1;
+        }
+        else
+        {
+            status = 0;
+        }
+        $.ajax({
+            url: '@Url.Action("ChangeTaxStatus", "Configuration")',
+            type: 'POST',
+            data: { taxId: taxId, status: status },
+            success: function (data)
+            {
+                if (data == "success")
+                {
+                    $("#divMiscFuncList").empty();
+                    $("#divMiscFuncList").append('<div class="loading_partial"></div>');
+                    $("#divMiscFuncList").load('@Url.Action("MiscFuncList","Configuration")');
+                }
+                else {
+                    alert("status update error...");
+                }
+            }
+        });
+    });
+    //tax status change end
+
+    //minimum quantity on/off toggle
+    $(function () {
+        $('#miniQuantity').bootstrapToggle({
+            on: 'on',
+            off: 'off'
+        });
+    });
+
+    if ($("#miniQuantity").attr('checked')) {
+        $("#miniQuantity").val(true);
+    }
+    else {
+        $("#miniQuantity").val(false);
+    }
+
+    //minimum quantity status change
+    $("#miniQuantity").change(function () {
+        var miniQuantityId = $(this).data("id");
+        if ($(this).is(":checked")) {
+            $('#miniQuantity').val(true);
+            status = 1;
+        } else {
+            $('#miniQuantity').val(false);
+            status = 0;
+        }
+        $.ajax({
+            url: '@Url.Action("ChangeMinimumQuantityStatus", "Configuration")',
+            type: 'POST',
+            data: { miniQuantityId: miniQuantityId, status: status },
+            success: function (data)
+            {
+                if (data == "success")
+                {
+                    $("#divMiscFuncList").empty();
+                    $("#divMiscFuncList").append('<div class="loading_partial"></div>');
+                    $("#divMiscFuncList").load('@Url.Action("MiscFuncList","Configuration")');
+                }
+                else {
+                    alert("status update error...");
+                }
+            }
+        });
+    });
+
+</script>

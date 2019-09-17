@@ -1,0 +1,47 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewDailyAttendance>
+@{
+    var count = 0;
+    int offset = Convert.ToInt32(System.Configuration.ConfigurationManager.AppSettings["localTime"]);
+    DateTime now = DateTime.UtcNow.AddMinutes(offset);
+}
+@if (Model.Any())
+{
+    <span>@Convert.ToDateTime(now).ToString("MMMM yyyy")</span>
+    <table class="table table-bordered">
+        <tr>
+            <th>SL.</th>
+            <th>Inserted Date</th>
+            <th>Attendance Type</th>
+            <th>Inserted By</th>
+        </tr>
+        @foreach (var list in Model)
+        {
+            count++;
+            <tr>
+                <td>@count . </td>
+                <td>@Convert.ToDateTime(list.InsertedDate).ToString("MMM dd yyyy hh:mm:ss tt")</td>
+                <td>
+                    @if (list.AttType == 1)
+                    {
+                        <span>Present</span>
+                    }
+                    else if (list.AttType == 2)
+                    {
+                        <span>Absent</span>
+                    }
+                    else if (list.AttType == 3)
+                    {
+                        <span>Leave(@list.LeaveTypeName)</span>
+                    }
+                </td>
+                <td>@list.InsertedBy</td>
+            </tr>
+         }
+    </table>
+}
+else
+{
+    <h4>There is no record to display</h4>
+}
+
+

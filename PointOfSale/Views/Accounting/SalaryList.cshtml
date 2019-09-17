@@ -1,0 +1,81 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewEmpSalary>
+@using PointOfSale.Helpers
+@using System.Globalization
+@{
+    var count = 0;
+}
+@if (Model.Any())
+{
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Name</th>
+            <th>Salary</th>
+            <th>Salary to pay</th>
+            <th>Paid</th>
+            <th>Due</th>
+            <th>Present</th>
+            <th>Paid Leave</th>
+            <th>Working Days</th>
+            <th>Holiday</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            @if (ViewBag.IsPrint == false)
+             {
+                <th></th>
+             }
+            
+        </tr>
+        @foreach (var list in Model)
+         {
+            count++;
+            <tr>
+                <td>@count. </td>
+                <td>
+                    @if (ViewBag.IsPrint == false)
+                     {
+                        if (list.Picture != null && list.Picture != "")
+                        {
+                            <img class="img-circle" src="~/Images/UserPicture/thumb/@list.Picture" />
+                        }
+                        else
+                        {
+                            <img src="~/Images/Icon/blank-person.jpg" class="img-circle" width="29" height="29" alt="">
+                        }
+                        <a href="@Html.EncodedParam("UserInfoDetails", "HumanResource", new { userId = list.UserId, isDisplay = true}, null)">@list.Title @list.FirstName @list.MiddleName @list.LastName</a>
+                     }
+                    else
+                    {
+                        <span>@list.Title @list.FirstName @list.MiddleName @list.LastName</span>
+                    }
+                </td>
+                <td>@list.ActualSalary.ToString("C", new CultureInfo("bn-BD"))</td>
+                <td>@list.TotalAmount.ToString("C", new CultureInfo("bn-BD"))</td>
+                <td>@list.PaidAmount.ToString("C", new CultureInfo("bn-BD"))</td>
+                <td>@list.DueAmount.ToString("C", new CultureInfo("bn-BD"))</td>
+                <td>@list.TotalPresent</td>
+                <td>@list.TotalPaidLeave</td>
+                <td>@list.TotalWorkingDays</td>
+                <td>@list.TotalHoliday</td>
+                <td>@Convert.ToDateTime(list.StartDate).ToString("MMM dd yyyy")</td>
+                <td>@Convert.ToDateTime(list.EndDate).ToString("MMM dd yyyy")</td>
+                @if (ViewBag.IsPrint == false)
+                 {
+                    <td>
+                        <span data-id="@list.Id" style="cursor:pointer;" data-toggle="tooltip" title="Delete Transaction" class="btn btn-danger btnDeleteSalaryTransaction">
+                            <i class="fa fa-trash"></i>
+                        </span>
+                    </td>
+                 }
+            </tr>
+         }
+    </table>
+ }
+else
+{
+    <h4>There is no record to display</h4>
+}
+<script>
+    $('[data-toggle="tooltip"]').tooltip();
+</script>
+

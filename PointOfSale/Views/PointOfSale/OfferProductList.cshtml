@@ -1,0 +1,68 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewOfferItem>
+@using System.Globalization
+@{
+    var count = 0;
+}
+@if (Model.Any())
+ {
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped tablesorter" id="tblOfferItems">
+        <tr>
+            <th>SL.</th>
+            <th>Name</th>
+            <th>Price</th>
+            <th>Quantity</th>
+            <th>Free</th>
+            <th>Off(%)</th>
+            <th>Off(Tk)</th>
+            <th>Discount price</th>
+            <th>Schedule</th>
+            @if (ViewBag.IsSingleOffer == false)
+             {
+                <th>Coupon</th>
+             }
+            <th>Validity</th>
+            <th></th>
+        </tr>
+        @foreach (var list in Model)
+        {
+            count++;
+            <tr>
+                <td>@count.</td>
+                <td>@list.ProductName</td>
+                <td>@list.ProductPrice.Value.ToString("C", new CultureInfo("bn-BD"))</td>
+                <td>@list.Quantity</td>
+                <td>@list.IsFree</td>
+                <td>@list.PercentageOff</td>
+                <td>@list.AmountOff.ToString("C", new CultureInfo("bn-BD"))</td>
+                <td>@list.Price.ToString("C", new CultureInfo("bn-BD"))</td>
+                <td>@list.ScheduleName</td>
+                @if (ViewBag.IsSingleOffer == false)
+                 {
+                    <td>@list.Coupon</td>
+                 }
+                <td>@Convert.ToDateTime(list.Validity).ToString("MMM dd,yyy hh:mm:ss tt")</td>
+                <td>
+                    @if (list.SubOfferId == 4 && list.OfferId == 0)
+                     {
+                        <button class="btn btn-info btnEditCoupon" data-id="@list.Id" data-toggle="tooltip" title="Edit coupon"><i class="fa fa-pencil-square-o"></i></button>
+                     }
+                </td>
+            </tr>
+         }
+    </table>
+ }
+else
+{
+    <h4>There is no record to display</h4>
+}
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    })
+</script>
+
+
+
+
+
+

@@ -1,0 +1,44 @@
+﻿@model IEnumerable<PointOfSale.Models.Offer>
+@{ 
+    var count = 0;
+}
+<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin-bottom:4%;margin-top:2%; margin-left:2%;">
+    <div id="divOfferList">
+        @if(Model.Any())
+         {
+            <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+                <tr>
+                    <th>SL.</th>
+                    <th>Offer Name</th>
+                    <th>Coupon</th>
+                    <th>Actual Price</th>
+                    <th>Offer Price</th>
+                </tr>
+                @foreach(var list in Model)
+                 {
+                    count++;
+                    <tr>
+                        <td>@count</td>
+                        <td>@list.OfferName</td>
+                        <td>@list.Coupon</td>
+                        <td>@list.ActualPrice</td>
+                        <td>@list.OfferPrice</td>
+                    </tr>
+                 }
+            </table>
+         }
+        else
+        {
+            <h4>No offer found</h4>
+        }
+    </div>
+    <div class="k-edit-buttons k-state-default">
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnOfferCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+    $("#btnOfferCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+
+</script>

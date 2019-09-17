@@ -1,0 +1,8 @@
+﻿@model PointOfSale.ModelViews.StockModel
+@Html.HiddenFor(m => m.StockId)
+<div class="editor-label"><label for="Quantity">Quantity</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.Quantity, new { htmlattributes = new { @class = "k-textbox form-control" } })
+    @Html.ValidationMessageFor(model => model.Quantity, "", new { @class = "text-Danger" })
+</div>
+

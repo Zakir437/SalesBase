@@ -1,0 +1,81 @@
+﻿@{
+    ViewBag.Title = "WorkingSchedule";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+}
+@*<section class="content-header">
+    <h1>
+        Working Schedule
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-user"></i> HR</a></li>
+        <li class="active">Working Schedule</li>
+    </ol>
+</section>*@
+<section class="content">
+    <div class="row">
+        <div class="col-md-12">
+            @*@Html.ActionLink("User", "AllUserLists", "HumanResource", routeValues: null, htmlAttributes: new { @class = "btn btn-default" })
+            @Html.ActionLink("Attendance", "Attendance", "Attendance", routeValues: null, htmlAttributes: new { @class = "btn btn-default" })
+            @Html.ActionLink("Working Schedule", "WorkingSchedule", "HumanResource", routeValues: null, htmlAttributes: new { @class = "btn btn-default selected" })
+            @Html.ActionLink("Holiday", "Holiday", "Holiday", routeValues: null, htmlAttributes: new { @class = "btn btn-default" })
+            @Html.ActionLink("Leave Type", "LeaveType", "Configuration", routeValues: null, htmlAttributes: new { @class = "btn btn-default" })
+            @Html.ActionLink("System-User", "User", "Configuration", routeValues: null, htmlAttributes: new { @class = "btn btn-default" })*@
+            <br />
+            <button class="btn btn-default" id="btnScheduleCreateWin" data-toggle="tooltip" title="Add new Schedule" style="margin:15px 0 5px 0;"><i class="fa fa-plus-circle" aria-hidden="true"></i> Add</button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div id="divScheduleList"></div>
+        </div>
+    </div>
+</section>
+<div id="divScheduleWin"></div>
+<script>
+    $(document).ready(function () {
+        $("#liForHr").addClass('active');
+        $("#liForHRConfig").addClass('active');
+        $("#liForWorkingSchedule").addClass('active');
+
+        $('[data-toggle="tooltip"]').tooltip();
+        $("#divScheduleList").append('<div class="loading_partial"></div>');
+        $("#divScheduleList").load('@Url.Action("WorkingScheduleList", "HumanResource")');
+    });
+    //Schedule Create
+    $("#btnScheduleCreateWin").click(function () {
+        $("#divScheduleWin").empty();
+        $("#divScheduleWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 767,
+            height: 422,
+            title: 'Working Schedule',
+            resizable: false
+        });
+        var scheduleWin = $("#divScheduleWin").data("kendoWindow");
+        scheduleWin.refresh('@Url.Action("WorkingScheduleCreate", "HumanResource")');
+        scheduleWin.center().open();
+    });
+
+    $("#divScheduleList").on('click', '.btnScheduleEdit', function () {
+        var id = $(this).data("id");
+        $("#divScheduleWin").empty();
+        $("#divScheduleWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 767,
+            height: 422,
+            title: 'Working Schedule',
+            resizable: false
+        });
+        var scheduleWin = $("#divScheduleWin").data("kendoWindow");
+        scheduleWin.refresh('@Url.Action("WorkingScheduleCreate", "HumanResource")?scheduleId=' + id);
+        scheduleWin.center().open();
+    });
+
+</script>
+

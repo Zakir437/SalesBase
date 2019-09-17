@@ -1,0 +1,116 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewIndent>
+@using PointOfSale.Helpers
+@{
+    var count = 0;
+}
+@if (Model.Any() == true)
+{
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Voucher Name</th>
+            <th>Status</th>
+            <th>Created By</th>
+            <th>Created Date</th>
+            @*<th>Updated By</th>
+            <th>Updated Date</th>*@
+            @if (ViewBag.IsWorkOrderList == false)
+             {
+                <th></th>
+             }
+        </tr>
+        @foreach (var list in Model)
+         {
+            count++;
+            <tr>
+                <td>@count. </td>
+                <td>
+                    <a href="@Html.EncodedParam("IndentVoucherDetails","Inventory", new { VoucherId = list.Id, isView = true },null)" target="_blank">
+                        @list.VoucherName
+                    </a>
+                </td>
+                <td>
+                    @if(list.Status == 1)
+                     {
+                        <span class="label label-primary">Pending</span>
+                     }
+                    else if(list.Status == 2)
+                    {
+                        <span class="label label-warning">Partial Approved</span>
+                    }
+                    else if (list.Status == 3)
+                    {
+                        <span class="label label-info">Approved</span>
+                    }
+                    else if (list.Status == 4)
+                    {
+                        <span class="label label-success">Completed</span>
+                    }
+                    else if(list.Status == 5)
+                    {
+                        <span class="label label-danger">Deleted</span>
+                    }
+                </td>
+                <td>@list.CreatedBy</td>
+                <td>@Convert.ToDateTime(list.CreatedDate).ToString("MMMM dd,yyyy")</td>
+                @*<td>@list.UpdatedBy</td>
+                <td>
+                    @if(list.UpdatedDate != null)
+                     {
+                        <span>@Convert.ToDateTime(list.UpdatedDate).ToString("MMMM dd,yyyy")</span>
+                     }
+                    else
+                    {
+                        <span>Not updated yet</span>
+                    }
+                </td>*@
+                @if (ViewBag.IsWorkOrderList == false)
+                 {
+                    <td>
+                        @if (ViewBag.IsProcurementList == true)
+                        {
+                            if (list.ProcurementStatus == 1 && list.Status == 3) //status 1 for procurementlist......status 3 for indent approve
+                            {
+                                <button class="btn btn-success btnSendToWorkOrder" data-toggle="tooltip" title="Send to workorder" data-id="@list.Id"><i class="fa fa-arrow-right"></i></button>
+                            }
+                         }
+                        else
+                        {
+                            if (list.Status < 4) //status 4 is complete
+                            {
+                                <a href="@Html.EncodedParam("IndentVoucherDetails", "Inventory", new { VoucherId = list.Id }, null)"><span class="btn btn-primary" data-toggle="tooltip" title="Edit Indent" data-id="@list.Id"><i class="fa fa-pencil"></i></span></a>
+                            }
+                            if (list.Status == 1 && list.Status != 2) //status 1 pending.......status 2 partial approved
+                            {
+                                <button class="btn btn-success btnapproveIndent" data-toggle="tooltip" title="Approve Indent" data-id="@list.Id"><i class="fa fa-check"></i></button>
+                            }
+                            if (list.Status == 3 && list.ProcurementStatus == null)
+                            {
+                                <button class="btn btn-warning btnSendToProcurement" data-toggle="tooltip" title="Send to procurement" data-id="@list.Id"><i class="fa fa-arrow-right"></i></button>
+                            }
+                            if (list.Status == 1)
+                            {
+                                <button class="btn btn-danger btnDeleteIndent" data-id="@list.Id" data-toggle="tooltip" title="Delete Indent"><i class="fa fa-trash"></i></button>
+                            }
+                        }
+                    </td>
+                 }
+            </tr>
+         }
+    </table>
+ }
+else
+{
+    <h3>There is no record to display</h3>
+}
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    })
+</script>
+
+
+
+
+
+

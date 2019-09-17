@@ -1,0 +1,63 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewPaySheet>
+@using PointOfSale.Helpers
+@using System.Globalization
+@{
+    var count = 0;
+}
+@if (Model.Any())
+{
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Assign User</th>
+            <th>File Name</th>
+            <th>Total Salary</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Generate By</th>
+            <th>Generate Date</th>
+            <th></th>
+        </tr>
+        @foreach (var list in Model)
+         {
+            count++;
+            <tr>
+                <td>@count. </td>
+                <td>@list.AssignUserName</td>
+                <td>@list.Filename</td>
+                <td>@list.TotalAmount.ToString("C", new CultureInfo("bn-BD"))</td>
+                <td>@Convert.ToDateTime(list.StartDate).ToString("MMMM dd,yyyy")</td>
+                <td>@Convert.ToDateTime(list.EndDate).ToString("MMMM dd,yyyy")</td>
+                <td>@list.GenerateBy</td>
+                <td>@Convert.ToDateTime(list.GenerateDate).ToString("MMMM dd,yyyy")</td>
+                <td>
+                    <a class="btn btn-success" data-toggle="tooltip" title="View Details" href="@Html.EncodedParam("XmlFileInfoDetails", "Accounting", new { xmlFileId = list.Id}, null)"><i class="fa fa-eye"></i> View</a>
+                    <button class="btn btn-primary btnPrint" data-toggle="tooltip" title="Print pay sheet" data-id="@list.Id"><i class="fa fa-print"></i></button>
+                    <button class="btn btn-primary btnPrintForReceipt" data-toggle="tooltip" title="Print receipt sheet" data-id="@list.Id"><i class="fa fa-print"></i></button>
+                    @if (list.IsPaid == false)
+                     {
+                        <button class="btn btn-warning btnCreatePayWin" data-toggle="tooltip" title="Pay" data-id="@list.Id"><i class="fa fa-money"></i></button>
+                     }
+                    else
+                    {
+                        if (list.IsApproved == false)
+                        {
+                            <button class="btn btn-success btnPayApproved" data-toggle="tooltip" title="Pay complete" data-id="@list.Id"><i class="fa fa-check-circle"></i></button>
+                            <a class="btn btn-success" data-toggle="tooltip" title="Pay complete with unpaid" href="@Html.EncodedParam("PayComplete", "Accounting", new { paySheetId = list.Id}, null)"><i class="fa fa-check-circle"></i></a>
+                        }
+                    }
+                </td>
+            </tr>
+         }
+    </table>
+}
+else
+{
+    <h4>There is no record to display</h4>
+}
+<script>
+    $('[data-toggle="tooltip"]').tooltip();
+</script>
+
+
+

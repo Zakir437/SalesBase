@@ -1,0 +1,128 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin-bottom:4%;margin-top:2%;">
+    <div id="divCreditForm"></div>
+    <div class="k-edit-buttons k-state-default" style="margin-left:30px;">
+        <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnCreditPaymentConfirm"><span class="k-icon k-update"></span>Confirm</button>
+        <button type="reset" class="k-button k-button-icontext k-grid-update" id="btnCreditPaymentRefresh"><span class="k-icon k-i-refresh"></span>Refresh</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnCreditPaymentCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+    var totalDue = 0, totalAmount = 0;
+    $(document).ready(function () {
+        $("#divCreditForm").append('<div class="tiny_loading"></div>');
+        $("#divCreditForm").load('@Url.Action("CreditPaymentPartial", "PointOfSale")?customerId=' + '@ViewBag.CustomerId');
+    });
+    $("#btnCreditPaymentRefresh").click(function () {
+        $("#divCreditForm").empty();
+        $("#divCreditForm").append('<div class="tiny_loading"></div>');
+        $("#divCreditForm").load('@Url.Action("CreditPaymentPartial", "PointOfSale")?customerId=' + '@ViewBag.CustomerId');
+    });
+
+    $("#btnCreditPaymentCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+
+    var validation = $("#divCreditForm").kendoValidator({
+    }).data("kendoValidator");
+
+    $("#btnCreditPaymentConfirm").click(function () {
+        if (validation.validate())
+        {
+            $(this).prop('disabled', true);
+            $("#btnCreditPayment").hide();
+
+            duePay = parseFloat($("#CreditPay").val());
+            totalAmount = duePay;
+            //if duePaid amount greater than due then add to debit account
+            if (duePay > totalDue)
+            {
+                //if debit refill already include in cart
+                if (debitRefill > 0) {
+                    totalAmount = totalAmount - debitRefill;
+                }
+
+                debitRefill = duePay - totalDue;
+                duePay = totalDue;
+                $("#btnAccountRefill").hide();
+                $("#emptyCartPlaceholder").hide();
+                if($("#cartItem_DebitRefill").length == 1)
+                {
+                    $("#spanDebitRefill").empty();
+                    $("#spanDebitRefill").append(debitRefill.toFixed(2));
+                }
+                else
+                {
+                    $("#btnAccountRefill").hide();
+                    $("#emptyCartPlaceholder").hide();
+                    $("#cartListContainer").prepend('<li class="singleCartItem" id="cartItem_DebitRefill" data-id="0" data-type="3">' +
+                        '<span style="font-size:13px; font-weight:bold;">Debit Refill</span> | ' +
+                        '<span class="itemCancel pull-right" data-id="0" data-type="3">' +
+                        ' <span class="fa fa-times-circle"></span>' +
+                        '</span>' +
+                        '<span class="subitemPrice" data-id="0" data-price="' + debitRefill.toFixed(2) +'" data-type="3" id="spanDebitRefill">' + debitRefill.toFixed(2) + '</span>' +
+                        'Tk' +
+                        '</li>');
+                }
+            }
+            $("#emptyCartPlaceholder").hide();
+            $("#cartListContainer").prepend('<li class="singleCartItem" id="cartItem_CreditPayment" data-id="0" data-type="2">' +
+                '<span style="font-size:13px; font-weight:bold;">Credit Payment</span> | ' +
+                '<span class="itemCancel pull-right" data-id="0" data-type="2">' +
+                ' <span class="fa fa-times-circle"></span>' +
+                '</span>' +
+                '<span class="subitemPrice" data-id="0" data-price="' + duePay.toFixed(2) + '" data-type="2">' + duePay.toFixed(2) + '</span>' +
+                'Tk' +
+                '</li>');
+
+            calculateCartAmount();
+
+            //totalPrice = 0.00;
+            //$(".subitemPrice").each(function () {
+            //    totalPrice = totalPrice + parseFloat($(this).text());
+            //});
+            //$(".totalItemPrice").empty();
+            //$(".totalItemPrice").append(totalPrice.toFixed(2) + '<i class="taka">Tk</i>');
+
+            ////if discount active
+            //if ($("#totalAmount").length == 1)
+            //{
+            //    totalPrice = parseFloat($("#totalAmount").text());
+            //    totalPrice = totalPrice + totalAmount;
+            //    $("#totalAmount").empty();
+            //    $("#totalAmount").append(totalPrice.toFixed(2));
+            //}
+            ////if tax active
+            //if (taxStatus == 1)
+            //{
+            //    if ($("#taxRateRow").length == 1)
+            //    {
+            //        totalPrice = parseFloat($("#priceWithVat").text());
+            //        totalPrice = totalPrice + totalAmount;
+            //        $("#priceWithVat").empty();
+            //        $("#priceWithVat").append(totalPrice.toFixed(2));
+            //    }
+            //    else
+            //    {
+            //        $(".summaryTbl").append('<tr class="totalCartPriceRow" id="taxRateRow">' +
+            //            '<td>Tax(' + taxIcon + ')</td>' +
+            //            '<td>' +
+            //            taxRate + '%(<span id="taxAmount">' + 0.00 + '</span>)Tk' +
+            //            '</td>' +
+            //            '</tr>' +
+            //            '<tr class="totalCartPriceRow" id="priceWithVatRow">' +
+            //            '<td id="divTotal">Total Amount</td>' +
+            //            '<td>' +
+            //            '<span id="priceWithVat">' + totalPrice.toFixed(2) + '</span>Tk' +
+            //            '</td>' +
+            //            '</tr>');
+            //    }
+            //}
+
+            $("#divCreditPaymentWin").data("kendoWindow").close();
+        }
+    });
+</script>
+
+
+
+

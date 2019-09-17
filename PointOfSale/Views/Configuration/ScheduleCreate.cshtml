@@ -1,0 +1,326 @@
+﻿<style>
+    .btnCancelItem{
+        margin-right: 3px;
+    }
+</style>
+@{ 
+    PointOfSale.Models.PointOfSale_DBEntities db = new PointOfSale.Models.PointOfSale_DBEntities();
+    var shopTime = db.MiscFuntions.Find(6); //6 for shop time
+    var startTime = new TimeSpan();
+    var endTime = new TimeSpan();
+    if (shopTime.Is24hours == false)
+    {
+        startTime = shopTime.Starttime.Value;
+        endTime = shopTime.EndTime.Value;
+    }
+}
+<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin:2%;">
+    <div class="editor-field">
+        @if (ViewBag.IsMultiSchedule == true)
+         {
+            <label class="radio-inline" id="chkSingleLabel">
+                <input type="radio" class="" name="type" id="chkSingle" /> Single
+            </label>
+            <label class="radio-inline" id="chkMultiLabel">
+                <input type="radio" checked name="type" id="chkMultiple" /> Multiple
+            </label>
+            if(ViewBag.Id > 0)
+            {
+                <script>
+                    $("#chkSingleLabel").hide();
+                </script>
+            }
+         }
+        else
+        {
+            <label class="radio-inline" id="chkSingleLabel">
+                <input type="radio"  checked class="" name="type" id="chkSingle" /> Single
+            </label>
+            <label class="radio-inline" id="chkMultiLabel">
+                <input type="radio"  name="type" id="chkMultiple" /> Multiple
+            </label>
+            if (ViewBag.Id > 0)
+            {
+                <script>
+                    $("#chkMultiLabel").hide();
+                </script>
+            }
+
+        }
+    </div>
+    <div id="divScheduleForm"></div>
+    <div id="divScheduleItem" style="padding:0 .6em 0 .6em"></div>
+    <div class="k-edit-buttons k-state-default">
+        @if (ViewBag.Id > 0)
+         {
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnScheduleCreate"><span class="k-icon k-update"></span>Update</button>
+         }
+        else
+        {
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnScheduleCreate"><span class="k-icon k-update"></span>Create</button>
+        }
+        <button type="reset" class="k-button k-button-icontext k-grid-update" id="btnRefresh"><span class="k-icon k-i-refresh"></span>Refresh</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+    var count = 0, isMultiple = false, minValue, id = 0, deletedIds = [], selectedId = 0;
+    $(document).ready(function () {
+        if ($("#chkMultiple").is(":checked"))
+        {
+            isMultiple = true;
+        }
+        $("#divScheduleForm").append('<div class="tiny_loading"></div>');
+        $("#divScheduleForm").load('@Url.Action("ScheduleCreatePartial", "Configuration")?id=' + '@ViewBag.Id');
+
+        $("#divScheduleItem").append('<div class="tiny_loading"></div>');
+        $("#divScheduleItem").load('@Url.Action("ScheduleItemList", "Configuration")?id=' + '@ViewBag.Id' + '&IsMultiple=' + isMultiple);
+    });
+    $("#btnRefresh").click(function () {
+        deletedIds = [];
+        $("#divScheduleForm").empty();
+        $("#divScheduleForm").append('<div class="tiny_loading"></div>');
+        $("#divScheduleForm").load('@Url.Action("ScheduleCreatePartial", "Configuration")?id=' + '@ViewBag.Id' );
+
+        $("#divScheduleItem").empty();
+        $("#divScheduleItem").append('<div class="tiny_loading"></div>');
+        $("#divScheduleItem").load('@Url.Action("ScheduleItemList", "Configuration")?id=' + '@ViewBag.Id' + '&IsMultiple=' + isMultiple);
+    });
+
+    $("#chkSingle").click(function () {
+        isMultiple = false;
+        $("#divScheduleItem").empty();
+        $("#divScheduleItem").append('<div class="tiny_loading"></div>');
+        $("#divScheduleItem").load('@Url.Action("ScheduleItemList", "Configuration")?id=' + '@ViewBag.Id' + '&IsMultiple=' + isMultiple);
+    });
+
+    $("#chkMultiple").click(function () {
+        isMultiple = true;
+        $("#divScheduleItem").empty();
+        $("#divScheduleItem").append('<div class="tiny_loading"></div>');
+        $("#divScheduleItem").load('@Url.Action("ScheduleItemList", "Configuration")?id=' + '@ViewBag.Id' + '&IsMultiple=' + isMultiple);
+    });
+
+
+
+    $("#btnCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+
+    function startChange() {
+        var isTimeExist = false;
+        var changeValue = $("#startTime_" + selectedId).val();
+        var changeTime = new Date("May 20, 2018 " + changeValue);
+        changeTime = changeTime.getTime();
+
+        $('.ScheduleItem').each(function () {
+            id = parseInt($(this).data("id"));
+            if (id != selectedId) {
+                //start time
+                var start_time = $("#startTime_" + id).val();
+
+                //end time
+                var end_time = $("#endTime_" + id).val();
+
+                //convert both time into timestamp
+                var stt = new Date("May 20, 2018 " + start_time);
+                stt = stt.getTime();
+
+                var endt = new Date("May 20, 2018 " + end_time);
+                endt = endt.getTime();
+
+                if (stt <= changeTime && changeTime < endt) {
+                    alert("This time is already used. Please try another.");
+                    $("#startTime_" + selectedId).val("");
+                    isTimeExist = true;
+                    return false;
+                }
+            }
+        });
+
+        //set end time
+        if (isTimeExist == false) {
+            var startTime = this.value();
+            if (startTime) {
+                startTime = new Date(startTime);
+                startTime.setMinutes(startTime.getMinutes() + this.options.interval);
+                var end = $("#endTime_" + selectedId).data("kendoTimePicker");
+                end.value(startTime);
+            }
+        }
+    }
+
+    function endChange()
+    {
+        //start time
+        var start_time = $("#startTime_" + selectedId).val();
+        //end time
+        var end_time = $("#endTime_" + selectedId).val();
+        if (end_time != "")
+        {
+            //convert both time into timestamp
+            var stt = new Date("May 20, 2018 " + start_time);
+            stt = stt.getTime();
+
+            var endt = new Date("May 20, 2018 " + end_time);
+            endt = endt.getTime();
+
+            if (stt >= endt) {
+                alert('end time always greater then start time');
+                $("#endTime_" + selectedId).val("");
+            }
+        }
+    }
+
+    $("#divScheduleItem").on('click', '.btnAddItem', function () {
+        if (itemValidation.validate())
+        {
+            $(this).hide();
+            $(this).parents().parent().find('.btnCancelItem').show();
+            count++;
+
+            $("#tblScheduleItems").append('<tr id="scheduleItem_' + count + '" class="ScheduleItem" data-id="' + count + '" data-transid="0">' +
+                '<td>' +
+                '<input type="text" class="k-textbox" id="scheduleItemName_' + count + '" name="scheduleItemName_' + count + '" data-id="' + count + '" required validationMessage="*" value="" style="width:100%" />' +
+                '<span class="field-validation-valid text-danger" data-valmsg-for="scheduleItemName_' + count + '" data-valmsg-replace="true"></span>' +
+                '</td>' +
+                '<td>' +
+                '<input id="startTime_' + count + '" onkeydown = "javascript:return false;" name="startTime_' + count + '" style="width: 100%;" required validationMessage="*" />' +
+                '<span class="field-validation-valid text-danger" data-valmsg-for="startTime_' + count + '" data-valmsg-replace="true"></span>' +
+                '</td>' +
+                '<td>' +
+                '<input id="endTime_' + count + '" onkeydown = "javascript:return false;" name="endTime_' + count + '" style="width: 100%;" required validationMessage="*" />' +
+                '<span class="field-validation-valid text-danger" data-valmsg-for="endTime_' + count + '" data-valmsg-replace="true"></span>' +
+                '</td>' +
+                '<td>' +
+                '<span class="btn btn-default btnCancelItem" data-toggle="tooltip"  title="Cancel item" data-id="' + count + '" data-transid="0"><i class="fa fa-times-circle" aria-hidden="true" style="font-size:24px;cursor:pointer"></i></span>' +
+                '<span class="btn btn-default btnAddItem" data-toggle="tooltip" title="Add item" data-id="' + count + '"><i class="fa fa-plus-circle" aria-hidden="true" style="font-size:24px;cursor:pointer"></i></span>' +
+                '</td>' +
+                '</tr>')
+
+            $("#startTime_" + count).kendoTimePicker({
+                min: "@startTime",
+                max: "@endTime",
+                change: startChange
+            }).data("kendoTimePicker");
+
+            $("#endTime_" + count).kendoTimePicker({
+                min: "@startTime",
+                max: "@endTime",
+                change: endChange
+            }).data("kendoTimePicker");
+        }
+    });
+
+    $("#divScheduleItem").on("click", ".ScheduleItem", function () {
+        selectedId = parseInt($(this).data("id"));
+    });
+
+    $("#divScheduleItem").on("click", ".btnCancelItem", function () {
+        id = parseInt($(this).data("transid"));
+        if (id > 0)
+        {
+            deletedIds.push(id);
+        }
+        var alltr = $("#tblScheduleItems").find('tr');
+        if (alltr.length == 3) {
+            $(this).parent().parent().prev().find(".btnAddItem").show();
+            $(this).parent().parent().remove();
+            $(".btnCancelItem").each(function () {
+                $(this).hide();
+            });
+        }
+        else if (alltr[alltr.length - 1] != $(this).parent().parent()[0]) {
+            $(this).parent().parent()[0].remove();
+        }
+        else if (alltr.length > 3) {
+            $(this).parents().parent().prev().find('.btnAddItem').show();
+            $(this).parents().parent().prev().find('.btnCancelItem').show();
+            $(this).parent().parent().remove();
+        }
+    });
+
+    var itemValidation = $("#divScheduleItem").kendoValidator({}).data("kendoValidator");
+    var validation = $("#divScheduleForm,#divScheduleItem").kendoValidator({
+    }).data("kendoValidator");
+
+    $("#btnScheduleCreate").click(function () {
+
+        if (validation.validate() && itemValidation.validate())
+        {
+            $(this).prop('disabled', true);
+
+            var scheduleItems = [];
+            $(".ScheduleItem").each(function () {
+                id = parseInt($(this).data("id"));
+                scheduleItems.push({
+                    Id: parseInt($(this).data("transid")),
+                    Name: $("#scheduleItemName_" + id).val(),
+                    StartTime: $("#startTime_" + id).val(),
+                    EndTime: $("#endTime_" + id).val()
+                });
+            });
+
+            var sendData = {
+                Id: $("#Id").val(),
+                Name: $.trim($("#Name").val()),
+                IsMultiSchedule: isMultiple,
+                ScheduleItems: scheduleItems,
+                deleteIds: deletedIds,
+                CreatedBy : userId
+            }
+            $.ajax({
+                url: '@Url.Action("ScheduleSave", "Configuration")',
+                type: "POST",
+                data: JSON.stringify({ model: sendData }),
+                contentType: 'application/json',
+                success: function (result) {
+                    $("#divScheduleCreateWin").data("kendoWindow").close();
+                    if (result == "success") {
+                         if ('@ViewBag.IsCreateFromEvent' == 'True')
+                         {
+                             $("#ScheduleId").data("kendoDropDownList").dataSource.read();
+                         }
+                         else
+                         {
+                            if (tab == 1)
+                            {
+                                $("#div_All").empty();
+                                $("#div_All").append('<div class="loading_partial"></div>');
+                                $("#div_All").load('@Url.Action("ScheduleList", "Configuration")');
+                            }
+                            else if (tab == 2)
+                            {
+                                status = 1;
+                                passdata = { status: status };
+                                $("#div_Active").append('<div class="loading_partial"></div>');
+                                $("#div_Active").load('@Url.Action("ScheduleList", "Configuration")', passdata);
+                            }
+                            else if (tab == 3)
+                            {
+                                status = 0;
+                                passdata = { status: status};
+                                $("#div_Inactive").append('<div class="loading_partial"></div>');
+                                $("#div_Inactive").load('@Url.Action("ScheduleList", "Configuration")', passdata);
+                            }
+                            else if (tab == 4)
+                            {
+                                status = 2;
+                                passdata = { status: status };
+                                $("#div_Deleted").append('<div class="loading_partial"></div>');
+                                $("#div_Deleted").load('@Url.Action("ScheduleList", "Configuration")', passdata);
+                            }
+                         }
+
+                    }
+                    else {
+                        alert("Save Error");
+                    }
+                }
+            });
+        }
+    });
+</script>
+
+
+

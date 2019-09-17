@@ -1,0 +1,78 @@
+﻿@model PointOfSale.ModelViews.HR.UserInformationModelView
+@Html.HiddenFor(m => m.UserId)
+<style>
+    input {
+        max-width: 100%;
+    }
+</style>
+<div class="editor-label"><label for="PreAddress">Address</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.PreAddress, new { htmlAttributes = new { @class = "form-control k-textbox", } })
+    @Html.ValidationMessageFor(model => model.PreAddress, "", new { @class = "text-danger" })
+</div>
+<div class="editor-label"><label for="PreAddressLine1">Address Line 1</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.PreAddressLine1, new { htmlAttributes = new { @class = "form-control k-textbox" } })
+    @Html.ValidationMessageFor(model => model.PreAddressLine1, "", new { @class = "text-danger" })
+</div>
+<div class="editor-label"><label for="PreCountry">Country</label></div>
+<div class="editor-field">
+    @(Html.Kendo().DropDownListFor(model => model.PreCountry)
+                                 .Name("PreCountry")
+                                 .OptionLabel("--Select Country--")
+                                 .Events(e => e.Change("onChangeOfPreCountry"))
+                                 .BindTo(ViewBag.CountryId)
+                                 .HtmlAttributes(new { style = "width:100%" })
+    )
+    @Html.ValidationMessageFor(model => model.PreCountry, "", new { @class = "text-danger" })
+</div>
+
+<div id="DivForUserPreDivision">
+    <div class="editor-label"><label for="PreDivisionId">Division</label></div>
+    <div class="editor-field">
+        @(Html.Kendo().DropDownListFor(model => model.PreDivisionId)
+                         .Name("PreDivisionId")
+                         .OptionLabel("--Select Division--")
+                         .BindTo(ViewBag.DivisionList)
+                         .HtmlAttributes(new { style = "width:100%" })
+        )
+        @Html.ValidationMessageFor(model => model.PreDivisionId, "", new { @class = "text-danger" })
+    </div>
+</div>
+<div id="DivForUserPreState">
+    <div class="editor-label"><label for="PreState">State</label></div>
+    <div class="editor-field">
+        @Html.EditorFor(model => model.PreState, new { htmlAttributes = new { @class = "form-control k-textbox" } })
+        @Html.ValidationMessageFor(model => model.PreState, "", new { @class = "text-danger" })
+    </div>
+</div>
+<div class="editor-label"><label for="PreCity">City</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.PreCity, new { htmlAttributes = new { @class = "form-control k-textbox" } })
+    @Html.ValidationMessageFor(model => model.PreCity, "", new { @class = "text-danger" })
+</div>
+<div class="editor-label"><label for="PreArea">Area</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.PreArea, new { htmlAttributes = new { @class = "form-control k-textbox" } })
+    @Html.ValidationMessageFor(model => model.PreArea, "", new { @class = "text-danger" })
+</div>
+<div class="editor-label"><label for="PrePostalCode">Postal Code</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.PrePostalCode, new { htmlAttributes = new { @class = "form-control k-textbox" } })
+    @Html.ValidationMessageFor(model => model.PrePostalCode, "", new { @class = "text-danger" })
+</div>
+<script>
+    $(document).ready(function () {
+        if ('@Model.PreCountry' != 'BD')
+        {
+            $("#DivForUserPreState").show();
+            $("#DivForUserPreDivision").hide();
+        }
+        else
+        {
+            $("#DivForUserPreDivision").show();
+            $("#DivForUserPreState").hide();
+        }
+    });
+</script>
+ 

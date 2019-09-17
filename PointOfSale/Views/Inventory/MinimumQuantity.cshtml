@@ -1,0 +1,43 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin-bottom:4%;margin-top:2%;">
+    <div id="divMinimalQuantityForm"></div>
+    <div class="k-edit-buttons k-state-default" style="margin-left:30px;">
+        <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnMinimalQuantityUpdate"><span class="k-icon k-update"></span>Update</button>
+        <button type="reset" class="k-button k-button-icontext k-grid-update" id="btnMinimalQuantityRefresh"><span class="k-icon k-i-refresh"></span>Refresh</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnMinimalQuantityCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+     $(document).ready(function () {
+         $("#divMinimalQuantityForm").empty();
+         $("#divMinimalQuantityForm").load('@Url.Action("MinimumQuantityPartial", "Inventory")?productId=' + '@ViewBag.ProductId' + '&distributeId=' + '@ViewBag.DistributeId');
+    });
+    $("#btnMinimalQuantityRefresh").click(function () {
+        $("#divMinimalQuantityForm").empty();
+        $("#divMinimalQuantityForm").load('@Url.Action("MinimumQuantityPartial", "Inventory")?productId=' + '@ViewBag.ProductId' + '&distributeId=' + '@ViewBag.DistributeId');
+    });
+    $("#btnMinimalQuantityCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+
+    $("#btnMinimalQuantityUpdate").click(function () {
+        $.ajax({
+            url: '@Url.Action("MinimalUpdate", "Inventory")',
+            type: "POST",
+            data: { productId: '@ViewBag.ProductId', distributeId: '@ViewBag.DistributeId', minimumQuantity: $("#MinimalQuantity").val() },
+            success: function (data)
+            {
+                if (data == "success")
+                {
+                     $("#divMinimumQuantityWin").data("kendoWindow").close();
+
+                     $("#divStockList").empty();
+                     $("#divStockList").append('<div class="loading_partial"></div>');
+                     $("#divStockList").load('@Url.Action("StockListPartial", "Inventory")');
+                }
+                else {
+                    alert("Update error...");
+                }
+            }
+        })
+    });
+</script>

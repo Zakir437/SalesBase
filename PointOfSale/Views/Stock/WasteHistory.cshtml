@@ -1,0 +1,110 @@
+﻿@{
+    ViewBag.Title = "WasteHistory";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+}
+<style>
+    hr{
+        margin:0px;
+    }
+</style>
+@*<section class="content-header">
+    <h1>
+        Waste History
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="/Inventory/Dashboard"><i class="fa fa-dashboard"></i> Inventory</a></li>
+        <li class="active">Waste History</li>
+    </ol>
+</section>*@
+<section class="content">
+    @*<div class="row">
+        <div class="col-md-12">
+            @Html.ActionLink("Stock", "StockList", "Stock", routeValues: null, htmlAttributes: new { @class = "btn btn-default btnList" })
+            @Html.ActionLink("Sales", "Orders", "PointOfSale", routeValues: null, htmlAttributes: new { @class = "btn btn-default btnList" })
+            @Html.ActionLink("Import", "Import", "Stock", routeValues: null, htmlAttributes: new { @class = "btn btn-default btnList" })
+            @Html.ActionLink("Import History", "ImportHistory", "Stock", routeValues: null, htmlAttributes: new { @class = "btn btn-default btnList" })
+            @Html.ActionLink("Fulfillment", "MinimumQuantity", "Stock", routeValues: null, htmlAttributes: new { @class = "btn btn-default btnList" })
+            @Html.ActionLink("Waste Create", "Waste", "Stock", routeValues: null, htmlAttributes: new { @class = "btn btn-default btnList" })
+            @Html.ActionLink("Waste History", "WasteHistory", "Stock", routeValues: null, htmlAttributes: new { @class = "btn btn-default btnList selected" })
+            @Html.ActionLink("Waste Record", "WasteRecord", "Stock", routeValues: null, htmlAttributes: new { @class = "btn btn-default btnList" })
+            @Html.ActionLink("Master Product", "SubMasterProduct", "Configuration", routeValues: null, htmlAttributes: new { @class = "btn btn-default btnList" })
+            @Html.ActionLink("Product", "Product", "Configuration", routeValues: null, htmlAttributes: new { @class = "btn btn-default btnList" })
+            @Html.ActionLink("Tag", "Tag", "Configuration", routeValues: null, htmlAttributes: new { @class = "btn btn-default btnList" })
+            @Html.ActionLink("Category", "Category", "Configuration", routeValues: null, htmlAttributes: new { @class = "btn btn-default btnList" })
+            @Html.ActionLink("Sub Category", "SubCategory", "Configuration", routeValues: null, htmlAttributes: new { @class = "btn btn-default btnList" })
+            @Html.ActionLink("Borrow Products", "BorrowProducts", "Stock", routeValues: null, htmlAttributes: new { @class = "btn btn-default btnList" })
+        </div>
+    </div>*@
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4 class="uppercase">Waste History</h4>
+            </div>
+            <div class="pull-right">
+                @*<a class="btn btn-default" href="/Inventory/IndentHistory"><i class="fa fa-arrow-left"></i> Back</a>*@
+            </div>
+        </div>
+        <div class="panel-body" style="border:none!important;">
+            @Html.ActionLink("Waste Create", "Waste", "Stock", routeValues: null, htmlAttributes: new { @class = "btn btn-info" })
+            @Html.ActionLink("Waste Record", "WasteRecord", "Stock", routeValues: null, htmlAttributes: new { @class = "btn btn-info" })
+        </div>
+        <hr />
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-md-12">
+                    <div style="width:50%!important; margin:15px 0 5px 0" class="pull-left">
+                        @(Html.Kendo().MultiSelect()
+                .Name("wasteProductMultiselect")
+                .DataTextField("Text")
+                .DataValueField("Value")
+                .Placeholder("Type waste voucher no...")
+                .AutoBind(false)
+                .Events(e => e.Change("onChange"))
+                .HtmlAttributes(new { style = "width: 100%;" })
+                .DataSource(source =>
+                {
+                    source.Read(read =>
+                    {
+                        read.Action("GetWasteProductList", "Stock");
+                    })
+                    .ServerFiltering(false);
+                }))
+                        <span class="k-icon k-i-search" style="margin-top:-25px;float:right;margin-right:10px; position:relative">&nbsp;</span>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div id="divHistoryList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<script>
+    $(document).ready(function () {
+        $("#liForInventory").addClass('active');
+        $("#liForWasteHistory").addClass('active');
+
+        $("#divHistoryList").empty();
+        $("#divHistoryList").append('<div class="loading_partial"></div>');
+        $("#divHistoryList").load('@Url.Action("WasteProductList", "Stock")');
+    });
+
+    function onChange()
+    {
+        var selectId = "";
+        selectId = this.value();
+        if (selectId.length > 0)
+        {
+            $("#divHistoryList").empty();
+            $("#divHistoryList").append('<div class="loading_partial"></div>');
+            $("#divHistoryList").load('@Url.Action("WasteProductList", "Stock")?ids=' + selectId);
+        }
+        else {
+            $("#divHistoryList").empty();
+            $("#divHistoryList").append('<div class="loading_partial"></div>');
+            $("#divHistoryList").load('@Url.Action("WasteProductList", "Stock")');
+        }
+    }
+</script>

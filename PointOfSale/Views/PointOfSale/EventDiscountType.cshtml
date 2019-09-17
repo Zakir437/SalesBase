@@ -1,0 +1,54 @@
+﻿@using PointOfSale.Helpers
+@{
+    ViewBag.Title = "EventDiscountType";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .btnBox {
+        height: 200px;
+        width: 100%;
+        border: 1px solid #808080;
+        margin-bottom: 15px;
+    }
+
+    h1 {
+        padding: 50px 0px;
+    }
+</style>
+<div class="panel panel-default" style="margin-top:20px;">
+    <div class="panel-heading" style="padding-bottom:46px;">
+        <div class="pull-left">
+            <h4 class="uppercase">Event Offer Discount Type</h4>
+        </div>
+        <div class="pull-right">
+            <a class="btn btn-default" href="@Html.EncodedParam("EventDetails","PointOfSale", new { eventId = ViewBag.MasterId }, null)"><i class="fa fa-arrow-left"></i> Back</a>
+        </div>
+    </div>
+    <div class="panel-body">
+        <div class="col-md-4">
+            <a class="btn btn-default btnBox" href="@Html.EncodedParam("EventOfferCreate","PointOfSale", new { masterId =  ViewBag.MasterId, subId = ViewBag.SubId, scheduleId = ViewBag.ScheduleId,  evntDiscType = 1, validity = ViewBag.Validity }, null)" data-toggle="tooltip" title="Create Discount Multi Offer">
+                <h1>Discount Multi</h1>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a class="btn btn-default btnBox" href="@Html.EncodedParam("EventOfferCreate","PointOfSale", new { masterId =  ViewBag.MasterId, subId = ViewBag.SubId, scheduleId = ViewBag.ScheduleId, evntDiscType = 2, validity = ViewBag.Validity }, null)" data-toggle="tooltip" title="Create Discount Single Offer">
+                <h1>Discount Single</h1>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a class="btn btn-default btnBox" href="@Html.EncodedParam("EventOfferCreate","PointOfSale", new { masterId =  ViewBag.MasterId, subId = ViewBag.SubId, scheduleId = ViewBag.ScheduleId, evntDiscType = 3, validity = ViewBag.Validity }, null)" data-toggle="tooltip" title="Create Discount Category Offer">
+                <h1>Discount Category</h1>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a class="btn btn-default btnBox" href="@Html.EncodedParam("EventOfferCreate","PointOfSale", new { masterId =  ViewBag.MasterId, subId = ViewBag.SubId, scheduleId = ViewBag.ScheduleId, evntDiscType = 4, validity = ViewBag.Validity }, null)" data-toggle="tooltip" title="Create Discount Tag Offer">
+                <h1>Discount Tag</h1>
+            </a>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    })
+</script>

@@ -1,0 +1,41 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewHoliday>
+@using PointOfSale.Helpers
+@{
+    var count = 0;
+}
+@if (Model.Any())
+{
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Holiday</th>
+            <th>Date</th>
+            <th>No of Dates</th>
+            <th></th>
+        </tr>
+        @foreach (var list in Model)
+        {
+            count++;
+            <tr>
+                <td>@count . </td>
+                <td>@list.HolidayName</td>
+                <td>@Convert.ToDateTime(list.Date).ToString("MMM dd yyyy")</td>
+                <td>@list.TotalDay</td>
+                <td>
+                    <a class="btn btn-primary btnEditHoliday" data-id="@list.Id" data-toggle="tooltip" title="Edit Holiday Information"><i class="fa fa-pencil-square-o"></i></a>
+                </td>
+            </tr>
+        }
+    </table>
+}
+else
+{
+    <h4>There is no record to display</h4>
+}
+
+<script>
+    $('[data-toggle="tooltip"]').tooltip();
+</script>
+
+
+

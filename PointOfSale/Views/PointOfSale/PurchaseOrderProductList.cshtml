@@ -1,0 +1,79 @@
+﻿@using System.Globalization;
+@model IEnumerable<PointOfSale.Models.ViewPurchaseOrderTransaction>
+@{ 
+    var count = 0;
+}
+@if (Model.Any())
+{
+
+    if (ViewBag.IsListView == true)
+    {
+        <table class="table table-bordered table-responsive">
+            <tr>
+                <th>SL.</th>
+                <th>Product Name</th>
+                <th>Price</th>
+                <th></th>
+            </tr>
+            @foreach (var aProduct in Model)
+            {
+                count++;
+                <tr>
+                    <td>@count.</td>
+                    <td>
+                        <img src="~/Images/ProductImage/@aProduct.Image" class="img-circle" width="30" height="30" />
+                        @aProduct.ProductName
+                    </td>
+                    <td>
+                        @if (aProduct.PeritemCost > 0)
+                        {
+                            <span>@aProduct.PeritemCost.Value.ToString("C", new CultureInfo("bn-BD")) (PO Price)</span>
+                        }
+                        else
+                        {
+                            <span>
+                                @aProduct.ProductPrice.Value.ToString("C", new CultureInfo("bn-BD"))
+                            </span>
+                        }
+                    </td>
+                    <td>
+                        <button class="btn btn-default" id="addProduct" data-poprice="@aProduct.PeritemCost" data-poitemid="@aProduct.Id" data-purchaseorderqty="@aProduct.RemainingQty" data-id="@aProduct.ProductId" data-distributeid="@aProduct.DistributeId" data-isunitwise="@aProduct.IsUnitWise" data-isuniqueitem="@aProduct.IsUniqueItem"><i class="fa fa-shopping-cart"></i> Add to cart</button>
+                    </td>
+                </tr>
+             }
+        </table>
+    }
+    else
+    {
+        foreach (var aProduct in Model)
+        {
+            <div class="col-md-2 text-center img-thumbnail" id="addProduct" data-poprice="@aProduct.PeritemCost" data-poitemid="@aProduct.Id" data-purchaseorderqty="@aProduct.RemainingQty" data-id="@aProduct.ProductId" data-distributeid="@aProduct.DistributeId" data-isunitwise="@aProduct.IsUnitWise" data-isuniqueitem="@aProduct.IsUniqueItem" style="cursor:pointer; border: 1px solid #cccccc; margin: 5px; height:66px;">
+                <h6 style="margin:4px auto; font-size: 10px">@aProduct.ProductName</h6>
+                <img style="max-width:35px; max-height:18px; height:18px;" src="~/Images/ProductImage/@aProduct.Image" alt="Image">
+                <h6 style="margin:6px auto; font-size:10px">
+                    Price:
+                    @if (aProduct.PeritemCost > 0)
+                    {
+                        <span>@aProduct.PeritemCost.Value.ToString("C", new CultureInfo("bn-BD")) (PO Price)</span>
+                    }
+                    else
+                    {
+                        <span>
+                            @aProduct.ProductPrice.Value.ToString("C", new CultureInfo("bn-BD"))
+                        </span>
+                    }
+                </h6>
+            </div>
+        }
+    }
+
+
+}
+else
+{
+    <h3>There is no Product</h3>
+}
+<script>
+    $('[data-toggle="tooltip"]').tooltip();
+</script>
+

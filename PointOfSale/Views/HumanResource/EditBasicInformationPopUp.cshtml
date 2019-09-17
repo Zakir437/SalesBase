@@ -1,0 +1,73 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" style="margin-bottom:2%;margin-top:2%;" id="divForPersonalInfoedit">
+    <div id="show_user_basic_info"></div>
+    <div class="row">
+        <div class="col-xs-12" style="margin-top:-1%">
+            <div class="k-edit-buttons k-state-default">
+                <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btn_EditUserBasicInfo"><span class="k-icon k-update"></span>Update</button>
+                <button type="reset" class="k-button k-button-icontext k-grid-update" id="btn_RefreshUserBasicInfo"><span class="k-icon k-i-refresh"></span>Refresh</button>
+                <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btn_CancelUserBasicInfo"><span class="k-icon k-cancel"></span>Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#show_user_basic_info").append('<div class="tiny_loading"></div>')
+        $("#show_user_basic_info").load('@Url.Action("EditBasicInformation", "HumanResource")?userId=' + '@ViewBag.UserId');
+    });
+    $("#btn_RefreshUserBasicInfo").click(function () {
+        $("#show_user_basic_info").empty();
+        $("#show_user_basic_info").append('<div class="tiny_loading"></div>');
+        $("#show_user_basic_info").load('@Url.Action("EditBasicInformation", "HumanResource")?userId=' + '@ViewBag.UserId');
+        $("#show_user_basic_info").show();
+    });
+    $("#btn_CancelUserBasicInfo").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+    var userBasicValidation = $("#show_user_basic_info").kendoValidator({
+    }).data("kendoValidator");
+
+    $("#btn_EditUserBasicInfo").click(function () {
+        if (userBasicValidation.validate()) {
+            var sendData =new FormData();
+            sendData.append("UserId", $("#UserId").val());
+            sendData.append("Title", $("#Title").val());
+            sendData.append("FirstName", $("#FirstName").val());
+            sendData.append("MiddleName", $("#MiddleName").val());
+            sendData.append("LastName", $("#LastName").val());
+            sendData.append("EmailAddress", $("#EmailAddress").val());
+            sendData.append("DateOfBirth", $("#DateOfBirth").val());
+            sendData.append("Gender", $("#Gender").val());
+            sendData.append("Nationality", $("#Nationality").val());
+            sendData.append("NationalId", $("#NationalId").val());
+            sendData.append("Religion", $("#Religion").val());
+            sendData.append("CreatedBy", userId);
+            for (var i = 0; i < allMainFile.length; i++) {
+                sendData.append("files[" + i + "]", allMainFile[i]);
+            }
+            $.ajax({
+                url: '@Url.Action("PersonalInformationUpdate", "HumanResource")',
+                type: 'Post',
+                data: sendData,
+                contentType: false,
+                processData: false,
+                success: function (data) {
+                    if (data === "Error") {
+                        alert("Basic information of user update was unsuccessful.");
+                    }
+                    else {
+                        alert("Basic information of user has been successfully updated.");
+                    }
+                    $("#div_user_basic_info_edit").data("kendoWindow").close();
+                    $("#div_ryt_panel").empty();
+                    $("#div_ryt_panel").append('<div class="loading_partial"></div>');
+                    $("#div_ryt_panel").load('@Url.Action("_ShowUserInfo", "HumanResource")?userId=' + '@ViewBag.UserId' + '&isDisplay=false');
+                },
+                error: function (err) {
+                    alert("Basic information of user update was unsuccessful.");
+                }
+            });
+        }
+    });
+
+</script>

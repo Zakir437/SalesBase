@@ -1,0 +1,78 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewSupplier>
+@using PointOfSale.Helpers
+@{
+    var count = 0;
+}
+@if (Model.Count() > 0)
+{
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Address</th>
+            <th>Created By</th>
+            <th>Created Date</th>
+            <th>Updated By</th>
+            <th>Updated Date</th>
+            <th></th>
+        </tr>
+        @foreach (var list in Model)
+        {
+            count++;
+            <tr>
+                <td>@count . </td>
+                <td>
+                    <a href="@Html.EncodedParam("SupplierInvoiceInfo", "Configuration", new { supplierId = list.SupplierId}, null)">@list.Name</a>
+                </td>
+                <td>@list.Email</td>
+                <td>@list.Phone</td>
+                <td>@list.Address</td>
+                <td>@list.CreatedBy</td>
+                <td>@Convert.ToDateTime(list.CreatedDate).ToString("MMM dd yyyy")</td>
+                <td>@list.UpdatedBy</td>
+                <td>
+                    @if (list.UpdatedDate != null)
+                    {
+                        @Convert.ToDateTime(list.UpdatedDate).ToString("MMM dd,yyy")
+                    }
+                    else
+                    {
+                        <span>not yet updated</span>
+                    }
+                </td>
+                <td>
+                    <button class="btn btnSupplierEdit" style="background-color:#1c488e; color:white;" data-id="@list.SupplierId" data-toggle="tooltip" title="Edit Supplier Information"><i class="fa fa-pencil-square-o"></i></button>
+                    @if (list.Status == true)
+                    {
+                        <button type="button" data-id="@list.SupplierId" data-isactive="0" class="btn btn-danger inactivateSupplier" data-toggle="tooltip" title="Inactivate Supplier">
+                            <i class="fa fa-stop" aria-hidden="true"></i>
+                        </button>
+                    }
+                    else
+                    {
+                        <button type="button" data-id="@list.SupplierId" data-isactive="1" class="btn btn-success activateSupplier" data-toggle="tooltip" title="Activate Supplier">
+                            <i class="fa fa-play" aria-hidden="true"></i>
+                        </button>
+                    }
+                    @if (list.Status == false)
+                    {
+                        <span data-id="@list.SupplierId" style="cursor:pointer;" data-toggle="tooltip" title="Delete Supplier" class="btn btn-danger btnSupplierDelete">
+                            <i class="fa fa-trash"></i>
+                        </span>
+                     }
+                </td>
+            </tr>
+         }
+    </table>
+}
+else
+{
+    <h4>There is no record to display</h4>
+}
+
+<script>
+    $('[data-toggle="tooltip"]').tooltip();
+</script>
+

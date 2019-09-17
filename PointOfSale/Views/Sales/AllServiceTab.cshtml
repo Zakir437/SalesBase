@@ -1,0 +1,39 @@
+﻿<div class="panel-body">
+    <div class="row" style="margin:0; padding:0">
+        <div class="col-md-12" style="padding:0">
+            <div class="col-md-6" style="padding:0 5px 5px 0px">
+               @(Html.Kendo().DropDownList()
+                     .Name("voucherDropdown")
+                     .BindTo(ViewBag.VoucherList as SelectList)
+                     .DataTextField("Text")
+                     .DataValueField("Value")
+                     .OptionLabel("Select voucher...")
+                     .Filter("contains")
+                     .HtmlAttributes(new { style = "width:100%;" })
+                     .Events(e => { e.Change("onChangeVoucher"); })
+               )
+            </div>
+            <div class="col-md-6" style="padding:0 5px 5px 0px">
+                @(Html.Kendo().DropDownList()
+                     .Name("customerDropdown")
+                     .BindTo(ViewBag.CustomerList as SelectList)
+                     .DataTextField("Text")
+                     .DataValueField("Value")
+                     .OptionLabel("Select customer...")
+                     .Filter("contains")
+                     .HtmlAttributes(new { style = "width:100%;" })
+                     .Events(e => { e.Change("onChangeCustomer"); })
+                )
+            </div>
+        </div>
+    </div>
+    <div class="row" style="margin:0; padding:0 5px 5px 0px;">
+        <div id="divAllService" style="overflow-x:auto"></div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#divAllService").append('<div class="loading_partial"></div>');
+        $("#divAllService").load('@Url.Action("ProductServiceList", "Sales")?serviceType=' + '@ViewBag.ServiceType');
+    });
+</script>

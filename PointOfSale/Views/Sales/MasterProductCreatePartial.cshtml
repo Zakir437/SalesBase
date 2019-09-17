@@ -1,0 +1,56 @@
+﻿@model PointOfSale.ModelViews.Sales.MasterProductModelView
+@Html.HiddenFor(a => a.Id)
+<div class="editor-label"><label for="Name">Name</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.Name, new { htmlattributes = new { @class = "k-textbox", @style = "width:68%" } })
+    @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-Danger" })
+</div>
+<div class="editor-label"><label for="BrandId">Brand</label></div>
+<div class="editor-field">
+    @(Html.Kendo().AutoCompleteFor(a => a.Brand)
+          .Filter("startswith")
+          .Placeholder("Select or enter brand name...")
+          .BindTo(ViewBag.BrandList as SelectList)
+          .DataTextField("Text")
+          .HtmlAttributes(new { style = "width:68%" })
+    )
+    @Html.ValidationMessageFor(model => model.Brand, "", new { @class = "text-Danger" })
+</div>
+<div class="editor-label"><label for="ProductId">Product</label></div>
+<div class="editor-field">
+    @(Html.Kendo().DropDownListFor(a => a.ProductId)
+                     .BindTo(ViewBag.ProductList as SelectList)
+                     .DataTextField("Text")
+                     .DataValueField("Value")
+                     .OptionLabel("--Select One Product--")
+                     .Events(e => e.Change("onChangeProduct"))
+                     .HtmlAttributes(new { style = "width:68%" })
+    )
+    @Html.ValidationMessageFor(model => model.ProductId, "", new { @class = "text-Danger" })
+</div>
+<div id="divMaster">
+    <div class="editor-label"><label for="ProductName">Quantity/Name</label></div>
+    <div class="editor-field">
+        @Html.EditorFor(model => model.QuantityOrName, new { htmlattributes = new { @class = "k-textbox", @style = "width:68%", required = "required", validationMessage = "Please enter quantity/Name" } })
+        @Html.ValidationMessageFor(model => model.QuantityOrName, "", new { @class = "text-Danger" })
+    </div>
+    <div class="editor-label"><label for="MasterUnit">Master Unit</label></div>
+    <div class="editor-field">
+        @(Html.Kendo().DropDownListFor(a => a.MasterUnit)
+                     .BindTo(ViewBag.UnitList as SelectList)
+                     .DataTextField("Text")
+                     .DataValueField("Value")
+                     .OptionLabel("--Select One Unit--")
+                     .HtmlAttributes(new { style = "width:68%", required = "required", validationMessage = "Please select a master unit" })
+        )
+        @Html.ValidationMessageFor(model => model.MasterUnit, "", new { @class = "text-Danger" })
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#divMaster").hide();
+        $('#QuantityOrName').prop('required', false);
+        $('#MasterUnit').prop('required', false);
+    });
+</script>
+

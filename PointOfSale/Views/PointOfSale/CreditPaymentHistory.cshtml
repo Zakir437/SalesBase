@@ -1,0 +1,58 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewOrderTransaction>
+@using System.Globalization
+@{
+    var count = 0;
+}
+<style>
+    a{
+        cursor:pointer;
+    }
+</style>
+@if (Model.Any())
+{
+    <table class="table table-bordered">
+        <tr style="background-color:#f4f4f4">
+            <th>SL.</th>
+            <th>Voucher</th>
+            <th>Amount</th>
+            <th>Date</th>
+            @if (ViewBag.IsPrint == false)
+             {
+                <th></th>
+             }
+        </tr>
+            @foreach (var list in Model)
+             {
+                count++;
+                <tr>
+                    <td>@count.</td>
+                    <td>
+                        <a class="btnShowOrderDetails" data-toggle="tooltip" title="View Order Details" data-id="@list.OrderId">@list.OrderNumber</a>
+                    </td>
+                    <td>@list.Price.ToString("C", new CultureInfo("bn-BD"))
+                    <td>@Convert.ToDateTime(list.OrderDate).ToString("MMM dd,yyyy hh:mm:ss tt")</td>
+                    @if (ViewBag.IsPrint == false)
+                     {
+                        <td>
+                            <button class="btn btn-primary pull-right btnShowCreditPaymentHistory" data-id="@list.OrderId" data-toggle="tooltip" title="View Payment Details"><i class="fa fa-align-justify"></i></button>
+                        </td>
+                     }
+                </tr>
+             }
+        @*<tr style="font-weight:bold">
+            <td></td>
+            <td colspan="3" style="text-align:center">Total</td>
+            <td>@Model.Sum(a => a.Amount).ToString("C", new CultureInfo("bn-BD"))</td>
+            <td></td>
+            <td></td>
+        </tr>*@
+    </table>
+}
+else
+{
+    <h4>There is no record to display</h4>
+}
+
+<script>
+    $('[data-toggle="tooltip"]').tooltip();
+</script>

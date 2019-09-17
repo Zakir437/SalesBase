@@ -1,0 +1,111 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewAfterSaleService>
+@using PointOfSale.Helpers
+@{
+    var count = 0;
+}
+@if (Model.Any() == true)
+{
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            @if (ViewBag.Status == 1)
+            {
+                <th>Temporary No</th>
+                <th>Invoice No</th>
+                <th>Serial Number</th>
+                <th>Product</th>
+            }
+            else
+            {
+                <th>Service No</th>
+                <th>Invoice No</th>
+                <th>Serial Number</th>
+                <th>Status</th>
+                <th>Product</th>
+                <th>Order Date</th>
+                <th>Delivery Date</th>
+            }
+            <th></th>
+        </tr>
+        @foreach (var list in Model)
+        {
+            count++;
+            <tr>
+                <td>@count. </td>
+                @if (ViewBag.Status == 1)
+                {
+                    <td>@list.TemporaryWorkOrderNo</td>
+                    <td>@list.InvoiceNo</td>
+                    <td>@list.SerialNumber</td>
+                    <td>@list.ProductName</td>
+                    <td>
+                        <a class="btn btn-primary" href="@Html.EncodedParam("SaleServiceCreate","Sales", new { assId = list.Id }, null)" data-toggle="tooltip" title="Continue to complete this order">Continue</a>
+                    </td>
+                }
+                else
+                {
+                    <td>@list.WorkOrderNo</td>
+                    <td>@list.InvoiceNo</td>
+                    <td>@list.SerialNumber</td>
+                    <td>
+                        @if(list.Status == 1)
+                        {
+                            <span>Incomplete</span>
+                        }
+                        else if(list.Status == 2)
+                        {
+                            <span>Active</span>
+                        }
+                        else if(list.Status == 3)
+                        {
+                            <span>Complete</span>
+                        }
+                        else if(list.Status == 4)
+                        {
+                            <span>Working</span>
+                        }
+                        else if(list.Status == 5)
+                        {
+                            <span>Ready For Collection</span>
+                        }
+                        else if(list.Status == 6)
+                        {
+                            <span>Contact customer</span>
+                        }
+                    </td>
+                    <td>@list.ProductName</td>
+                    <td>@Convert.ToDateTime(list.CreatedDate).ToString("MMM dd,yyyy")</td>
+                    <td>@Convert.ToDateTime(list.DeliveryDate).ToString("MMM dd,yyyy")</td>
+                    <td>
+                        <button type="button" class="btn btn-primary btnConditionEdit" data-id="@list.Id" data-toggle="tooltip" title="Add condition information"><i class="fa fa-pencil-square-o"></i></button>
+                        <button type="button" class="btn btn-primary btnConditionHistory" data-id="@list.Id" data-toggle="tooltip" title="View condition history"><i class="fa fa-list"></i></button>
+                        <button type="button" class="btn btn-info btnContactInfoEdit" data-id="@list.Id" data-toggle="tooltip" title="Edit contact information"><i class="fa fa-pencil-square-o"></i></button>
+                        <button type="button" class="btn btn-warning btnSupplementaryEdit" data-id="@list.Id" data-toggle="tooltip" title="Edit supplementary information"><i class="fa fa-pencil-square-o"></i></button>
+                        <button type="button" class="btn btn-success btnPrint" data-id="@list.Id" data-toggle="tooltip" title="Print this order"><i class="fa fa-print"></i></button>
+                        <button type="button" class="btn btn-primary btnStatusChange" data-id="@list.Id" data-toggle="tooltip" title="Order Status Change"><i class="fa fa-pencil-square-o"></i></button>
+                        @if (list.Status != 3 && list.Status != 1)
+                         {
+                            <a class="btn btn-danger" href="@Html.EncodedParam("AfterSaleWasteCreate","Sales", new { assId = list.Id }, null)" data-toggle="tooltip" title="Waste Create"><i class="fa fa-recycle"></i></a>
+                         }
+                    </td>
+                }
+            </tr>
+        }
+    </table>
+}
+else
+{
+    <h4>There is no record to display</h4>
+}
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    })
+</script>
+
+
+
+
+
+
+

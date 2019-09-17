@@ -1,0 +1,137 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewWorkOrderItem>
+@using System.Globalization
+@{
+    var count = 0;
+    var productList = Model.GroupBy(g => new { g.ProductName })
+                      .Select(s => new
+                      {
+                          s.FirstOrDefault().ProductName,
+                          s.FirstOrDefault().Status,
+                          Item = s
+                      }).ToList();
+}
+@if (Model.Any() == true)
+{
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Product Name</th>
+            <th></th>
+            @*<th>Change Request</th>
+            <th>Price</th>
+            <th>Total Price</th>*@
+            @if (ViewBag.IsView == false)
+             {
+                <th></th>
+             }
+        </tr>
+        @foreach (var list in productList)
+        {
+            count++;
+            <tr>
+                <td>@count. </td>
+                <td>@list.ProductName</td>
+                <td>
+                    <table class="table table-bordered" style="margin-bottom:0px;">
+                        <tr>
+                            <th>Indent</th>
+                            <th>Request</th>
+                            <th>Received</th>
+                            <th>Remaining</th>
+                            <th>Change Request</th>
+                            <th>Price</th>
+                            <th>Total Price</th>
+                            @if (ViewBag.IsView == false)
+                            {
+                                <th></th>
+                            }
+                        </tr>
+                        @foreach(var item in list.Item)
+                         {
+                            <tr>
+                                <td>@item.IndentVoucher</td>
+                                <td>
+                                    @if (list.Status == 2)
+                                    {
+                                        <span class="text-danger">@item.RequestQty Piece/s <span class="pull-right"><i class="fa fa-info-circle" data-toggle="tooltip" data-placement="right" title="This product is added after approve this voucher. To import this product, it should be approved."></i></span></span>
+                                    }
+                                    else
+                                    {
+                                        <span>@item.RequestQty Piece/s</span>
+                                    }
+                                </td>
+                                <td>@item.ReceiveQty Piece/s</td>
+                                <td>@item.RemainingQty Piece/s</td>
+                                <td>
+                                    @if (item.ChangeRequest == true)
+                                    {
+                                        <span class="text-warning">@item.ChangeQty Piece/s <span class="pull-right"><i class="fa fa-info-circle" data-toggle="tooltip" data-placement="right" title="This product has a change request. Change Quantity will not effect on Import until Approve Changes."></i></span></span>
+                                    }
+                                    else
+                                    {
+                                        <span>-</span>
+                                    }
+                                </td>
+                                <td>@item.PerItemPrice.ToString("C", new CultureInfo("bn-BD"))</td>
+                                <td>@item.Price.ToString("C", new CultureInfo("bn-BD"))</td>
+                                @if (ViewBag.IsView == false)
+                                {
+                                    <td>
+                                        @if (item.ChangeRequest == true)
+                                         {
+                                            <button class="btn btn-success btnapproveChanges" data-toggle="tooltip" title="Approve changes" data-id="@item.Id"><i class="fa fa-check"></i></button>
+                                            <button class="btn btn-danger btnRemoveChanges" data-toggle="tooltip" title="Remove changes" data-id="@item.Id"><i class="fa fa-times"></i></button>
+                                         }
+                                        @if (item.WorkOrderStatus == 1 || list.Status == 2)
+                                         {
+                                            <button class="btn btn-primary btnEditItem" data-toggle="tooltip" title="Edit this item" data-id="@item.Id"><i class="fa fa-pencil-square-o"></i></button>
+                                            if (list.Status == 2)
+                                            {
+                                                <button class="btn btn-success btnapproveItem" data-toggle="tooltip" title="Approve item" data-id="@item.Id"><i class="fa fa-check-square-o"></i></button>
+                                            }
+                                         }
+                                        else
+                                        {
+                                            <button class="btn btn-primary btnEditItemQuantity" data-toggle="tooltip" title="Edit item quantity" data-id="@item.Id"><i class="fa fa-pencil"></i></button>
+                                        }
+                                        @if (item.ReceiveQty == 0)
+                                         {
+                                            <button class="btn btn-danger btnDeleteItem" data-id="@item.Id" data-toggle="tooltip" title="Delete item from voucher"><i class="fa fa-trash"></i></button>
+                                         }
+                                    </td>
+                                 }
+                            </tr>
+                         }
+                        <tr class="text-bold">
+                            <td >Total</td>
+                            <td>@list.Item.Sum(s => s.RequestQty)</td>
+                            <td>@list.Item.Sum(s => s.ReceiveQty)</td>
+                            <td>@list.Item.Sum(s => s.RemainingQty)</td>
+                            <td></td>
+                            <td>@list.Item.Sum(s => s.Price).ToString("C", new CultureInfo("bn-BD"))</td>
+                        </tr>
+                    </table>
+                </td>
+               
+               
+            </tr>
+        }
+    </table>
+}
+else
+{
+    <h3>There is no record to display</h3>
+}
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    })
+</script>
+
+
+
+
+
+
+
+

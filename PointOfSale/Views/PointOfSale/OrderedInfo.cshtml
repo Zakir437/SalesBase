@@ -1,0 +1,207 @@
+﻿@model PointOfSale.Models.PosOrder
+@{ 
+    var count = 0;
+    var discType = 0;
+    var taxFunc = 0;
+    if(Model.DiscountType == true)
+    {
+        discType = 1;
+    }
+    if(Model.TaxFunc == true)
+    {
+        taxFunc = 1;
+    }
+    PointOfSale.Models.PointOfSale_DBEntities db = new PointOfSale.Models.PointOfSale_DBEntities();
+    var orderTransaction = db.PosOrderTransactions.Where(a => a.OrderId == Model.OrderId && a.Status == true).ToList();
+}
+@if (orderTransaction.Any())
+ {
+    foreach (var atransaction in orderTransaction)
+    {
+        count++;
+        <li class="singleCartItem" id="cartItem_@count" data-poitemid="@atransaction.POItemId"  data-id="@count" data-productid="@atransaction.ProductId" data-distributeid="@atransaction.DistributeId"  data-isrefundallow="@atransaction.IsRefundAllow" data-productname="@atransaction.ProductName" data-isuniqueitem="@atransaction.IsUniqueItem.ToString().ToLower()">
+            <span id="pro_@atransaction.ProductId" data-id="@count" style="font-size:13px; font-weight:bold;">
+                <span id="dist_@atransaction.DistributeId" data-id="@count"></span>
+                @atransaction.ProductName
+            </span> |
+            @if(atransaction.IsUniqueItem != true)
+             {
+                <span>
+                    <span class="increase totalPriceUpdate" title="Add (+1)" data-id="@atransaction.ProductId" data-distributeid="@atransaction.DistributeId" data-price="@atransaction.Price" id="increaseBtn_@count">
+                        <span class="fa fa-plus"></span>
+                    </span>
+                    <span class="odrQuantity" title="Quantity" id="odrQuantity_@count">@atransaction.Quantity</span>
+                    <span class="decrease totalPriceUpdate" title="Reduce (-1)" data-id="@count" data-isrefundallow="@atransaction.IsRefundAllow" data-price="@atransaction.PerItemPrice">
+                        <span class="fa fa-minus"></span>
+                    </span> | 
+                </span>
+             }
+            <span class="pricePerItem">
+                <span id="perItemPrice_@count">@atransaction.PerItemPrice</span>Tk |
+                <span id="price_@count" data-price="@atransaction.PerItemPrice" class="subitemPrice"> @atransaction.Price </span>Tk
+            </span>
+            <span class="itemCancel pull-right" data-id="@count" data-isrefundallow="@atransaction.IsRefundAllow">
+                <span class="fa fa-times-circle"></span>
+            </span>
+            @if(atransaction.IsAfterSaleService == true)
+             {
+                <br />
+                <span>
+                    @atransaction.ServiceName (<span id="service_@count" data-servicename="@atransaction.ServiceName" data-servicetypeid="@atransaction.ServiceTypeId">@atransaction.ServiceDays</span>days)
+                </span>
+             }
+             @if(atransaction.IsPointBased == true)
+              {
+                 decimal? points = 0;
+                 points = atransaction.Points / atransaction.Quantity;
+                 <span class="pull-right">Points(<span id="points_@count" data-points="@points">@atransaction.Points</span>)</span>
+              }
+             @if(atransaction.IsUniqueItem == true)
+              {
+                <br>
+                <span>
+                    Serial Number : <span id="serialNumber_@count" data-points="@atransaction.Points" >@atransaction.SerialNumber</span>
+                </span> 
+              }
+            @if (atransaction.Discount > 0)
+             {
+                if (atransaction.DiscountType == true)
+                {
+                    <div id="discPerItem_@count" data-disctype="1">
+                        Discount(Fixed) |
+                         <span id="discount_@count">@atransaction.Discount</span>Tk(<span id="discPerUnit_@count">@atransaction.DiscountPercent</span>%) 
+                    </div>
+                }
+                else
+                {
+                    <div id="discPerItem_@count" data-disctype="0">
+                        Discount(Percent) |
+                        <span id="discount_@count">@atransaction.DiscountPercent</span>%(<span id="discPerUnit_@count">@atransaction.Discount</span>Tk)
+                    </div>
+                }
+             }
+        </li>
+    }
+ }
+else
+{
+    <li>There is no order item</li>
+}
+<script>
+    var orderTotalPrice = 0, orderDisPercentage = 0;
+    orderDisPercentage = @Model.DiscPercent;
+    orderTotalPrice = @Model.TotalPrice;
+    var refundAmount = 0;
+    var orderTaxRate = 0;
+    var orderTaxFunc = @taxFunc;
+    $(document).ready(function () {
+        count = @count;
+
+         if('@Model.CustomerId' > 0)
+         {
+             $("#CustomerDropdown").data("kendoDropDownList").value('@Model.CustomerId');
+             clientId = '@Model.CustomerId';
+             customerName = $("#CustomerDropdown").data("kendoDropDownList").text();
+         }
+        $("#orderTitle").empty();
+        $("#orderTitle").append('<div style="font-size:13px; padding-top: 8px">' +
+            'Order No: <span id="divOrderNo">'+ @Model.OrderNumber + '</span>' +
+            '</div>');
+        $(".summaryTbl").empty();
+        $(".summaryTbl").append('<tr class="totalCartPriceRow">' +
+            '<td>Invoice Total</td>' +
+            '<td id="total">' +
+            '<span>' + orderTotalPrice.toFixed(2) + 'Tk</span>' +
+            '</td>' +
+            '</tr >' +
+            '<tr class="totalCartPriceRow">' +
+            '<td>Current Total</td>' +
+            '<td>' +
+            '<div class="totalItemPrice">' +
+            '00.0 <i class="taka">Tk</i>' +
+            '</div>' +
+            '</td>' +
+            '</tr>');
+        $(".totalItemPrice").empty();
+        $(".totalItemPrice").append(@Model.SubTotalPrice + '<i class="taka">Tk</i>');
+        if (@Model.DiscPercent > 0)
+        {
+            if (@discType == 1)
+            {
+                $(".summaryTbl tbody").append(' <tr class="totalCartPriceRow" id="discountRow" data-disctype="' + @discType + '">' +
+                    '<td>Discount(Fixed)</td>' +
+                    '<td id="total">' +
+                    '<div>' +
+                    '<span id="discAmount" data-id="1">' + @Model.Discount + '</span><span id="discUnit">Tk(' + @Model.DiscPercent + '%)</span>' +
+                    '</div>' +
+                    '</td>' +
+                    '</tr >'+
+                    '<tr class="totalCartPriceRow" id="totalAmountRow">' +
+                    '<td>Total</td>' +
+                    '<td id="total">' +
+                    '<div>' +
+                    '<span id="totalAmount">' + orderTotalPrice + '</span>Tk' +
+                    '</div>' +
+                    '</td>' +
+                    '</tr>');
+            }
+            else
+            {
+                $(".summaryTbl tbody").append('<tr class="totalCartPriceRow" id="discountRow" data-disctype="' + @discType + '">' +
+                    '<td>Discount(Percent)</td>' +
+                    '<td id="total">' +
+                    '<div>' +
+                    '<span id="discAmount" data-id="0">' + @Model.DiscPercent + '</span><span id="discUnit">%(' + @Model.Discount + 'Tk)</span>' +
+                    '</div>' +
+                    '</td>' +
+                    '</tr >' +
+                    '<tr class="totalCartPriceRow" id="totalAmountRow">' +
+                    '<td>Total</td>' +
+                    '<td id="total">' +
+                    '<div>' +
+                    '<span id="totalAmount">' + @Model.TotalPrice + '</span>Tk' +
+                    '</div>' +
+                    '</td>' +
+                    '</tr>');
+            }
+        }
+        if (@Model.Tax > 0)
+        {
+            orderTaxRate = @Model.TaxPercent;
+            var taxFuncIcon = "D";
+            if (orderTaxFunc == 1)
+            {
+                taxFuncIcon = "A";
+            }
+            if ($("#totalAmountRow").length == 1)
+            {
+                $(".summaryTbl tbody tr:last").before('<tr class="totalCartPriceRow" id="taxRateRow">' +
+                    '<td>Tax(' + taxFuncIcon +')</td>' +
+                 '<td>' +
+                 @Model.TaxPercent + '%(<span id="taxAmount">' + @Model.Tax + '</span>)Tk' +
+                 '</td>' +
+                 '</tr>');
+                $("#totalAmount").empty();
+                $("#totalAmount").append(@Model.TotalPrice);
+            }
+            else {
+                $(".summaryTbl").append('<tr class="totalCartPriceRow" id="taxRateRow">' +
+                    '<td>Tax(' + taxFuncIcon +')</td>' +
+                    '<td>' +
+                    @Model.TaxPercent + '%(<span id="taxAmount">' + @Model.Tax + '</span>)Tk' +
+                    '</td>' +
+                    '</tr>'+
+                    '<tr class="totalCartPriceRow" id="totalAmountRow">' +
+                    '<td>Total</td>' +
+                    '<td id="total">' +
+                    '<div>' +
+                    '<span id="totalAmount">' + @Model.TotalPrice + '</span>Tk' +
+                    '</div>' +
+                    '</td>' +
+                    '</tr>');
+            }
+        }
+    });
+
+
+</script>

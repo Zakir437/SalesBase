@@ -1,0 +1,87 @@
+﻿@model PointOfSale.Models.ViewAccountName
+@{
+    PointOfSale.Models.PointOfSale_DBEntities db = new PointOfSale.Models.PointOfSale_DBEntities();
+    var allUser = db.ViewAccNameAssignWithUsers.Where(a => a.AccId == Model.AccId).ToList();
+}
+<style>
+    #Info .editor-label {
+        width: 49% !important;
+    }
+
+    #Info .editor-field {
+        padding-top: 7px;
+        width: 44% !important;
+    }
+</style>
+<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin-bottom:4%;margin-top:2%;">
+    <div id="Info">
+        <div class="editor-label"><label for="AccountName">Account Name</label></div>
+        <div class="editor-field">@Model.Name</div>
+        <div class="editor-label"><label for="AccountName">Account Cash Flow Type</label></div>
+        <div class="editor-field">
+            @if (Model.CashType == 1)
+            {
+                <span>Debit</span>
+            }
+            else if (Model.CashType == 2)
+            {
+                <span>Credit</span>
+            }
+            else
+            {
+                <span>Debit & Credit</span>
+            }
+        </div>
+        @if (Model.CashType == 1 || Model.CashType == 3)
+        {
+            <div class="editor-label"><label for="AccountName">Account Type</label></div>
+            <div class="editor-field">
+                @Model.AccTypeName
+            </div>
+            <div class="editor-label"><label for="WorkingBalance">Working Balance</label></div>
+            <div class="editor-field">Tk. @Model.Balance </div>
+
+            <div class="editor-label"><label for="TotalCreditLimit">Total Credit Limit</label></div>
+            <div class="editor-field">Tk. @Model.TotalCreditLimit </div>
+
+            <div class="editor-label"><label for="TransactionHigestAmount">Transaction Highest Amount(Per Month)</label></div>
+            <div class="editor-field">Tk. @Model.TransactionHigestAmount </div>
+
+            <div class="editor-label"><label for="NoOfTranPerMonth">No.of Transaction(Per Month)</label></div>
+            <div class="editor-field">@Model.NoOfTranPerMonth</div>
+        }
+        else
+        {
+            <div class="editor-label"><label for="WorkingBalance">Current Balance</label></div>
+            <div class="editor-field">Tk. @Model.Balance</div>
+        }
+        @************************* All Assigned User List ********************************@
+        <div class="editor-label"><label>All User Who Can Access</label></div>
+        <div class="editor-field">
+            @{
+                foreach (var usr in allUser)
+                {
+                    <div>
+                        @usr.UserName
+                    </div>
+                }
+            }
+        </div>
+        @if (Model.Description != null)
+        {
+            <div class="editor-label"><label>Description</label></div>
+            <div class="editor-field">@Model.Description</div>
+        }
+    </div>
+    <div class="k-edit-buttons k-state-default" style="margin-left:58px;">
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnAccInfoCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+    $("#btnAccInfoCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+</script>
+
+
+

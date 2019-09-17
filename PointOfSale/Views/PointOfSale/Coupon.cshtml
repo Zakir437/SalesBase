@@ -1,0 +1,84 @@
+﻿@using PointOfSale.Helpers
+@{
+    ViewBag.Title = "Coupon";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+}
+<style>
+    .btnBox {
+        height: 200px;
+        width: 100%;
+        border: 1px solid #808080;
+        margin-bottom: 15px;
+    }
+
+    h1 {
+        padding: 50px 0px;
+    }
+</style>
+<section class="content">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4 class="uppercase">Coupon</h4>
+            </div>
+            <div class="pull-right">
+                <a class="btn btn-default" href="/PointOfSale/OfferCreate">
+                    <i class="fa fa-arrow-left"></i> Back
+                </a>
+            </div>
+        </div>
+        <div class="panel-body">
+            @*<div class="col-md-4">
+                <a class="btn btn-default btnBox" href="@Html.EncodedParam("SaleOffer","PointOfSale", new { isCoupon = true }, null)" data-toggle="tooltip" title="Create Offer with coupon">
+                    <h1>Static</h1>
+                </a>
+            </div>*@
+            @*<div class="col-md-4">
+                <a class="btn btn-default btnBox" href="/PointOfSale/CouponCreate" data-toggle="tooltip" title="">
+                    <h1>Dynamic</h1>
+                </a>
+            </div>*@
+            @*<div class="col-md-4">
+                <a class="btn btn-default btnBox" href="" data-toggle="tooltip" title="">
+                    <h1>User Specific</h1>
+                </a>
+            </div>*@
+            @*<div class="col-md-4">
+                <a class="btn btn-default btnBox" href="" data-toggle="tooltip" title="">
+                    <h1>Loyalty Points</h1>
+                </a>
+            </div>*@
+            @*<div class="col-md-4">
+                <a class="btn btn-default btnBox" href="@Html.EncodedParam("AddCoupon","PointOfSale", new { type = 1 }, null)" data-toggle="tooltip" title="">
+                    <h1>Cash</h1>
+                </a>
+            </div>*@
+            @*<div class="col-md-4">
+                <a class="btn btn-default btnBox" href="@Html.EncodedParam("AddCoupon","PointOfSale", new { type = 2 }, null)" data-toggle="tooltip" title="">
+                    <h1>Percentile</h1>
+                </a>
+            </div>*@
+            <div class="col-md-4">
+                <a class="btn btn-default btnBox" href="/Sales/DeliveryChargeCoupon" data-toggle="tooltip" title="Delivery Charge Coupon">
+                    <h1>Delivery Charge</h1>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a class="btn btn-default btnBox" href="/Sales/AmountCoupon" data-toggle="tooltip" title="Amount Coupon">
+                    <h1>Amount</h1>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+
+        $("#liForSalesMenu").addClass('active');
+        $("#liForOffer").addClass('active');
+
+    })
+</script>
+
+

@@ -1,0 +1,6 @@
+﻿@model PointOfSale.Models.ViewOrderTransaction
+<div class="editor-label"><label>@Html.DisplayFor(m=>m.ProductName)</label></div>
+<div class="editor-field">
+    @Html.Editor("Quantity", new { htmlattributes = new { @class = "k-textbox form-control", @min = 1, @max = Model.Quantity, @validationMessage = "Please enter valid quantity", @type = "number" } })
+    @Html.ValidationMessage("Quantity", "", new { @class = "text-Danger" })
+</div>

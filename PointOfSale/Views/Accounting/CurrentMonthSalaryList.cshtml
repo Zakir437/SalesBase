@@ -1,0 +1,66 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewEmpSalary>
+@using System.Globalization
+@{
+    var count = 0;
+}
+@if (Model.Any())
+{
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Name</th>
+            <th>Salary</th>
+            <th>Salary To Pay</th>
+            <th>Present</th>
+            <th>Paid Leave</th>
+            <th>Working Days</th>
+            <th>Holiday</th>
+            @if (ViewBag.IsPrint == true)
+             {
+                <th width="125px;">Signature</th>
+             }
+        </tr>
+        @foreach (var list in Model)
+        {
+            count++;
+            <tr>
+                <td>@count. </td>
+                <td>
+                    <span>@list.Title @list.FirstName @list.MiddleName @list.LastName</span>
+                </td>
+                <td>@list.ActualSalary.ToString("C", new CultureInfo("bn-BD"))</td>
+                <td>@list.TotalAmount.ToString("C", new CultureInfo("bn-BD"))</td>
+                <td>@list.TotalPresent</td>
+                <td>@list.TotalPaidLeave</td>
+                <td>@list.TotalWorkingDays</td>
+                <td>@list.TotalHoliday</td>
+                @if (ViewBag.IsPrint == true)
+                 {
+                    <td></td>
+                 }
+            </tr>
+        }
+        <tr style="font-weight:bold">
+            <td></td>
+            <td colspan="2" style="text-align:center">Total</td>
+            <td>@Model.Sum(a => a.TotalAmount).ToString("C", new CultureInfo("bn-BD"))</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            @if (ViewBag.IsPrint == true)
+            {
+                <td></td>
+            }
+        </tr>
+    </table>
+}
+else
+{
+    <h4>There is no record to display</h4>
+}
+<script>
+    $('[data-toggle="tooltip"]').tooltip();
+</script>
+
+

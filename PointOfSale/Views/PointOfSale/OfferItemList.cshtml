@@ -1,0 +1,88 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewOfferItem>
+@using System.Globalization
+@{
+    var count = 0;
+}
+<table class="table table-bordered table-hover table-responsive table-condensed table-striped" id="tblOfferItems">
+    <tr>
+        <th width="20%">Name</th>
+        <th width="15%">Category</th>
+        <th width="10%">Price</th>
+        <th>Quantity</th>
+        <th width="62px">Free</th>
+        <th>Off(%)</th>
+        <th>Off(Tk)</th>
+        <th>Discount price</th>
+        <th></th>
+    </tr>
+    <tr id="emptyRow">
+        <td colspan="9">
+            <h4>There is no record to display</h4>
+            <script>
+                $("#btnOfferItemSave").prop('disabled', true);
+            </script>
+        </td>
+    </tr>
+    @if (Model.Any())
+     {
+        foreach (var list in Model)
+        {
+            count++;
+            <tr id="offerItem_@count" class="offerItem" data-id="@count" data-productid="@list.ProductId" data-transid="@list.Id">
+                <td>@list.ProductName</td>
+                <td>@list.Categorys</td>
+                <td>
+                    <span id="productPrice_@count">@list.ProductPrice</span>
+                </td>
+                <td>
+                    <input type="number" min="1" id="quantity_@count" name="quantity_@count" onclick="calculateDiscount(@count,1)"  onkeyup="calculateDiscount(@count,1)" class="quantity" data-id="@count" required validationMessage="*" value="@list.Quantity" />
+                    <span class="field-validation-valid text-danger" data-valmsg-for="quantity_@count" data-valmsg-replace="true"></span>
+                </td>
+                <td>
+                    @if(list.IsFree == true)
+                     {
+                        <label>
+                            <input type="checkbox" checked data-id="@count" class="chkFree" id="chkFree_@count"  onclick="calculateDiscount(@count,2)"/> Free
+                        </label>
+                    }
+                    else
+                    {
+                        <label>
+                            <input type="checkbox" data-id="@count" class="chkFree" id="chkFree_@count"  onclick="calculateDiscount(@count,2)" /> Free
+                        </label>
+                    }
+                </td>
+                <td>
+                    <input type="number" min="0" max="100" id="percentOff_@count" name="percentOff_@count" class="percentOff" data-id="@count" onchange="changeHandler(this)" onclick="calculateDiscount(@count,3)"  onkeyup="calculateDiscount(@count,3)" required validationMessage="*" value="@list.PercentageOff" />
+                    <span class="field-validation-valid text-danger" data-valmsg-for="percentOff_@count" data-valmsg-replace="true"></span>
+                </td>
+                <td>
+                    <input type="number" min="0" max="@list.ProductPrice" id="amountOff_@count" class="amountOff" data-id="@count" name="amountOff_@count" onclick="calculateDiscount(@count,4)"  onkeyup="calculateDiscount(@count,4)" value="@list.AmountOff" required validationMessage="*" />
+                    <span class="field-validation-valid text-danger" data-valmsg-for="amountOff_@count" data-valmsg-replace="true"></span>
+                </td>
+                <td>
+                    <input type="number" min="0" readonly id="discPrice_@count" data-id="@count" value="@list.Price" />
+                </td>
+                <td>
+                    <span class="btnCancelItem" data-toggle="tooltip" title="Cancel item" data-transid="@list.Id"  data-id="@count"><i class="fa fa-times" aria-hidden="true" style="font-size:24px;cursor:pointer"></i></span>
+                </td>
+            </tr>
+        }
+     }
+</table>
+<script>
+    $(document).ready(function () {
+        count = @count;
+        if (count > 0)
+        {
+            $("#emptyRow").hide();
+            $("#btnOfferItemSave").prop('disabled', false);
+        }
+        $('[data-toggle="tooltip"]').tooltip();
+    })
+</script>
+
+
+
+
+

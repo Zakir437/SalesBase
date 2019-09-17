@@ -1,0 +1,201 @@
+﻿@model PointOfSale.Models.ViewWorkOrder
+@{
+    ViewBag.Title = "WorkOrderImportManual";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+    PointOfSale.Models.PointOfSale_DBEntities db = new PointOfSale.Models.PointOfSale_DBEntities();
+    decimal totalPaid = 0;
+    decimal dueAmount = 0;
+    if(db.WImports.Any(a => a.WOrderId == Model.Id))
+    {
+        totalPaid = db.WImports.Where(a => a.WOrderId == Model.Id).Sum(a => a.PaidAmount);
+        dueAmount = db.WImports.Where(a => a.WOrderId == Model.Id).Sum(a => a.DueAmount);
+    }
+}
+<style>
+    .label {
+        font-size: 90%;
+    }
+    p{
+        margin:5px 0px;
+    }
+    hr{
+        margin:0px;
+    }
+</style>
+@*<section class="content-header">
+    <ol class="breadcrumb">
+        <li><a href=""><i class="fa fa-shopping-cart"></i> Inventory</a></li>
+        <li><a href="/Inventory/WorkOrderImport"><i class="fa fa-indent"></i> Work-Order Import</a></li>
+        <li class="active"><a href=""><i class="fa fa-list-ul"></i> Work-Order Import Manual</a></li>
+    </ol>
+</section>*@
+<section class="content">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4 class="uppercase">Work-Order Voucher Details</h4>
+            </div>
+            <div class="pull-right">
+                <a class="btn btn-default" href="/Inventory/WorkOrderImport"><i class="fa fa-arrow-left"></i> Back</a>
+            </div>
+        </div>
+        <div class="panel-body">
+            <h2>
+                @Model.VoucherName
+            </h2>
+            <div class="row">
+                <div class="col-xs-6">
+                    <dl class="dl-horizontal">
+                        <dt>Supplier</dt>
+                        <dd>@Model.SupplierName</dd>
+                        <dt>Created By</dt>
+                        <dd>@Model.CreatedBy</dd>
+                        <dt>Created Date</dt>
+                        <dd>@Convert.ToDateTime(Model.CreatedDate).ToString("MMMM dd yyyy hh:mm:ss tt")</dd>
+                        <dt>Status</dt>
+                        <dd>
+                            @if (Model.Status == 1)
+                            {
+                                <span class="label label-primary">Pending Approval</span>
+                            }
+                            else if (Model.Status == 2)
+                            {
+                                <span class="label label-warning">Partial Approved</span>
+                            }
+                            else if (Model.Status == 3)
+                            {
+                                <span class="label label-info">Approved but not completed</span>
+                            }
+                        </dd>
+                    </dl>
+                </div>
+                <div class="col-xs-6">
+                    <dl class="dl-horizontal">
+                        <dt>Paid Amount</dt>
+                        <dd>@totalPaid</dd>
+                        <dt>Due Amount</dt>
+                        <dd>@dueAmount</dd>
+                    </dl>
+                </div>
+            </div>
+            <button class="btn btn-success pull-right" id="btnImpAll"><i class="fa fa-reply-all"></i>IMPORT ALL</button>
+        </div>
+        <hr />
+        <div class="panel-body">
+            <p class="pull-right" id="divBtnImp">
+                <button class="btn btn-primary" id="btnImpFull"><i class="fa fa-reply-all"></i>IMPORT FULL QTY</button>
+                <button class="btn btn-primary" id="btnImpPartial"><i class="fa fa-reply-all"></i>IMPORT PARTIAL QTY</button>
+            </p>
+            <div id="divList"></div>
+        </div>
+    </div>
+</section>
+<script id="temp_win_Imp_All" type="text/x-kendo-template">
+    <div style="padding:1em;">
+        <p style="font-size: 14px; padding: 10px"> #=msg# </p>
+        <div style="text-align: right;">
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btn_imp_all_noty_ok"><span class="k-icon k-update"></span>OK</button>
+            <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btn_imp_all_noty_cancel"><span class="k-icon k-cancel"></span>Cancel</button>
+        </div>
+    </div>
+</script>
+
+<script>
+    var itemId = 0, selectedIds = [], id = 0;
+    $(document).ready(function () {
+        $("#liForInventory").addClass('active');
+        $("#liForWarehouse").addClass('active');
+
+        $("#divBtnImp").hide();
+        $("#divList").append('<div class="loading_partial"></div>');
+        $("#divList").load('@Url.Action("WorkOrderItemListForImport", "Inventory")?id=' + "@Model.Id");
+    });
+
+    //Check/uncheck all
+    $("#divList").on('click', '#checkAll', function () {
+        selectedIds = [];
+        if ($(this).is(":checked")) {
+            $(".check").each(function () {
+                id = parseInt($(this).data("id"));
+                $("#check_" + id).prop('checked', true);
+                selectedIds.push(id);
+            });
+            $("#divBtnImp").show();
+        }
+        else {
+            $(".check").each(function () {
+                id = parseInt($(this).data("id"));
+                $("#check_" + id).prop('checked', false);
+            });
+            $("#divBtnImp").hide();
+        }
+    });
+
+    //check/uncheck single
+    $("#divList").on('click', '.check', function () {
+        id = $(this).data("id");
+        if ($("#check_" + id).is(":checked")) {
+            if (selectedIds.indexOf(id) == -1) {
+                selectedIds.push(id);
+            }
+        }
+        else
+        {
+            selectedIds = selectedIds.filter(item => item !== id);
+        }
+        var checkAll = true;
+        $('.check').each(function () {
+            id = parseInt($(this).data("id"));
+            if ($("#check_" + id).is(":checked") == false) {
+                checkAll = false;
+            }
+        });
+
+        if (checkAll) {
+            $("#checkAll").prop('checked', true);
+        }
+        else
+        {
+            $("#checkAll").prop('checked', false);
+        }
+
+        if ($("#divList .check:checked").length > 0)
+        {
+            $("#divBtnImp").show();
+        }
+        else
+        {
+            $("#divBtnImp").hide();
+        }
+    });
+
+    $("#btnImpAll").click(function () {
+        selectedIds = [];
+        $('.check').each(function () {
+            id = parseInt($(this).data("id"));
+            selectedIds.push(id);
+        });
+
+        var data = "id=" + '@Model.Id' + "?selectedId=" + selectedIds.join(",") + '?isPartialFull=true';
+        window.location.href = ('@Url.Action("WorkOrderImportSelectedItems", "Inventory")?q=' + getDataEncrypted(data));
+    });
+
+
+    $("#btnImpFull").click(function () {
+        var data = "id=" + '@Model.Id' + "?selectedId=" + selectedIds.join(",") + '?isPartialFull=true';
+        //window.open('@Url.Action("WorkOrderImportSelectedItems", "Inventory")?q=' + getDataEncrypted(data), '_blank');
+        window.location.href = ('@Url.Action("WorkOrderImportSelectedItems", "Inventory")?q=' + getDataEncrypted(data));
+    });
+
+    $("#btnImpPartial").click(function () {
+        var data = "id=" + '@Model.Id' + "?selectedId=" + selectedIds.join(",") + '?isPartialFull=false';
+        //window.open('@Url.Action("WorkOrderImportSelectedItems", "Inventory")?q=' + getDataEncrypted(data), '_blank');
+        window.location.href = ('@Url.Action("WorkOrderImportSelectedItems", "Inventory")?q=' + getDataEncrypted(data));
+    });
+
+</script>
+
+
+
+
+

@@ -1,0 +1,171 @@
+﻿@{
+    ViewBag.Title = "Unit";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+}
+@*<section class="content-header">
+    <h1>
+        Unit
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-cog"></i> Configuration</a></li>
+        <li class="active">Unit</li>
+    </ol>
+</section>*@
+<section class="content">
+    @*<div class="row">
+        <div class="col-md-12">
+            @Html.ActionLink("Miscellaneous Function", "MiscFunction", "Configuration", routeValues: null, htmlAttributes: new { @class = "btn btn-default" })
+            @Html.ActionLink("Unit", "Unit", "Configuration", routeValues: null, htmlAttributes: new { @class = "btn btn-default selected" })
+            @Html.ActionLink("Brand", "Brand", "Configuration", routeValues: null, htmlAttributes: new { @class = "btn btn-default" })
+            @Html.ActionLink("Vat", "Vat", "Configuration", routeValues: null, htmlAttributes: new { @class = "btn btn-default" })
+            @Html.ActionLink("Payment Type", "PaymentType", "Configuration", routeValues: null, htmlAttributes: new { @class = "btn btn-default" })
+            @Html.ActionLink("Payment Method", "PaymentMethod", "Configuration", routeValues: null, htmlAttributes: new { @class = "btn btn-default" })
+            @Html.ActionLink("Schedule", "Schedule", "Configuration", routeValues: null, htmlAttributes: new { @class = "btn btn-default" })
+            @Html.ActionLink("Restriction", "Restriction", "Configuration", routeValues: null, htmlAttributes: new { @class = "btn btn-default" })
+            @Html.ActionLink("Credit Limit", "CreditLimit", "Configuration", routeValues: null, htmlAttributes: new { @class = "btn btn-default" })
+            <br />
+            <button class="btn btn-default" id="btnUnitWindowCreate" style="margin:15px 0 5px 0"><i class="fa fa-plus-circle" aria-hidden="true"></i> Add</button>
+        </div>
+    </div>*@
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4 class="uppercase">Unit</h4>
+            </div>
+        </div>
+        <div class="panel-body">
+            <div id="divUnitList"></div>
+        </div>
+    </div>
+</section>
+<div id="divUnitWindow"></div>
+<script id="temp_win_delete_entry" type="text/x-kendo-template">
+    <div style="padding:1em;">
+        <p style="font-size: 14px; padding: 10px"> #=msg# </p>
+        <div style="text-align: right;">
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btn_delete_Entry_noty_ok"><span class="k-icon k-update"></span>OK</button>
+            <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btn_delete_Entry_noty_cancel"><span class="k-icon k-cancel"></span>Cancel</button>
+        </div>
+    </div>
+</script>
+
+<script>
+    $(document).ready(function () {
+        $("#divUnitList").empty();
+        $("#divUnitList").append('<div class="loading_partial"></div>');
+        $("#divUnitList").load('@Url.Action("UnitList","Configuration")');
+
+        $("#liForInventory").addClass('active');
+        $("#liForInventoryConfig").addClass('active');
+        $("#liForUnit").addClass('active');
+    });
+
+    $("#btnUnitWindowCreate").click(function () {
+        $("#divUnitWindow").empty();
+        $("#divUnitWindow").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 661,
+            height: 175,
+            resizable: false,
+            title: 'Unit',
+        });
+        var unitWindow = $("#divUnitWindow").data("kendoWindow");
+        unitWindow.refresh('@Url.Action("UnitCreate", "Configuration")');
+        unitWindow.center().open();
+    });
+
+    $("#divUnitList").on('click', ".btnUnitEdit", function () {
+        var unitId = $(this).data("id");
+        $("#divUnitWindow").empty();
+        $("#divUnitWindow").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 661,
+            height: 175,
+            resizable: false,
+            title: 'Unit',
+        });
+        var unitWindow = $("#divUnitWindow").data("kendoWindow");
+        unitWindow.refresh('@Url.Action("UnitCreate", "Configuration")?id=' + unitId);
+        unitWindow.center().open();
+    });
+
+
+
+    $("#divUnitList").on('click', ".btnUnitDelete", function () {
+        var unitId = $(this).data("id");
+        var kendoWindow = $("<div />").kendoWindow({
+            actions: ["Close"],
+            title: "Alert",
+            resizable: false,
+            width: "30%",
+            modal: true
+        });
+
+        msg = "Are you sure want to delete this Unit?";
+        var template = kendo.template($("#temp_win_delete_entry").html());
+        kendoWindow.data("kendoWindow").content(template).center().open();
+
+        kendoWindow.find("#btn_delete_Entry_noty_cancel").click(function () {
+            kendoWindow.data("kendoWindow").close();
+            document.documentElement.style.overflow = "auto";
+        }).end();
+        kendoWindow.find("#btn_delete_Entry_noty_ok").click(function () {
+            kendoWindow.data("kendoWindow").close();
+            document.documentElement.style.overflow = "auto";
+            deleteUnit(unitId);
+        }).end();
+        document.documentElement.style.overflow = "hidden";
+    });
+
+    function deleteUnit(unitId) {
+        $.ajax({
+            url: '@Url.Action("DeleteUnit", "Configuration")',
+            type: 'Post',
+            data: { unitId: unitId },
+            success: function (data) {
+                if (data === "success") {
+                    $("#divUnitList").empty();
+                    $("#divUnitList").append('<div class="loading_partial"></div>');
+                    $("#divUnitList").load('@Url.Action("UnitList", "Configuration")');
+                } else {
+                    alert("Error Brand Delete");
+                }
+            }
+        });
+    }
+
+
+    $("#divUnitList").on("click", ".activateUnitType,.inactivateUnitType", function () {
+        var id = $(this).data("id");
+        var status = $(this).data("isactive");
+        var sendData = {
+            id: id,
+            status: status
+        };
+        $.ajax({
+            url: '@Url.Action("ChangeUnitStatus", "Configuration")',
+            method: 'POST',
+            data: sendData,
+            success: function (res) {
+                if (res == "success") {
+                    $("#divUnitList").empty();
+                    $("#divUnitList").append('<div class="loading_partial"></div>');
+                    $("#divUnitList").load('@Url.Action("UnitList", "Configuration")');
+                }
+                else {
+                    alert("Error Status Update")
+                }
+            }, error: function (err) {
+            }
+        });
+    });
+
+
+</script>
+

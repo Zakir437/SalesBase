@@ -1,0 +1,626 @@
+﻿@model PointOfSale.Models.ViewPosOrder
+@using System.Globalization;
+@using PointOfSale.Helpers;
+<style>
+    h2{
+        margin-top:0px;
+    }
+    hr{
+        margin:0px;
+    }
+    .row{
+        margin:0px;
+    }
+
+    /* The container <div> - needed to position the dropdown content */
+    .dropdown {
+        position: relative;
+        display: inline-block;
+    }
+
+    /* Dropdown Content (Hidden by Default) */
+    .dropdown-content {
+        display: none;
+        position: absolute;
+        background-color: #f1f1f1;
+        min-width: 180px;
+        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+        z-index: 1;
+    }
+
+    /* Links inside the dropdown */
+    .dropdown-content a {
+        color: black;
+        padding: 12px 16px;
+        text-decoration: none;
+        display: block;
+    }
+
+    /* Change color of dropdown links on hover */
+    .dropdown-content a:hover {
+        background-color: #ddd;
+    }
+
+    /* Show the dropdown menu on hover */
+    .dropdown:hover .dropdown-content {
+        display: block;
+    }
+
+    /* Change the background color of the dropdown button when the dropdown content is shown */
+    .dropdown:hover .dropbtn {
+        background-color: #3e8e41;
+    }
+
+</style>
+<div class="panel panel-info">
+    <div class="panel-heading" style="padding-bottom:46px;">
+        <div class="pull-left">
+            <h4 class="uppercase">Sales Order Information</h4>
+        </div>
+        <div class="pull-right">
+            <a class="btn btn-default" href="/Sales/Order"><i class="fa fa-arrow-left"></i> Back</a>
+        </div>
+    </div>
+    <div class="panel-body">
+        <div class="row">
+            <label style="font-size:20px;">@Model.OrderNumber</label>
+            <button type="button" id="btnInvoiceInfo" class="btn btn-info" style="margin:0px 5px;" data-toggle="tooltip" title="Invoice Details"><i class="fa fa-info-circle"></i></button>
+            <div class="dropdown">
+                <button class="btn bg-purple"><i class="fa fa-print"></i></button>
+                <div class="dropdown-content">
+                    <a href="@Html.EncodedParam("OrderTransactionPrint","Sales", new { orderId = Model.OrderId, type = 1 },null)" target="_blank">Sales Order</a>
+                    <a href="@Html.EncodedParam("OrderVoucherPrint","Sales", new { orderId = Model.OrderId },null)" target="_blank">Recipt</a>
+                    <a href="@Html.EncodedParam("OrderTransactionPrint","Sales", new { orderId = Model.OrderId, type = 2 },null)" target="_blank">Detailed Info</a>
+                    <a href="@Html.EncodedParam("OrderTransactionPrint","Sales", new { orderId = Model.OrderId, type = 3 },null)" target="_blank">Payment Info</a>
+                </div>
+            </div>
+        </div>
+        <h2>
+            @*<a class="pull-right" data-toggle="tooltip" title="Sales Order Print" href="@Html.EncodedParam("OrderTransactionPrint","Sales", new { orderId = Model.OrderId },null)" target="_blank">
+                <i class="fa fa-print"></i>
+            </a>*@
+        </h2>
+       
+        <div class="row">
+            <div class="col-xs-5">
+                <dl class="dl-horizontal">
+                    @if (ViewBag.CurrentVoucherName != null)
+                     {
+                        <dt>Current Voucher</dt>
+                        <dd>@ViewBag.CurrentVoucherName</dd>
+                     }
+                    @if (Model.ASReffId > 0)
+                     {
+                        <dt>After Sale Reff.</dt>
+                        <dd>@Model.ASReff</dd>
+                     }
+                    <dt>Created By</dt>
+                    <dd>@Model.CreatedBy</dd>
+                    <dt>Order Date</dt>
+                    <dd>@Convert.ToDateTime(Model.OrderDate).ToString("MMMM dd yyyy hh:mm:ss tt")</dd>
+                    <dt>PO Voucher</dt>
+                    <dd>@Model.POVoucher</dd>
+                </dl>
+            </div>
+            <div class="col-xs-5">
+                <dl class="dl-horizontal">
+                    <dt>Order Amount</dt>
+                    <dd>@Model.OrderAmount.ToString("C", new CultureInfo("bn-BD"))</dd>
+                    <dt>Discount</dt>
+                    @if(Model.OrderAmountDiscount == null)
+                    {
+                        Model.OrderAmountDiscount = 0;
+                    }
+                    <dd>@Model.OrderAmountDiscount.Value.ToString("C", new CultureInfo("bn-BD"))</dd>
+                    <dt>Sub Total</dt>
+                    <dd>@Model.SubTotalPrice.ToString("C", new CultureInfo("bn-BD"))</dd>
+                    <dt>Tax</dt>
+                    <dd>@Model.Tax.ToString("C", new CultureInfo("bn-BD"))</dd>
+                    <dt>Delivery Charge</dt>
+                    @if (Model.DeliveryCharge == null)
+                     {
+                        Model.DeliveryCharge = 0;
+                     }
+                    <dd>@Model.DeliveryCharge.Value.ToString("C", new CultureInfo("bn-BD"))</dd>
+                    <dt>Invoice Amount</dt>
+                    <dd>@Model.InvoiceAmount.ToString("C", new CultureInfo("bn-BD"))</dd>
+                    <dt>Due Amount</dt>
+                    @if(Model.DueAmount == null)
+                    {
+                        Model.DueAmount = 0;
+                    }
+                    <dd>@Model.DueAmount.Value.ToString("C", new CultureInfo("bn-BD"))</dd>
+                </dl>
+            </div>
+        </div>
+        <div class="row">
+            <button class="btn btn-default" id="btnPaymentTransaction" data-id="@Model.OrderId">Payment Transaction</button>
+            @if (Model.Status != false)
+            {
+                if (Model.RefundOrderId > 0)
+                {
+                    <button class="btn btn-default" id="btnOrderArchive" data-id="@Model.OrderId">Order Archive</button>
+                        <button class="btn btn-default" id="btnRefundProducts" data-id="@Model.OrderId">Refund Products</button>
+                }
+                <button class="btn btn-warning pull-right" id="btnReturnAll"><i class="fa fa-reply-all"></i> Return All</button>
+            }
+        </div>
+    </div>
+    <hr />
+    <div class="panel-body">
+       @if (Model.Status != false)
+       {
+        <div class="pull-right" id="divBtnReturn">
+            <button class="btn btn-primary" id="btnReturnFull"><i class="fa fa-reply-all"></i>Return FULL QTY</button>
+            <button class="btn btn-primary" id="btnReturnPartial"><i class="fa fa-reply-all"></i>Return PARTIAL QTY</button>
+        </div>
+       }
+        <div id="divOrderedList"></div>
+        <p class="pull-right" id="divReturnSave">
+            <button class="btn btn-success" id="btnSave"><i class="fa fa-save"></i> Save</button>
+            <button class="btn btn-info" id="btnRefresh"><i class="fa fa-refresh"></i> Refresh</button>
+            <button class="btn btn-warning" id="btnCancel"><i class="fa fa-times"></i> Cancel</button>
+        </p>
+    </div>
+</div>
+<div id="divRefundAlert"></div>
+<div id="divPaymentTranWin"></div>
+<div id="divRefundInfoWin"></div>
+<div id="divRefundPayWin"></div>
+<div id="divReturnAlertWin"></div>
+<div id="divInvoiceInfo"></div>
+<script>
+    var orderId = 0, id = 0;
+    var orderTransId = 0;
+    var quantity = 0;
+    var productId = 0;
+    var refundQuantity = 0;
+    var selectedIds = [];
+    var validation;
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+        $("#divBtnReturn").hide();
+        $("#divReturnSave").hide();
+        validation = $("#divOrderedList").kendoValidator().data("kendoValidator");
+        $("#divOrderedList").empty();
+        $("#divOrderedList").append('<div class="loading_partial"></div>');
+        $("#divOrderedList").load('@Url.Action("OrderedProducts","Sales")?orderId=' + @Model.OrderId + '&orderStatus=' + '@Model.Status');
+    });
+
+     $("#divOrderedList").on('click', '.btnRefundItem', function () {
+        var isrefundallow = $(this).data("isrefundallow");
+        if (isrefundallow == "False")
+        {
+            alert("Refund not allow for this product");
+        }
+        else
+        {
+            orderTransId = parseInt($(this).data("id"));
+            quantity = parseFloat($(this).data("quantity"));
+            productId = parseInt($(this).data("productid"));
+            $("#divRefundAlert").empty();
+            $("#divRefundAlert").kendoWindow({
+                actions: ["Close"],
+                draggable: false,
+                modal: true,
+                visible: false,
+                width: 500,
+                height: 161,
+                resizable: false,
+                title: 'Alert'
+            });
+            var refundWin = $("#divRefundAlert").data("kendoWindow");
+            refundWin.refresh('@Url.Action("RefundCreate", "Sales")?orderTransactionId=' + orderTransId);
+            refundWin.center().open();
+        }
+    });
+
+    @*//View Payment transaction
+    $("#btnPaymentTransaction").click(function () {
+        orderId = $(this).data("id");
+        $("#divPaymentTranWin").empty();
+        $("#divPaymentTranWin").kendoWindow({
+                actions: ["Close"],
+                draggable: false,
+                modal: true,
+                visible: false,
+                width: 1200,
+                height: 500,
+               resizable: false,
+                title: 'Payment Transaction'
+            });
+        var paymentTranWin = $("#divPaymentTranWin").data("kendoWindow");
+        paymentTranWin.refresh('@Url.Action("PaymentHistoryPartial", "Sales")?orderId=' + orderId);
+        paymentTranWin.center().open();
+    });*@
+
+    //Show Refund Info
+    @*$("#btnRefundInfo").click(function () {
+        orderId = $(this).data("id");
+        $("#divRefundInfoWin").empty();
+        $("#divRefundInfoWin").kendoWindow({
+                actions: ["Close"],
+                draggable: false,
+                modal: true,
+                visible: false,
+                width: 1037,
+                height: 405,
+                resizable: false,
+                title: 'Refund Info'
+            });
+        var refundAlertWin = $("#divRefundInfoWin").data("kendoWindow");
+        refundAlertWin.refresh('@Url.Action("RefundInfo", "Sales")?orderId=' + orderId);
+        refundAlertWin.center().open();
+    });*@
+
+    $("#divRefundAlert").on('click', '#btnConfirm', function() {
+        if (validation.validate())
+        {
+            refundQuantity = parseFloat($("#Quantity").val());
+            $("#divRefundAlert").data("kendoWindow").close();
+            quantity = quantity - refundQuantity;
+            var orderProducts = [];
+            orderProducts.push({
+                ProductId: productId,
+                Quantity: quantity,
+            });
+            var model = {
+                OrderId: @Model.OrderId,
+                OrderTransId: orderTransId,
+                OrderProducts: orderProducts
+            };
+            $("#divRefundPayWin").empty();
+            $("#divRefundPayWin").kendoWindow({
+                    actions: ["Close"],
+                    draggable: false,
+                    modal: true,
+                    visible: false,
+                    title: 'Refund Pay',
+                    resizable: false
+                });
+            var refundPayWin = $("#divRefundPayWin").data("kendoWindow");
+            refundPayWin.refresh({ url: '@Url.Action("RefundPay", "Sales")', type: "POST", data: model });
+            refundPayWin.center().open().maximize();
+        }
+    });
+
+    //order payment info
+    $("#divRefundPayWin").on('click', "#btnPaymentInfo", function () {
+        document.getElementById("btnPaymentTransaction").click();
+    });
+    //***************************************Refund pay *************************************************
+    $("#divRefundPayWin").on('click', "#refundPay", function () {
+        var payments = [];
+        $(".amountInTransaction").each(function () {
+            if ($(this).data("id") == 1) {
+                payments.push({
+                    PaymentTypeId: 1,
+                    PaymentBodyId: parseInt($(this).data("cashbodyid")),
+                    AmountPaid: parseFloat(cashAmount)
+                });
+            }
+            else if ($(this).data("id") == 2) {
+                payments.push({
+                    PaymentTypeId: 2,
+                    PaymentBodyId: parseInt($(this).data("cardbodyid")),
+                    AmountPaid: parseFloat($(this).data("cardamount")),
+                    TransactionNo: $(this).data("transactionno")
+                });
+            }
+            else if ($(this).data("id") == 3) {
+                payments.push({
+                    PaymentTypeId: 3,
+                    PaymentBodyId: parseInt($(this).data("bkashbodyid")),
+                    AmountPaid: parseFloat($(this).data("bkashamount")),
+                    TransactionNo: $(this).data("transactionno")
+                });
+            }
+        });
+         $.ajax({
+            url: '@Url.Action("RefundSave", "Sales")',
+            type: "POST",
+            data: JSON.stringify({
+                orderTransactionId: orderTransId,
+                quantity: refundQuantity,
+                Payments: payments,
+                methodId: methodId,
+                userId: userId
+            }),
+            contentType: 'application/json',
+            success: function (data) {
+                if (data = "success")
+                {
+                    window.location.reload();
+                }
+            }
+        });
+    });
+
+
+    //****************************Return all******************************
+    $("#btnReturnAll").click(function () {
+        $("#divReturnAlertWin").empty();
+        $("#divReturnAlertWin").kendoWindow({
+                actions: ["Close"],
+                draggable: false,
+                modal: true,
+                visible: false,
+                width: 647,
+                height: 192,
+                resizable: false,
+                title: 'Alert',
+                close: onWindowClose
+            });
+        var returnAlertWin = $("#divReturnAlertWin").data("kendoWindow");
+        returnAlertWin.refresh('@Url.Action("RefundAlert", "Sales")?orderId=' + '@Model.OrderId');
+        returnAlertWin.center().open();
+        document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+        document.body.scroll = "no";
+    });
+
+    $("#divReturnAlertWin").on('click', '#btnRefundConfirm', function () {
+        $("#divReturnAlertWin").data("kendoWindow").close();
+        var model = {
+            OrderId: '@Model.OrderId'
+        };
+        $("#divRefundPayWin").empty();
+        $("#divRefundPayWin").kendoWindow({
+                actions: ["Close"],
+                draggable: false,
+                modal: true,
+                visible: false,
+                title: 'Refund Pay',
+                resizable: false
+            });
+        var refundPayWin = $("#divRefundPayWin").data("kendoWindow");
+        refundPayWin.refresh({ url: '@Url.Action("RefundPay", "Sales")', type: "POST", data: model });
+        refundPayWin.center().open().maximize();
+    });
+    //***************************************Refund pay *************************************************
+    $("#divRefundPayWin").on('click', "#btnRefundPaySave", function () {
+        var payments = [];
+        $(".amountInTransaction").each(function () {
+            if ($(this).data("id") == 1) {
+                payments.push({
+                    PaymentTypeId: 1,
+                    PaymentBodyId: parseInt($(this).data("cashbodyid")),
+                    AmountPaid: parseFloat(cashAmount)
+                });
+            }
+            else if ($(this).data("id") == 2) {
+                payments.push({
+                    PaymentTypeId: 2,
+                    PaymentBodyId: parseInt($(this).data("cardbodyid")),
+                    AmountPaid: parseFloat($(this).data("cardamount")),
+                    TransactionNo: $(this).data("transactionno")
+                });
+            }
+            else if ($(this).data("id") == 3) {
+                payments.push({
+                    PaymentTypeId: 3,
+                    PaymentBodyId: parseInt($(this).data("bkashbodyid")),
+                    AmountPaid: parseFloat($(this).data("bkashamount")),
+                    TransactionNo: $(this).data("transactionno")
+                });
+            }
+        });
+
+        var refundItem = [];
+        $(".item").each(function () {
+            id = parseInt($(this).data("id"));
+            refundItem.push({
+                OrderTransactionId: id,
+                Quantity: $("#qty_" + id).val(),
+            });
+        });
+
+
+        $.ajax({
+            url: '@Url.Action("RefundSave", "Sales")',
+            type: "POST",
+            data: JSON.stringify({
+                orderId: '@Model.OrderId',
+                Payments: payments,
+                refundItem: refundItem,
+                createdBy: userId
+            }),
+            contentType: 'application/json',
+            success: function (data) {
+                if (data = "success")
+                {
+                    window.location.href = '/Sales/Order';
+                }
+                else
+                {
+                    alert("Save error...");
+                }
+            }
+        });
+    });
+
+    //Check/uncheck all
+    $("#divOrderedList").on('click', '#checkAll', function () {
+        selectedIds = [];
+        if ($(this).is(":checked")) {
+            $(".check").each(function () {
+                id = parseInt($(this).data("id"));
+                $("#check_" + id).prop('checked', true);
+                selectedIds.push(id);
+            });
+            $("#divBtnReturn").show();
+        }
+        else {
+            $(".check").each(function () {
+                id = parseInt($(this).data("id"));
+                $("#check_" + id).prop('checked', false);
+            });
+            $("#divBtnReturn").hide();
+        }
+    });
+
+    //check/uncheck single
+    $("#divOrderedList").on('click', '.check', function () {
+        id = $(this).data("id");
+        if ($("#check_" + id).is(":checked")) {
+            if (selectedIds.indexOf(id) == -1) {
+                selectedIds.push(id);
+            }
+        }
+        else {
+            selectedIds = selectedIds.filter(item => item !== id);
+        }
+        var checkAll = true;
+        $('.check').each(function () {
+            id = parseInt($(this).data("id"));
+            if ($("#check_" + id).is(":checked") == false) {
+                checkAll = false;
+            }
+        });
+
+        if (checkAll) {
+            $("#checkAll").prop('checked', true);
+        }
+        else {
+            $("#checkAll").prop('checked', false);
+        }
+
+        if ($("#divOrderedList .check:checked").length > 0) {
+            $("#divBtnReturn").show();
+        }
+        else {
+            $("#divBtnReturn").hide();
+        }
+    });
+
+    var isPartial = false;
+
+    //if return selected item full qty
+    $("#btnReturnFull").click(function () {
+        isPartial = false;
+        $("#divOrderedList").empty();
+        $("#divOrderedList").append('<div class="loading_partial"></div>');
+        $("#divOrderedList").load('@Url.Action("OrderedProducts","Sales")?orderId=' + @Model.OrderId + '&isReturnPartial=' + isPartial + '&selectedId=' + selectedIds);
+
+        $("#divReturnSave").show();
+        $("#divBtnReturn").hide();
+    });
+
+    //if return selected item partial qty
+    $("#btnReturnPartial").click(function () {
+        isPartial = true;
+        $("#divOrderedList").empty();
+        $("#divOrderedList").append('<div class="loading_partial"></div>');
+        $("#divOrderedList").load('@Url.Action("OrderedProducts","Sales")?orderId=' + @Model.OrderId + '&isReturnPartial=' + isPartial + '&selectedId=' + selectedIds);
+
+        $("#divReturnSave").show();
+        $("#divBtnReturn").hide();
+    });
+
+    $("#btnSave").click(function () {
+        if (validation.validate())
+        {
+            var refundItem = [];
+            $(".item").each(function () {
+                id = parseInt($(this).data("id"));
+                refundItem.push({
+                    OrderTransactionId: id,
+                    Quantity: $("#qty_" + id).val(),
+                });
+            });
+
+            var model = {
+                OrderId: '@Model.OrderId',
+                RefundItems : refundItem
+            };
+            $("#divRefundPayWin").empty();
+            $("#divRefundPayWin").kendoWindow({
+                    actions: ["Close"],
+                    draggable: false,
+                    modal: true,
+                    visible: false,
+                    title: 'Refund Pay',
+                    resizable: false
+            });
+            var refundPayWin = $("#divRefundPayWin").data("kendoWindow");
+            refundPayWin.refresh({ url: '@Url.Action("RefundPay", "Sales")', type: "POST", data: model });
+            refundPayWin.center().open().maximize();
+
+
+            @*$.ajax({
+                url: '@Url.Action("RefundSave", "Sales")',
+                type: "POST",
+                data: JSON.stringify({
+                    OrderId: orderId,
+                    SalesmanId: userId,
+                    CustomerId: clientId,
+                    TaxPercent: orderTaxRate,
+                    DiscountPercent: orderDisPercentage,
+                    SubTotalPrice: subTotalPrice.toFixed(2),
+                    Tax: tax,
+                    TaxFunc: orderTaxFunc,
+                    TotalPrice: totalPrice.toFixed(2),
+                    OrderProducts: orderProducts,
+                    Discount: discountAmount,
+                    DiscType: discType,
+                    MethodId: methodId,
+                    Payments: payments,
+                    CreditAmount: creditAmount,
+                    ReturnAmount: returnAmount,
+                    IsServiceItems: isServiceItem,
+                    IsPointItems: isPointItem,
+                    TotalPoints: totalPoints,
+                    RefundAmount: refundAmount.toFixed(2),
+                    PayAmount: extraPay.toFixed(2)
+                }),
+                contentType: 'application/json',
+                success: function (data) {
+                    if (data = "success")
+                    {
+                        window.location.reload();
+                    }
+                    else {
+                        alert("Save error...");
+                    }
+                }
+            });*@
+        }
+    });
+
+    $("#btnRefresh").click(function () {
+        $("#divOrderedList").empty();
+        $("#divOrderedList").append('<div class="loading_partial"></div>');
+        $("#divOrderedList").load('@Url.Action("OrderedProducts","Sales")?orderId=' + @Model.OrderId + '&isReturnPartial=' + isPartial + '&selectedId=' + selectedIds);
+    });
+
+    $("#btnCancel").click(function () {
+
+         $("#divOrderedList").empty();
+        $("#divOrderedList").append('<div class="loading_partial"></div>');
+        $("#divOrderedList").load('@Url.Action("OrderedProducts","Sales")?orderId=' + @Model.OrderId);
+
+        $("#divBtnReturn").hide();
+        $("#divReturnSave").hide();
+        selectedIds = [];
+    });
+
+    //****************************View Invoice Details*************************************
+    $("#btnInvoiceInfo").click(function(){
+        $("#divInvoiceInfo").empty();
+        $("#divInvoiceInfo").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 680,
+            height: 695,
+            title: 'Invoice Details',
+            //resizable: false,
+            close: onWindowClose
+        });
+        var invoiceInfo = $("#divInvoiceInfo").data("kendoWindow");
+        invoiceInfo.refresh('/PointOfSale/InvoiceInfoByOrderId?orderId=' + '@Model.OrderId');
+        invoiceInfo.center().open();
+        document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+        document.body.scroll = "no";
+    });
+</script>

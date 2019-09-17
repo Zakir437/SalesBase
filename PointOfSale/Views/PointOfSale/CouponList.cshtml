@@ -1,0 +1,58 @@
+﻿@model IEnumerable<PointOfSale.Models.AmountCoupon>
+@{
+    var count = 0;
+}
+@if (Model.Any() == true)
+{
+    @*<table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Name</th>
+            @if (ViewBag.Type == 1) // cash coupon
+             {
+                <th>Amount</th>
+             }
+            else
+            {
+                <th>Percentile</th>
+                <th>Maximum Amount</th>
+            }
+            <th>Minimum Purchase</th>
+            <th>validity Date</th>
+        </tr>
+        @foreach (var list in Model)
+        {
+            count++;
+            <tr>
+                <td>@count. </td>
+                <td>@list.Code</td>
+                @if (list.Type == 1)
+                 {
+                    <td>@list.Amount</td>
+                 }
+                else
+                {
+                    <td>@list.Percentile</td>
+                    <td>@list.MaximumAmount</td>
+                }
+                <td>@list.MinimumPurchase</td>
+                <td>@Convert.ToDateTime(list.ValidityDate).ToString("MMM dd,yyyy hh:mm:ss tt")</td>
+            </tr>
+         }
+    </table>*@
+ }
+else
+{
+    <h4>There is no record to display</h4>
+}
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    })
+</script>
+
+
+
+
+
+

@@ -1,0 +1,269 @@
+﻿@model PointOfSale.Models.ViewSupplier
+@using PointOfSale.Helpers
+@{
+    ViewBag.Title = "CreditPaymentHistory";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+    PointOfSale.Models.PointOfSale_DBEntities db = new PointOfSale.Models.PointOfSale_DBEntities();
+    long listCount = db.ViewPayments.Where(a => a.SupplierId == Model.SupplierId && a.IsCreditPayment == true).Count();
+}
+@*<section class="content-header">
+    <h1>Credit Payment History</h1>
+    <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-handshake-o"></i> CRM</a></li>
+        @if (Model.Type == true)
+        {
+            <li><a href="/Configuration/Supplier"><i class="fa fa-list-ul"></i> Supplier</a></li>
+            <li><a href="@Html.EncodedParam("SupplierInvoiceInfo", "Configuration", new { supplierId = Model.SupplierId }, null)"><i class="fa fa-list-ul"></i> Supplier Invoice</a></li>
+            <li><a href="@Html.EncodedParam("CreditReport", "Configuration", new { supplierId = Model.SupplierId }, null)"><i class="fa fa-list-ul"></i> Supplier Credit Invoice</a></li>
+            <li class="active">Credit Payment History</li>
+        }
+        else
+        {
+            <li><a href="/Configuration/Associate"><i class="fa fa-list-ul"></i> Associate</a></li>
+            <li><a href="@Html.EncodedParam("SupplierInvoiceInfo", "Configuration", new { supplierId = Model.SupplierId }, null)"><i class="fa fa-list-ul"></i> Associate Invoice</a></li>
+            <li><a href="@Html.EncodedParam("CreditReport", "Configuration", new { supplierId = Model.SupplierId }, null)"><i class="fa fa-list-ul"></i> Associate Credit Invoice</a></li>
+            <li class="active">Credit Payment History</li>
+        }
+    </ol>
+</section>*@
+<section class="content">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4>Credit Payment History</h4>
+            </div>
+            <div class="pull-right">
+                <a class="btn btn-default" href="@Html.EncodedParam("CreditReport", "Configuration", new { supplierId = Model.SupplierId }, null)"><i class="fa fa-arrow-left"></i> Back</a>
+            </div>
+        </div>
+        <div class="panel-body">
+            <div class="col-md-6 pull-left">
+                <dl class="dl-horizontal">
+                    <dt>Name</dt>
+                    <dd>@Model.Name</dd>
+                    <dt>Phone</dt>
+                    <dd>@Model.Phone</dd>
+                    @if (Model.Email != null)
+                    {
+                        <dt>E-mail</dt>
+                        <dd>@Model.Email</dd>
+                    }
+                    @if (Model.SupplierSince != null)
+                    {
+                        <dt>Supplier Since</dt>
+                        <dd>@Convert.ToDateTime(Model.SupplierSince).ToString("yyyy MMMM")</dd>
+                    }
+                    <dt>CreatedBy</dt>
+                    <dd>@Model.CreatedBy</dd>
+                    <dt>CreatedDate</dt>
+                    <dd>@Convert.ToDateTime(Model.CreatedDate).ToString("MMM dd,yyyy")</dd>
+                    <dt>UpdatedBy</dt>
+                    <dd>@Model.UpdatedBy</dd>
+                    <dt>UpdatedDate</dt>
+                    <dd>
+                        @if (Model.UpdatedDate != null)
+                        {
+                            @Convert.ToDateTime(Model.CreatedDate).ToString("MMM dd,yyyy")
+                        }
+                        else
+                        {
+                            <span>not yet updated</span>
+                        }
+                    </dd>
+                    <dt>Address</dt>
+                    <dd>@Model.Address</dd>
+                </dl>
+            </div>
+        </div>
+        <hr style="margin:0;" />
+        <div class="panel-body">
+            <div class="pull-right">
+                <div class="pull-left" style="padding: 5px 10px;padding-right:5px!important;" id="show_Days_Title"></div>
+                <button class="btn btn-primary btnPrint pull-right" style="height:32px;"><i class="fa fa-print"></i></button>
+                <div class="btn-group btn-group-devided pull-right" data-toggle="buttons" style="padding-right:5px;">
+                    <div id="reportrange" class="pull-right" style="background: #fff; cursor: pointer; padding: 5px 10px; border: 1px solid #ccc; width: 100%">
+                        <span></span> <b class="caret"></b>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div style="margin:0px 15px;">
+            <div id="paymentList"></div>
+            <div class="text-center" style="margin-bottom:10px">
+                <button class="btn btn-primary" id="btnSeeMore"><i class="fa fa-arrow-down"></i> See more</button>
+            </div>
+        </div>
+    </div>
+</section>
+<div id="divImportDetailsWin"></div>
+<script>
+    var days = 0, from = null, to = null, count = 20;
+    var passdata = '';
+    var start = moment();
+    var end = moment().subtract(1, 'days');
+    $(document).ready(function () {
+        $("#btnSeeMore").hide();
+         $("#liForCRM").addClass('active');
+
+        if ('@Model.Type' == 'True')
+        {
+            $("#liForSupplier").addClass('active');
+        }
+        else
+        {
+            $("#liForAssociate").addClass('active');
+        }
+
+        $('.ranges li').first().click();
+    });
+
+    //View Import transaction details
+    $("#paymentList").on('click', ".btnImportDetails", function () {
+        var importId = $(this).data("id");
+        $("#divImportDetailsWin").empty();
+        $("#divImportDetailsWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 892,
+            height: 582,
+            title: 'Import Transaction',
+            resizable: false
+        });
+        var impTranWin = $("#divImportDetailsWin").data("kendoWindow");
+        impTranWin.refresh('@Url.Action("ImportTransaction", "PointOfSale")?importId=' + importId);
+        impTranWin.center().open();
+    });
+
+    @***************DateRange Start******************@
+    $('#reportrange').daterangepicker({
+        startDate: start,
+        endDate: end,
+        ranges: {
+            'Select Date': [moment(), moment().subtract(1, 'days')],
+            'Today': [moment(), moment()],
+            'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+            'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+        }
+    }, cb);
+    cb(start, end);
+    start = moment(); end = moment();
+    $(".applyBtn").click(function () {
+        $("#searchstring").val("");
+        from = $("input[name*='daterangepicker_start']").val();
+        to = $("input[name*='daterangepicker_end']").val();
+        btn_CustomDate(from, to);
+    });
+
+    $('.ranges').on("click", "li", function () {
+        var day = $(this).text();
+        if (day == "Select Date") {
+            btn_All();
+        } else {
+            if (day == "Today") {
+                btn_today();
+            } else if (day == "Last 7 Days") {
+                btn_last_seven();
+            } else if (day == "Last 30 Days") {
+                btn_last_thirty();
+            }
+        }
+    });
+    function cb(start, end) {
+        if (start == null && end == null) {
+            $('#reportrange span').html("Select Date");
+            return;
+        }
+        else if ((!start._isValid && !end._isValid)) {
+            $('#reportrange span').html("Select Date");
+            return;
+        } else if (start._d > end._d) {
+            $('#reportrange span').html("Select Date");
+            return;
+        }
+        $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+    }
+    function btn_today() {
+        days = 1;
+        from = null;
+        to = null;
+        $(".btnPrint").prop("disabled", false);
+        $("#btnSeeMore").hide();
+        $('#show_Days_Title').html("Today");
+        passdata = { days: 1, supplierId: @Model.SupplierId };
+        $("#paymentList").empty();
+        $("#paymentList").append('<div class="loading_partial"></div>');
+        $("#paymentList").load('@Url.Action("CreditPaymentList", "Configuration")', passdata);
+    }
+    function btn_last_seven() {
+        days = 7;
+        from = null;
+        to = null;
+        $(".btnPrint").prop("disabled", false);
+        $("#btnSeeMore").hide();
+        $('#show_Days_Title').html("Last 7 Days");
+        passdata = { days: 7, supplierId: @Model.SupplierId };
+        $("#paymentList").empty();
+        $("#paymentList").append('<div class="loading_partial"></div>');
+        $("#paymentList").load('@Url.Action("CreditPaymentList", "Configuration")', passdata);
+    }
+    function btn_last_thirty() {
+        days = 30;
+        from = null;
+        to = null;
+        $(".btnPrint").prop("disabled", false);
+        $("#btnSeeMore").hide();
+        $('#show_Days_Title').html("Last 30 Days");
+        passdata = { days: 30, supplierId: @Model.SupplierId };
+        $("#paymentList").empty();
+        $("#paymentList").append('<div class="loading_partial"></div>');
+        $("#paymentList").load('@Url.Action("CreditPaymentList", "Configuration")', passdata);
+    }
+    function btn_All() {
+        days = 0;
+        from = null;
+        to = null;
+        count = 20;
+        $(".btnPrint").prop("disabled", true);
+         if (@listCount > count)
+        {
+            $("#btnSeeMore").show();
+        }
+        $('#show_Days_Title').html("");
+        $('#reportrange span').html("Select Date");
+        passdata = { supplierId: @Model.SupplierId, count: count };
+        $("#paymentList").empty();
+        $("#paymentList").append('<div class="loading_partial"></div>');
+        $("#paymentList").load('@Url.Action("CreditPaymentList", "Configuration")', passdata);
+    }
+    function btn_CustomDate(from, to) {
+        days = 0;
+        $(".btnPrint").prop("disabled", false);
+        $("#btnSeeMore").hide();
+        passdata = { from: new Date(from).toISOString(), to: new Date(to).toISOString(), supplierId : @Model.SupplierId };
+        $('#show_Days_Title').html("Custom Range");
+        $("#paymentList").empty();
+        $("#paymentList").append('<div class="loading_partial"></div>');
+        $("#paymentList").load('@Url.Action("CreditPaymentList", "Configuration")', passdata);
+    }
+    @***************DateRange End******************@
+
+    $(".btnPrint").click(function () {
+        var data = "supplierId=" + @Model.SupplierId + "&days=" + days + "&from=" + from + "&to=" + to;
+        window.open('@Url.Action("CreditPaymentPrint", "Configuration")?q=' + btoa(data), '_blank');
+    });
+
+    $("#btnSeeMore").click(function () {
+        count = count + 20;
+        if (count >= @listCount)
+        {
+            $("#btnSeeMore").hide();
+        }
+        passdata = { supplierId: @Model.SupplierId, count: count };
+        $("#paymentList").empty();
+        $("#paymentList").append('<div class="loading_partial"></div>');
+        $("#paymentList").load('@Url.Action("CreditPaymentList", "Configuration")', passdata);
+    })
+
+</script>

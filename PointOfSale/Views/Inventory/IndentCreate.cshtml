@@ -1,0 +1,212 @@
+﻿@{
+    ViewBag.Title = "IndentCreate";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+}
+<style>
+    .k-input {
+        height: 26px !important;
+        width: 100%;
+        max-width: 100%;
+        padding-left: 8px;
+    }
+    .quantity {
+        width : 80%;
+        max-width : 80%;
+    }
+</style>
+@*<section class="content-header">
+    <ol class="breadcrumb">
+        <li><a href=""><i class="fa fa-shopping-cart"></i> Inventory</a></li>
+        <li><a href="/Inventory/IndentHistory"><i class="fa fa-indent"></i> Indent History</a></li>
+        <li class="active"><a href="/Inventory/IndentCreate"><i class="fa fa-plus-circle"></i> Add New Indent</a></li>
+    </ol>
+</section>*@
+<section class="content">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4 class="uppercase"><i class="fa fa-plus-circle"></i> add new indent</h4>
+            </div>
+            <div class="pull-right">
+                <a class="btn btn-default" href="/Inventory/IndentHistory"><i class="fa fa-arrow-left"></i> Back</a>
+            </div>
+        </div>
+        <div class="panel-body">
+            <div class="row" style="margin: 0;">
+                <div class="col-md-6">
+                    @(Html.Kendo().AutoComplete()
+                            .Name("productsAutoComplete")
+                            .Placeholder("Type product name...")
+                            .HtmlAttributes(new { style = "width:100%; max-width:100%" })
+                            .MinLength(3)
+                            .DataTextField("Text")
+                            .Filter("contains")
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("GetProductListForText", "PointOfSale")
+                                       .Data("additionInfo");
+                                })
+                               .ServerFiltering(true);
+                            })
+                            .Events(e =>
+                            {
+                                e.Change("onChangeProduct").Select("onSelectProduct");
+                            })
+                    )
+                    <span class="k-icon k-i-search" style="margin-top:-25px;float:right;margin-right:10px; position:relative">&nbsp;</span>
+                </div>
+                <div class="col-md-6">
+
+                </div>
+            </div>
+            <div class="row" style="margin:0; margin-top:5px; overflow-x:auto">
+                <div class="col-md-12">
+                    <div id="divProductList">
+                        <table class="table table-bordered" id="tblProductList">
+                            <tr>
+                                <th>Product Name</th>
+                                <th>Quantity</th>
+                                <th>Price</th>
+                                <th>Comments</th>
+                                <th></th>
+                            </tr>
+                            <tr id="emptyRow">
+                                <td colspan="5">
+                                    <h3>Please select product</h3>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="text-right">
+                        <button class="btn btn-success" id="btnIndentSave"><i class="fa fa-save"></i> Save</button>
+                        <a class="btn btn-info" href="/Inventory/IndentCreate" id="btnTagItemRefresh"><i class="fa fa-refresh"></i> Refresh</a>
+                        <a class="btn btn-warning" href="/Inventory/IndentHistory"><i class="fa fa-times"></i> Cancel</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<script>
+    var rowId = 0;
+    var validation;
+    $(document).ready(function () {
+        $("#btnIndentSave").prop('disabled', true);
+        $("#liForInventory").addClass('active');
+        $("#liForStock").addClass('active');
+        validation = $("#divProductList").kendoValidator().data("kendoValidator");
+    });
+    //Product autocomplete
+    function additionInfo() {
+        var ids = [];
+        $(".products").each(function () {
+            ids.push($(this).data("rowid"));
+        });
+        return {
+            ids: ids.join(","),
+            text: $("#productsAutoComplete").val()
+        }
+    }
+    function onChangeProduct() {
+        $("#productsAutoComplete").data("kendoAutoComplete").value("");
+    }
+    function onSelectProduct(e) {
+        rowId = this.dataItem(e.item.index()).Value;
+        $.ajax({
+            url: '@Url.Action("GetProduct", "PointOfSale")',
+                type: 'Get',
+                data: { rowId: rowId },
+                success: function (data)
+                {
+                    if (data == "error")
+                    {
+                        alert("Not Found...");
+                    }
+                    else
+                    {
+                        $("#btnIndentSave").prop('disabled', false);
+                        if ($("#emptyRow").length == 1)
+                        {
+                            $("#emptyRow").hide();
+                        }
+                        if ($("#product_" + rowId).length == 1)
+                        {
+                            alert("This product already add to import list")
+                        }
+                        else {
+                            $("#tblProductList").append('<tr id="product_' + rowId + '" class="products" data-rowid="' + rowId + '" data-productid="' + data.ProductId + '" data-distributeid="' + data.DistributeId + '" data-productname="' + data.ProductName + '">' +
+                                '<td>' + data.ProductName + '</td>' +
+                                '<td>' +
+                                '<input type="number" min="0" class="k-input quantity" placeholder="Quantity" id="quantity_' + rowId + '" name="quantity_' + rowId + '" data-val-required="*"/> ' +
+                                '<span>Piece/s</span><br>' +
+                                '<span class="field-validation-valid text-danger" data-valmsg-for="quantity_' + rowId + '" data-valmsg-replace="true"></span>' +
+                                '</td>' +
+                                '<td>' +
+                                '<input type="number" min="0" class="k-input" placeholder="Unit Price" id="price_' + rowId + '" name="price_' + rowId + '"/>' +
+                                '</td>' +
+                                '<td>' +
+                                '<input type="text" class="k-input" placeholder="Comments" id="comments_' + rowId + '" name="comments_' + rowId + '"/>' +
+                                '</td>' +
+                                '<td>' +
+                                '<span id="btnCancelProduct" data-id="' + rowId + '"><i class="fa fa-times" aria-hidden="true" style="font-size:24px;cursor:pointer"></i></span>' +
+                                '</td>' +
+                                '</tr > ');
+                        }
+                    }
+                },
+                error: function() {
+                    alert("Not Found...");
+                    $("#productsAutoComplete").data("kendoAutoComplete").value("");
+                }
+        });
+    }
+    //******************cancel product from list
+    $("#tblProductList").on('click', '#btnCancelProduct', function () {
+        rowId = $(this).data("id");
+        $("#product_" + rowId).remove();
+        if ($("#tblProductList tr").length == 2) {
+            $("#btnIndentSave").prop('disabled', true);
+            $("#emptyRow").show();
+        }
+    });
+
+    //Indent save
+    $("#btnIndentSave").click(function () {
+        if (validation.validate())
+        {
+            var indentData = [];
+            $(".products").each(function () {
+                rowId = parseInt($(this).data("rowid"));
+                indentData.push({
+                    ProductId: parseInt($(this).data("productid")),
+                    DistributeId: $(this).data("distributeid"),
+                    ProductName: $(this).data("productname"),
+                    Quantity: $("#quantity_" + rowId).val(),
+                    PeritemCost: $("#price_" + rowId).val(),
+                    Comment: $("#comments_" + rowId).val()
+                });
+            });
+
+            $.ajax({
+                url: '@Url.Action("IndentSave","Inventory")',
+                type: 'POST',
+                data: JSON.stringify({ createdBy: userId, IndentData: indentData }),
+                contentType: 'application/json',
+                success: function (data) {
+                    if (data == "success") {
+                        window.location.href = "/Inventory/IndentHistory";
+                    }
+                    else {
+                        alert("Save error...");
+                    }
+                }
+            });
+        }
+    });
+
+
+
+
+</script>

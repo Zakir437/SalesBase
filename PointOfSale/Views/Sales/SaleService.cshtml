@@ -1,0 +1,222 @@
+﻿@{
+    ViewBag.Title = "SaleService";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+}
+<section class="content">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4 class="uppercase">Sale Service</h4>
+            </div>
+        </div>
+        <div class="panel-body">
+            <a class="btn btn-success" href="/Sales/SaleServiceCreate"><i class="fa fa-plus-circle" aria-hidden="true"></i> Add</a>
+            <a class="btn btn-info" href="/Sales/ProductServiceInfo"><i class="fa fa-list-ul" aria-hidden="true"></i> Product Service</a>
+            <a class="btn btn-info" href="/Sales/SupplementaryItems"><i class="fa fa-list-ul" aria-hidden="true"></i> Supplementary</a>
+            <a class="btn btn-info" href="/Sales/Service"><i class="fa fa-list-ul" aria-hidden="true"></i> Service</a>
+            @*<a class="btn btn-info" href="/Sales/AfterSaleWasteCreate"><i class="fa fa-list-ul" aria-hidden="true"></i> Waste</a>*@
+        </div>
+        <div class="panel-heading">
+            <ul class="nav nav-tabs">
+                <li class="active" id="liForServicesList"><a href="#tab1ServicesList" data-toggle="tab">Services</a></li>
+                <li id="liForIncomplete"><a href="#tab2IncompleteList" data-toggle="tab">Incomplete</a></li>
+            </ul>
+        </div>
+        <div class="panel-body" style="border:none!important;">
+            <div class="tab-content">
+                <div class="tab-pane fade in active" id="tab1ServicesList">
+                    <div id="div_Services"></div>
+                </div>
+                <div id="tab2IncompleteList" class="tab-pane fade">
+                    <div id="div_Incomplete"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<div id="divConditionWin"></div>
+<div id="divContactWin"></div>
+<div id="divSupplementaryWin"></div>
+<div id="divConditonHistoryWin"></div>
+<div id="divStatusChangeWin"></div>
+<script>
+    var tab = 0; status = 0, id = 0, searchType = 1;
+    $(document).ready(function () {
+        $("#liForServicesList").click();
+        $("#liForSalesMenu").addClass('active');
+        $("#liForAfterSaleService").addClass('active');
+    });
+
+    function clearBeforeClick() {
+        $("#div_Services").empty();
+        $("#div_Incomplete").empty();
+    }
+
+    $("#liForServicesList").click(function () {
+        tab = 1;
+        clearBeforeClick();
+        $("#div_Services").append('<div class="loading_partial"></div>');
+        $("#div_Services").load('@Url.Action("ServicesTab", "Sales")');
+    });
+
+    $("#liForIncomplete").click(function () {
+        tab = 2;
+        clearBeforeClick();
+        $("#div_Incomplete").append('<div class="loading_partial"></div>');
+        $("#div_Incomplete").load('@Url.Action("IncompleteTab", "Sales")');
+    });
+
+    function additionInfo() {
+        return {
+            searchType: searchType,
+            status: status,
+            text: $("#searchAutocomplete").val()
+        }
+    }
+    function onChangeStatus() {
+        status = this.value();
+        $("#divServiceList").empty();
+        $("#divServiceList").append('<div class="loading_partial"></div>');
+        $("#divServiceList").load('/Sales/AfterSaleServiceList?status=' + status);
+    }
+    function onChangeItem() {
+        $("#searchAutocomplete").data("kendoAutoComplete").value("");
+    }
+    function onSelectItem(e) {
+        id = this.dataItem(e.item.index()).Value;
+        if (id > 0) {
+            $("#divServiceList").empty();
+            $("#divServiceList").append('<div class="loading_partial"></div>');
+            $("#divServiceList").load('/Sales/AfterSaleServiceList?assId=' + id + '&status=' + status);
+        }
+        else {
+            $("#divServiceList").empty();
+            $("#divServiceList").append('<div class="loading_partial"></div>');
+            $("#divServiceList").load('/Sales/AfterSaleServiceList?status=' + status);
+        }
+    }
+
+    //device condition edit
+    $("#div_Services").on('click', ".btnConditionEdit", function () {
+        id = parseInt($(this).data("id"));
+        $("#divConditionWin").empty();
+        $("#divConditionWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 767,
+            height: 318,
+            title: 'Condition',
+            resizable: false,
+            close: onWindowClose
+        });
+        var conditionWin = $("#divConditionWin").data("kendoWindow");
+        conditionWin.refresh('/Sales/ProductConditionEdit?assId=' + id);
+        conditionWin.center().open();
+        document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+        document.body.scroll = "no";
+    });
+
+    //contact information edit
+    $("#div_Services").on('click', ".btnContactInfoEdit", function () {
+        id = parseInt($(this).data("id"));
+        $("#divContactWin").empty();
+        $("#divContactWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 767,
+            height: 540,
+            title: 'Contact Info',
+            resizable: false,
+            close: onWindowClose
+        });
+        var contactWin = $("#divContactWin").data("kendoWindow");
+        contactWin.refresh('/Sales/ContactEdit?assId=' + id);
+        contactWin.center().open();
+        document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+        document.body.scroll = "no";
+    });
+
+    //Supplementary item add
+    $("#div_Services").on('click', ".btnSupplementaryEdit", function () {
+        id = parseInt($(this).data("id"));
+        $("#divSupplementaryWin").empty();
+        $("#divSupplementaryWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 767,
+            height: 540,
+            title: 'Supplementary',
+            resizable: false,
+            close: onWindowClose
+        });
+        var supplementaryWin = $("#divSupplementaryWin").data("kendoWindow");
+        supplementaryWin.refresh('/Sales/SupplementaryEdit?assId=' + id);
+        supplementaryWin.center().open();
+        document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+        document.body.scroll = "no";
+    });
+
+
+
+    //*****************Print order*********************************
+    $("#div_Services").on('click', '.btnPrint', function () {
+        id = parseInt($(this).data("id"));
+        var data = "aSaleServiceId=" + id;
+        window.open('@Url.Action("ServiceOrderPrint", "Sales")?q=' + getDataEncrypted(data), '_blank');
+    });
+
+
+    //*************view condition history****************
+    $("#div_Services").on('click', ".btnConditionHistory", function () {
+        id = parseInt($(this).data("id"));
+        $("#divConditonHistoryWin").empty();
+        $("#divConditonHistoryWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 767,
+            height: 540,
+            title: 'Condition History',
+            resizable: false,
+            close: onWindowClose
+        });
+        var conditionHistoryWin = $("#divConditonHistoryWin").data("kendoWindow");
+        conditionHistoryWin.refresh('/Sales/ConditionHistory?assId=' + id);
+        conditionHistoryWin.center().open();
+        document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+        document.body.scroll = "no";
+    });
+
+
+    //*************Status change****************
+    $("#div_Services").on('click', ".btnStatusChange", function () {
+        id = parseInt($(this).data("id"));
+        $("#divStatusChangeWin").empty();
+        $("#divStatusChangeWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 767,
+            height: 200,
+            title: 'Status Change',
+            resizable: false,
+            close: onWindowClose
+        });
+        var statusChangeWin = $("#divStatusChangeWin").data("kendoWindow");
+        statusChangeWin.refresh('/Sales/SaleServiceStatusChange?assId=' + id);
+        statusChangeWin.center().open();
+        document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+        document.body.scroll = "no";
+    });
+
+</script>
+
+

@@ -1,0 +1,143 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin-bottom:4%;margin-top:2%;">
+    <div id="div_User_Create"></div>
+    <div class="k-edit-buttons k-state-default" style="margin-left:30px;">
+        @if (ViewBag.id > 0)
+        {
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnUserCreate"><span class="k-icon k-update"></span>Update</button>
+        }
+        else
+        {
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnUserCreate"><span class="k-icon k-update"></span>Create</button>
+        }
+        <button type="reset" class="k-button k-button-icontext k-grid-update" id="btnRefreshUserForm"><span class="k-icon k-i-refresh"></span>Refresh</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnCancelUserForm"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("div_User_Create").empty();
+        $("#div_User_Create").load('@Url.Action("UserCreatePartial", "Configuration")?id=' + '@ViewBag.id');
+    });
+    $("#btnRefreshUserForm").click(function () {
+        $("#div_User_Create").empty();
+        $("#div_User_Create").load('@Url.Action("UserCreatePartial", "Configuration")?id=' + '@ViewBag.id');
+    });
+
+    $("#btnCancelUserForm").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+
+    var validaton = $("#div_User_Create").kendoValidator({
+        rules: {
+            remoteUserName: function (input) {
+                var remoteAttr = input.attr("data-val-remote-url");
+                if (typeof remoteAttr === typeof undefined || remoteAttr === false) {
+                    return true;
+                }
+                var isInvalid;
+                var data = {};
+                var Id = $("#Id").val();
+                var UserName = $.trim($("#UserName").val());
+                data = { Id: Id, UserName: UserName };
+                $.ajax({
+                    url: remoteAttr,
+                    mode: "abort",
+                    port: "validate" + input.attr('name'),
+                    dataType: "json",
+                    type: input.attr("data-val-remote-type"),
+                    data: data,
+                    async: false,
+                    success: function (response) {
+                        isInvalid = response;
+                        if (isInvalid === true) {
+                            isInvalid = true;
+                        }
+                        else {
+                            isInvalid = false;
+                        }
+                    }
+                });
+                return isInvalid;
+            },
+            remotePassword: function (input) {
+                var remoteAttr = input.attr("data-val-remote-url");
+                if (typeof remoteAttr === typeof undefined || remoteAttr === false) {
+                    return true;
+                }
+                var isInvalid;
+                var data = {};
+                var Id = $("#Id").val();
+                var Password = $.trim($("#Password").val());
+                data = { Id: Id, Password: Password };
+                $.ajax({
+                    url: remoteAttr,
+                    mode: "abort",
+                    port: "validate" + input.attr('name'),
+                    dataType: "json",
+                    type: input.attr("data-val-remote-type"),
+                    data: data,
+                    async: false,
+                    success: function (response) {
+                        isInvalid = response;
+                        if (isInvalid === true) {
+                            isInvalid = true;
+                        }
+                        else {
+                            isInvalid = false;
+                        }
+                    }
+                });
+                return isInvalid;
+            },
+            verifyPasswords: function (input) {
+                var ret = true;
+                if (input.is("[name=ConfirmPassword]")) {
+                    ret = input.val() === $("#Password").val();
+                }
+                return ret;
+            },
+        },
+        messages: {
+            remoteUserName: function (input) {
+                return input.data('val-remote');
+            },
+            remotePassword: function (input) {
+                return input.data('val-remote');
+            },
+            verifyPasswords: "Passwords do not match!",
+        }
+    }).data("kendoValidator");
+
+    $("#btnUserCreate").click(function () {
+        if (validaton.validate()) {
+            var sendData = {
+                Id: $("#Id").val(),
+                UserId: $("#UserId").val(),
+                FirstName: $("#FirstName").val(),
+                LastName: $("#LastName").val(),
+                UserName: $("#UserName").val(),
+                Password: $("#Password").val()
+            };
+            $.ajax({
+                url: '@Url.Action("CreateUserSave", "Configuration")',
+                type: 'POST',
+                data: sendData,
+                success: function (data) {
+                    if (data = "success") {
+                        $("#divUserWindow").data("kendoWindow").close();
+                        $("#divUserList").empty();
+                        $("#divUserList").append('<div class="loading_partial"></div>');
+                        $("#divUserList").load('@Url.Action("UserList", "Configuration")');
+                    }
+                    else {
+                        alert("User Save Error");
+                    }
+                }
+            });
+        }
+        else {
+            return false;
+        }
+    });
+</script>

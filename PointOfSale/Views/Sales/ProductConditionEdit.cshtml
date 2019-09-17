@@ -1,0 +1,58 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin-bottom:4%;margin-top:2%;">
+    <div id="divConditionForm"></div>
+    <div class="k-edit-buttons k-state-default" style="margin-left:30px;">
+        <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnConditionSave"><span class="k-icon k-update"></span>Save</button>
+        <button type="reset" class="k-button k-button-icontext k-grid-update" id="btnConditionWinRefresh"><span class="k-icon k-i-refresh"></span>Refresh</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnConditionWinCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#divConditionForm").append('<div class="tiny_loading"></div>');
+        $("#divConditionForm").load('@Url.Action("ProductConditionEditPartial", "Sales")');
+    });
+    $("#btnConditionWinRefresh").click(function () {
+        $("#divConditionForm").empty();
+        $("#divConditionForm").append('<div class="tiny_loading"></div>');
+        $("#divConditionForm").load('@Url.Action("ProductConditionEditPartial", "Sales")');
+    });
+
+    $("#btnConditionWinCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+
+    var validation = $("#divConditionForm").kendoValidator({
+
+    }).data("kendoValidator");
+
+    $("#btnConditionSave").click(function () {
+        if (validation.validate())
+        {
+            var sendData = {
+                assId: '@ViewBag.AfterSaleServiceId',
+                conditionId: $("#ConditionDropdown").val(),
+                observation: $("#conditionObservation").val(),
+                createdBy: userId
+            }
+            $.ajax({
+                url: '/Sales/ConditionSave',
+                type: "POST",
+                data: sendData,
+                success: function (result) {
+                    $("#divConditionWin").data("kendoWindow").close();
+                    if (result == "success") {
+
+                    }
+                    else {
+                        alert("Save Error");
+                    }
+                }
+            });
+        }
+    });
+</script>
+
+
+
+
+

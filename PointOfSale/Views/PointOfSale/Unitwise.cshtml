@@ -1,0 +1,181 @@
+﻿@model PointOfSale.Models.ViewProduct
+@Html.HiddenFor(a => a.ProductName)
+@Html.HiddenFor(a => a.IsPriceChangeAllow)
+@Html.HiddenFor(a => a.ProductId)
+@Html.HiddenFor(a=>a.IsUnitWise)
+@Html.HiddenFor(a => a.IsDiscountAllow)
+@Html.HiddenFor(a => a.IsRefundAllow)
+@Html.HiddenFor(a => a.IsUniqueItem)
+<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin-bottom:4%;margin-top:2%;">
+    <div id="divUnitWise"></div>
+    <div class="text-center k-edit-buttons k-state-default" style="margin-left:8px;">
+        <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnAccept"><span class="k-icon k-update"></span>Accept</button>
+        <button type="reset" class="k-button k-button-icontext k-grid-update" id="btnRefresh"><span class="k-icon k-i-refresh"></span>Refresh</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+    var unitType = 1;
+    $(document).ready(function () {
+        price = @Model.Price;
+        //if purchase order price exist
+        if (poPrice > 0)
+        {
+            price = poPrice;
+        }
+
+        @*if (@Model.OfferPrice > 0)
+        {
+            price = @Model.OfferPrice;
+        }*@
+
+        $("#divUnitWise").append('<div class="tiny_loading"></div>');
+        $("#divUnitWise").load('@Url.Action("UnitwisePartial", "PointOfSale")');
+    });
+    $("#btnRefresh").click(function () {
+        $("#divUnitWise").empty();
+        $("#divUnitWise").append('<div class="tiny_loading"></div>');
+        $("#divUnitWise").load('@Url.Action("UnitwisePartial", "PointOfSale")');
+    });
+    $("#btnCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+    var unitValidaton = $("#divUnitWise").kendoValidator().data("kendoValidator");
+    $("#btnAccept").click(function () {
+        if (unitValidaton.validate())
+        {
+             count++;
+             if (unitType == 1) // type 1 for add product by weight wise
+             {
+                 if (purchaseOrderQty > 0 && $("#UnitAmount").val() > purchaseOrderQty)
+                 {
+                     $("#divUnitWiseWin").data("kendoWindow").close();
+                     alert("Quantity can not be greater than " + purchaseOrderQty);
+                     return false;
+                 }
+
+                 if (@Model.OfferPrice > 0)
+                 {
+                    itemPrice = parseFloat($("#UnitAmount").val()) * @Model.OfferPrice;
+                    $("#emptyCartPlaceholder").hide();
+                    $("#cartListContainer").prepend('<li class="singleCartItem" id="cartItem_' + count + '"  data-id="' + count + '" data-poitemid="' + poItemId + '" data-productid="' + @Model.ProductId +'"  data-distributeid="' + @Model.DistributeId + '" data-isunitwise="' + $("#IsUnitWise").val() + '" data-isrefundallow="' + $("#IsRefundAllow").val().toLowerCase() + '" data-productname="' + $("#ProductName").val() + '" data-isuniqueitem="' + $("#IsUniqueItem").val().toLowerCase() + '">' +
+                        '<span id="pro_' + $("#ProductId").val() + '" data-id="' + count + '" style="font-size:13px; font-weight:bold;">' +
+                        $("#ProductName").val() +
+                        '</span> | ' +
+                        '<span class="odrQuantity" title="Quantity" id="odrQuantity_' + count + '">' + $("#UnitAmount").val() +'</span>Kg|' +
+                        '<span id="divPerItemPrice_' + count + '">' +
+                        '<span id="perItemPrice_' + count + '" data-ispricechangeallow="' + $("#IsPriceChangeAllow").val().toLowerCase() + '" data-isdiscountallow="' + $("#IsDiscountAllow").val().toLowerCase() + '">' + @Model.Price + '</span >Tk | ' +
+                        ($("#UnitAmount").val() > 1 ? '<span id="divPerItemTotal_' + count + '">' +  @Model.Price * parseFloat($("#UnitAmount").val()) + '</span> Tk | ': '') +
+                        '<span id="price_' + count + '" data-id="' + count + '" data-price = "' + @Model.Price + '"  class="subitemPrice" data-isdiscountallow="' + $("#IsDiscountAllow").val().toLowerCase() + '">' + itemPrice.toFixed(2) + '</span>' +
+                        'Tk' +
+                        '</span>' +
+                        '<span class="pull-right">' +
+                        '<input type="checkbox" class="checkBorrow" id="checkBorrow_' + count + '" data-id="' + count + '" data-associateid="0" />' +
+                        '<span class="fa fa-times-circle itemCancel" data-id="' + count + '"></span>' +
+                        '</span>' +
+                        '<br />' +
+                        (@Model.OfferPrice > 0 ? '<div id= "discPerItem_' + count + '">Discount(<span id="discount_' + count + '" data-disctype="0" data-offertype="2" data-offerid="'+ @Model.OfferId +'">' + @Model.PercentageOff + '</span> %) | -<span id="discPerUnit_' + count + '">' + @Model.AmountOff * parseFloat($("#UnitAmount").val()) + '</span> Tk <span class="discPerItemCancel" data-id ="' + count + '">' +
+                                                //'<span class="fa fa-times-circle"></span>' +
+                                                '</span></div>' : '<span id="discPerItem_' + count + '"></span>') +
+                        '<span id="discCouponPerItem_' + count + '"></span>' +
+                        ('@Model.IsAfterSaleService' == 'True' ? @Model.ServiceName + '(<span id="service_' + count + '">' + @Model.ServiceDays + '</span>days)' : "") +
+                        '<span class="pull-right">' + ('@Model.IsPointBased' == 'True' ? 'Points(<span id="points_' + count + '">' + @Model.Points + '</span>)' : "") + '</span>' +
+                        '</li>');
+                 }
+                 else
+                 {
+                     itemPrice = parseFloat($("#UnitAmount").val()) * price;
+                    $("#emptyCartPlaceholder").hide();
+                    $("#cartListContainer").prepend('<li class="singleCartItem" id="cartItem_' + count + '"  data-id="' + count + '" data-poitemid="' + poItemId + '" data-productid="' + @Model.ProductId +'"  data-distributeid="' + @Model.DistributeId + '" data-isunitwise="' + $("#IsUnitWise").val() + '" data-isrefundallow="' + $("#IsRefundAllow").val().toLowerCase() + '" data-productname="' + $("#ProductName").val() + '" data-isuniqueitem="' + $("#IsUniqueItem").val().toLowerCase() + '">' +
+                        '<span id="pro_' + $("#ProductId").val() + '" data-id="' + count + '" style="font-size:13px; font-weight:bold;">' +
+                        $("#ProductName").val() +
+                        '</span> | ' +
+                        '<span class="odrQuantity" title="Quantity" id="odrQuantity_' + count + '">' + $("#UnitAmount").val() +'</span>Kg|' +
+                        '<span id="divPerItemPrice_' + count + '">' +
+                        '<span id="perItemPrice_' + count + '" data-ispricechangeallow="' + $("#IsPriceChangeAllow").val().toLowerCase() + '" data-isdiscountallow="' + $("#IsDiscountAllow").val().toLowerCase() + '">' + price + '</span >Tk | ' +
+                        '<span id="price_' + count + '"  data-id="' + count + '" data-price = "' + @Model.Price + '" class="subitemPrice" data-isdiscountallow="' + $("#IsDiscountAllow").val().toLowerCase() + '">' + itemPrice.toFixed(2) + '</span>' +
+                        'Tk' +
+                        '</span>' +
+                        '<span class="pull-right">' +
+                        '<input type="checkbox" class="checkBorrow" id="checkBorrow_' + count + '" data-id="' + count + '" data-associateid="0" />' +
+                        '<span class="fa fa-times-circle itemCancel" data-id="' + count + '"></span>' +
+                        '</span>' +
+                        '<br />' +
+                        '<span id="discPerItem_' + count + '"></span>' +
+                        '<span id="discCouponPerItem_' + count + '"></span>' +
+                        ('@Model.IsAfterSaleService' == 'True' ? @Model.ServiceName + '(<span id="service_' + count + '">' + @Model.ServiceDays + '</span>days)' : "") +
+                        '<span class="pull-right">' + ('@Model.IsPointBased' == 'True' ? 'Points(<span id="points_' + count + '">' + @Model.Points + '</span>)' : "") + '</span>' +
+                        '</li>');
+                 }
+             }
+             else
+             {
+                 itemPrice = parseFloat($("#UnitAmount").val());
+                 quantity = itemPrice / price;
+
+                 if (purchaseOrderQty > 0 && quantity > purchaseOrderQty) {
+                     $("#divUnitWiseWin").data("kendoWindow").close();
+                     alert("Quantity can not be greater than " + purchaseOrderQty);
+                     return false;
+                 }
+
+                 if (@Model.OfferPrice > 0)
+                 {
+
+                     quantity = itemPrice / @Model.OfferPrice;
+
+                     $("#emptyCartPlaceholder").hide();
+                     $("#cartListContainer").prepend('<li class="singleCartItem" id="cartItem_' + count + '" data-id="' + count + '" data-poitemid="' + poItemId + '"  data-productid="' + @Model.ProductId +'" data-distributeid="' + @Model.DistributeId + '" data-isunitwise="' + $("#IsUnitWise").val() + '" data-isrefundallow="' + $("#IsRefundAllow").val().toLowerCase() + '" data-productname="' + $("#ProductName").val() + '" data-isuniqueitem="' + $("#IsUniqueItem").val().toLowerCase() + '">' +
+                            '<span id="pro_' + $("#ProductId").val() + '"  data-id="' + count + '" style="font-size:13px; font-weight:bold;">' +
+                            $("#ProductName").val() +
+                            '</span> | ' +
+                            '<span class="odrQuantity" title="Quantity" id="odrQuantity_' + count + '">' + quantity.toFixed(2) + '</span>Kg|' +
+                            '<span id="divPerItemPrice_' + count + '">' +
+                         '<span id="perItemPrice_' + count + '" data-ispricechangeallow="' + $("#IsPriceChangeAllow").val().toLowerCase() + '" data-isdiscountallow="' + $("#IsDiscountAllow").val().toLowerCase() + '">' + @Model.Price + '</span >Tk | ' +
+                         (quantity > 1 ? '<span id="divPerItemTotal_' + count + '">' + (@Model.Price * quantity).toFixed(2) + '</span> Tk | ' : '') +
+                            '<span id="price_' + count + '" class="subitemPrice" data-isdiscountallow="' + $("#IsDiscountAllow").val().toLowerCase() + '">' + itemPrice.toFixed(2) + '</span>' +
+                            'Tk' +
+                            '</span>' +
+                            '<span class="pull-right">' +
+                            '<input type="checkbox" class="checkBorrow" id="checkBorrow_' + count + '" data-id="' + count + '" data-associateid="0" />' +
+                            ' <span class="fa fa-times-circle itemCancel" data-id="' + count + '"></span>' +
+                            '</span> ' +
+                            '<br/>' +
+                           (@Model.OfferPrice > 0 ? '<div id= "discPerItem_' + count + '" data-disctype="0">Discount(<span id="discount_' + count + '">' + @Model.PercentageOff + '</span> %) | -<span id="discPerUnit_' + count + '">' + (@Model.AmountOff * quantity).toFixed(2) + '</span> Tk <span class="discPerItemCancel" data-id ="' + count + '">' +
+                                //'<span class="fa fa-times-circle"></span>' +
+                             '</span></div>' : '') +
+
+                            ('@Model.IsAfterSaleService' == 'True' ? @Model.ServiceName + '(<span id="service_' + count + '">' + @Model.ServiceDays + '</span>days)' : "") +
+                            '<span class="pull-right">' + ('@Model.IsPointBased' == 'True' ? 'Points(<span id="points_' + count + '">' + @Model.Points + '</span>)' : "") + '</span>' +
+                            '</li>');
+                 }
+                 else
+                 {
+
+                     $("#emptyCartPlaceholder").hide();
+                     $("#cartListContainer").prepend('<li class="singleCartItem" id="cartItem_' + count + '" data-id="' + count + '" data-poitemid="' + poItemId + '"  data-productid="' + @Model.ProductId +'" data-distributeid="' + @Model.DistributeId + '" data-isunitwise="' + $("#IsUnitWise").val() + '" data-isrefundallow="' + $("#IsRefundAllow").val().toLowerCase() + '" data-productname="' + $("#ProductName").val() + '" data-isuniqueitem="' + $("#IsUniqueItem").val().toLowerCase() + '">' +
+                            '<span id="pro_' + $("#ProductId").val() + '"  data-id="' + count + '" style="font-size:13px; font-weight:bold;">' +
+                            $("#ProductName").val() +
+                            '</span> | ' +
+                            '<span class="odrQuantity" title="Quantity" id="odrQuantity_' + count + '">' + quantity.toFixed(2) + '</span>Kg|' +
+                            '<span id="divPerItemPrice_' + count + '">' +
+                            '<span id="perItemPrice_' + count + '" data-ispricechangeallow="' + $("#IsPriceChangeAllow").val().toLowerCase() + '" data-isdiscountallow="' + $("#IsDiscountAllow").val().toLowerCase() + '">' + price + '</span >Tk | ' +
+                            '<span id="price_' + count + '" class="subitemPrice" data-isdiscountallow="' + $("#IsDiscountAllow").val().toLowerCase() + '">' + itemPrice.toFixed(2) + '</span>' +
+                            'Tk' +
+                            '</span>' +
+                            '<span class="pull-right">' +
+                            '<input type="checkbox" class="checkBorrow" id="checkBorrow_' + count + '" data-id="' + count + '" data-associateid="0" />' +
+                            ' <span class="fa fa-times-circle itemCancel" data-id="' + count + '"></span>' +
+                            '</span> ' +
+                            ('@Model.IsAfterSaleService' == 'True' ? @Model.ServiceName + '(<span id="service_' + count + '">' + @Model.ServiceDays + '</span>days)' : "") +
+                            '<span class="pull-right">' + ('@Model.IsPointBased' == 'True' ? 'Points(<span id="points_' + count + '">' + @Model.Points + '</span>)' : "") + '</span>' +
+                            '</li>');
+                 }
+             }
+             calculateCartAmount();
+             poItemId = 0;
+             poPrice = 0;
+            $("#divUnitWiseWin").data("kendoWindow").close();
+        }
+    });
+</script>

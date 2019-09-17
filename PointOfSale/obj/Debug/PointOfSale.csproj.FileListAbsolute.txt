@@ -1,0 +1,188 @@
+G:\Zakir\PointOfSale\PointOfSale\bin\PointOfSale.dll.config
+G:\Zakir\PointOfSale\PointOfSale\bin\PointOfSale.dll
+G:\Zakir\PointOfSale\PointOfSale\bin\PointOfSale.pdb
+G:\Zakir\PointOfSale\PointOfSale\bin\Antlr3.Runtime.dll
+G:\Zakir\PointOfSale\PointOfSale\bin\Microsoft.Web.Infrastructure.dll
+G:\Zakir\PointOfSale\PointOfSale\bin\Newtonsoft.Json.dll
+G:\Zakir\PointOfSale\PointOfSale\bin\System.Web.Helpers.dll
+G:\Zakir\PointOfSale\PointOfSale\bin\System.Web.Mvc.dll
+G:\Zakir\PointOfSale\PointOfSale\bin\System.Web.Optimization.dll
+G:\Zakir\PointOfSale\PointOfSale\bin\System.Web.Razor.dll
+G:\Zakir\PointOfSale\PointOfSale\bin\System.Web.WebPages.Deployment.dll
+G:\Zakir\PointOfSale\PointOfSale\bin\System.Web.WebPages.dll
+G:\Zakir\PointOfSale\PointOfSale\bin\System.Web.WebPages.Razor.dll
+G:\Zakir\PointOfSale\PointOfSale\bin\WebGrease.dll
+G:\Zakir\PointOfSale\PointOfSale\bin\System.Web.Helpers.xml
+G:\Zakir\PointOfSale\PointOfSale\bin\System.Web.Mvc.xml
+G:\Zakir\PointOfSale\PointOfSale\bin\System.Web.Optimization.xml
+G:\Zakir\PointOfSale\PointOfSale\bin\System.Web.Razor.xml
+G:\Zakir\PointOfSale\PointOfSale\bin\System.Web.WebPages.xml
+G:\Zakir\PointOfSale\PointOfSale\bin\System.Web.WebPages.Deployment.xml
+G:\Zakir\PointOfSale\PointOfSale\bin\System.Web.WebPages.Razor.xml
+G:\Zakir\PointOfSale\PointOfSale\bin\Antlr3.Runtime.pdb
+G:\Zakir\PointOfSale\PointOfSale\bin\Newtonsoft.Json.xml
+G:\Zakir\PointOfSale\PointOfSale\obj\Debug\PointOfSale.csprojResolveAssemblyReference.cache
+G:\Zakir\PointOfSale\PointOfSale\obj\Debug\PointOfSale.dll
+G:\Zakir\PointOfSale\PointOfSale\obj\Debug\PointOfSale.pdb
+G:\Zakir\PointOfSale\PointOfSale\bin\EntityFramework.dll
+G:\Zakir\PointOfSale\PointOfSale\bin\EntityFramework.SqlServer.dll
+G:\Zakir\PointOfSale\PointOfSale\bin\EntityFramework.xml
+G:\Zakir\PointOfSale\PointOfSale\bin\EntityFramework.SqlServer.xml
+D:\Zakir\PointOfSale\PointOfSale\bin\PointOfSale.dll.config
+D:\Zakir\PointOfSale\PointOfSale\bin\PointOfSale.dll
+D:\Zakir\PointOfSale\PointOfSale\bin\PointOfSale.pdb
+D:\Zakir\PointOfSale\PointOfSale\bin\Antlr3.Runtime.dll
+D:\Zakir\PointOfSale\PointOfSale\bin\EntityFramework.dll
+D:\Zakir\PointOfSale\PointOfSale\bin\EntityFramework.SqlServer.dll
+D:\Zakir\PointOfSale\PointOfSale\bin\Microsoft.Web.Infrastructure.dll
+D:\Zakir\PointOfSale\PointOfSale\bin\Newtonsoft.Json.dll
+D:\Zakir\PointOfSale\PointOfSale\bin\System.Web.Helpers.dll
+D:\Zakir\PointOfSale\PointOfSale\bin\System.Web.Mvc.dll
+D:\Zakir\PointOfSale\PointOfSale\bin\System.Web.Optimization.dll
+D:\Zakir\PointOfSale\PointOfSale\bin\System.Web.Razor.dll
+D:\Zakir\PointOfSale\PointOfSale\bin\System.Web.WebPages.Deployment.dll
+D:\Zakir\PointOfSale\PointOfSale\bin\System.Web.WebPages.dll
+D:\Zakir\PointOfSale\PointOfSale\bin\System.Web.WebPages.Razor.dll
+D:\Zakir\PointOfSale\PointOfSale\bin\WebGrease.dll
+D:\Zakir\PointOfSale\PointOfSale\bin\EntityFramework.xml
+D:\Zakir\PointOfSale\PointOfSale\bin\EntityFramework.SqlServer.xml
+D:\Zakir\PointOfSale\PointOfSale\bin\System.Web.Helpers.xml
+D:\Zakir\PointOfSale\PointOfSale\bin\System.Web.Mvc.xml
+D:\Zakir\PointOfSale\PointOfSale\bin\System.Web.Optimization.xml
+D:\Zakir\PointOfSale\PointOfSale\bin\System.Web.Razor.xml
+D:\Zakir\PointOfSale\PointOfSale\bin\System.Web.WebPages.xml
+D:\Zakir\PointOfSale\PointOfSale\bin\System.Web.WebPages.Deployment.xml
+D:\Zakir\PointOfSale\PointOfSale\bin\System.Web.WebPages.Razor.xml
+D:\Zakir\PointOfSale\PointOfSale\bin\Antlr3.Runtime.pdb
+D:\Zakir\PointOfSale\PointOfSale\bin\Newtonsoft.Json.xml
+D:\Zakir\PointOfSale\PointOfSale\obj\Debug\PointOfSale.csprojResolveAssemblyReference.cache
+D:\Zakir\PointOfSale\PointOfSale\obj\Debug\PointOfSale.csproj.CoreCompileInputs.cache
+D:\Zakir\PointOfSale\PointOfSale\obj\Debug\PointOfSale.dll
+D:\Zakir\PointOfSale\PointOfSale\obj\Debug\PointOfSale.pdb
+E:\Backup-Zakir (June-10-2018)\June-13-2018 POS\PointOfSale\PointOfSale\bin\PointOfSale.dll.config
+E:\Backup-Zakir (June-10-2018)\June-13-2018 POS\PointOfSale\PointOfSale\bin\PointOfSale.dll
+E:\Backup-Zakir (June-10-2018)\June-13-2018 POS\PointOfSale\PointOfSale\bin\PointOfSale.pdb
+E:\Backup-Zakir (June-10-2018)\June-13-2018 POS\PointOfSale\PointOfSale\bin\Antlr3.Runtime.dll
+E:\Backup-Zakir (June-10-2018)\June-13-2018 POS\PointOfSale\PointOfSale\bin\EntityFramework.dll
+E:\Backup-Zakir (June-10-2018)\June-13-2018 POS\PointOfSale\PointOfSale\bin\EntityFramework.SqlServer.dll
+E:\Backup-Zakir (June-10-2018)\June-13-2018 POS\PointOfSale\PointOfSale\bin\Microsoft.Web.Infrastructure.dll
+E:\Backup-Zakir (June-10-2018)\June-13-2018 POS\PointOfSale\PointOfSale\bin\Newtonsoft.Json.dll
+E:\Backup-Zakir (June-10-2018)\June-13-2018 POS\PointOfSale\PointOfSale\bin\System.Web.Helpers.dll
+E:\Backup-Zakir (June-10-2018)\June-13-2018 POS\PointOfSale\PointOfSale\bin\System.Web.Mvc.dll
+E:\Backup-Zakir (June-10-2018)\June-13-2018 POS\PointOfSale\PointOfSale\bin\System.Web.Optimization.dll
+E:\Backup-Zakir (June-10-2018)\June-13-2018 POS\PointOfSale\PointOfSale\bin\System.Web.Razor.dll
+E:\Backup-Zakir (June-10-2018)\June-13-2018 POS\PointOfSale\PointOfSale\bin\System.Web.WebPages.Deployment.dll
+E:\Backup-Zakir (June-10-2018)\June-13-2018 POS\PointOfSale\PointOfSale\bin\System.Web.WebPages.dll
+E:\Backup-Zakir (June-10-2018)\June-13-2018 POS\PointOfSale\PointOfSale\bin\System.Web.WebPages.Razor.dll
+E:\Backup-Zakir (June-10-2018)\June-13-2018 POS\PointOfSale\PointOfSale\bin\WebGrease.dll
+E:\Backup-Zakir (June-10-2018)\June-13-2018 POS\PointOfSale\PointOfSale\bin\EntityFramework.xml
+E:\Backup-Zakir (June-10-2018)\June-13-2018 POS\PointOfSale\PointOfSale\bin\EntityFramework.SqlServer.xml
+E:\Backup-Zakir (June-10-2018)\June-13-2018 POS\PointOfSale\PointOfSale\bin\System.Web.Helpers.xml
+E:\Backup-Zakir (June-10-2018)\June-13-2018 POS\PointOfSale\PointOfSale\bin\System.Web.Mvc.xml
+E:\Backup-Zakir (June-10-2018)\June-13-2018 POS\PointOfSale\PointOfSale\bin\System.Web.Optimization.xml
+E:\Backup-Zakir (June-10-2018)\June-13-2018 POS\PointOfSale\PointOfSale\bin\System.Web.Razor.xml
+E:\Backup-Zakir (June-10-2018)\June-13-2018 POS\PointOfSale\PointOfSale\bin\System.Web.WebPages.xml
+E:\Backup-Zakir (June-10-2018)\June-13-2018 POS\PointOfSale\PointOfSale\bin\System.Web.WebPages.Deployment.xml
+E:\Backup-Zakir (June-10-2018)\June-13-2018 POS\PointOfSale\PointOfSale\bin\System.Web.WebPages.Razor.xml
+E:\Backup-Zakir (June-10-2018)\June-13-2018 POS\PointOfSale\PointOfSale\bin\Antlr3.Runtime.pdb
+E:\Backup-Zakir (June-10-2018)\June-13-2018 POS\PointOfSale\PointOfSale\bin\Newtonsoft.Json.xml
+E:\Backup-Zakir (June-10-2018)\June-13-2018 POS\PointOfSale\PointOfSale\obj\Debug\PointOfSale.csprojResolveAssemblyReference.cache
+E:\Backup-Zakir (June-10-2018)\June-13-2018 POS\PointOfSale\PointOfSale\obj\Debug\PointOfSale.csproj.CoreCompileInputs.cache
+E:\Backup-Zakir (June-10-2018)\June-13-2018 POS\PointOfSale\PointOfSale\obj\Debug\PointOfSale.dll
+E:\Backup-Zakir (June-10-2018)\June-13-2018 POS\PointOfSale\PointOfSale\obj\Debug\PointOfSale.pdb
+E:\PointOfSale\PointOfSale\bin\PointOfSale.dll.config
+E:\PointOfSale\PointOfSale\bin\PointOfSale.dll
+E:\PointOfSale\PointOfSale\bin\PointOfSale.pdb
+E:\PointOfSale\PointOfSale\bin\Antlr3.Runtime.dll
+E:\PointOfSale\PointOfSale\bin\EntityFramework.dll
+E:\PointOfSale\PointOfSale\bin\EntityFramework.SqlServer.dll
+E:\PointOfSale\PointOfSale\bin\Microsoft.Web.Infrastructure.dll
+E:\PointOfSale\PointOfSale\bin\Newtonsoft.Json.dll
+E:\PointOfSale\PointOfSale\bin\System.Web.Helpers.dll
+E:\PointOfSale\PointOfSale\bin\System.Web.Mvc.dll
+E:\PointOfSale\PointOfSale\bin\System.Web.Optimization.dll
+E:\PointOfSale\PointOfSale\bin\System.Web.Razor.dll
+E:\PointOfSale\PointOfSale\bin\System.Web.WebPages.Deployment.dll
+E:\PointOfSale\PointOfSale\bin\System.Web.WebPages.dll
+E:\PointOfSale\PointOfSale\bin\System.Web.WebPages.Razor.dll
+E:\PointOfSale\PointOfSale\bin\WebGrease.dll
+E:\PointOfSale\PointOfSale\bin\EntityFramework.xml
+E:\PointOfSale\PointOfSale\bin\EntityFramework.SqlServer.xml
+E:\PointOfSale\PointOfSale\bin\System.Web.Helpers.xml
+E:\PointOfSale\PointOfSale\bin\System.Web.Mvc.xml
+E:\PointOfSale\PointOfSale\bin\System.Web.Optimization.xml
+E:\PointOfSale\PointOfSale\bin\System.Web.Razor.xml
+E:\PointOfSale\PointOfSale\bin\System.Web.WebPages.xml
+E:\PointOfSale\PointOfSale\bin\System.Web.WebPages.Deployment.xml
+E:\PointOfSale\PointOfSale\bin\System.Web.WebPages.Razor.xml
+E:\PointOfSale\PointOfSale\bin\Antlr3.Runtime.pdb
+E:\PointOfSale\PointOfSale\bin\Newtonsoft.Json.xml
+E:\PointOfSale\PointOfSale\obj\Debug\PointOfSale.csproj.CoreCompileInputs.cache
+E:\PointOfSale\PointOfSale\obj\Debug\PointOfSale.dll
+E:\PointOfSale\PointOfSale\obj\Debug\PointOfSale.pdb
+E:\PointOfSale\PointOfSale\obj\Debug\PointOfSale.csprojAssemblyReference.cache
+E:\PointOfSale\PointOfSale\obj\Debug\PointOfSale.csproj.CopyComplete
+C:\Users\zakir\Downloads\Compressed\PointOfSale\PointOfSale\bin\PointOfSale.dll.config
+C:\Users\zakir\Downloads\Compressed\PointOfSale\PointOfSale\bin\PointOfSale.dll
+C:\Users\zakir\Downloads\Compressed\PointOfSale\PointOfSale\bin\PointOfSale.pdb
+C:\Users\zakir\Downloads\Compressed\PointOfSale\PointOfSale\bin\Antlr3.Runtime.dll
+C:\Users\zakir\Downloads\Compressed\PointOfSale\PointOfSale\bin\EntityFramework.dll
+C:\Users\zakir\Downloads\Compressed\PointOfSale\PointOfSale\bin\EntityFramework.SqlServer.dll
+C:\Users\zakir\Downloads\Compressed\PointOfSale\PointOfSale\bin\Microsoft.Web.Infrastructure.dll
+C:\Users\zakir\Downloads\Compressed\PointOfSale\PointOfSale\bin\Newtonsoft.Json.dll
+C:\Users\zakir\Downloads\Compressed\PointOfSale\PointOfSale\bin\System.Web.Helpers.dll
+C:\Users\zakir\Downloads\Compressed\PointOfSale\PointOfSale\bin\System.Web.Mvc.dll
+C:\Users\zakir\Downloads\Compressed\PointOfSale\PointOfSale\bin\System.Web.Optimization.dll
+C:\Users\zakir\Downloads\Compressed\PointOfSale\PointOfSale\bin\System.Web.Razor.dll
+C:\Users\zakir\Downloads\Compressed\PointOfSale\PointOfSale\bin\System.Web.WebPages.Deployment.dll
+C:\Users\zakir\Downloads\Compressed\PointOfSale\PointOfSale\bin\System.Web.WebPages.dll
+C:\Users\zakir\Downloads\Compressed\PointOfSale\PointOfSale\bin\System.Web.WebPages.Razor.dll
+C:\Users\zakir\Downloads\Compressed\PointOfSale\PointOfSale\bin\WebGrease.dll
+C:\Users\zakir\Downloads\Compressed\PointOfSale\PointOfSale\bin\EntityFramework.xml
+C:\Users\zakir\Downloads\Compressed\PointOfSale\PointOfSale\bin\EntityFramework.SqlServer.xml
+C:\Users\zakir\Downloads\Compressed\PointOfSale\PointOfSale\bin\System.Web.Helpers.xml
+C:\Users\zakir\Downloads\Compressed\PointOfSale\PointOfSale\bin\System.Web.Mvc.xml
+C:\Users\zakir\Downloads\Compressed\PointOfSale\PointOfSale\bin\System.Web.Optimization.xml
+C:\Users\zakir\Downloads\Compressed\PointOfSale\PointOfSale\bin\System.Web.Razor.xml
+C:\Users\zakir\Downloads\Compressed\PointOfSale\PointOfSale\bin\System.Web.WebPages.xml
+C:\Users\zakir\Downloads\Compressed\PointOfSale\PointOfSale\bin\System.Web.WebPages.Deployment.xml
+C:\Users\zakir\Downloads\Compressed\PointOfSale\PointOfSale\bin\System.Web.WebPages.Razor.xml
+C:\Users\zakir\Downloads\Compressed\PointOfSale\PointOfSale\bin\Antlr3.Runtime.pdb
+C:\Users\zakir\Downloads\Compressed\PointOfSale\PointOfSale\bin\Newtonsoft.Json.xml
+C:\Users\zakir\Downloads\Compressed\PointOfSale\PointOfSale\obj\Debug\PointOfSale.csprojAssemblyReference.cache
+C:\Users\zakir\Downloads\Compressed\PointOfSale\PointOfSale\obj\Debug\PointOfSale.csproj.CoreCompileInputs.cache
+C:\Users\zakir\Downloads\Compressed\PointOfSale\PointOfSale\obj\Debug\PointOfSale.csproj.CopyComplete
+C:\Users\zakir\Downloads\Compressed\PointOfSale\PointOfSale\obj\Debug\PointOfSale.dll
+C:\Users\zakir\Downloads\Compressed\PointOfSale\PointOfSale\obj\Debug\PointOfSale.pdb
+E:\Data File\Project\PointOfSale\PointOfSale\bin\PointOfSale.dll.config
+E:\Data File\Project\PointOfSale\PointOfSale\bin\PointOfSale.dll
+E:\Data File\Project\PointOfSale\PointOfSale\bin\PointOfSale.pdb
+E:\Data File\Project\PointOfSale\PointOfSale\bin\Antlr3.Runtime.dll
+E:\Data File\Project\PointOfSale\PointOfSale\bin\EntityFramework.dll
+E:\Data File\Project\PointOfSale\PointOfSale\bin\EntityFramework.SqlServer.dll
+E:\Data File\Project\PointOfSale\PointOfSale\bin\Microsoft.Web.Infrastructure.dll
+E:\Data File\Project\PointOfSale\PointOfSale\bin\Newtonsoft.Json.dll
+E:\Data File\Project\PointOfSale\PointOfSale\bin\System.Web.Helpers.dll
+E:\Data File\Project\PointOfSale\PointOfSale\bin\System.Web.Mvc.dll
+E:\Data File\Project\PointOfSale\PointOfSale\bin\System.Web.Optimization.dll
+E:\Data File\Project\PointOfSale\PointOfSale\bin\System.Web.Razor.dll
+E:\Data File\Project\PointOfSale\PointOfSale\bin\System.Web.WebPages.Deployment.dll
+E:\Data File\Project\PointOfSale\PointOfSale\bin\System.Web.WebPages.dll
+E:\Data File\Project\PointOfSale\PointOfSale\bin\System.Web.WebPages.Razor.dll
+E:\Data File\Project\PointOfSale\PointOfSale\bin\WebGrease.dll
+E:\Data File\Project\PointOfSale\PointOfSale\bin\EntityFramework.xml
+E:\Data File\Project\PointOfSale\PointOfSale\bin\EntityFramework.SqlServer.xml
+E:\Data File\Project\PointOfSale\PointOfSale\bin\System.Web.Helpers.xml
+E:\Data File\Project\PointOfSale\PointOfSale\bin\System.Web.Mvc.xml
+E:\Data File\Project\PointOfSale\PointOfSale\bin\System.Web.Optimization.xml
+E:\Data File\Project\PointOfSale\PointOfSale\bin\System.Web.Razor.xml
+E:\Data File\Project\PointOfSale\PointOfSale\bin\System.Web.WebPages.xml
+E:\Data File\Project\PointOfSale\PointOfSale\bin\System.Web.WebPages.Deployment.xml
+E:\Data File\Project\PointOfSale\PointOfSale\bin\System.Web.WebPages.Razor.xml
+E:\Data File\Project\PointOfSale\PointOfSale\bin\Antlr3.Runtime.pdb
+E:\Data File\Project\PointOfSale\PointOfSale\bin\Newtonsoft.Json.xml
+E:\Data File\Project\PointOfSale\PointOfSale\obj\Debug\PointOfSale.csprojAssemblyReference.cache
+E:\Data File\Project\PointOfSale\PointOfSale\obj\Debug\PointOfSale.csproj.CoreCompileInputs.cache
+E:\Data File\Project\PointOfSale\PointOfSale\obj\Debug\PointOfSale.csproj.CopyComplete
+E:\Data File\Project\PointOfSale\PointOfSale\obj\Debug\PointOfSale.dll
+E:\Data File\Project\PointOfSale\PointOfSale\obj\Debug\PointOfSale.pdb

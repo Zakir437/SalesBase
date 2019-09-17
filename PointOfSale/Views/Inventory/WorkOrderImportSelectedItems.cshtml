@@ -1,0 +1,250 @@
+﻿@model PointOfSale.Models.ViewWorkOrder
+@{
+    ViewBag.Title = "WorkOrderImportSelectedItems";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+    PointOfSale.Models.PointOfSale_DBEntities db = new PointOfSale.Models.PointOfSale_DBEntities();
+    decimal totalPaid = 0;
+    decimal dueAmount = 0;
+    if (db.WImports.Any(a => a.WOrderId == Model.Id))
+    {
+        totalPaid = db.WImports.Where(a => a.WOrderId == Model.Id).Sum(a => a.PaidAmount);
+        dueAmount = db.WImports.Where(a => a.WOrderId == Model.Id).Sum(a => a.DueAmount);
+    }
+}
+<link href="~/Content/numpad.css" rel="stylesheet" />
+<link href="~/Content/myCss.css" rel="stylesheet" />
+<link href="~/Content/Hover/hover.css" rel="stylesheet" />
+<style>
+    .label {
+        font-size: 90%;
+    }
+    p {
+        margin: 5px 0px;
+    }
+</style>
+@*<section class="content-header">
+    <ol class="breadcrumb">
+        <li><a href=""><i class="fa fa-shopping-cart"></i> Inventory</a></li>
+        <li><a href="/Inventory/WorkOrderImport"><i class="fa fa-indent"></i> Work-Order Import</a></li>
+        <li class="active"><a href=""><i class="fa fa-list-ul"></i> Work-Order Import Selected Items</a></li>
+    </ol>
+</section>*@
+<section class="content">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4 class="uppercase">Work-Order Voucher Details</h4>
+            </div>
+            <div class="pull-right">
+                <button type="button" class="btn btn-default" id="btnBack"><i class="fa fa-arrow-left"></i> Back</button>
+            </div>
+        </div>
+        <div class="panel-body">
+            <h2>
+                @Model.VoucherName
+            </h2>
+            <div class="row">
+                <div class="col-xs-6">
+                    <dl class="dl-horizontal">
+                        <dt>Supplier</dt>
+                        <dd>@Model.SupplierName</dd>
+                        <dt>Created By</dt>
+                        <dd>@Model.CreatedBy</dd>
+                        <dt>Created Date</dt>
+                        <dd>@Convert.ToDateTime(Model.CreatedDate).ToString("MMMM dd yyyy hh:mm:ss tt")</dd>
+                        <dt>Status</dt>
+                        <dd>
+                            @if (Model.Status == 1)
+                            {
+                                <span class="label label-primary">Pending Approval</span>
+                            }
+                            else if (Model.Status == 2)
+                            {
+                                <span class="label label-warning">Partial Approved</span>
+                            }
+                            else if (Model.Status == 3)
+                            {
+                                <span class="label label-info">Approved but not completed</span>
+                            }
+                        </dd>
+                    </dl>
+                </div>
+                <div class="col-xs-6">
+                    <dl class="dl-horizontal">
+                        <dt>Paid Amount</dt>
+                        <dd>@totalPaid</dd>
+                        <dt>Due Amount</dt>
+                        <dd>@dueAmount</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+        <hr />
+        <div class="panel-body">
+            <div id="divList"></div>
+            <p class="pull-right">
+                <button class="btn btn-success" id="btnSave"><i class="fa fa-save"></i> Save</button>
+                <button class="btn btn-info" id="btnRefresh"><i class="fa fa-refresh"></i> Refresh</button>
+                <button class="btn btn-warning" id="btnCancel"><i class="fa fa-times"></i> Cancel</button>
+            </p>
+        </div>
+    </div>
+</section>
+<div id="divImportPayWin"></div>
+<script>
+    var itemId = 0, selectedIds = [], id = 0;
+    $(document).ready(function () {
+        $("#liForInventory").addClass('active');
+        $("#liForWarehouse").addClass('active');
+
+        $("#divList").append('<div class="loading_partial"></div>');
+        $("#divList").load('@Url.Action("WorkOrderItemListForImport", "Inventory")?selectedId=' + '@ViewBag.SelectedIds' + '&isPartialImport=' + '@ViewBag.IsPartialFull');
+        var validation = $("#divList").kendoValidator().data("kendoValidator");
+
+        $("#btnSave").click(function () {
+            if (validation.validate())
+            {
+                var importData = [];
+                $(".importItem").each(function () {
+                    id = parseInt($(this).data("id"));
+                    importData.push({
+                        IndentVoucher: $(this).data("indvoucher"),
+                        ProductId: parseInt($(this).data("productid")),
+                        DistributeId: $(this).data("distributeid"),
+                        ProductName: $(this).data("productname"),
+                        Quantity: $("#qty_" + id).val(),
+                        PeritemCost: $("#txt_itemPrice_" + id).val(),
+                        Cost: parseFloat($("#itemTotal_" + id).text())
+                    });
+                });
+                var model = { ImportData: importData, SupplierId: @Model.SupplierId };
+                //totalCost = parseFloat($("#totalCost").text()).toFixed(2);
+                $("#divImportPayWin").empty();
+                $("#divImportPayWin").kendoWindow({
+                    actions: ["Close"],
+                    draggable: false,
+                    modal: true,
+                    visible: false,
+                    width: 767,
+                    height: 280,
+                    title: 'Pay',
+                    resizable: false
+                });
+                var importPayWin = $("#divImportPayWin").data("kendoWindow");
+                importPayWin.refresh({
+                    url:'/Inventory/WorkOrderImportPay',
+                    type: "POST",
+                    data: model
+                });
+                importPayWin.center().open().maximize();
+
+
+            }
+        });
+    });
+
+
+    $("#divImportPayWin").on('click', "#btnPay", function () {
+
+        var importData = [];
+        $(".importItem").each(function () {
+            id = parseInt($(this).data("id"));
+            importData.push({
+                WorkOrderItemId: id,
+                IndentId: parseInt($(this).data("indentid")),
+                Quantity: $("#qty_" + id).val(),
+                PeritemCost: $("#txt_itemPrice_" + id).val(),
+                Cost: parseFloat($("#itemTotal_" + id).text())
+            });
+        });
+
+        var payments = [];
+        $(".amountInTransaction").each(function () {
+            if ($(this).data("id") == 1) //cash
+            {
+                payments.push({
+                    PaymentTypeId: 1,
+                    PaymentBodyId: parseInt($(this).data("cashbodyid")),
+                    AmountPaid: cashAmount
+                });
+            }
+            else if ($(this).data("id") == 2) // card
+            {
+                payments.push({
+                    PaymentTypeId: 2,
+                    PaymentBodyId: parseInt($(this).data("cardbodyid")),
+                    AmountPaid: parseFloat($(this).data("cardamount")),
+                    TransactionNo: $(this).data("transactionno")
+                });
+            }
+            else if ($(this).data("id") == 3) // bkash
+            {
+                payments.push({
+                    PaymentTypeId: 3,
+                    PaymentBodyId: parseInt($(this).data("bkashbodyid")),
+                    AmountPaid: parseFloat($(this).data("bkashamount")),
+                    TransactionNo: $(this).data("transactionno")
+                });
+            }
+            else if ($(this).data("id") == 4) // check
+            {
+                payments.push({
+                    PaymentTypeId: 6,
+                    PaymentBodyId: parseInt($(this).data("checkbodyid")),
+                    AmountPaid: parseFloat($(this).data("checkamount")),
+                    TransactionNo: $(this).data("transactionno")
+                });
+            }
+            else if ($(this).data("id") == 5) //debit
+            {
+                payments.push({
+                    PaymentTypeId: 8,
+                    PaymentBodyId: 19,
+                    AmountPaid: parseFloat($(this).data("debitamount")),
+                });
+            }
+            else if ($(this).data("id") == 6) //credit
+            {
+                payments.push({
+                    PaymentTypeId: 7,
+                    PaymentBodyId: 18,
+                    AmountPaid: parseFloat($(this).data("creditamount")),
+                });
+            }
+        });
+
+        $.ajax({
+            url: '/Inventory/WorkOrderImportSave',
+            type: "POST",
+            data: JSON.stringify({ UserId: userId, Payments: payments, WorkOrderId : '@Model.Id', SupplierId: '@Model.SupplierId', ImportData: importData  }),
+            contentType: 'application/json',
+            success: function (result) {
+                if (result == "success")
+                {
+                    window.location.href = '/Inventory/WorkOrderImport';
+                }
+                else
+                {
+                    alert("Save Error");
+                }
+            }
+        });
+    });
+
+
+    $("#btnRefresh").click(function () {
+        window.location.reload();
+    });
+
+    $("#btnBack, #btnCancel").click(function () {
+        var data = "id=" + '@Model.Id';
+        window.location.href = '/Inventory/WorkOrderImportManual?q=' + getDataEncrypted(data);
+    })
+
+</script>
+
+
+
+
+
+

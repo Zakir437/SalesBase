@@ -1,0 +1,42 @@
+﻿@model IEnumerable<PointOfSale.Models.StockDailyTopReturn>
+@{
+    var count = 0;
+}
+@if (Model.Any() == true)
+{
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Date</th>
+        </tr>
+        @foreach (var list in Model)
+        {
+            count++;
+            <tr>
+                <td>@count. </td>
+                <td>@list.ProductName</td>
+                <td>@list.Quantity</td>
+                <td>@Convert.ToDateTime(list.Date).ToString("MMMM dd,yyyy")</td>
+            </tr>
+         }
+    </table>
+ }
+else
+{
+    <h3>There is no record to display</h3>
+}
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    })
+</script>
+
+
+
+
+
+
+
+

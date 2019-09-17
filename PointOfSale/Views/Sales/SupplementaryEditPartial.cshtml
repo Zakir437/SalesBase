@@ -1,0 +1,54 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewServicesSupplementary>
+<div style="width:50%!important; margin-bottom:5px;">
+    @(Html.Kendo().AutoComplete()
+            .Name("supplementaryAutoComplete")
+            .Placeholder("Type supplementary name...")
+            .HtmlAttributes(new { style = "width:100%; max-width:100%" })
+            .DataTextField("Text")
+            .Filter("contains")
+            .DataSource(source =>
+            {
+                source.Read(read =>
+                {
+                    read.Action("GetSupplementaryItems", "Sales")
+                        .Data("SuppadditionInfo");
+                })
+                .ServerFiltering(true);
+            })
+            .Events(e =>
+            {
+                e.Change("onChangeSupplementary").Select("onSelectSupplementary");
+            })
+    )
+    <span class="k-icon k-i-search" style="margin-top:-25px;float:right;margin-right:10px; position:relative">&nbsp;</span>
+</div>
+<div>
+    <table class="table table-bordered" id="tblSupplementary">
+        <tr>
+            <th>Name</th>
+            <th></th>
+        </tr>
+        <tr id="supplementaryEmptyRow">
+            <td colspan="2">
+                <h4>There is no selected items</h4>
+            </td>
+        </tr>
+        @if(Model.Any())
+         {
+            foreach(var list in Model)
+            {
+                <tr id="suppItem_@list.SupplementaryId" class="suppItem" data-id="@list.SupplementaryId" >
+                    <td>@list.SupplementaryName</td>
+                    <td>
+                        <span class="btnCancelSuppItem" data-id="@list.SupplementaryId"><i class="fa fa-times" aria-hidden="true" style="font-size:24px;cursor:pointer"></i></span>
+                    </td>
+                </tr >
+            }
+         }
+    </table>
+</div>
+<script>
+    if ($("#tblSupplementary tr").length > 2) {
+        $("#supplementaryEmptyRow").hide();
+    }
+</script>

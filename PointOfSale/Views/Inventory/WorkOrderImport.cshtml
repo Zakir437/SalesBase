@@ -1,0 +1,97 @@
+﻿@{
+    ViewBag.Title = "WorkOrderImport";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+}
+<style>
+    .k-input {
+        height: 26px !important;
+    }
+
+    p {
+        margin: 10px;
+    }
+</style>
+@*<section class="content-header">
+    <ol class="breadcrumb">
+        <li><a><i class="fa fa-shopping-cart"></i> Inventory</a></li>
+        <li><a href="/Inventory/IndentHistory"><i class="fa fa-indent"></i> Indent History</a></li>
+        <li class="active"><a href="/Inventory/WorkOrderImport"><i class="fa fa-indent"></i> Work-Order Import</a></li>
+    </ol>
+</section>*@
+<section class="content">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4 class="uppercase">APPROVED work-order VOUCHER LIST</h4>
+            </div>
+            <div class="pull-right">
+                <button class="btn btn-default" id="btnBack"><i class="fa fa-arrow-left"></i> Back</button>
+            </div>
+        </div>
+        @*<p>
+            <a class="btn btn-info" href="/Inventory/IndentHistory"><i class="fa fa-indent"></i> Indent History</a>
+            <a class="btn btn-info" href="/Inventory/Procurement"><i class="fa fa-list-ul" aria-hidden="true"></i> Procurement</a>
+            <a class="btn btn-info" href="/Inventory/CreateWorkOrder"><i class="fa fa-list-ul"></i> Create Work-Order</a>
+            <a class="btn btn-info" href="/Inventory/WorkOrder"><i class="fa fa-list-ul"></i> Work-Order History</a>
+            <a class="btn btn-success" href="/Inventory/WorkOrderImport"><i class="fa fa-list-ul"></i> Work-Order Import</a>
+            <a class="btn btn-info" href="/Inventory/WorkOrderToIndent"><i class="fa fa-list-ul"></i> Work-Order To Indent MRR</a>
+        </p>*@
+        <div class="panel-body" style="border:none!important;">
+            <div id="divList"></div>
+            @*<div class="row" style="margin : 0px; margin-bottom:5px;">
+                <div class="pull-left" style="max-width: 48%!important; width:100%;">
+                    @(Html.Kendo().MultiSelect()
+                        .Name("WorkOrderMultiselect")
+                        .DataTextField("Text")
+                        .DataValueField("Value")
+                        .Placeholder("Type voucher name...")
+                        .AutoBind(false)
+                        .Events(e => e.Change("onChangeVoucher"))
+                        .HtmlAttributes(new { style = "width: 100%;" })
+                        .DataSource(source =>
+                        {
+                            source.Read(read =>
+                            {
+                                read.Action("GetWorkOrderVoucherList", "Inventory").Data("additionalInfo"); ;
+                            })
+                            .ServerFiltering(false);
+                        })
+                    )
+                    <span class="k-icon k-i-search" style="margin-top:-25px;float:right;margin-right:10px; position:relative">&nbsp;</span>
+                </div>
+                <div class="pull-right" style="max-width: 48%!important;">
+                    <div class="pull-left" style="padding: 5px 10px;padding-right:5px!important;" id="show_Days_Title"></div>
+                    <div class="btn-group btn-group-devided pull-right" data-toggle="buttons">
+                        <div id="reportrange" class="pull-right" style="background: #fff; cursor: pointer; padding: 5px 10px; border: 1px solid #ccc; width: 100%">
+                            <span></span> <b class="caret"></b>
+                        </div>
+                    </div>
+                </div>
+            </div>*@
+           
+        </div>
+    </div>
+</section>
+<script>
+    var tab = 1, status = 0, id = 0, count = 20;
+    var days = 0, from = null, to = null;
+    var passdata = '';
+    var start = moment();
+    var end = moment().subtract(1, 'days');
+    $(document).ready(function () {
+        $("#liForInventory").addClass('active');
+        $("#liForWarehouse").addClass('active');
+
+        $("#divList").append('<div class="loading_partial"></div>');
+        $("#divList").load('@Url.Action("WorkOrderApproveVoucherList", "Inventory")');
+        //$('.ranges li').first().click();
+    });
+
+    $("#btnBack").click(function () {
+        window.history.back();
+    });
+
+</script>
+
+
+

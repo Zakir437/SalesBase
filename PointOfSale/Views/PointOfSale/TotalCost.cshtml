@@ -1,0 +1,32 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin-bottom:4%;margin-top:2%;">
+    <div id="divTotalCostForm"></div>
+    <div class="k-edit-buttons k-state-default" style="margin-left:30px;">
+        <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnTotalCostSubmit"><span class="k-icon k-update"></span>Submit</button>
+        <button type="reset" class="k-button k-button-icontext k-grid-update" id="btnRefresh"><span class="k-icon k-i-refresh"></span>Refresh</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+
+<script>
+     $(document).ready(function () {
+         $("#divTotalCostForm").empty();
+         $("#divTotalCostForm").load('@Url.Action("TotalCostPartial", "PointOfSale")');
+    });
+    $("#btnRefresh").click(function () {
+        $("#divTotalCostForm").empty();
+        $("#divTotalCostForm").load('@Url.Action("TotalCostPartial", "PointOfSale")');
+    });
+
+    $("#btnCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+
+    $("#btnTotalCostSubmit").click(function () {
+        var fromDatePicker = $("#fromDatePicker").data("kendoDateTimePicker");
+        var toDatePicker = $("#toDatePicker").data("kendoDateTimePicker");
+        $("#divTotalCostWin").data("kendoWindow").close();
+        $("#reportList").empty();
+        $("#reportList").append('<div class="loading_partial"></div>');
+        $("#reportList").load('@Url.Action("TotalCostList","PointOfSale")?FromDate=' + fromDatePicker.value().toISOString() + '&ToDate=' + toDatePicker.value().toISOString());
+    });
+</script>

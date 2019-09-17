@@ -1,0 +1,198 @@
+﻿@model PointOfSale.Models.ViewPurchaseOrder
+@{
+    ViewBag.Title = "PO_Print";
+    Layout = "~/Views/Shared/_LayoutPrintPage.cshtml";
+}
+<style>
+    hr{
+        margin:0px;
+    }
+    .dl-horizontal dt {
+        float: left;
+        width: 160px;
+        overflow: hidden;
+        clear: left;
+        text-align: right;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .dl-horizontal dd {
+        margin-left: 180px;
+    }
+    .dl-horizontal dd:before,
+    .dl-horizontal dd:after {
+        display: table;
+        content: " ";
+    }
+    .dl-horizontal dd:after {
+        clear: both;
+    }
+    .dl-horizontal dd:before,
+    .dl-horizontal dd:after {
+        display: table;
+        content: " ";
+    }
+    .dl-horizontal dd:after {
+        clear: both;
+    }
+    a:link:after,
+    a:visited:after {
+        content: "";
+        font-size: 90%;
+    }
+</style>
+<section class="content-header" style="text-align:center;">
+    <div class="row">
+        <div class="col-xs-3"></div>
+        <div class="col-xs-6">
+            <h3>Purchase Order</h3>
+            <p>Sales Base</p>
+        </div>
+        <div class="col-xs-3">
+            <button class="btn btn-default pull-right" id="btnPrint" style="margin-top:10px;"><i class="fa fa-print"></i>Print</button>
+        </div>
+    </div>
+    <hr />
+</section>
+<div class="row">
+    <div class="col-xs-offset-6 col-xs-6 text-left">
+        <p>
+            Generate By : @HttpContext.Current.Request.Cookies["CookieUserInfo"].Values["UserName"]<br>
+            Generate Date : @DateTime.Now.ToString("MMM dd yyyy hh:mm:ss tt") <br>
+        </p>
+    </div>
+    <div class="col-xs-offset-6 col-xs-6 text-right">
+
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-body">
+        <h2>
+            @Model.VoucherName
+        </h2>
+        <div class="row">
+            <div class="col-xs-6">
+                <dl class="dl-horizontal">
+                    <dt>Customer</dt>
+                    <dd>@Model.CustomerName</dd>
+                    <dt>Total Amount</dt>
+                    <dd>@Model.TotalAmount</dd>
+                    <dt>Delivery Date</dt>
+                    <dd>@Convert.ToDateTime(Model.DeliveryDate).ToString("MMMM dd yyyy hh:mm:ss tt")</dd>
+                    <dt>Status</dt>
+                    <dd>
+                        @if (Model.Status == 1)
+                        {
+                            <span class="label label-primary">Pending Approval</span>
+                        }
+                        else if (Model.Status == 2)
+                        {
+                            <span class="label label-warning">Partial Approved</span>
+                        }
+                        else if (Model.Status == 3)
+                        {
+                            <span class="label label-info">Approved but not completed</span>
+                        }
+                        else if (Model.Status == 4)
+                        {
+                            <span class="label label-success">Completed</span>
+                        }
+                        else if (Model.Status == 5)
+                        {
+                            <span class="label label-danger">Deleted</span>
+                        }
+                    </dd>
+                </dl>
+            </div>
+            <div class="col-xs-6">
+                <dl class="dl-horizontal">
+                    <dt>Created By</dt>
+                    <dd>@Model.CreatedBy</dd>
+                    <dt>Created Date</dt>
+                    <dd>@Convert.ToDateTime(Model.CreatedDate).ToString("MMMM dd yyyy hh:mm:ss tt")</dd>
+                    @*<dt>Updated By</dt>
+                    <dd>@Model.UpdatedBy</dd>
+                    <dt>Updated Date</dt>
+                    <dd>
+                        @if (Model.UpdatedDate != null)
+                        {
+                            <span>
+                                @Convert.ToDateTime(Model.UpdatedDate).ToString("MMMM dd yyyy hh:mm:ss tt")
+                            </span>
+                        }
+                        else
+                        {
+                            <span>not updated yet</span>
+                        }
+                    </dd>*@
+                    <dt>Approved By</dt>
+                    <dd>@Model.ApprovedBy</dd>
+                    <dt>Approved Date</dt>
+                    <dd>
+                        @if (Model.ApprovedDate != null)
+                        {
+                            <span>
+                                @Convert.ToDateTime(Model.ApprovedDate).ToString("MMMM dd yyyy hh:mm:ss tt")
+                            </span>
+                        }
+                        else
+                        {
+                            <span>not approved yet</span>
+                        }
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+    @if (ViewBag.Type != 5)
+     {
+        <hr />
+        <div class="panel-body">
+            <h4>PO Transaction</h4>
+            <div id="divPurchaseTransList"></div>
+        </div>
+     }
+   
+    @if (ViewBag.Type == 2 || ViewBag.Type == 4 || ViewBag.Type == 5)
+     {
+        <hr />
+        <div class="panel-body">
+            <h4>Payment Transaction</h4>
+            <div id="divPaymentTransList"></div>
+        </div>
+    }
+    @if (ViewBag.Type == 3 || ViewBag.Type == 4)
+    {
+        <hr />
+        <div class="panel-body">
+            <h4>Order Transaction</h4>
+            <div id="divSalesOrderPrint"></div>
+        </div>
+    }
+</div>
+<script>
+    $(document).ready(function () {
+        if (@ViewBag.Type != 5)
+        {
+            $("#divPurchaseTransList").append('<div class="loading_partial"></div>');
+            $("#divPurchaseTransList").load('@Url.Action("PurchaseTransList", "Sales")?id=' + "@Model.Id" + '&IsView=true');
+        }
+
+        if (@ViewBag.Type == 2 || @ViewBag.Type == 4 || @ViewBag.Type == 5)
+        {
+            $("#divPaymentTransList").append('<div class="loading_partial"></div>');
+            $("#divPaymentTransList").load('@Url.Action("PaymentHistoryList", "Sales")?poId=' + "@Model.Id");
+        }
+
+        if (@ViewBag.Type == 3 || @ViewBag.Type == 4)
+        {
+            $("#divSalesOrderPrint").append('<div class="loading_partial"></div>');
+            $("#divSalesOrderPrint").load('@Url.Action("PO_SalesOrderList", "Sales")?poId=' + "@Model.Id");
+        }
+    });
+    $("#btnPrint").click(function () {
+        $("#btnPrint").hide();
+        window.print();
+        $("#btnPrint").show();
+    });
+</script>

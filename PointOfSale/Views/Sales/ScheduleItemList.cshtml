@@ -1,0 +1,127 @@
+﻿@model IEnumerable<PointOfSale.Models.ScheduleItem>
+@{
+    var count = 0;
+    PointOfSale.Models.PointOfSale_DBEntities db = new PointOfSale.Models.PointOfSale_DBEntities();
+    var shopTime = db.MiscFuntions.Find(6); //6 for shop time
+    var startTime = new TimeSpan();
+    var endTime = new TimeSpan();
+    if(shopTime.Is24hours == false)
+    {
+        startTime = shopTime.Starttime.Value;
+        endTime = shopTime.EndTime.Value;
+    }
+}
+<table class="table table-bordered table-hover table-responsive table-condensed table-striped" id="tblScheduleItems">
+    <tr>
+        <th>Name</th>
+        <th>Start Time</th>
+        <th>End Time</th>
+        @if (ViewBag.IsMultiple == true)
+         {
+            <th width="102px"></th>
+         }
+    </tr>
+    @if (Model.Any())
+    {
+        foreach (var list in Model)
+        {
+            count++;
+            <tr id="scheduleItem_@count" class="ScheduleItem" data-id="@count" data-transid="@list.Id">
+                <td>
+                   
+                    <input type="text" class="k-textbox" id="scheduleItemName_@count" name="scheduleItemName_@count" data-id="@count" required validationMessage="*" value="@list.Name" style="width:100%" />
+                    <span class="field-validation-valid text-danger" data-valmsg-for="scheduleItemName_@count" data-valmsg-replace="true"></span>
+                </td>
+                <td>
+                    @(Html.Kendo().TimePicker()
+                        .Name("startTime_" + count)
+                        .HtmlAttributes(new { onkeydown = "javascript:return false;", style = "width: 100%; max-width:100%", required = "required", @validationMessage = "*" })
+                        .Value(list.StartTime)
+                        .Min(startTime)
+                        .Max(endTime)
+                        .Events(e => e.Change("startChange"))
+                    )
+                    <span class="field-validation-valid text-danger" data-valmsg-for="startTime_@count" data-valmsg-replace="true"></span>
+                </td>
+                <td>
+                    @(Html.Kendo().TimePicker()
+                        .Name("endTime_" + count)
+                        .HtmlAttributes(new { onkeydown = "javascript:return false;", style = "width: 100%; max-width:100%", required = "required", @validationMessage = "*" })
+                        .Value(list.EndTime)
+                        .Min(startTime)
+                        .Max(endTime)
+                        .Events(e => e.Change("endChange"))
+                    )
+                    <span class="field-validation-valid text-danger" data-valmsg-for="endTime_@count" data-valmsg-replace="true"></span>
+                </td>
+                @if (ViewBag.IsMultiple == true)
+                {
+                    <td>
+                        <span class="btn btn-default btnCancelItem" data-toggle="tooltip" title="Cancel item" data-id="@count" data-transid="@list.Id"><i class="fa fa-times-circle" aria-hidden="true" style="font-size:24px;cursor:pointer"></i></span>
+                        <span class="btn btn-default btnAddItem" data-toggle="tooltip" title="Add item" data-id="@count"><i class="fa fa-plus-circle" aria-hidden="true" style="font-size:24px;cursor:pointer"></i></span>
+                    </td>
+                 }
+            </tr>
+        }
+     }
+    else
+    {
+        count++;
+        <tr id="scheduleItem_@count" class="ScheduleItem" data-id="@count" data-transid="0">
+            <td>
+                <input type="text" class="k-textbox" id="scheduleItemName_@count" name="scheduleItemName_@count" data-id="@count" required validationMessage="*" value="" style="width:100%" />
+                <span class="field-validation-valid text-danger" data-valmsg-for="scheduleItemName_@count" data-valmsg-replace="true"></span>
+            </td>
+            <td>
+                @(Html.Kendo().TimePicker()
+                        .Name("startTime_" + count)
+                        .HtmlAttributes(new { onkeydown = "javascript:return false;", style = "width: 100%; max-width:100%", required = "required", @validationMessage = "*" })
+                        .Min(startTime)
+                        .Max(endTime)
+                        .Events(e => e.Change("startChange"))
+                )
+                <span class="field-validation-valid text-danger" data-valmsg-for="startTime_@count" data-valmsg-replace="true"></span>
+            </td>
+            <td>
+                @(Html.Kendo().TimePicker()
+                        .Name("endTime_" + count)
+                        .HtmlAttributes(new { onkeydown = "javascript:return false;", style = "width: 100%; max-width:100%", required = "required", @validationMessage = "*" })
+                        .Min(startTime)
+                        .Max(endTime)
+                        .Events(e => e.Change("endChange"))
+                )
+                <span class="field-validation-valid text-danger" data-valmsg-for="endTime_@count" data-valmsg-replace="true"></span>
+            </td>
+            @if(ViewBag.IsMultiple == true)
+             {
+                <td>
+                    <span class="btn btn-default btnCancelItem" data-toggle="tooltip" title="Cancel item" data-id="@count" data-transid="0"><i class="fa fa-times-circle" aria-hidden="true" style="font-size:24px;cursor:pointer"></i></span>
+                    <span class="btn btn-default btnAddItem" data-toggle="tooltip" title="Add item" data-id="@count"><i class="fa fa-plus-circle" aria-hidden="true" style="font-size:24px;cursor:pointer"></i></span>
+                </td>
+             }
+        </tr>
+    }
+</table>
+<script>
+    $(document).ready(function () {
+        count = @count; 
+        $(".btnCancelItem").each(function () {
+            if (count == 1)
+            {
+                $(this).hide();
+            }
+        });
+        $(".btnAddItem").each(function () {
+            if ($(this).data("id") != count)
+            {
+                $(this).hide();
+            }
+        });
+        $('[data-toggle="tooltip"]').tooltip();
+    })
+</script>
+
+
+
+
+

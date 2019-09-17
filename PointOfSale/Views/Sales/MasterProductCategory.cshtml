@@ -1,0 +1,182 @@
+﻿@model PointOfSale.Models.ViewMasterProduct
+@{
+    ViewBag.Title = "MasterProductCategory";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+}
+<section class="content">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4 class="uppercase">Master Product Category</h4>
+            </div>
+            <div class="pull-right">
+                <a class="btn btn-default" href="/Sales/Configuration/MasterProduct"><i class="fa fa-arrow-left"></i> Back</a>
+            </div>
+        </div>
+        <div class="panel-body">
+            <dl class="dl-horizontal">
+                <dt>Name</dt>
+                <dd>@Model.Name</dd>
+                <dt>Brand Name</dt>
+                <dd>@Model.BrandName</dd>
+                <dt>Created By</dt>
+                <dd>@Model.CreatedBy</dd>
+                <dt>Created Date</dt>
+                <dd>@Convert.ToDateTime(Model.CreatedDate).ToString("MMM dd,yyyy")</dd>
+                @if (Model.UpdatedDate != null)
+            {
+                    <dt>Updated By</dt>
+                    <dd>@Model.UpdatedBy</dd>
+                    <dt>Updated Date</dt>
+                    <dd>@Convert.ToDateTime(Model.UpdatedDate).ToString("MMM dd,yyyy")</dd>
+                }
+            </dl>
+        </div>
+        <hr style="margin:0;" />
+        <div class="panel-body">
+            <div class="row" style="margin: 0;">
+                <div class="col-md-6">
+                    @(Html.Kendo().MultiSelect()
+                        .Name("CategoryMultiSelect")
+                        .BindTo(ViewBag.CategoryList as SelectList)
+                        .Placeholder("--Select Category--")
+                        .DataTextField("Text")
+                        .DataValueField("Value")
+                        .Filter("contains")
+                        .HtmlAttributes(new { style = "width: 100%;" })
+                        .Events(e =>
+                        {
+                            e.Change("onChangeCategory").DataBound("onCategoryDatabound");
+                        })
+                    )
+                </div>
+                <div class="col-md-6">
+                </div>
+            </div>
+            <div class="row" style="margin:0; margin-top:5px;">
+                <div class="col-md-12">
+                    <div id="divMasterSubCategoryList"></div>
+                    <div class="text-right">
+                        <button class="btn btn-default" id="btnMasterCategorySave"><span class="k-icon k-update"></span> Save</button>
+                        <button class="btn btn-default" id="btnMasterCategoryRefresh"><span class="k-icon k-i-refresh"></span> Refresh</button>
+                        <a class="btn btn-default" href="/Sales/Configuration/MasterProduct"><span class="k-icon k-cancel"></span> Cancel</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<script>
+     var categoryIds = "", id = 0, deleteSubCategoryIds = [];
+    $(document).ready(function () {
+        $("#liForSalesMenu").addClass('active');
+        $("#liForSalesConfig").addClass('active');
+
+         $("#divMasterSubCategoryList").append('<div class="loading_partial"></div>');
+         $("#divMasterSubCategoryList").load('@Url.Action("MasterSubCategoryList", "Sales")?id=' + '@Model.Id');
+    });
+
+    $("#btnMasterCategoryRefresh").click(function () {
+        location.reload();
+    });
+
+    //*******************Category multiselect**************
+    function onChangeCategory() {
+        categoryIds = $("#CategoryMultiSelect").data("kendoMultiSelect").value().join(",");
+        $("#tblSubCategory tbody tr").remove();
+        if (categoryIds.length > 0)
+        {
+            $.ajax({
+                url: '/Sales/GetSubCategories',
+                type: "GET",
+                data: { categoryIds: categoryIds, isMultiselect : false },
+                success: function (data) {
+                    $(data).each(function (index, item) {
+                        if ($("#emptyRow").length == 1) {
+                            $("#emptyRow").hide();
+                            $("#btnMasterCategorySave").prop('disabled', false);
+                        }
+                        count++;
+                        $("#tblSubCategory tbody").append('<tr id="subCategory_' + count + '" class="subCategory" data-id="' + count + '" data-categoryid="' + item.CategoryId + '" data-subcategoryid="' + item.SubCategoryId + '" data-transid="0">' +
+                            '<td>' + item.Name + '</td>' +
+                            '<td>' +
+                            '<span class="btnCancelItem" data-id="' + count + '" data-toggle="tooltip" title="Cancel item"><i class="fa fa-times" aria-hidden="true" style="font-size:24px;cursor:pointer"></i></span>' +
+                            '</td>' +
+                            '</tr > ');
+                    });
+                }
+            });
+        }
+        else {
+            $("#emptyRow").show();
+        }
+    }
+    function onCategoryDatabound()
+    {
+         $.ajax({
+             url: '/Sales/GetCategoryByMasterProductId',
+            type: 'GET',
+            dataType: 'json',
+            data: { masterProductId: '@Model.Id' },
+            success: function (data)
+            {
+                if (data != "NotFound")
+                {
+                    $("#CategoryMultiSelect").data("kendoMultiSelect").value(data);
+                }
+            }
+        });
+    }
+     //cancel item
+    $("#divMasterSubCategoryList").on('click', '.btnCancelItem', function () {
+        var transId = parseInt($(this).data("transid"));
+        if (transId > 0)
+        {
+            deleteSubCategoryIds.push(transId);
+        }
+        id = parseInt($(this).data("id"));
+        $("#subCategory_" + id).remove();
+
+        var row_count = $('#tblSubCategory').find('tr').length;
+        if (row_count == 2)
+        {
+            $("#emptyRow").show();
+            $("#btnMasterCategorySave").prop('disabled', true);
+        }
+    });
+
+    //Master product category and subcategory Save
+    $("#btnMasterCategorySave").click(function () {
+        categoryIds = $("#CategoryMultiSelect").data("kendoMultiSelect").value().join(",");
+        var subCategorys = [];
+        $('.subCategory').each(function () {
+            subCategorys.push({
+                CategoryId: parseInt($(this).data("categoryid")),
+                SubCategoryId: parseInt($(this).data("subcategoryid"))
+            });
+        });
+        $.ajax({
+            url: '/Sales/MasterProductCategorySave',
+            type: "POST",
+            data: JSON.stringify({
+                subCategorys: subCategorys,
+                categoryIds: categoryIds,
+                deleteSubCategoryIds: deleteSubCategoryIds,
+                CreatedBy: userId,
+                masterProductId: '@Model.Id'
+            }),
+            contentType: 'application/json',
+            success: function (data)
+            {
+                if (data == "success")
+                {
+                    location.href = '/Sales/Configuration/MasterProduct';
+                }
+                else {
+                    alert("Save error...");
+                }
+            }
+        });
+    });
+
+</script>

@@ -1,0 +1,60 @@
+﻿@{ 
+    PointOfSale.Models.PointOfSale_DBEntities db = new PointOfSale.Models.PointOfSale_DBEntities();
+    int userId = ViewBag.UserId;
+    DateTime? joinDate = db.UserInformations.FirstOrDefault(a => a.UserId == userId).JoinDate;
+    bool isJoinDate = joinDate.HasValue;
+}
+<div class="col-sm-12" style="padding-left:0px!important;padding-right:0px!important;">
+    <div class="panel with-nav-tabs panel-default">
+        <div class="panel-heading">
+            <ul class="nav nav-tabs">
+                @if (ViewBag.isDisplay == false && isJoinDate == false)
+                {
+                    <li class="active"><a href="#tab1JoinDate" data-toggle="tab">Assigned Join Date</a></li>
+                }
+                else
+                {
+                    <li class="active"><a href="#tab1JoinDate" data-toggle="tab">Join Date</a></li>
+                }
+            </ul>
+        </div>
+        <div class="panel-body" style="border:none!important;">
+            <div class="tab-content">
+                <div class="tab-pane fade in active" id="tab1JoinDate"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+     $(document).ready(function () {
+         var isDisplay = '@(ViewBag.isDisplay)';
+         var isJoinDate = '@isJoinDate';
+         var joindDate = '@joinDate';
+         if (isJoinDate == "True")
+         {
+              $("#tab1JoinDate").append('<div class="loading_half"></div>');
+              $("#tab1JoinDate").load('@Url.Action("showJoinDate", "HumanResource")?userId=' + '@userId');
+         }
+         else
+         {
+            if(isDisplay=="True")
+            {
+                $("#tab1JoinDate").append('<div class="control-label col-md-3 col-sm-3"> No Join date assigned</div>');
+            }
+            else
+            {
+                $("#tab1JoinDate").append('<div class="loading_half"></div>');
+                $("#tab1JoinDate").load('@Url.Action("SetJoinDate", "HumanResource")?userId=' + '@userId');
+            }
+         }
+    });
+
+    $("#tab1JoinDate").on('click', '#btnRefreshJoinDate', function ()
+    {
+        $("#tab1JoinDate").append('<div class="tiny_loading"></div>');
+        $("#tab1JoinDate").load('@Url.Action("SetJoinDate", "HumanResource")?userId=' + '@userId');
+    });
+
+
+</script>
+

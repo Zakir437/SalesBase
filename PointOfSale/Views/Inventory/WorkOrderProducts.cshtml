@@ -1,0 +1,94 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewStockWarehouse>
+@{
+    var count = 0;
+    var productList = Model.GroupBy(g => new { g.ProductId, g.DistributeId })
+                      .Select(s => new
+                      {
+                          s.FirstOrDefault().ProductId,
+                          s.FirstOrDefault().DistributeId,
+                          s.FirstOrDefault().ProductName,
+                          Quantity = s.Sum(a => a.Quantity),
+                      });
+    PointOfSale.Models.PointOfSale_DBEntities db = new PointOfSale.Models.PointOfSale_DBEntities();
+}
+@if (Model.Any() == true)
+{
+    if (ViewBag.IsAllProducts == true)
+    {
+        <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+            <tr>
+                <th>SL.</th>
+                <th>Product Name</th>
+                <th>Quantity</th>
+            </tr>
+            @foreach (var list in productList)
+            {
+                count++;
+                <tr>
+                    <td>@count. </td>
+                    <td>@list.ProductName</td>
+                    <td>@list.Quantity</td>
+                    @if (ViewBag.IsAllProducts == false)
+                    {
+                        <td>
+                            <button class="btn btn-success btnAddItem" id="btnAddItem_@count" data-id="@count" data-qty="@list.Quantity" data-name="@list.ProductName" data-productid="@list.ProductId" data-distributeid="@list.DistributeId"><i class="fa fa-cart-plus"></i> Add to Cart</button>
+                            <div id="divForOrder_@count" style="font-size: 16px; display: none;">
+                                <span class="fa fa-minus cartItemMinus" data-id="@count" style="cursor:pointer;"></span>
+                                <span class="qtyInList ProductInCart" id="qtyInList_@count" data-id="@count" style="display: inline-block;">1</span>
+                                <input class="k-textbox txt_quantity" style="width: 25% !important; display: none;" data-max="@list.Quantity" data-id="@count" data-val-required="Please enter amount" id="txt_quan_@count" name="txt_quan_@count" value="1" type="text" @*onkeyup="return txtQtyChange(this.value)"*@>
+                                <span class="fa fa-plus cartItemPlus" data-id="@count" data-qty="@list.Quantity" style="cursor:pointer;"></span>
+                            </div>
+                        </td>
+                    }
+                </tr>
+            }
+        </table>
+    }
+    else
+    {
+        <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+            <tr>
+                <th>SL.</th>
+                <th>Product Name</th>
+                <th>Quantity</th>
+                <th></th>
+            </tr>
+            @foreach (var list in productList)
+             {
+                count++;
+                <tr>
+                    <td>@count. </td>
+                    <td>@list.ProductName</td>
+                    <td>@list.Quantity</td>
+                    <td>
+                        @*<button class="btn btn-success btnAddItem" id="btnAddItem_@count" data-id="@count" data-qty="@list.Quantity" data-name="@list.ProductName" data-productid="@list.ProductId" data-distributeid="@list.DistributeId"><i class="fa fa-cart-plus"></i> Add to Cart</button>
+                        <div id="divForOrder_@count" style="font-size: 16px; display: none;">
+                            <span class="fa fa-minus cartItemMinus" data-id="@count" style="cursor:pointer;"></span>
+                            <span class="qtyInList ProductInCart" id="qtyInList_@count" data-id="@count" style="display: inline-block;">1</span>
+                            <input class="k-textbox txt_quantity" style="width: 25% !important; display: none;" data-max="@list.Quantity" data-id="@count" data-val-required="Please enter amount" id="txt_quan_@count" name="txt_quan_@count" value="1" type="text">
+                            <span class="fa fa-plus cartItemPlus" data-id="@count" data-qty="@list.Quantity" style="cursor:pointer;"></span>
+                        </div>*@
+                    </td>
+                </tr>
+             }
+        </table>
+    }
+}
+else
+{
+    <h3>There is no record to display</h3>
+}
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    })
+</script>
+
+
+
+
+
+
+
+
+

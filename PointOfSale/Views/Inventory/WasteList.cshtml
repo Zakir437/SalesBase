@@ -1,0 +1,118 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewWasteProduct>
+@{
+    var count = 0;
+}
+@if (Model.Any())
+{
+    <table class="table table-bordered table-responsive">
+        <tr>
+            <th>SL.</th>
+            <th>Waste Reff.</th>
+            <th>Type</th>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>W.Type</th>
+            <th>AS Reff.</th>
+            <th>WH Reff.</th>
+            <th>Supplier</th>
+            <th>Status</th>
+            <th>Created By</th>
+            <th>Created Date</th>
+            <th>Comments</th>
+            @if (ViewBag.IsPrint != true)
+            {
+                <th></th>
+            }
+        </tr>
+        @foreach (var list in Model)
+        {
+            count++;
+            <tr>
+                <td>@count.</td>
+                <td>@list.WasteReffNo</td>
+                <td>
+                    @if(list.Type == 1)
+                    {
+                        <span>Store</span>
+                    }
+                    else if(list.Type == 2)
+                    {
+                        <span>Warehouse</span>
+                    }
+                    else if(list.Type == 3)
+                    {
+                        <span>After Sale</span>
+                    }
+                    else
+                    {
+                        <span>N/A</span>
+                    }
+                </td>
+                <td>@list.ProductName</td>
+                <td>@list.Quantity</td>
+                <td>@list.WasteTypeName</td>
+                <td>@list.ASReffNo</td>
+                <td>@list.WHReffNo</td>
+                <td>@list.Supplier</td>
+                <td>
+                    @if (list.Status == 1)
+                     {
+                        <span>Pending</span>
+                     }
+                    else if (list.Status == 2)
+                    {
+                        <span>Complete</span>
+                    }
+                    else if (list.Status == 3)
+                    {
+                        <span>Invalid</span>
+
+                    }
+                    else if (list.Status == 4)
+                    {
+                        <span>Partial Invalid</span>
+                    }
+                    else
+                    {
+                        <span>N/A</span>
+                    }
+                </td>
+                <td>@list.CreatedBy</td>
+                <td>@Convert.ToDateTime(list.CreatedDate).ToString("MMM dd,yyyy")</td>
+                <td>@list.Comments</td>
+                @if(ViewBag.IsPrint != true)
+                {
+                    <td>
+                        @if (list.Status != 2 && list.Status != 3 && list.ASReffId == null)
+                        {
+                            <button type="button" class="btn btn-danger btnInvalid" data-id="@list.Id" data-toggle="tooltip" title="Invalid"><i class="fa fa-times"></i></button>
+                        }
+                        @if (list.WHReffId > 0 && list.WasteTypeId == 1 && (list.Status == 1 || list.Status == 4))
+                        {
+                            <button type="button" class="btn btn-success btnComplete" data-id="@list.Id" data-toggle="tooltip" title="Complete"><i class="fa fa-check"></i></button>
+                        }
+                    </td>
+                }
+            </tr>
+         }
+    </table>
+}
+else
+{
+    <h3>There is no record to display</h3>
+}
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    })
+</script>
+
+
+
+
+
+
+
+
+
+

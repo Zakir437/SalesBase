@@ -1,0 +1,132 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewPayment>
+@using System.Globalization
+@{
+    var count = 0;
+    var colorCount = 0;
+    DateTime date = new DateTime();
+    //var paymentList = Model.GroupBy(g => new { g.PaymentId, g.Date })
+    //                 .Select(s => new
+    //                 {
+    //                     OrderId = s.FirstOrDefault().PaymentId,
+    //                     Date = s.FirstOrDefault().Date,
+    //                     OrderNumber = s.FirstOrDefault().OrderNumber,
+    //                     Amount = s.Sum(a => a.Amount),
+    //                     DueAmount = s.FirstOrDefault().OrderDueAmount
+    //                 });
+}
+<style>
+    a{
+        cursor:pointer;
+    }
+</style>
+@if (Model.Any())
+{
+    <table class="table table-bordered">
+        <tr>
+            <th>SL.</th>
+            <th>Voucher</th>
+            <th>Voucher(Credit)</th>
+            <th>Payment Type</th>
+            <th>Payment Body</th>
+            <th>Debit</th>
+            <th>Credit</th>
+            <th>Transaction No</th>
+            <th>Date</th>
+        </tr>
+        @foreach (var list in Model)
+         {
+            count++;
+            if (list.InOut == true)
+            {
+                <tr style="background-color:#e4f8ff">
+                    <td>@count.</td>
+                    <td>
+                        <a class="btnShowOrderDetails" data-toggle="tooltip" title="View Order Details" data-id="@list.PaymentId">@list.OrderNumber</a>
+                    </td>
+                    <td>
+                        @if (list.CreditPaymentId > 0)
+                         {
+                            <a class="btnShowOrderDetails" data-toggle="tooltip" title="View Order Details" data-id="@list.CreditPaymentId">@list.CreditVoucherNo</a>
+                         }
+                        else
+                        {
+                            <span>@list.CreditVoucherNo</span>
+                        }
+                    </td>
+                    <td>@list.PaymentTypeName</td>
+                    <td>
+                        @list.PaymentBodyName @if (list.SerialNumber != null)
+                        { <span>(@list.SerialNumber)</span> }
+                    </td>
+                    <td>
+                        @list.Amount.ToString("C", new CultureInfo("bn-BD")) @if (list.IsCreditPayment == true)
+                        { <span>(Credit Payment)</span> }
+                    </td>
+                    <td></td>
+                    <td>@list.TransactionNo</td>
+                    <td>@Convert.ToDateTime(list.Date).ToString("MMM dd yyyy")</td>
+                </tr>
+            }
+            else
+            {
+                <tr style="background-color:#fafff6">
+                    <td>@count.</td>
+                    <td>
+                        <a class="btnShowOrderDetails" data-toggle="tooltip" title="View Order Details" data-id="@list.PaymentId">@list.OrderNumber</a>
+                    </td>
+                    <td>
+                        @if (list.CreditPaymentId > 0)
+                        {
+                            <a class="btnShowOrderDetails" data-toggle="tooltip" title="View Order Details" data-id="@list.CreditPaymentId">@list.CreditVoucherNo</a>
+                        }
+                        else
+                        {
+                            <span>@list.CreditVoucherNo</span>
+                        }
+                    </td>
+                    <td>@list.PaymentTypeName</td>
+                    <td>
+                        @list.PaymentBodyName @if (list.SerialNumber != null)
+                        { <span>(@list.SerialNumber)</span> }
+                    </td>
+                    <td></td>
+                    <td>
+                        @list.Amount.ToString("C", new CultureInfo("bn-BD"))
+                    </td>
+                    <td>@list.TransactionNo</td>
+                    <td>@Convert.ToDateTime(list.Date).ToString("MMM dd yyyy")</td>
+                </tr>
+            }
+         }
+        @{
+            decimal totalDue = 0;
+            decimal totalPaid = 0;
+            decimal remaining = 0;
+            totalDue = Model.Where(a => a.InOut == false).Sum(s => s.Amount);
+            totalPaid = Model.Where(a => a.InOut == true).Sum(s => s.Amount);
+            remaining = totalDue - totalPaid;
+        }
+        <tr style="font-weight:bold">
+            <td></td>
+            <td colspan="4" style="text-align:center">Total</td>
+            <td>@totalPaid.ToString("C", new CultureInfo("bn-BD"))</td>
+            <td>@totalDue.ToString("C", new CultureInfo("bn-BD"))</td>
+            <td></td>
+            <td></td>
+        </tr>
+        @*<tr style="font-weight:bold">
+            <td></td>
+            <td colspan="4" style="text-align:center">Remaining</td>
+            <td colspan="2" style="text-align:center">@remaining.ToString("C", new CultureInfo("bn-BD"))</td>
+            <td></td>
+            <td></td>
+        </tr>*@
+    </table>
+ }
+else
+{
+    <h4>There is no record to display</h4>
+}
+<script>
+    $('[data-toggle="tooltip"]').tooltip();
+</script>

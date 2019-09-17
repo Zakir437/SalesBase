@@ -1,0 +1,250 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewWorkOrderItem>
+@using System.Globalization
+@{
+    var count = 0;
+    var productList = Model.GroupBy(g => new { g.ProductName })
+                     .Select(s => new
+                     {
+                         s.FirstOrDefault().ProductName,
+                         s.FirstOrDefault().Status,
+                         Item = s
+                     }).ToList();
+
+}
+<style>
+    input[type=number], input[type=text] {
+        width: 100%;
+        max-width: 100%;
+    }
+</style>
+@if (Model.Any() == true)
+{
+
+    if (ViewBag.IsPartialImport != null)
+    {
+        <table class="table table-bordered table-responsive">
+            <tr>
+                <th>SL.</th>
+                <th>Product Name</th>
+                <th></th>
+            </tr>
+            @foreach (var list in productList)
+            {
+                count++;
+                <tr >
+                    <td>@count. </td>
+                    <td>@list.ProductName</td>
+                    <td>
+                        <table class="table table-bordered" style="margin-bottom:0px;">
+                            <tr >
+                                <th>Indent</th>
+                                <th>Request</th>
+                                <th>Received</th>
+                                <th>Remaining</th>
+                                <th width="120px;">Price</th>
+                                <th>Total Price</th>
+                                <th width="120px;">Import Qty</th>
+                            </tr>
+                            @foreach (var item in list.Item)
+                            {
+                                <tr class="importItem" data-id="@item.Id" data-indentid="@item.IndentId" data-indvoucher="@item.IndentVoucher" data-productid="@item.ProductId" data-distributeid="@item.DistributeId" data-productname="@item.ProductName">
+                                    <td>@item.IndentVoucher</td>
+                                    <td>
+                                        @if (list.Status == 2)
+                                        {
+                                            <span class="text-danger">@item.RequestQty Piece/s <span class="pull-right"><i class="fa fa-info-circle" data-toggle="tooltip" data-placement="right" title="This product is added after approve this voucher. To import this product, it should be approved."></i></span></span>
+                                        }
+                                        else
+                                        {
+                                            <span>@item.RequestQty Piece/s</span>
+                                        }
+                                    </td>
+                                    <td>@item.ReceiveQty Piece/s</td>
+                                    <td>@item.RemainingQty Piece/s</td>
+                                    <td>
+                                        @if (item.PerItemPrice > 0)
+                                        {
+                                            <input class="k-textbox txt_itemPrice" min="1" data-id="@item.Id" id="txt_itemPrice_@item.Id" name="txt_itemPrice_@item.Id" value="@item.PerItemPrice" required validationMessage="*" type="text">
+                                        }
+                                        else
+                                        {
+                                            <input class="k-textbox txt_itemPrice" min="1" data-id="@item.Id" id="txt_itemPrice_@item.Id" name="txt_itemPrice_@item.Id" required validationMessage="*" type="text">
+                                        }
+                                        <span class="field-validation-valid text-danger" data-valmsg-for="txt_itemPrice_@item.Id" data-valmsg-replace="true"></span>
+                                    </td>
+                                    <td>
+                                        <span id="itemTotal_@item.Id" class="itemTotal">@item.Price</span>Tk
+                                    </td>
+                                    <td>
+                                        @if (ViewBag.IsPartialImport == true)
+                                        {
+                                            <input type="number" class="k-textbox item" min="1" id="qty_@item.Id" name="qty_@item.Id" data-id="@item.Id" readonly value="@item.RemainingQty" />
+                                        }
+                                        else
+                                        {
+                                            <input type="number" min="1" class="k-textbox item" max="@item.RemainingQty" id="qty_@item.Id" data-id="@item.Id" name="qty_@item.Id" required validationMessage="*" />
+                                            <span class="field-validation-valid text-danger" data-valmsg-for="qty_@item.Id" data-valmsg-replace="true"></span>
+                                        }
+                                    </td>
+                                </tr>
+                             }
+                            @*<tr class="text-bold">
+                                <td>Total</td>
+                                <td>@list.Item.Sum(s => s.RequestQty)</td>
+                                <td>@list.Item.Sum(s => s.ReceiveQty)</td>
+                                <td>@list.Item.Sum(s => s.RemainingQty)</td>
+                                <td></td>
+                                <td><span id="divTotalPrice_@count">@Model.Sum(a => a.Price)</span>Tk</td>
+                                <td></td>
+                            </tr>*@
+                        </table>
+                    </td>
+                </tr>
+             }
+            <tr class="text-bold">
+                <td></td>
+                <td>Total</td>
+                <td><span id="divTotalPrice">@Model.Sum(a => a.Price)</span>Tk</td>
+            </tr>
+        </table>
+        <script>
+            $(document).ready(function () {
+                $(".importItem").each(function () {
+                    id = parseInt($(this).data("id"));
+                    calculateItemTotal(id);
+                });
+            });
+
+            var itemPrice = 0, quantity = 0, itemTotal = 0, id = 0;
+            $('.txt_itemPrice').keypress(function (event) {
+                if (event.which != 8 && isNaN(String.fromCharCode(event.which))) {
+                    event.preventDefault(); //stop character from entering input
+                }
+            });
+
+            $('.txt_itemPrice').focusout(function () {
+                id = parseInt($(this).data("id"));
+                calculateItemTotal(id);
+            });
+
+            $('.item').focusout(function () {
+                id = parseInt($(this).data("id"));
+                calculateItemTotal(id);
+            });
+
+            function calculateItemTotal(id)
+            {
+                itemPrice = 0;
+                if ($("#txt_itemPrice_" + id).val() > 0) {
+                    itemPrice = parseInt($("#txt_itemPrice_" + id).val());
+                }
+                quantity = 0;
+                if ($("#qty_" + id).val() > 0)
+                {
+                    quantity = parseInt($("#qty_" + id).val());
+                }
+                itemTotal = itemPrice * quantity;
+                $("#itemTotal_" + id).empty();
+                $("#itemTotal_" + id).append(itemTotal.toFixed(2));
+
+                itemTotal = 0;
+                $('.itemTotal').each(function () {
+                    itemTotal = itemTotal + parseInt($(this).text());
+                });
+
+                $("#divTotalPrice").empty();
+                $("#divTotalPrice").append(itemTotal.toFixed(2));
+            }
+        </script>
+    }
+    else
+    {
+        <table class="table table-bordered table-responsive">
+            <tr>
+                <th>SL.</th>
+                <th> Product Name</th>
+                <th>
+                    <label>
+                        <input type="checkbox" id="checkAll" /> Select All
+                    </label>
+                </th>
+            </tr>
+            @foreach (var list in productList)
+            {
+                count++;
+                <tr>
+                    <td>@count. </td>
+                    <td>
+                        @list.ProductName
+                    </td>
+                    <td>
+                        <table class="table table-bordered" style="margin-bottom:0px;">
+                            <tr>
+                                <th>Indent</th>
+                                <th>Request</th>
+                                <th>Received</th>
+                                <th>Remaining</th>
+                                <th>Price</th>
+                                <th>Total Price</th>
+                            </tr>
+                            @foreach (var item in list.Item)
+                            {
+                                
+                                <tr class="importItem" data-id="@item.Id" data-productid="@item.ProductId" data-distributeid="@item.DistributeId" data-productname="@item.ProductName">
+                                    <td>
+                                        @if (item.RemainingQty > 0)
+                                        {
+                                            <input type="checkbox" class="check" id="check_@item.Id" data-id="@item.Id" />
+                                        }
+                                        @item.IndentVoucher
+                                    </td>
+                                    <td>
+                                        @if (list.Status == 2)
+                                        {
+                                            <span class="text-danger">@item.RequestQty Piece/s <span class="pull-right"><i class="fa fa-info-circle" data-toggle="tooltip" data-placement="right" title="This product is added after approve this voucher. To import this product, it should be approved."></i></span></span>
+                                        }
+                                        else
+                                        {
+                                            <span>@item.RequestQty Piece/s</span>
+                                        }
+                                    </td>
+                                    <td>@item.ReceiveQty Piece/s</td>
+                                    <td>@item.RemainingQty Piece/s</td>
+                                    <td>@item.PerItemPrice.ToString("C", new CultureInfo("bn-BD"))</td>
+                                    <td>@item.Price.ToString("C", new CultureInfo("bn-BD"))</td>
+                                </tr>
+                             }
+                            <tr class="text-bold">
+                                <td>Total</td>
+                                <td>@list.Item.Sum(s => s.RequestQty)</td>
+                                <td>@list.Item.Sum(s => s.ReceiveQty)</td>
+                                <td>@list.Item.Sum(s => s.RemainingQty)</td>
+                                <td></td>
+                                <td>@list.Item.Sum(s => s.Price).ToString("C", new CultureInfo("bn-BD"))</td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            }
+        </table>
+    }
+
+}
+else
+{
+    <h3>There is no record to display</h3>
+}
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    })
+</script>
+
+
+
+
+
+
+
+
+

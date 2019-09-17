@@ -1,0 +1,62 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewStockImport>
+@using System.Globalization;
+@{
+    var count = 0;
+    PointOfSale.Models.PointOfSale_DBEntities db = new PointOfSale.Models.PointOfSale_DBEntities();
+
+}
+@if (Model.Any() == true)
+{
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Invoice</th>
+            <th>Total Cost</th>
+            <th>Due</th>
+            <th>Date</th>
+        </tr>
+        @foreach (var list in Model)
+        {
+            count++;
+            <tr>
+                <td>@count. </td>
+                <td>
+                    @list.RefferenceNo <br />
+                    @{
+                        var importTransactionList = db.ViewImportTransactions.Where(a => a.StockImportId == list.StockImportId).Select(a => new { a.ProductName, a.PeritemCost, a.Quantity });
+                        <table class="table">
+                            <tr>
+                                <th>Product Name</th>
+                                <th>Quantity</th>
+                                <th>Cost(peritem)</th>
+                            </tr>
+                            @foreach (var import in importTransactionList)
+                            {
+                                <tr>
+                                    <td>@import.ProductName</td>
+                                    <td>@import.Quantity</td>
+                                    <td>@import.PeritemCost</td>
+                                </tr>
+                            }
+                        </table>
+                    }
+                </td>
+                <td>@list.TotalCost.ToString("C", new CultureInfo("bn-BD"))</td>
+                <td>@list.DueAmount.ToString("C", new CultureInfo("bn-BD"))</td>
+                <td>@Convert.ToDateTime(list.Date).ToString("MMM dd yyyy")</td>
+            </tr>
+        }
+    </table>
+}
+else
+{
+    <h3>There is no record to display</h3>
+}
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    })
+</script>
+
+
+

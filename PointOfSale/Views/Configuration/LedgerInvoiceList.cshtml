@@ -1,0 +1,52 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewStockImport>
+@using System.Globalization;
+@{
+    var count = 0;
+}
+<style>
+    a{
+        cursor:pointer;
+    }
+</style>
+@if (Model.Any() == true)
+{
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Invoice Name</th>
+            <th>Total Cost</th>
+            <th>Due</th>
+            <th>Date</th>
+        </tr>
+        @foreach (var list in Model)
+        {
+            count++;
+            <tr>
+                <td>@count. </td>
+                <td>
+                    <a class="btnImportDetails" data-toggle="tooltip" title="view import transactions" data-id="@list.StockImportId">@list.RefferenceNo</a> 
+                    @if (ViewBag.IsPrint == false)
+                    {
+                       <button class="btn btn-primary pull-right btnShowPaymentHistory" data-id="@list.StockImportId" data-toggle="tooltip" title="View Payment Details"><i class="fa fa-align-justify"></i></button>
+                    }
+                </td>
+                <td>@list.TotalCost.ToString("C", new CultureInfo("bn-BD"))</td>
+                <td>@list.DueAmount.ToString("C", new CultureInfo("bn-BD"))</td>
+                <td>@Convert.ToDateTime(list.Date).ToString("MMM dd yyyy")</td>
+            </tr>
+        }
+    </table>
+}
+else
+{
+    <h3>There is no record to display</h3>
+}
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    })
+</script>
+
+
+
+

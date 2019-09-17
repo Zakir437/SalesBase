@@ -1,0 +1,39 @@
+﻿@model PointOfSale.ModelViews.Attendance.ManuallyAttModelView
+<div class="editor-label"><label>User</label></div>
+<div class="editor-field">
+    <div style="width:72%!important">
+        @(Html.Kendo().AutoComplete()
+            .Name("User")
+            .Placeholder("Type User name...")
+            .HtmlAttributes(new { style = "width:100%; max-width:100%", @required = "required" })
+            .MinLength(3)
+            .DataTextField("Text")
+            .Filter("contains")
+            .DataSource(source =>
+            {
+                source.Read(read =>
+                {
+                    read.Action("GetUserList", "HumanResource").Data("additionInfo"); ;
+                })
+                .ServerFiltering(true);
+            })
+            .Events(e =>
+            {
+                e.Select("onSelectUser");
+            })
+        )
+        <span class="k-icon k-i-search" style="margin-top:-25px;float:right;margin-right:10px; position:relative">&nbsp;</span>
+        <span class="field-validation-valid text-danger" data-valmsg-for="User" data-valmsg-replace="true"></span>
+    </div>
+</div>
+<div class="editor-label"><label for="toDatePickerForSale">Date</label></div>
+<div class="editor-field">
+    @(Html.Kendo().DateTimePickerFor(m => m.DateTime)
+        .Max(DateTime.Now)
+        .Value(DateTime.Now)
+        .HtmlAttributes(new { style = "width:100%; max-width:100%" })
+        //.Format("MMM dd yyyy hh:mm tt")
+        .HtmlAttributes(new { @style = "width:248px;" })
+    )
+    @Html.ValidationMessageFor(model => model.DateTime, "", new { @class = "text-Danger" })
+</div>

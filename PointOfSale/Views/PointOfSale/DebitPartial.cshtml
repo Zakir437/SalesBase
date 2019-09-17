@@ -1,0 +1,73 @@
+﻿@model PointOfSale.ModelViews.POS.DebitModelView
+<style>
+    #keyboard li {
+        border: 1px solid #c9ccd0;
+    }
+</style>
+
+<div class="editor-label"><label>Available Debit Amount :</label></div>
+<div class="editor-field" style="padding-top:6px;">
+    <span>@ViewBag.AvailableDebitAmount</span>Tk
+</div>
+<div class="editor-label"><label>Total Amount :</label></div>
+<div class="editor-field" style="padding-top:6px;">
+    <span id="TotalAmountInCash">@ViewBag.TotalPrice</span>Tk
+</div>
+<div class="editor-label"><label for="Name">Amount paid :</label></div>
+<div class="editor-field">
+    @Html.EditorFor(m => m.DebitAmount, new { htmlattributes = new { @class = "k-textbox form-control", @min = 1, @max = @ViewBag.ValidAmount, @validationMessage = "Please enter valid paid amount", @type = "number", style = "width:200px; display:inline" } })
+    <span>Tk</span> <button class="btn btn-default" id="btnTotalDebit"><i class="fa fa-money" aria-hidden="true"></i></button>
+    <button class="btn btn-default" id="btnBackInDebit"><i class="fa fa-arrow-circle-left"></i></button>
+    @Html.ValidationMessageFor(model => model.DebitAmount, "", new { @class = "text-Danger" })
+</div>
+<div class="editor-field" style="padding-top:6px;">
+    <ul id="keyboard" style="height:267px; width: 201px; font: 71%/1.5 Verdana;">
+        <li class="clearl letter">1</li>
+        <li class="letter" id="two">2</li>
+        <li class="letter" id="three">3</li>
+        <li class="clearl letter" id="four">4</li>
+        <li class="letter">5</li>
+        <li class="letter">6</li>
+        <li class="clearl letter">7</li>
+        <li class="letter">8</li>
+        <li class="letter">9</li>
+        <li class="clearl letter" style="width:194px;">0</li>
+    </ul>
+</div>
+<script>
+    var number = 0;
+    var totalPaidNumber = [];
+    $("#btnTotalDebit").click(function () {
+        totalPaidNumber = [];
+        $("#DebitAmount").val('@ViewBag.ValidAmount');
+    });
+
+    $(".letter").click(function () {
+        number = $(this).text();
+        totalPaidNumber.push(number);
+        number = parseInt(totalPaidNumber.join(""));
+        $("#DebitAmount").val(number);
+    });
+
+    String.prototype.deleteWord = function (searchTerm) {
+        var str = this;
+        var n = str.search(searchTerm);
+        while (str.search(searchTerm) > -1) {
+            n = str.search(searchTerm);
+            str = str.substring(0, n) + str.substring(n + searchTerm.length, str.length);
+        }
+        return str;
+    }
+
+    $("#btnBackInDebit").click(function () {
+        totalPaidNumber.pop();
+        if (totalPaidNumber.length > 0) {
+            number = parseInt(totalPaidNumber.join(""));
+            $("#DebitAmount").val(number);
+        }
+        else {
+            number = null;
+            $("#DebitAmount").val(number);
+        }
+    });
+</script>

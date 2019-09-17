@@ -1,0 +1,89 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewUserAttInput>
+@using PointOfSale.Helpers
+@{ 
+    var count = 0;
+}
+@if(Model.Any())
+{
+    <table class="table table-bordered">
+        <tr>
+            <th>SL.</th>
+            <th>Name</th>
+            <th></th>
+        </tr>
+        @foreach(var item in Model)
+        {
+            count++;
+            <tr>
+                <td>@count.</td>
+                <td>
+                    @if (item.Picture != null && item.Picture != "")
+                     {
+                        <img class="img-circle" src="~/Images/UserPicture/thumb/@item.Picture" />
+                     }
+                    else
+                    {
+                        <img src="~/Images/Icon/blank-person.jpg" class="img-circle" width="29" height="29" alt="">
+                    }
+                    <a href="@Html.EncodedParam("UserInfoDetails", "HumanResource", new { userId = item.UserId, isDisplay = true}, null)">@item.FirstName @item.MiddleName @item.LastName</a>
+                   
+                    <a class="btn btn-primary pull-right" data-toggle="tooltip" title="View History" href="@Html.EncodedParam("SpecificUserAttHistory", "Attendance", new { userId = item.UserId}, null)"><i class="fa fa-list-ul"></i></a>
+                    
+                    @*<span data-toggle="tooltip" title="View History" class="btn btn-primary allAttHis pull-right" data-id="@item.UserId"><i class="fa fa-list-ul"></i></span>*@
+                </td>
+                <td>
+                    <div class="row">
+                        <div class="col-lg-4 col-xs-12">
+                            <div class="radio radio-success radio-inline" style="padding-left:20px">
+                                <input type="radio" class="atten_radio" id="radioPresent_@item.UserId" value="1"
+                                       name="radioInline_@item.UserId" data-id="@item.UserId"
+                                       data-attid="@item.AttId" data-atttype="@item.AttType">
+                                <label for="radioPresent_@item.UserId"> Present </label>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-xs-12">
+                            <div class="radio radio-danger radio-inline" style="padding-left:20px">
+                                <input type="radio" class="atten_radio" id="radioAbsent_@item.UserId" value="2" name="radioInline_@item.UserId" data-id="@item.UserId" data-attid="@item.AttId" data-atttype="@item.AttType">
+                                <label for="radioAbsent_@item.UserId"> Absent </label>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-xs-12">
+                            <div class="radio radio-warning radio-inline" style="padding-left:20px">
+                                <input type="radio" class="atten_radio" id="radioLeave_@item.UserId" value="3" name="radioInline_@item.UserId" data-id="@item.UserId" data-attid="@item.AttId" data-atttype="@item.AttType">
+                                <label for="radioLeave_@item.UserId"> Leave </label>
+                            </div>
+                        </div>
+                    </div>
+                    @if (item.AttType > 0)
+                    {
+                        if (item.AttType == 1)
+                        {
+                            <script>
+                                $("#radioPresent_" + '@(item.UserId)').prop('checked',true);
+                            </script>
+                        }
+                        else if (item.AttType == 2)
+                        {
+                            <script>
+                                $("#radioAbsent_" + '@(item.UserId)').prop('checked', true);
+                            </script>
+                        }
+                        else
+                        {
+                            <script>
+                                $("#radioLeave_" + '@(item.UserId)').prop('checked', true);
+                            </script>
+                        }
+                    }
+                </td>
+            </tr>
+        }
+    </table>
+}
+else
+{
+    <h4>There is no record to display</h4>
+}
+<script>
+     $('[data-toggle="tooltip"]').tooltip();
+</script>

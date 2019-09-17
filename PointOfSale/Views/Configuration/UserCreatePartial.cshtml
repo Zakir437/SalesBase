@@ -1,0 +1,33 @@
+﻿@model PointOfSale.ModelViews.UserRegisterModelView
+@Html.HiddenFor(m => m.Id)
+<div class="editor-label"><label for="FirstName">First Name</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.FirstName, new { htmlattributes = new { @class = "k-textbox form-control" } })
+    @Html.ValidationMessageFor(model => model.FirstName, "", new { @class = "text-Danger" })
+</div>
+<div class="editor-label"><label for="LastName">Last Name</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.LastName, new { htmlattributes = new { @class = "k-textbox form-control" } })
+    @Html.ValidationMessageFor(model => model.LastName, "", new { @class = "text-Danger" })
+</div>
+<div class="editor-label"><label for="UserName">Username</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.UserName, new { htmlattributes = new { @class = "k-textbox form-control" } })
+    @Html.ValidationMessageFor(model => model.UserName, "", new { @class = "text-Danger" })
+</div>
+<div class="editor-label"><label for="UserId">ID</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.UserId, new { htmlattributes = new { @class = "k-textbox form-control" } })
+    @Html.ValidationMessageFor(model => model.UserId, "", new { @class = "text-Danger" })
+</div>
+<div class="editor-label"><label for="Password">Password</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.Password, new { htmlattributes = new { @class = "k-textbox form-control" } })
+    @Html.ValidationMessageFor(model => model.Password, "", new { @class = "text-Danger" })
+</div>
+<div class="editor-label"><label for="ConfirmPassword">ConfirmPassword</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.ConfirmPassword, new { htmlattributes = new { @class = "k-textbox form-control" } })
+    @Html.ValidationMessageFor(model => model.ConfirmPassword, "", new { @class = "text-Danger" })
+</div>
+

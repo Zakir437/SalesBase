@@ -1,0 +1,68 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin-bottom:4%;margin-top:2%;">
+    <div id="divScheduleForm"></div>
+    <div class="k-edit-buttons k-state-default" style="margin-left:30px;">
+        @if (ViewBag.ScheduleId > 0)
+         {
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnScheduleCreate"><span class="k-icon k-update"></span>Update</button>
+         }
+        else
+        {
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnScheduleCreate"><span class="k-icon k-update"></span>Create</button>
+        }
+        <button type="reset" class="k-button k-button-icontext k-grid-update" id="btnScheduleRefresh"><span class="k-icon k-i-refresh"></span>Refresh</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnScheduleCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+     $(document).ready(function () {
+         $("#divScheduleForm").append('<div class="tiny_loading"></div>');
+         $("#divScheduleForm").load('@Url.Action("_WorkingScheduleCreate", "HumanResource")?scheduleId=' + '@ViewBag.ScheduleId');
+     });
+    $("#btnScheduleRefresh").click(function () {
+        $("#divScheduleForm").empty();
+        $("#divScheduleForm").append('<div class="tiny_loading"></div>');
+        $("#divScheduleForm").load('@Url.Action("_WorkingScheduleCreate", "HumanResource")?scheduleId=' + '@ViewBag.ScheduleId');
+    });
+    $("#btnScheduleCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+    var validation = $("#divScheduleForm").kendoValidator().data("kendoValidator");
+    $("#btnScheduleCreate").click(function () {
+        if (validation.validate())
+        {
+            var workingDays = [];
+            $(".chkWorkingdays").each(function () {
+                if ($(this).is(":checked"))
+                {
+                    workingDays.push({
+                        Day : $(this).val()
+                    });
+                }
+            });
+            $.ajax({
+                url: '@Url.Action("WorkingScheduleSave", "HumanResource")',
+                type: 'POST',
+                data: JSON.stringify({
+                    ScheduleId: $("#ScheduleId").val(),
+                    ScheduleName: $("#ScheduleName").val(),
+                    WorkingDays: workingDays,
+                    CreatedBy: userId
+                }),
+                contentType: 'application/json',
+                success: function (data)
+                {
+                    $("#divScheduleWin").data("kendoWindow").close();
+                    if (data == "success")
+                    {
+                        $("#divScheduleList").empty();
+                        $("#divScheduleList").append('<div class="loading_partial"></div>');
+                        $("#divScheduleList").load('@Url.Action("WorkingScheduleList", "HumanResource")');
+                    }
+                    else {
+                        alert("Save error...");
+                    }
+                }
+            });
+        }
+    });
+</script>

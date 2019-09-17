@@ -1,0 +1,53 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewHolidayPackage>
+@using PointOfSale.Helpers
+@{
+    var count = 0;
+}
+@if (Model.Any())
+{
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Package Name</th>
+            <th>Created By</th>
+            <th>Created Date</th>
+            <th>Updated By</th>
+            <th>Updated Date</th>
+            <th></th>
+        </tr>
+        @foreach (var list in Model)
+        {
+            count++;
+            <tr>
+                <td>@count . </td>
+                <td>@list.HolidayPackName</td>
+                <td>@list.CreatedBy</td>
+                <td>@Convert.ToDateTime(list.CreatedDate).ToString("MMM dd yyyy")</td>
+                <td>@list.UpdatedBy</td>
+                <td>
+                    @if (list.UpdatedDate != null)
+                {
+                    <span>@Convert.ToDateTime(list.UpdatedDate).ToString("MMM dd yyyy")</span>
+                }
+                else
+                {
+                    <span>Not yet updated</span>
+                }
+            </td>
+            <td>
+                <a class="btn btn-primary" href="@Html.EncodedParam("HolidayPackDetails", "Holiday", new { packageId = list.HolidayPackId}, null)" data-toggle="tooltip" title="Edit Holiday Information"><i class="fa fa-pencil-square-o"></i></a>
+            </td>
+        </tr>
+         }
+    </table>
+}
+else
+{
+    <h4>There is no record to display</h4>
+}
+
+<script>
+    $('[data-toggle="tooltip"]').tooltip();
+</script>
+
+

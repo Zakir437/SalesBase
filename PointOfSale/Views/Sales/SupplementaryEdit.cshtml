@@ -1,0 +1,104 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin:2%;">
+    <div id="btnSupplementaryForm"></div>
+    <div class="k-edit-buttons k-state-default">
+        <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnSupplementaryUpdate"><span class="k-icon k-update"></span>Save</button>
+        <button type="reset" class="k-button k-button-icontext k-grid-update" id="btnSupplementaryRefresh"><span class="k-icon k-i-refresh"></span>Refresh</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnSuppCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+    var productId = 0, supplementaryId = 0, suppItemName = "";
+    productId = '@ViewBag.ProductId';
+    var ids = [];
+    $(document).ready(function () {
+        $("#btnSupplementaryForm").append('<div class="tiny_loading"></div>');
+        $("#btnSupplementaryForm").load('@Url.Action("SupplementaryEditPartial", "Sales")?assId=' + '@ViewBag.Id');
+    });
+    $("#btnSupplementaryRefresh").click(function () {
+        $("#btnSupplementaryForm").empty();
+        $("#btnSupplementaryForm").append('<div class="tiny_loading"></div>');
+        $("#btnSupplementaryForm").load('@Url.Action("SupplementaryEditPartial", "Sales")?assId=' + '@ViewBag.Id');
+    });
+
+    $("#btnSuppCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+
+
+    function SuppadditionInfo() {
+        ids = [];
+        $(".suppItem").each(function () {
+            ids.push($(this).data("id"));
+        });
+        return {
+            ids: ids.join(","),
+            text: $("#supplementaryAutoComplete").val(),
+            productId: productId
+        }
+    }
+
+    function onChangeSupplementary() {
+        $("#supplementaryAutoComplete").data("kendoAutoComplete").value("");
+    }
+    function onSelectSupplementary(e) {
+        var selectedValue = this.dataItem(e.item.index());
+        supplementaryId = selectedValue.Value;
+        suppItemName = selectedValue.Text;
+        $("#supplementaryEmptyRow").hide();
+        if ($("#suppItem_" + supplementaryId).length == 1) {
+            alert("This item already add to list")
+        }
+        else {
+            $("#tblSupplementary").append('<tr id="suppItem_' + supplementaryId + '" class="suppItem" data-id="' + supplementaryId + '" >' +
+                '<td>' + suppItemName + '</td>' +
+                '<td>' +
+                '<span class="btnCancelSuppItem" data-id="' + supplementaryId + '"><i class="fa fa-times" aria-hidden="true" style="font-size:24px;cursor:pointer"></i></span>' +
+                '</td>' +
+                '</tr > ');
+        }
+    }
+
+
+    $("#btnSupplementaryForm").on('click', '.btnCancelSuppItem', function () {
+        supplementaryId = parseInt($(this).data("id"));
+        $("#suppItem_" + supplementaryId).remove();
+        if ($("#tblSupplementary tr").length == 2) {
+            $("#supplementaryEmptyRow").show();
+        }
+    });
+
+    var validation = $("#btnSupplementaryForm").kendoValidator({
+    }).data("kendoValidator");
+
+    $("#btnSupplementaryUpdate").click(function () {
+        if (validation.validate())
+        {
+            ids = [];
+            $(".suppItem").each(function () {
+                ids.push($(this).data("id"));
+            });
+            
+            $.ajax({
+                url: '/Sales/SupplementaryItemUpdate',
+                type: "POST",
+                data: { ids: ids.join(","), assId: '@ViewBag.Id', createdBy : userId  },
+                success: function (result) {
+                    $("#divSupplementaryWin").data("kendoWindow").close();
+                    if (result == "success") {
+
+                    }
+                    else
+                    {
+                        alert("Save Error");
+                    }
+                }
+            });
+        }
+    });
+</script>
+
+
+
+
+
+

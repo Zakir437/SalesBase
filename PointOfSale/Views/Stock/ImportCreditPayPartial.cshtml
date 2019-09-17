@@ -1,0 +1,19 @@
+﻿<div class="editor-label"><label>Total Due</label></div>
+<div class="editor-field" style="padding-top:6px;">
+    <span>@ViewBag.TotalDue</span>Tk
+</div>
+<div class="editor-label"><label for="PayAmount">Paid</label></div>
+@if (ViewBag.IsTotalPay == true)
+{
+    <div class="editor-field">
+        @Html.Editor("PayAmount", new { htmlattributes = new { @class = "k-textbox form-control", @type = "number", @min = "1", @max = @ViewBag.TotalDue, @validationMessage = "Please enter valid paid amount", @required = "required", @style = "max-width:266px;" } })
+    </div>
+}
+else
+{
+    <div class="editor-field">
+        @Html.Editor("PayAmount", new { htmlattributes = new { @class = "k-textbox form-control", @type = "number", @min = @ViewBag.TotalDue, @max = @ViewBag.TotalDue, @validationMessage = "Please enter valid paid amount", @required = "required", @style = "max-width:266px;" } })
+    </div>
+}
+
+

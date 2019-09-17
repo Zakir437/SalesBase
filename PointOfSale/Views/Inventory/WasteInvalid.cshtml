@@ -1,0 +1,47 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" style="margin:2%;">
+    <div id="divInvalidForm"></div>
+    <div class="k-edit-buttons k-state-default">
+        <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btn_invalid_ok"><span class="k-icon k-update"></span>OK</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btn_invalid_cancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#divInvalidForm").append('<div class="tiny_loading"></div>');
+        $("#divInvalidForm").load('/Inventory/WasteInvalidPartial?id=' + '@ViewBag.Id');
+    });
+
+    $("#btn_invalid_cancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+
+    var validation = $("#divInvalidForm").kendoValidator({
+    }).data("kendoValidator");
+
+    $("#btn_invalid_ok").click(function () {
+        if (validation.validate())
+        {
+            $.ajax({
+                url: '/Inventory/WasteStatusChange',
+                type: 'Post',
+                data: { id: '@ViewBag.Id', CreatedBy: userId, status: 3, quantity: $("#invQty").val() },
+                success: function (data) {
+                    $("#divInvalidAlertWin").data("kendoWindow").close();
+                    if (data == "success") {
+                        $('.ranges li').first().click();
+                    }
+                    else {
+                        alert("Save error...");
+                    }
+                },
+                error: function (err) {
+                    alert("Save error...");
+                }
+            });
+        }
+    });
+</script>
+
+
+
+

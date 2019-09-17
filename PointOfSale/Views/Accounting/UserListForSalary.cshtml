@@ -1,0 +1,182 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewUserList>
+@using PointOfSale.Helpers
+@using System.Configuration;
+@{
+    var count = 0;
+    PointOfSale.Models.PointOfSale_DBEntities db = new PointOfSale.Models.PointOfSale_DBEntities();
+    int offset = Convert.ToInt32(ConfigurationManager.AppSettings["localTime"]);
+    DateTime now = DateTime.UtcNow.AddMinutes(offset);
+    DateTime date = now.AddMonths(-1);
+    DateTime startDate = new DateTime(date.Year, date.Month, 1);
+    DateTime endDate = new DateTime(date.Year, date.Month, DateTime.DaysInMonth(date.Year, date.Month));
+}
+@if (Model.Any())
+{
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Name</th>
+            <th>Join Date</th>
+            <th></th>
+        </tr>
+        @foreach (var list in Model)
+        {
+            count++;
+            <tr>
+                <td>@count. </td>
+                <td>
+                    @if (list.Picture != null && list.Picture != "")
+                     {
+                         <img class="img-circle" src="~/Images/UserPicture/thumb/@list.Picture" />
+                     }
+                    else
+                    {
+                        <img src="~/Images/Icon/blank-person.jpg" class="img-circle" width="29" height="29" alt="">
+                    }
+                    <a href="@Html.EncodedParam("UserInfoDetails", "HumanResource", new { userId = list.UserId, isDisplay = true}, null)">@list.Title @list.FirstName @list.MiddleName @list.LastName</a>
+                </td>
+                <td>
+                    @if (list.JoinDate != null)
+                     {
+                        @Convert.ToDateTime(list.JoinDate).ToString("MMM dd,yyyy")
+                     }
+                    else
+                    {
+                        <span>Not assigned</span>
+                    }
+                </td>
+                <td>
+                    <span class="btn btn-primary annualDetails"
+                          data-toggle="tooltip" data-original-title="Details" data-id="@list.UserId" data-salaryid="@list.SalaryPackageId">
+                        <i class="fa fa-info-circle"></i>
+                    </span>
+                    <span class="btn btn-primary monthDetails"
+                          data-toggle="tooltip" data-original-title="Month Wise" data-id="@list.UserId" data-salaryid="@list.SalaryPackageId">
+                        <i class="fa fa-info-circle"></i>
+                    </span>
+                    @if (db.EmpSalaryPayments.Where(m => m.UserId == list.UserId && m.DueAmount > 0).Any())
+                     {
+                        <span class="btn btn-warning OutDetails"
+                              data-toggle="tooltip" data-original-title="Outstanding" data-id="@list.UserId">
+                            <i class="fa fa-info-circle"></i>
+                        </span>
+                        <span class="btn btn-warning dueSalaryPay"
+                              data-toggle="tooltip" data-original-title="Pay Due Salary" data-id="@list.UserId">
+                            <i class="fa fa-money"></i>
+                        </span>
+                     }
+                    
+                    @if (db.EmpSalaryPayments.Any(m => m.UserId == list.UserId && m.PaidAmount == 0 && m.DueAmount == 0))
+                     {
+                        <span class="btn btn-success currentMonthSalaryPay"
+                              data-toggle="tooltip" data-original-title="Pay current month Salary" data-id="@db.EmpSalaryPayments.FirstOrDefault(m => m.UserId == list.UserId && m.PaidAmount == 0 && m.DueAmount == 0).Id">
+                            <i class="fa fa-money"></i>
+                        </span>
+                     }
+                    @if (db.EmpSalaryPayments.Any(m => m.UserId == list.UserId && (m.PaidAmount == 0 || m.DueAmount > 0)))
+                    {
+                        <span class="btn btn-primary payAllSalary"
+                              data-toggle="tooltip" data-original-title="Pay all Salary" data-id="@list.UserId">
+                            <i class="fa fa-money"></i>
+                        </span>
+                    }
+                    @if (db.EmpSalaryPayments.Where(a => a.UserId == list.UserId).Any(a => (a.EndDate.Month == now.Month && a.EndDate.Year == now.Year)) == false)
+                     {
+                        <span class="btn btn-danger CreateSalary"
+                              data-toggle="tooltip" data-original-title="Up to Day Salary Generate" data-id="@list.UserId">
+                            <i class="fa fa-plus"></i>
+                        </span>
+                     }
+                    @if (db.EmpSalaryPayments.Where(a => a.UserId == list.UserId).Any(a => (a.EndDate.Month == now.Month && a.EndDate.Year == now.Year)) == false)
+                     {
+                        <span class="btn btn-success FullMonthSalaryGenerate"
+                              data-toggle="tooltip" data-original-title="FullMonth Salary Generate" data-id="@list.UserId">
+                            <i class="fa fa-plus"></i>
+                        </span>
+                     }
+                    @if (db.EmpSalaryPayments.Where(a => a.UserId == list.UserId).Any(a => (a.EndDate.Month == now.Month && a.EndDate.Year == now.Year)) == false)
+                     {
+                        <span class="btn btn-danger upToDateSalaryGenerate"
+                              data-toggle="tooltip" data-original-title="Up to Date Salary Generate" data-id="@list.UserId">
+                            <i class="fa fa-plus"></i>
+                        </span>
+                     }
+                    <span class="btn btn-success SpecificDateSalaryGenerate"
+                          data-toggle="tooltip" data-original-title="Specific Date Salary Generate" data-id="@list.UserId">
+                        <i class="fa fa-plus"></i>
+                    </span>
+                    @if (db.EmpSalaryPayments.Any(m => m.UserId == list.UserId && m.StartDate.Month == startDate.Month && m.StartDate.Year == startDate.Year))
+                     {
+                        var empSalary = db.EmpSalaryPayments.FirstOrDefault(a => a.UserId == list.UserId && a.StartDate.Month == date.Month && a.StartDate.Year == date.Year);
+                        if (empSalary.StartDate.Date != startDate.Date || empSalary.EndDate.Date != endDate.Date && (list.JoinDate.Value.Month < now.Month || list.JoinDate.Value.Year < now.Year))
+                        {
+                            <div class="divIsGenerateAll"></div>
+                        }
+                    }
+                    else
+                    {
+                        if (list.JoinDate.Value.Month < now.Month || list.JoinDate.Value.Year < now.Year)
+                        {
+                            <div class="divIsGenerateAll"></div>
+                        }
+                    }
+                    @*@if (db.AllSalaryPayLists.Where(m => m.UserId == item.UserId && m.UserType == item.UserType).Any())
+                    {
+                        <span class="btn blue HistoryDetails"
+                              data-toggle="tooltip" data-original-title="History" data-id="@count">
+                            <i class="fa fa-history"></i>
+                        </span>
+                    }
+                    @if (db.EmpSalaryPaymentDetails.Where(m => m.UserId == item.UserId && m.UserType == item.UserType && m.Status == 0).Any())
+                    {
+                        <span class="btn yellow OutDetails"
+                              data-toggle="tooltip" data-original-title="Outstanding" data-id="@count">
+                            <i class="fa fa-info-circle"></i>
+                        </span>
+                    }
+                    @if (!db.EmpSalaryPaymentDetails.Where(m => m.UserId == item.UserId && m.UserType == item.UserType && (m.MonthId == DateTime.Now.Month || m.MonthId == (DateTime.Now.Month) - 1) && m.Year == DateTime.Now.Year).Any())
+                    {
+                        <span class="btn green CreateSalary"
+                              data-toggle="tooltip" data-original-title="Create" data-id="@count">
+                            <i class="fa fa-plus"></i>
+                        </span>
+                    }
+                    @if (db.EmpSalaryPaymentDetails.Where(m => m.UserId == item.UserId && m.UserType == item.UserType && m.Status == 0
+                        && (m.MonthId == DateTime.Now.Month || m.MonthId == (DateTime.Now.Month) - 1) && m.Year == DateTime.Now.Year).Any())
+                    {
+                        <span class="btn green PaySalary"
+                              data-toggle="tooltip" data-original-title="Pay Salary" id="achrPay_@count" data-id="@count">
+                            <i class="fa fa-pencil-square-o"></i>
+                        </span>
+                    }
+                    @if (db.EmpSalaryPaymentDetails.Where(m => m.UserId == item.UserId && m.UserType == item.UserType && m.Status == 0).Any())
+                    {
+                        <span class="btn green PayDue"
+                              data-toggle="tooltip" data-original-title="Pay Due" data-id="@count">
+                            <i class="fa fa-pencil-square-o"></i>
+                        </span>
+                     }*@
+                </td>
+             
+            </tr>
+        }
+    </table>
+}
+else
+{
+    <h4>There is no record to display</h4>
+}
+<script>
+    $('[data-toggle="tooltip"]').tooltip();
+    $(document).ready(function (){
+        if ($(".divIsGenerateAll").length > 0) {
+            $(".btnGenerateAll").show();
+            $(".btnCurrentMonthSalaryLog").hide();
+        }
+        else
+        {
+            $(".btnGenerateAll").hide();
+            $(".btnCurrentMonthSalaryLog").show();
+        }
+    });
+</script>

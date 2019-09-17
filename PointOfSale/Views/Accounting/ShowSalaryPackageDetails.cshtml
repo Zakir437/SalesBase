@@ -1,0 +1,37 @@
+﻿@model PointOfSale.Models.Salary
+@{ 
+    var annual = Model.Amount * 12;
+}
+<style>
+    #salaryInfo .editor-field {
+        padding-top: 5px;
+    }
+</style>
+<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="salaryInfo" style="margin-bottom:4%;margin-top:2%;">
+    @if (ViewBag.Type == "annual")
+    {
+        <div class="editor-label"><label>Monthly</label></div>
+        <div class="editor-field">
+            Tk. @Html.DisplayFor(model => model.Amount, new { htmlattributes = new { @class = "k-textbox form-control" } })
+        </div>
+        <div class="editor-label"><label>Annual</label></div>
+        <div class="editor-field">
+            Tk. @annual
+        </div>
+    }
+    else
+    {
+        <div class="editor-label"><label>Monthly</label></div>
+        <div class="editor-field">
+            Tk. @Html.DisplayFor(model => model.Amount, new { htmlattributes = new { @class = "k-textbox form-control" } }) (Current Month)
+        </div>
+    }
+    <div class="k-edit-buttons k-state-default" style="margin-left:30px;">
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+    $("#btnCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+</script>

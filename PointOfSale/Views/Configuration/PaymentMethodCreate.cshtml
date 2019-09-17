@@ -1,0 +1,96 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin-bottom:4%;margin-top:2%;">
+    <div id="divMethodForm"></div>
+    <div class="k-edit-buttons k-state-default" style="margin-left:17px;">
+        @if (ViewBag.Id > 0)
+         {
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnMethodCreate"><span class="k-icon k-update"></span>Update</button>
+         }
+        else
+        {
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnMethodCreate"><span class="k-icon k-update"></span>Create</button>
+        }
+        <button type="reset" class="k-button k-button-icontext k-grid-update" id="btnRefresh"><span class="k-icon k-i-refresh"></span>Refresh</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+    var id = 0;
+    $(document).ready(function () {
+        $("#divMethodForm").append('<div class="tiny_loading"></div>');
+        $("#divMethodForm").load('@Url.Action("PaymentMethodCreatePartial", "Configuration")?id=' + '@ViewBag.Id');
+    });
+
+    $("#btnRefresh").click(function () {
+        $("#divMethodForm").empty();
+        $("#divMethodForm").load('@Url.Action("PaymentMethodCreatePartial", "Configuration")?id=' + '@ViewBag.Id');
+    });
+
+    $("#btnCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+    var validation = $("#divMethodForm").kendoValidator({
+        rules: {
+            remoteName: function (input) {
+                var remoteAttr = input.attr("data-val-remote-url");
+                if (typeof remoteAttr === typeof undefined || remoteAttr === false) {
+                    return true;
+                }
+                var isInvalid;
+                var data = {};
+                var Id = $("#Id").val();
+                var MethodName = $.trim($("#MethodName").val());
+                data = { Id: Id, MethodName : MethodName };
+                $.ajax({
+                    url: remoteAttr,
+                    mode: "abort",
+                    port: "validate" + input.attr('name'),
+                    dataType: "json",
+                    type: input.attr("data-val-remote-type"),
+                    data: data,
+                    async: false,
+                    success: function (response) {
+                        isInvalid = response;
+                        if (isInvalid === true) {
+                            isInvalid = true;
+                        }
+                        else {
+                            isInvalid = false;
+                        }
+                    }
+                });
+                return isInvalid;
+            }
+        },
+        messages: {
+            remoteName: function (input) {
+                return input.data('val-remote');
+            }
+        }
+    }).data("kendoValidator");
+    $("#btnMethodCreate").click(function () {
+        if (validation.validate()) {
+            var sendData = {
+                Id: $("#Id").val(),
+                MethodName: $.trim($("#MethodName").val()),
+                Type: $("#Type").val(),
+                CreatedBy: userId
+            }
+            $.ajax({
+                url: '@Url.Action("PaymentMethodSave", "Configuration")',
+                type: "POST",
+                data: sendData,
+                success: function (data) {
+                    if (data == "success") {
+                        $("#divMethodWin").data("kendoWindow").close();
+                        $("#divMethodList").empty();
+                        $("#divMethodList").append('<div class="loading_partial"></div>');
+                        $("#divMethodList").load('@Url.Action("PaymentMethodList","Configuration")');
+                    }
+                    else {
+                        alert("Save Error");
+                    }
+                }
+            });
+        }
+    });
+</script>

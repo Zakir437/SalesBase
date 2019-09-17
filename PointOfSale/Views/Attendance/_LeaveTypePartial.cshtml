@@ -1,0 +1,31 @@
+﻿@model PointOfSale.Models.DailyAttendance
+<div class="editor-label"><label>Leave Type</label></div>
+<div class="editor-field">
+    @(Html.Kendo().DropDownListFor(m => m.LeaveType)
+    .OptionLabel("--Select One--")
+    .BindTo(ViewBag.LeaveType)
+    .HtmlAttributes(new { style = "width:100%" })
+    )
+    <span class="field-validation-valid text-danger" data-valmsg-for="LeaveType" data-valmsg-replace="true"></span>
+</div>
+<div class="editor-label"><label>Is Paid Leave</label></div>
+<div class="editor-field">
+    @(Html.Kendo().DropDownListFor(a => a.IsPaidLeave)
+          .OptionLabel("--Select One Type--")
+          .DataTextField("Text")
+          .DataValueField("Value")
+          .HtmlAttributes(new { style = "width:100%" })
+          .BindTo(new List<SelectListItem>() {
+              new SelectListItem() {
+                  Text = "Paid",
+                  Value = "1"
+              },
+              new SelectListItem() {
+                  Text = "UnPaid",
+                  Value = "2"
+              }
+          })
+    )
+    <span class="field-validation-valid text-danger" data-valmsg-for="IsPaidLeave" data-valmsg-replace="true"></span>
+</div>
+

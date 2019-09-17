@@ -1,0 +1,361 @@
+﻿@{
+    ViewBag.Title = "Points";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+}
+<section class="content">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4 class="uppercase">Product Points</h4>
+            </div>
+            <div class="pull-right">
+                <a class="btn btn-default btnBox" href="/PointOfSale/OfferCreate">
+                    <i class="fa fa-arrow-left"></i> Back
+                </a>
+            </div>
+        </div>
+        <div class="panel-heading">
+            <ul class="nav nav-tabs">
+                <li class="active" id="liForList"><a href="#tab1liForList" data-toggle="tab">List</a></li>
+                <li id="liForSelected"><a href="#tab2liForSelected" data-toggle="tab">Selected</a></li>
+            </ul>
+        </div>
+        <div class="panel-body" style="border:none!important;">
+            <div class="tab-content">
+                <div class="tab-pane fade in active" id="tab1liForList">
+                    <div id="div_List"></div>
+                </div>
+                <div id="tab2liForSelected" class="tab-pane fade">
+                    <div id="div_Selected"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    var selectedOne = "", subCategoryId = 0, categoryId = 0, tagId = 0, productId = 0, id = 0, count = 0, selectedIds = [], rowId = 0;
+    $(document).ready(function () {
+
+        $("#liForSalesMenu").addClass('active');
+        $("#liForOffer").addClass('active');
+
+        $("#btnSave").prop('disabled', true);
+        $("#liForList").click();
+    });
+   
+
+    function clearBeforeClick()
+    {
+        $("#div_List").empty();
+        $("#div_Selected").empty();
+    }
+    $("#liForList").click(function () {
+        tab = 1;
+        clearBeforeClick();
+        $("#div_List").append('<div class="loading_partial"></div>');
+        $("#div_List").load('@Url.Action("ListProduct", "PointOfSale")');
+    });
+    $("#liForSelected").click(function () {
+        clearBeforeClick();
+        tab = 2;
+        $("#div_Selected").append('<div class="loading_partial"></div>');
+        $("#div_Selected").load('@Url.Action("SelectedProduct", "PointOfSale")?ids=' + selectedIds.join(','));
+    });
+
+
+    //filter sub category by category
+    function filterCategory() {
+        return {
+            categoryId: $("#Category").val()
+        };
+    }
+
+    //add product by category
+    function onChangeCategory() {
+        $("#TagDropdown").data("kendoDropDownList").value("");
+        selectedOne = "";
+        selectedOne = this.value();
+        subCategoryId = 0;
+        if (selectedOne.length > 0) {
+            categoryId = parseInt(selectedOne);
+            $.ajax({
+                url: '/PointOfSale/GetProduct',
+                type: "GET",
+                data: { categoryId: categoryId },
+                success: function (data) {
+                    $("#tblProducts tbody tr").remove();
+                    $("#checkAll").prop('checked', false);
+                    if (data == "") {
+                        $("#emptyRow").show();
+                        $("#btnSave").prop('disabled', true);
+                    }
+                    else
+                    if (data === "error")
+                    {
+                        $("#emptyRow").show();
+                        $("#btnSave").prop('disabled', true);
+                        return 0;
+                    }
+                    else
+                    {
+                        if ($("#emptyRow").length == 1)
+                        {
+                            $("#emptyRow").hide();
+                            $("#btnSave").prop('disabled', true);
+                        }
+                        $(data).each(function (index, item) {
+                            $("#tblProducts").append('<tr id="product_' + item.RowID + '" class="Products" data-id="' + item.RowID + '"  >' +
+                                '<td>' +
+                                '<input type="checkbox" data-id="' + item.RowID + '" class="check" id="check_' + item.RowID + '"/>' +
+                                '</td>' +
+                                '<td>' + item.ProductName + '</td>' +
+                                '<td>' +
+                                '<span>' + item.Price + '</span>' +
+                                '</td>' +
+                                '<td>' +
+                                '<span>' + (item.Points > 0 ? item.Points : 0)  + '</span>' +
+                                '</td>' +
+                                '</tr > ');
+                            checkExist(item.RowID);
+                        });
+                    }
+                }
+            });
+        }
+        else {
+            $("#tblProducts tbody tr").remove();
+            $("#emptyRow").show();
+            categoryId = 0;
+        }
+    }
+    //add product by subcategory
+    function onChangeSubCategory() {
+        selectedOne = "";
+        selectedOne = this.value();
+     
+        if (selectedOne.length > 0) {
+            subCategoryId = parseInt(selectedOne);
+            $.ajax({
+                url: '/PointOfSale/GetProduct',
+                type: "GET",
+                data: { categoryId: categoryId, subCategoryId: subCategoryId },
+                success: function (data) {
+                    $("#tblProducts tbody tr").remove();
+                    $("#checkAll").prop('checked', false);
+                    if (data == "") {
+                        $("#emptyRow").show();
+                    }
+                    else
+                    if (data === "error")
+                    {
+                        alert("Error...");
+                        $("#emptyRow").show();
+                        return 0;
+                    }
+                    else
+                    {
+                        if ($("#emptyRow").length == 1)
+                        {
+                            $("#emptyRow").hide();
+                        }
+                        
+                        $(data).each(function (index, item) {
+                           
+                            $("#tblProducts").append('<tr id="product_' + item.RowID + '" class="Products"  data-id="' + item.RowID + '">' +
+                                '<td>' +
+                                '<input type="checkbox" data-id="' + item.RowID + '" class="check" id="check_' + item.RowID + '"/>' +
+                                '</td>' +
+                                '<td>' + item.ProductName + '</td>' +
+                                '<td>' +
+                                '<span>' + item.Price + '</span>' +
+                                '</td>' +
+                                '<td>' +
+                                '<span>' + (item.Points > 0 ? item.Points : 0) + '</span>' +
+                                '</td>' +
+                                '</tr > ');
+
+                            checkExist(item.RowID);
+                        });
+                    }
+                }
+            });
+        }
+        else {
+            subCategoryId = 0;
+            $.ajax({
+                url: '/PointOfSale/GetProduct',
+                type: "GET",
+                data: { categoryId: categoryId },
+                success: function (data) {
+                    $("#tblProducts tbody tr").remove();
+                    $("#checkAll").prop('checked', false);
+                    if (data == "")
+                    {
+                        $("#emptyRow").show();
+                    }
+                    else
+                    if (data === "error")
+                    {
+                        $("#emptyRow").show();
+                        return 0;
+                    }
+                    else
+                    {
+                        if ($("#emptyRow").length == 1) {
+                            $("#emptyRow").hide();
+                        }
+                        $(data).each(function (index, item) {
+                          
+                            $("#tblProducts").append('<tr id="product_' + item.RowID + '" class="Products" data-id="' + item.RowID + '">' +
+                                '<td>' +
+                                '<input type="checkbox" data-id="' + item.RowID + '" class="check" id="check_' + item.RowID + '"/>' +
+                                '</td>' +
+                                '<td>' + item.ProductName + '</td>' +
+                                '<td>' +
+                                '<span>' + item.Price + '</span>' +
+                                '</td>' +
+                                '<td>' +
+                                '<span>' + (item.Points > 0 ? item.Points : 0) + '</span>' +
+                                '</td>' +
+                                '</tr > ');
+                            checkExist(item.RowID);
+                        });
+                    }
+                }
+            });
+        }
+    }
+
+    //Change Tag 
+    function onChangeTag()
+    {
+        $("#Category").data("kendoDropDownList").value("");
+
+        selectedOne = "";
+        selectedOne = this.value();
+        tagId = 0;
+        if (selectedOne.length > 0) {
+            tagId = parseInt(selectedOne);
+            $.ajax({
+                url: '/PointOfSale/GetProductInfoById',
+                type: "GET",
+                data: { tagId: tagId, },
+                success: function (data) {
+                    $("#tblProducts tbody tr").remove();
+                    $("#checkAll").prop('checked', false);
+                    if (data == "")
+                    {
+                        $("#emptyRow").show();
+                    }
+                    else
+                    if (data === "error")
+                    {
+                        $("#emptyRow").show();
+                        return 0;
+                    }
+                    else
+                    {
+                        if ($("#emptyRow").length == 1)
+                        {
+                            $("#emptyRow").hide();
+                        }
+                        $(data).each(function (index, item) {
+                            $("#tblProducts").append('<tr id="product_' + item.RowID + '" class="Products" data-id="' + item.RowID + '">' +
+                                '<td>' +
+                                '<input type="checkbox" data-id="' + item.RowID + '" class="check" id="check_' + item.RowID + '"/>' +
+                                '</td>' +
+                                '<td>' + item.ProductName + '</td>' +
+                                '<td>' +
+                                '<span>' + item.Price + '</span>' +
+                                '</td>' +
+                                '<td>' +
+                                '<span>' + (item.Points > 0 ? item.Points : 0) + '</span>' +
+                                '</td>' +
+                                '</tr > ');
+                            checkExist(item.RowID);
+                        });
+                    }
+                }
+            });
+        }
+        else {
+            $("#tblProducts tbody tr").remove();
+            $("#emptyRow").show();
+            tagId = 0;
+        }
+    }
+
+    //*******************Product Autocomplete**************
+    function onChangeProduct() {
+        $("#productsAutoComplete").data("kendoAutoComplete").value("");
+    }
+    function onSelect(e) {
+        $("#Category").data("kendoDropDownList").value("");
+        $("#TagDropdown").data("kendoDropDownList").value("");
+
+        selectedOne = this.dataItem(e.item.index());
+        productId = parseInt(selectedOne.Value);
+        $.ajax({
+            url: '/PointOfSale/GetProductInfoById',
+            type: "GET",
+            data: { productId: productId },
+            success: function (data) {
+                $("#tblProducts tbody tr").remove();
+                $("#checkAll").prop('checked', false);
+                if (data == "") {
+                    $("#emptyRow").show();
+                }
+                else
+                if (data === "error")
+                {
+                    $("#emptyRow").show();
+                    return 0;
+                }
+                else
+                {
+                    if ($("#emptyRow").length == 1)
+                    {
+                            $("#emptyRow").hide();
+                    }
+                    $(data).each(function (index, item) {
+                        $("#tblProducts").append('<tr id="product_' + item.RowID + '" class="Products" data-id="' + item.RowID + '">' +
+                            '<td>' +
+                            '<input type="checkbox" data-id="' + item.RowID + '" class="check" id="check_' + item.RowID + '"/>' +
+                            '</td>' +
+                            '<td>' + item.ProductName + '</td>' +
+                            '<td>' +
+                            '<span>' + item.Price + '</span>' +
+                            '</td>' +
+                            '<td>' +
+                            '<span>' + (item.Points > 0 ? item.Points : 0) + '</span>' +
+                            '</td>' +
+                            '</tr > ');
+                    });
+                    checkExist(item.RowID);
+                }
+            }
+        });
+    }
+
+    //product autocomplete additonal info
+    function additionInfo() {
+        var ids = [];
+        $(".Products").each(function () {
+            ids.push($(this).data("id"));
+        });
+        return {
+            ids: ids.join(","),
+            text: $("#productsAutoComplete").val()
+        }
+    }
+
+    function checkExist(rowId)
+    {
+        if (selectedIds.indexOf(rowId) > -1) {
+            $("#check_" + rowId).prop('checked', true);
+        }
+    }
+
+    
+</script>

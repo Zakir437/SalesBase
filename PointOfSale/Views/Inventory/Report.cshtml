@@ -1,0 +1,118 @@
+﻿@using System.Globalization
+@{
+    ViewBag.Title = "Report";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+}
+<section class="content">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4 class="uppercase">Report</h4>
+            </div>
+        </div>
+        <div class="panel-body">
+            <!-- =========================================================== -->
+            <div class="row">
+                <div class="col-md-3 col-sm-6 col-xs-12">
+                    <div class="info-box bg-aqua">
+                        <span class="info-box-icon"><i class="fa fa-money "></i></span>
+                        <div class="info-box-content">
+                            <span class="info-box-text">Total Sale (Today)</span>
+                            <span class="info-box-number">@ViewBag.TotalSale.ToString("C", new CultureInfo("bn-BD"))</span>
+                        </div>
+                        <!-- /.info-box-content -->
+                    </div>
+                    <!-- /.info-box -->
+                </div>
+                <!-- /.col -->
+                <div class="col-md-3 col-sm-6 col-xs-12">
+                    <div class="info-box bg-green">
+                        <span class="info-box-icon"><i class="fa fa-money "></i></span>
+                        <div class="info-box-content">
+                            <span class="info-box-text">Total Sale (Month)</span>
+                            <span class="info-box-number">@ViewBag.TotalSaleMonth.ToString("C", new CultureInfo("bn-BD"))</span>
+                        </div>
+                        <!-- /.info-box-content -->
+                    </div>
+                    <!-- /.info-box -->
+                </div>
+                <!-- /.col -->
+                <div class="col-md-3 col-sm-6 col-xs-12">
+                    <div class="info-box bg-yellow">
+                        <span class="info-box-icon"><i class="fa  fa-money"></i></span>
+                        <div class="info-box-content">
+                            <span class="info-box-text">Total Debt (Customer)</span>
+                            <span class="info-box-number">@ViewBag.CustomerDebt.ToString("C", new CultureInfo("bn-BD"))</span>
+                        </div>
+                        <!-- /.info-box-content -->
+                    </div>
+                    <!-- /.info-box -->
+                </div>
+                <!-- /.col -->
+                <div class="col-md-3 col-sm-6 col-xs-12">
+                    <div class="info-box bg-red">
+                        <span class="info-box-icon"><i class="fa fa-money"></i></span>
+                        <div class="info-box-content">
+                            <span class="info-box-text">Total Debt (Supplier)</span>
+                            <span class="info-box-number">@ViewBag.SupplierDebt.ToString("C", new CultureInfo("bn-BD"))</span>
+                        </div>
+                        <!-- /.info-box-content -->
+                    </div>
+                    <!-- /.info-box -->
+                </div>
+                <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="box box-success box-solid">
+                        <div class="box-header">
+                            <div class="box-title">Top Sale Item (Day)</div>
+                        </div>
+                        <div class="box-body">
+                            <div class="box-footer no-padding">
+                                <ul class="nav nav-stacked">
+                                    @if (ViewBag.TopSaleItemDayList != null)
+                                     {
+                                        foreach (var item in ViewBag.TopSaleItemDayList as SelectList)
+                                        {
+                                            <li><a>@item.Text <span class="pull-right badge bg-blue">@item.Value</span></a></li>
+                                        }
+                                     }
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="box box-success box-solid">
+                        <div class="box-header">
+                            <div class="box-title">Top Sale Item (Month)</div>
+                        </div>
+                        <div class="box-body">
+                            <div class="box-footer no-padding">
+                                <ul class="nav nav-stacked">
+                                    @if (ViewBag.TopSaleItemMonthList != null)
+                                     {
+                                        foreach (var item in ViewBag.TopSaleItemMonthList as SelectList)
+                                        {
+                                            <li><a>@item.Text <span class="pull-right badge bg-blue">@item.Value</span></a></li>
+                                        }
+                                     }
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+        $("#liForReporting").addClass('active');
+        $("#liForReport").addClass('active');
+    });
+</script>

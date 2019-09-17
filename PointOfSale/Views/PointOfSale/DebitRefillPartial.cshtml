@@ -1,0 +1,36 @@
+﻿@model PointOfSale.ModelViews.CustomerModelView
+@Html.HiddenFor(a => a.CustomerId)
+@{ 
+    decimal validPay = 0;
+     if(Model.IsDebitAccounts == true)
+     {
+        validPay = Model.DebitLimit - Model.AvailableDebit;
+     }
+}
+@if (Model.IsDebitAccounts == true)
+ {
+    <div class="editor-label"><label for="DebitLimit">Debit Limit</label></div>
+    <div class="editor-field">
+        @Html.DisplayFor(model => model.DebitLimit, new { htmlattributes = new { @style = "width:100%; max-width:100%" } })
+    </div>
+    <div class="editor-label"><label for="AvailableDebit">Available Amount</label></div>
+    <div class="editor-field">
+        @Html.DisplayFor(model => model.AvailableDebit, new { htmlattributes = new { @style = "width:100%; max-width:100%" } })
+    </div>
+    <div class="editor-label"><label for="CreditPay">Pay Amount(Tk)</label></div>
+    <div class="editor-field">
+        @Html.EditorFor(model => model.DebitPay, new { htmlattributes = new { @min = 1, @max = validPay, @class = "k-textbox", @style = "width:100%; max-width:100%", required = "required", validationMessage = "Please enter valid amount", type = "number" } })
+        @Html.ValidationMessageFor(model => model.DebitPay, "", new { @class = "text-Danger" })
+    </div>
+ }
+else
+{
+    <div class="text-center">
+        <h4>Debit account not found</h4>
+    </div>
+    <script>
+        $("#btnDebitRefillConfirm").prop('disabled', true);
+    </script>
+}
+
+

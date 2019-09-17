@@ -1,0 +1,153 @@
+﻿@{
+    ViewBag.Title = "Vat";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+}
+<section class="content">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4 class="uppercase">Vat</h4>
+            </div>
+        </div>
+        <div class="panel-body">
+            <button class="btn btn-success" id="btnVatCreateWin"><i class="fa fa-plus-circle" aria-hidden="true"></i> Add</button>
+        </div>
+        <div class="panel-body">
+            <div id="divVatList"></div>
+        </div>
+    </div>
+</section>
+<div id="divVatWin"></div>
+<script id="temp_win_delete_entry" type="text/x-kendo-template">
+    <div style="padding:1em;">
+        <p style="font-size: 14px; padding: 10px"> #=msg# </p>
+        <div style="text-align: right;">
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btn_delete_Entry_noty_ok"><span class="k-icon k-update"></span>OK</button>
+            <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btn_delete_Entry_noty_cancel"><span class="k-icon k-cancel"></span>Cancel</button>
+        </div>
+    </div>
+</script>
+<script>
+    var vatId = 0;
+    $(document).ready(function () {
+        $("#divVatList").empty();
+        $("#divVatList").append('<div class="loading_partial"></div>');
+        $("#divVatList").load('@Url.Action("VatList","Sales")');
+
+        $("#liForSalesMenu").addClass('active');
+        $("#liForSalesConfig").addClass('active');
+    });
+
+    //*************Create vat popup window
+
+    $("#btnVatCreateWin").click(function () {
+        $("#divVatWin").empty();
+        $("#divVatWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 600,
+            height: 173,
+            title: 'Vat Rate',
+            //resizable: false
+        });
+        var vatWin = $("#divVatWin").data("kendoWindow");
+        vatWin.refresh('@Url.Action("VatCreate", "Sales")');
+        vatWin.center().open();
+    });
+
+    //***************vat edit ********************
+    $("#divVatList").on('click', '.btnVatEdit', function () {
+        vatId = $(this).data("id");
+        $("#divVatWin").empty();
+        $("#divVatWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 600,
+            height: 173,
+            title: 'Vat Rate',
+            resizable: false
+        });
+        var vatWin = $("#divVatWin").data("kendoWindow");
+        vatWin.refresh('@Url.Action("VatCreate", "Sales")?vatId=' + vatId);
+        vatWin.center().open();
+    });
+
+    //*******************vat delete ****************************
+    $("#divVatList").on('click', ".btnVatDelete", function () {
+        vatId = $(this).data("id");
+        var kendoWindow = $("<div />").kendoWindow({
+            actions: ["Close"],
+            title: "Alert",
+            resizable: false,
+            width: "30%",
+            modal: true
+        });
+
+        msg = "Are you sure want to delete this vat rate?";
+        var template = kendo.template($("#temp_win_delete_entry").html());
+        kendoWindow.data("kendoWindow").content(template).center().open();
+
+        kendoWindow.find("#btn_delete_Entry_noty_cancel").click(function () {
+            kendoWindow.data("kendoWindow").close();
+            document.documentElement.style.overflow = "auto";
+        }).end();
+        kendoWindow.find("#btn_delete_Entry_noty_ok").click(function () {
+            kendoWindow.data("kendoWindow").close();
+            document.documentElement.style.overflow = "auto";
+            deletevat(vatId);
+        }).end();
+        document.documentElement.style.overflow = "hidden";
+    });
+
+    function deletevat(vatId) {
+        $.ajax({
+            url: '@Url.Action("DeleteVat", "Sales")',
+            type: 'Post',
+            data: { vatId: vatId },
+            success: function (data) {
+                if (data === "success") {
+                    $("#divVatList").empty();
+                    $("#divVatList").append('<div class="loading_partial"></div>');
+                    $("#divVatList").load('@Url.Action("VatList", "Sales")');
+                } else {
+                    alert("Delete Error...");
+                }
+            }
+        });
+    }
+
+    //**********************vat status active inactive ********************
+
+    $("#divVatList").on("click",".activateVat,.inactivateVat", function () {
+        var id = $(this).data("id");
+        var status = $(this).data("isactive");
+        var sendData = {
+            vatId: id,
+            status: status,
+            userId : userId
+        };
+        $.ajax({
+            url: '@Url.Action("ChangeVatStatus", "Sales")',
+            method: 'POST',
+            data: sendData,
+            success: function (res) {
+                if (res == "success") {
+                    $("#divVatList").empty();
+                    $("#divVatList").append('<div class="loading_partial"></div>');
+                    $("#divVatList").load('@Url.Action("VatList", "Sales")');
+                }
+                else {
+                    alert("Error Status Update");
+                }
+            }
+        });
+    });
+</script>
+
+
+
+

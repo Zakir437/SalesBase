@@ -1,0 +1,45 @@
+﻿@{
+    ViewBag.Title = "StockDailyTopSold";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+}
+<section class="content-header">
+    <ol class="breadcrumb">
+        <li><a href="/Inventory/TaskScheduler"><i class="fa fa-list-ul"></i> Task Scheduler</a></li>
+        <li><a href="/Inventory/TopSoldDate"><i class="fa fa-list-ul"></i>Top Sold Generate Date</a></li>
+        <li class="active">Stock Daily Top Sold</li>
+    </ol>
+</section>
+<section class="content">
+    <div class="panel panel-info" style="margin-top:20px;">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4 class="uppercase">Stock Daily Top Sold (@Convert.ToDateTime(ViewBag.Date).ToString("MMMM dd,yyyy"))</h4>
+            </div>
+            <div class="pull-right">
+                <a class="btn btn-primary" href="/Inventory/TopSoldDate"><i class="fa fa-arrow-left"></i> Back</a>
+            </div>
+        </div>
+        <div class="panel-body">
+            <div class="form-group">
+                <button class="btn btn-primary btnPrint pull-right"><i class="fa fa-print"></i></button>
+            </div>
+            <div id="divDailyTopSoldList"></div>
+        </div>
+    </div>
+</section>
+<script>
+    $(document).ready(function () {
+        $("#liForTaskScheduler").addClass('active');
+        $("#divDailyTopSoldList").append('<div class="loading_partial"></div>');
+        $("#divDailyTopSoldList").load('/Inventory/StockDailyTopSoldList?date=' + new Date("@ViewBag.Date").toISOString());
+    });
+
+    //Print
+    $(".btnPrint").click(function () {
+        var data = "date=" + new Date("@ViewBag.Date").toISOString();
+        window.open('@Url.Action("TopSoldPrint", "Inventory")?q=' + getDataEncrypted(data), '_blank');
+    });
+
+</script>
+
+

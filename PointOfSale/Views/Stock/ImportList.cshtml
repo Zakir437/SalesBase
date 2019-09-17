@@ -1,0 +1,56 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewStockImport>
+@using PointOfSale.Helpers
+@using System.Globalization
+@{
+    var count = 0;
+}
+@if (Model.Any())
+{
+    <table class="table table-bordered table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Reff.</th>
+            <th>Import By</th>
+            <th>Supplier</th>
+            <th>MRR</th>
+            <th>Total Cost</th>
+            <th>Due</th>
+            <th>Date</th>
+            <th>Comments</th>
+            <th width="86px"></th>
+        </tr>
+        @foreach (var list in Model)
+         {
+            count++;
+            <tr>
+                <td>@count.</td>
+                <td>
+                    <a href="@Html.EncodedParam("ImportTransaction", "Stock", new { importId = list.StockImportId}, null)">@list.RefferenceNo</a>
+                </td>
+                <td>@list.ImportBy</td>
+                <td>@list.SupplierName</td>
+                <td>@list.MRR</td>
+                <td>@list.TotalCost.ToString("C", new CultureInfo("bn-BD"))</td>
+                <td>@list.DueAmount.ToString("C", new CultureInfo("bn-BD"))</td>
+                <td>@Convert.ToDateTime(list.Date).ToString("MMM dd yyyy hh:mm:ss tt")</td>
+                <td>@list.Comments</td>
+                <td>
+                    @if (list.SupplierId > 0)
+                    {
+                        <button class="btn btn-danger btnReturn" data-id="@list.StockImportId" data-toggle="tooltip" title="Return products">Return</button>
+                    }
+                </td>
+            </tr>
+         }
+    </table>
+ }
+else
+{
+    <h3>There is no data to display</h3>
+}
+
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    })
+</script>

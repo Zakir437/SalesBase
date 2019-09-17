@@ -1,0 +1,15 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" style="margin:14px 0 0 28px;">
+    <div id="divCreditPaymentHistoryList"></div>
+    <div class="k-edit-buttons k-state-default">
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnCreditPaymentHistoryCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#divCreditPaymentHistoryList").append('<div class="tiny_loading"></div>');
+        $("#divCreditPaymentHistoryList").load('@Url.Action("CreditPaymentHistoryList", "PointOfSale")?orderId=' + '@ViewBag.OrderId');
+    });
+    $("#btnCreditPaymentHistoryCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+</script>

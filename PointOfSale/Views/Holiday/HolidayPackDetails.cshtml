@@ -1,0 +1,113 @@
+﻿@model PointOfSale.Models.ViewHolidayPackage
+@{
+    ViewBag.Title = "HolidayPackDetails";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="panel panel-default" style="margin-top:20px;">
+    <div class="panel-heading" style="padding-bottom:46px;">
+        <div class="pull-left">
+            <h4>Holidays</h4>
+        </div>
+        <div class="pull-right">
+            <a class="btn btn-default" href="/Holiday/Holiday"><i class="fa fa-arrow-left"></i> Back</a>
+        </div>
+    </div>
+    <div class="panel-body">
+        <dl class="dl-horizontal">
+            <dt>Package Name</dt>
+            <dd>
+                @Model.HolidayPackName 
+                <span data-toggle="tooltip" data-container="body" title="Update Holiday Package" class="btn btn-primary" style="margin-left:5%;margin-top:-10px;" id="btn_holiday_pck_edit"><i class="fa fa-pencil"></i></span>
+            </dd>
+            <dt>No. Of Paid Leave</dt>
+            <dd>@Model.NoOfPaidLeave</dd>
+            <dt>CreatedBy</dt>
+            <dd>@Model.CreatedBy</dd>
+            <dt>Created Date</dt>
+            <dd>@Convert.ToDateTime(Model.CreatedDate).ToString("MMM dd yyyy")</dd>
+            @if (Model.UpdatedDate != null)
+             {
+                <dt>UpdatedBy</dt>
+                <dd>@Model.UpdatedBy</dd>
+                <dt>Updated Date</dt>
+                <dd>
+                    @Convert.ToDateTime(Model.UpdatedDate).ToString("MMM dd yyyy")
+                </dd>
+             }
+        </dl>
+       
+
+        @*<span data-toggle="tooltip" data-container="body" title="Update Holiday Package" class="btn green" style="margin-left:5%;margin-top:-10px;" id="btn_holiday_pck_edit"><i class="fa fa-pencil"></i></span>*@
+    </div>
+    <hr />
+    <div class="panel-body">
+        <button class="btn btn-default" id="btnHolidayAdd" data-toggle="tooltip" title="Add new holiday" style="margin:15px 0 5px 0;"><i class="fa fa-plus-circle" aria-hidden="true"></i> Add New Holiday</button>
+    </div>
+    <div class="panel-body" style="padding:0px 15px;">
+        <div id="divHolidayList" style="padding-top:5px;"></div>
+    </div>
+</div>
+<div id="divHolidayAddWin"></div>
+<div id="divHolidayPackageWin"></div>
+<script>
+     $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+        $("#divHolidayList").append('<div class="loading_partial"></div>');
+        $("#divHolidayList").load('@Url.Action("HolidayList", "Holiday")?packageId=' + '@Model.HolidayPackId');
+    });
+
+     //Holiday Create
+    $("#btnHolidayAdd").click(function () {
+        $("#divHolidayAddWin").empty();
+        $("#divHolidayAddWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 767,
+            height: 289,
+            title: 'Holiday',
+            resizable: false
+        });
+        var holidayWin = $("#divHolidayAddWin").data("kendoWindow");
+        holidayWin.refresh('@Url.Action("HolidayCreate", "Holiday")?packageId=' + '@Model.HolidayPackId');
+        holidayWin.center().open();
+    });
+     //Holiday Edit
+    $("#divHolidayList").on('click', '.btnEditHoliday', function () {
+        var holidayId = $(this).data("id");
+        $("#divHolidayAddWin").empty();
+        $("#divHolidayAddWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 767,
+            height: 289,
+            title: 'Holiday',
+            resizable: false
+        });
+        var holidayWin = $("#divHolidayAddWin").data("kendoWindow");
+        holidayWin.refresh('@Url.Action("HolidayCreate", "Holiday")?packageId=' + '@Model.HolidayPackId' + '&holidayId=' + holidayId);
+        holidayWin.center().open();
+    });
+
+    //Holiday package edit
+    $("#btn_holiday_pck_edit").click(function () {
+        $("#divHolidayPackageWin").empty();
+        $("#divHolidayPackageWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 767,
+            height: 250,
+            title: 'Holiday Package',
+            resizable: false
+        });
+        var holidayPackageWin = $("#divHolidayPackageWin").data("kendoWindow");
+        holidayPackageWin.refresh('@Url.Action("HolidayPackageCreate", "Holiday")?holidayId=' + '@Model.HolidayPackId');
+        holidayPackageWin.center().open();
+    });
+
+</script>

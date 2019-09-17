@@ -1,0 +1,94 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin-bottom:4%;margin-top:2%;">
+    <div id="divBrandForm"></div>
+    <div class="k-edit-buttons k-state-default" style="margin-left:30px;">
+        @if (ViewBag.BrandId > 0)
+        {
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnBrandCreate"><span class="k-icon k-update"></span>Update</button>
+        }
+        else
+        {
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnBrandCreate"><span class="k-icon k-update"></span>Create</button>
+        }
+        <button type="reset" class="k-button k-button-icontext k-grid-update" id="btnRefresh"><span class="k-icon k-i-refresh"></span>Refresh</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#divBrandForm").empty();
+        $("#divBrandForm").load('@Url.Action("BrandCreatePartial", "Configuration")?id=' + '@ViewBag.BrandId');
+    });
+    $("#btnRefresh").click(function () {
+        $("#divBrandForm").empty();
+        $("#divBrandForm").load('@Url.Action("BrandCreatePartial", "Configuration")?id=' + '@ViewBag.BrandId');
+    });
+    $("#btnCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+
+    var validation = $("#divBrandForm").kendoValidator({
+        rules: {
+            remoteBrandName: function (input) {
+                var remoteAttr = input.attr("data-val-remote-url");
+                if (typeof remoteAttr === typeof undefined || remoteAttr === false) {
+                    return true;
+                }
+                var isInvalid;
+                var data = {};
+                var Id = $("#BrandId").val();
+                var BrandName = $.trim($("#BrandName").val());
+                data = { Id: Id, BrandName: BrandName };
+                $.ajax({
+                    url: remoteAttr,
+                    mode: "abort",
+                    port: "validate" + input.attr('name'),
+                    dataType: "json",
+                    type: input.attr("data-val-remote-type"),
+                    data: data,
+                    async: false,
+                    success: function (response) {
+                        isInvalid = response;
+                        if (isInvalid === true) {
+                            isInvalid = true;
+                        }
+                        else {
+                            isInvalid = false;
+                        }
+                    }
+                });
+                return isInvalid;
+            }
+        },
+        messages: {
+            remoteBrandName: function (input) {
+                return input.data('val-remote');
+            }
+        }
+    }).data("kendoValidator");
+    $("#btnBrandCreate").click(function () {
+        if (validation.validate()) {
+            var sendData = {
+                BrandId: $("#BrandId").val(),
+                BrandName: $("#BrandName").val(),
+                CreatedBy: userId
+            }
+            $.ajax({
+                url: '@Url.Action("BrandCreateSave","Configuration")',
+                type: "POST",
+                data: sendData,
+                success: function (data) {
+                    if (data = "success") {
+                        $("#divBrandWindow").data("kendoWindow").close();
+                        $("#divBrandList").empty();
+                        $("#divBrandList").append('<div class="loading_partial"></div>');
+                        $("#divBrandList").load('@Url.Action("BrandList", "Configuration")');
+                    }
+                    else {
+                        alert("Brand Save Error");
+                    }
+                }
+            });
+        }
+    });
+</script>

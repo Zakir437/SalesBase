@@ -1,0 +1,53 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin-bottom:4%;margin-top:2%;">
+    <div id="divSpecificMonthForm"></div>
+    <div class="k-edit-buttons k-state-default" style="margin-left:30px;">
+        <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnSpecificMonthGenerate"><span class="k-icon k-update"></span>Ok</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnSpecificMonthGenerateCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+    $(document).ready(function ()
+    {
+        $("#divSpecificMonthForm").empty();
+        $("#divSpecificMonthForm").load('@Url.Action("_SpecificDateSalaryGenerate", "Accounting")?userId=' + '@ViewBag.UserId');
+    });
+    $("#btnSpecificMonthGenerateCancel").click(function ()
+    {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+    var specificMonthValidation = $("#divSpecificMonthForm").kendoValidator().data("kendoValidator");
+    $("#btnSpecificMonthGenerate").click(function () {
+        if (specificMonthValidation.validate())
+        {
+            var sendData = {
+                UserId: $("#UserId").val(),
+                MonthDate: $("#MonthDate").val(),
+                CreatedBy: userId,
+            }
+            $.ajax({
+                url: '@Url.Action("SpecificSalaryGenerateSave", "Accounting")',
+                type: 'Post',
+                data: sendData,
+                success: function (data) {
+                    $("#divSpecificDateSalaryGenerateWin").data("kendoWindow").close();
+                    if (data === "success")
+                    {
+                        alert("Save successfully...");
+                        $("#divUserList").empty();
+                        $("#divUserList").append('<div class="loading_partial"></div>');
+                        $("#divUserList").load('@Url.Action("UserListForSalary", "Accounting")');
+                    }
+                    else
+                    {
+                        alert('error');
+                    }
+                },
+                error: function (error)
+                {
+                    alert('error');
+                }
+
+            });
+        }
+    });
+</script>

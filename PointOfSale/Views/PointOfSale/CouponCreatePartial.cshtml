@@ -1,0 +1,125 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin-bottom:4%;margin-top:2%;">
+    <div id="divCouponForm"></div>
+    <div class="k-edit-buttons k-state-default" style="margin-left:30px;">
+        <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnCouponCreate"><span class="k-icon k-update"></span>Update</button>
+        <button type="reset" class="k-button k-button-icontext k-grid-update" id="btnCouponRefresh"><span class="k-icon k-i-refresh"></span>Refresh</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnCouponCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#divCouponForm").append('<div class="tiny_loading"></div>');
+        $("#divCouponForm").load('@Url.Action("_CouponCreatePartial", "PointOfSale")?offerId=' + '@ViewBag.OfferId' + '&eventId=' + '@ViewBag.EventId' + '&offerItemId=' + '@ViewBag.OfferItemId');
+    });
+    $("#btnCouponRefresh").click(function () {
+        $("#divCouponForm").empty();
+        $("#divCouponForm").append('<div class="tiny_loading"></div>');
+        $("#divCouponForm").load('@Url.Action("_CouponCreatePartial", "PointOfSale")?offerId=' + '@ViewBag.OfferId' + '&eventId=' + '@ViewBag.EventId' + '&offerItemId=' + '@ViewBag.OfferItemId');
+    });
+
+    $("#btnCouponCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+
+    var validation = $("#divCouponForm").kendoValidator({
+        rules:
+        {
+            remoteCouponCode: function (input) {
+                var remoteAttr = input.attr("data-val-remote-url");
+                if (typeof remoteAttr === typeof undefined || remoteAttr === false) {
+                    return true;
+                }
+                var isInvalid;
+                var data = {};
+                var coupon = $.trim($("#Coupon").val());
+                data = { coupon: coupon };
+                $.ajax({
+                    url: remoteAttr,
+                    mode: "abort",
+                    port: "validate" + input.attr('name'),
+                    dataType: "json",
+                    type: input.attr("data-val-remote-type"),
+                    data: data,
+                    async: false,
+                    success: function (response) {
+                        isInvalid = response;
+                        if (isInvalid === true) {
+                            isInvalid = true;
+                        }
+                        else {
+                            isInvalid = false;
+                        }
+                    }
+                });
+                return isInvalid;
+            }
+        },
+        messages: {
+            remoteCouponCode: function (input) {
+                return input.data('val-remote');
+            }
+        }
+    }).data("kendoValidator");
+
+    $("#btnCouponCreate").click(function () {
+
+        if (validation.validate())
+        {
+            var sendData = {
+                Id: $("#Id").val(),
+                OfferItemId: $("#OfferItemId").val(),
+                MasterOfferId: $("#MasterOfferId").val(),
+                IsCouponApplicable: $("#IsCouponApplicable").val(),
+                Coupon: $.trim($("#Coupon").val()),
+                CreatedBy : userId
+            }
+            $.ajax({
+                url: '@Url.Action("CouponSave", "PointOfSale")',
+                type: "POST",
+                data: sendData,
+                success: function (result) {
+                    $("#divCouponWin").data("kendoWindow").close();
+                    if (result == "success") {
+                        if (tab == 1)
+                        {
+                            clearBeforeClick();
+                            $("#div_All").append('<div class="loading_partial"></div>');
+                            $("#div_All").load('@Url.Action("OfferItemTab", "PointOfSale")');
+                        }
+                        else if (tab == 2)
+                        {
+                            clearBeforeClick();
+                            $("#div_Products").append('<div class="loading_partial"></div>');
+                            $("#div_Products").load('@Url.Action("SingleOfferItemTab", "PointOfSale")');
+                        }
+                        else if (tab == 3)
+                        {
+                            clearBeforeClick();
+                            $("#div_Offers").append('<div class="loading_partial"></div>');
+                            $("#div_Offers").load('@Url.Action("OfferTab", "PointOfSale")');
+                        }
+                        else if (tab == 4)
+                        {
+                            clearBeforeClick();
+                            $("#div_Events").append('<div class="loading_partial"></div>');
+                            $("#div_Events").load('@Url.Action("EventTab", "PointOfSale")');
+                        }
+                        else if (tab == 5)
+                        {
+                            clearBeforeClick();
+                            $("#div_Coupon").append('<div class="loading_partial"></div>');
+                            $("#div_Coupon").load('@Url.Action("CouponTab", "PointOfSale")');
+                        }
+                    }
+                    else {
+                        alert("Save Error");
+                    }
+                }
+            });
+        }
+    });
+</script>
+
+
+
+

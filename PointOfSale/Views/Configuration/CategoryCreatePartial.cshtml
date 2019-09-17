@@ -1,0 +1,19 @@
+﻿@model PointOfSale.ModelViews.CategoryModelView
+@Html.HiddenFor(m => m.CategoryId)
+<div class="editor-label"><label for="CategoryName">Name</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.CategoryName, new { htmlattributes = new { @class = "k-textbox form-control" } })
+    @Html.ValidationMessageFor(model => model.CategoryName, "", new { @class = "text-Danger" })
+</div>
+<div class="editor-label"><label for="RestrictionId">Restriction</label></div>
+<div class="editor-field">
+    @(Html.Kendo().DropDownListFor(a => a.RestrictionId)
+                     .BindTo(ViewBag.RestrictionList as SelectList)
+                     .DataTextField("Text")
+                     .DataValueField("Value")
+                     .OptionLabel("--Select one restriction--")
+                     .HtmlAttributes(new { style = "width:68%" })
+    )
+</div>
+
+

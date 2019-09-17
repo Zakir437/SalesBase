@@ -1,0 +1,135 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewDiscountItem>
+@{
+    var count = 0;
+}
+<style>
+    .checkbox {
+        margin-top: 0px;
+        margin-bottom: 5px;
+    }
+</style>
+@if (Model.Any() == true)
+{
+    if (ViewBag.Isprint == true)
+    {
+        <table class="table table-bordered table-hover table-responsive">
+            <tr>
+                <th>SL.</th>
+                <th>Product</th>
+                <th>Price</th>
+                <th>Discount Price</th>
+                <th>Discount(%)</th>
+                <th>Discount(Tk)</th>
+                <th>Schedule</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>CreatedBy</th>
+                <th>Created Date</th>
+            </tr>
+            @foreach (var list in Model)
+            {
+                count++;
+                <tr>
+                    <td>
+                        @count.
+                    </td>
+                    <td>@list.ProductName</td>
+                    <td>@list.Price Tk</td>
+                    <td>@list.OfferPrice Tk</td>
+                    <td>@list.PercentageOff %</td>
+                    <td>@list.AmountOff Tk</td>
+                    <td>@list.ScheduleName</td>
+                    <td>@Convert.ToDateTime(list.StartDate).ToString("MMM dd,yyyy hh:mm:ss tt")</td>
+                    <td>@Convert.ToDateTime(list.EndDate).ToString("MMM dd,yyyy hh:mm:ss tt")</td>
+                    <td>@list.CreatedBy</td>
+                    <td>@Convert.ToDateTime(list.CreatedDate).ToString("MMM dd,yyyy")</td>
+                </tr>
+             }
+        </table>
+    }
+    else
+    {
+        <table class="table table-bordered table-hover table-responsive">
+            <tr>
+                <th>SL.</th>
+                <th>
+                    <div class="checkbox">
+                        <label style="font-weight:bold; font-size:14px; color:#333"><input type="checkbox" id="checkAll" /> Product</label>
+                    </div>
+                </th>
+                <th>Price</th>
+                <th>Discount Price</th>
+                <th>Discount(%)</th>
+                <th>Discount(Tk)</th>
+                <th>Schedule</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>CreatedBy</th>
+                <th>Created Date</th>
+                <th></th>
+            </tr>
+            @foreach (var list in Model)
+            {
+                count++;
+                <tr>
+                    <td>
+                        @count.
+                    </td>
+                    <td>
+                        <div class="checkbox">
+                            <label><input type="checkbox" data-id="@list.Id" class="check" id="check_@list.Id" /> @list.ProductName</label>
+                        </div>
+                    </td>
+                    <td>@list.Price Tk</td>
+                    <td>@list.OfferPrice Tk</td>
+                    <td>@list.PercentageOff %</td>
+                    <td>@list.AmountOff Tk</td>
+                    <td>@list.ScheduleName</td>
+                    <td>@Convert.ToDateTime(list.StartDate).ToString("MMM dd,yyyy hh:mm:ss tt")</td>
+                    <td>@Convert.ToDateTime(list.EndDate).ToString("MMM dd,yyyy hh:mm:ss tt")</td>
+                    <td>@list.CreatedBy</td>
+                    <td>@Convert.ToDateTime(list.CreatedDate).ToString("MMM dd,yyyy")</td>
+                    <td>
+                        <button type="button" class="btn btn-primary btnDiscountEdit" data-id="@list.Id" data-toggle="tooltip" title="Edit Discount Information"><i class="fa fa-pencil-square-o"></i></button>
+                        @if (list.Status == true)
+                        {
+                            <button type="button" data-id="@list.Id" data-isactive="0" class="btn btn-danger inactivateDiscItem" data-toggle="tooltip" title="Inactivate Discount Item">
+                                <i class="fa fa-stop" aria-hidden="true"></i>
+                            </button>
+                        }
+                        else
+                        {
+                            <button type="button" data-id="@list.Id" data-isactive="1" class="btn btn-success activateDiscItem" data-toggle="tooltip" title="Activate Discount Item">
+                                <i class="fa fa-play" aria-hidden="true"></i>
+                            </button>
+                        }
+                        @if (@list.Status == false)
+                        {
+                            <button type="button" data-id="@list.Id" style="cursor:pointer;" data-toggle="tooltip" title="Delete Discount Item" class="btn btn-danger btnDiscItemDelete">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                        }
+                    </td>
+                </tr>
+            }
+        </table>
+    }
+}
+else
+{
+    <h4>There is no record to display</h4>
+}
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    })
+</script>
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,6 @@
+﻿@model PointOfSale.ModelViews.Sales.ProductModelView
+<div class="editor-label"><label for="MinimalQuantity">Quantity</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.MinimalQuantity, new { htmlattributes = new { @class = "k-textbox", @style = "width:68%" } })
+    @Html.ValidationMessageFor(model => model.MinimalQuantity, "", new { @class = "text-Danger" })
+</div>

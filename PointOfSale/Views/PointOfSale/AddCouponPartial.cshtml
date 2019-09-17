@@ -1,0 +1,91 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin-bottom:4%;margin-top:2%;">
+    <div id="divCouponForm"></div>
+    <div class="k-edit-buttons k-state-default" style="margin-left:30px;">
+        <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnCouponCreate"><span class="k-icon k-update"></span>Create</button>
+        <button type="reset" class="k-button k-button-icontext k-grid-update" id="btnCouponRefresh"><span class="k-icon k-i-refresh"></span>Refresh</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnCouponCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#divCouponForm").append('<div class="tiny_loading"></div>');
+        $("#divCouponForm").load('@Url.Action("_AddCouponPartial", "PointOfSale")?type=' + '@ViewBag.Type');
+    });
+    $("#btnCouponRefresh").click(function () {
+        $("#divCouponForm").empty();
+        $("#divCouponForm").append('<div class="tiny_loading"></div>');
+        $("#divCouponForm").load('@Url.Action("_AddCouponPartial", "PointOfSale")?type=' + '@ViewBag.Type');
+    });
+
+    $("#btnCouponCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+
+    var validation = $("#divCouponForm").kendoValidator({
+        rules:
+        {
+            minimum: function (input) {
+                if (input.attr('name') === "MinimumPurchase" && $("#MinimumPurchase").val() > 0) {
+                    if (parseFloat($("#MinimumPurchase").val()) < parseFloat($("#Amount").val()))
+                    {
+                        return false;
+                    }
+                    else {
+                        return true;
+                    }
+                }
+                else if (input.attr('name') === "MinimumPurchase" && parseFloat($("#MinimumPurchase").val()) <= 0)
+                {
+                    return false;
+                }
+                return true;
+            },
+        },
+        messages: {
+            minimum: "Please enter valid amount",
+        }
+    }).data("kendoValidator");
+
+    $("#btnCouponCreate").click(function () {
+
+        if (validation.validate())
+        {
+            $(this).prop('disabled', true);
+            var sendData = {
+                Id: $("#Id").val(),
+                Name: $.trim($("#Name").val()),
+                Amount: $("#Amount").val(),
+                Percentile: $("#Percentile").val(),
+                MinimumPurchase: $("#MinimumPurchase").val(),
+                MaximumAmount: $("#MaximumAmount").val(),
+                ValidityDate: $("#ValidityDate").val(),
+                Type: '@ViewBag.Type',
+                CreatedBy : userId
+            }
+            $.ajax({
+                url: '@Url.Action("CustomCouponSave", "PointOfSale")',
+                type: "POST",
+                data: sendData,
+                success: function (result) {
+                    $("#divAddCouponWin").data("kendoWindow").close();
+                    if (result == "success")
+                    {
+                       $("#divCouponList").empty();
+                       $("#divCouponList").append('<div class="loading_partial"></div>');
+                       $("#divCouponList").load('@Url.Action("CouponList", "PointOfSale")?type=' + '@ViewBag.Type' );
+                    }
+                    else
+                    {
+                        alert("Save Error");
+                    }
+                }
+            });
+        }
+    });
+
+</script>
+
+
+
+
+

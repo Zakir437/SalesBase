@@ -1,0 +1,181 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin-bottom:4%;margin-top:2%;">
+    <div id="divSupplementaryForm"></div>
+    <div class="k-edit-buttons k-state-default" style="margin-left:30px;">
+        @if (ViewBag.Id > 0)
+        {
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnSupplementaryCreate"><span class="k-icon k-update"></span>Update</button>
+        }
+        else
+        {
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnSupplementaryCreate"><span class="k-icon k-update"></span>Create</button>
+        }
+        <button type="reset" class="k-button k-button-icontext k-grid-update" id="btnSupplementaryRefresh"><span class="k-icon k-i-refresh"></span>Refresh</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnSupplementaryCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#divSupplementaryForm").append('<div class="tiny_loading"></div>');
+        $("#divSupplementaryForm").load('@Url.Action("SupplementaryCreatePartial", "Sales")?id=' + '@ViewBag.Id');
+    });
+    $("#btnSupplementaryRefresh").click(function () {
+        $("#divSupplementaryForm").empty();
+        $("#divSupplementaryForm").append('<div class="tiny_loading"></div>');
+        $("#divSupplementaryForm").load('@Url.Action("SupplementaryCreatePartial", "Sales")?id=' + '@ViewBag.Id');
+    });
+
+    $("#btnSupplementaryCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+
+    function dataSubMulti() {
+        return {
+            categoryIds: $("#CategoryMultiSelect").data("kendoMultiSelect").value().join(","),
+            isMultiselect: true
+        };
+    }
+    //sub category data bound
+    function onDataBoundSubCategory() {
+        if ('@ViewBag.Id' != "")
+        {
+            $.ajax({
+                url: '/Sales/GetSubCategories',
+                type: 'GET',
+                dataType: 'json',
+                data: { supplementaryId : '@ViewBag.Id' },
+                success: function (data) {
+                    if (data != "NotFound") {
+                        $("#SubCategoryMultiSelect").data("kendoMultiSelect").value(data);
+                    }
+                    else {
+                        $("#SubCategoryMultiSelect").data("kendoMultiSelect").value("");
+                    }
+                }
+            });
+        }
+    }
+    //category data bound
+    function onDataBoundCategory() {
+        if ('@ViewBag.Id' != "")
+        {
+             $.ajax({
+                url: '/Sales/GetCategory',
+                type: 'GET',
+                dataType: 'json',
+                data: { supplementaryId : '@ViewBag.Id' },
+                success: function (data) {
+                    if (data != "NotFound") {
+                        $("#CategoryMultiSelect").data("kendoMultiSelect").value(data);
+                    }
+                    else {
+                        $("#CategoryMultiSelect").data("kendoMultiSelect").value("");
+                    }
+                    $('#SubCategoryMultiSelect').data('kendoMultiSelect').dataSource.read();
+                }
+             });
+        }
+    }
+    function onChangeCategoryMulti() {
+        $('#SubCategoryMultiSelect').data('kendoMultiSelect').dataSource.read();
+    }
+
+
+    var validation = $("#divSupplementaryForm").kendoValidator({
+        rules: {
+            supplementaryName: function (input) {
+                var remoteAttr = input.attr("data-val-remote-url");
+                if (typeof remoteAttr === typeof undefined || remoteAttr === false) {
+                    return true;
+                }
+                var isInvalid;
+                var data = {};
+                var Id = $("#Id").val();
+                var Name = $.trim($("#Name").val());
+                data = { Id: Id, Name: Name };
+                $.ajax({
+                    url: remoteAttr,
+                    mode: "abort",
+                    port: "validate" + input.attr('name'),
+                    dataType: "json",
+                    type: input.attr("data-val-remote-type"),
+                    data: data,
+                    async: false,
+                    success: function (response) {
+                        isInvalid = response;
+                        if (isInvalid === true) {
+                            isInvalid = true;
+                        }
+                        else {
+                            isInvalid = false;
+                        }
+                    }
+                });
+                return isInvalid;
+            }
+        },
+        messages: {
+            supplementaryName: function (input) {
+                return input.data('val-remote');
+            }
+        }
+    }).data("kendoValidator");
+
+    $("#btnSupplementaryCreate").click(function () {
+
+        if (validation.validate())
+        {
+            var sendData = {
+                Id: $("#Id").val(),
+                Name: $.trim($("#Name").val()),
+                CategoryIds: $("#CategoryMultiSelect").data("kendoMultiSelect").value().join(","),
+                SubCategoryIds: $("#SubCategoryMultiSelect").data("kendoMultiSelect").value().join(","),
+                IsRequestConditionInfo: $("#IsRequestConditionInfo").val(),
+                CreatedBy : userId
+            }
+            $.ajax({
+                url: '@Url.Action("SupplementarySave", "Sales")',
+                type: "POST",
+                data: sendData,
+                success: function (result) {
+                    $("#divSupplementaryItemWin").data("kendoWindow").close();
+                    if (result == "success") {
+                        if (tab == 1)
+                        {
+                            $("#div_All").empty();
+                            $("#div_All").append('<div class="loading_partial"></div>');
+                            $("#div_All").load('@Url.Action("SupplementaryItemList", "Sales")');
+                        }
+                        else if (tab == 2)
+                        {
+                            status = 1;
+                            passdata = { status: status };
+                            $("#div_Active").append('<div class="loading_partial"></div>');
+                            $("#div_Active").load('@Url.Action("SupplementaryItemList", "Sales")', passdata);
+                        }
+                        else if (tab == 3)
+                        {
+                            status = 0;
+                            passdata = { status: status};
+                            $("#div_Inactive").append('<div class="loading_partial"></div>');
+                            $("#div_Inactive").load('@Url.Action("SupplementaryItemList", "Sales")', passdata);
+                        }
+                        else if (tab == 4)
+                        {
+                            status = 2;
+                            passdata = { status: status };
+                            $("#div_Deleted").append('<div class="loading_partial"></div>');
+                            $("#div_Deleted").load('@Url.Action("SupplementaryItemList", "Sales")', passdata);
+                        }
+                    }
+                    else {
+                        alert("Save Error");
+                    }
+                }
+            });
+        }
+    });
+</script>
+
+
+
+

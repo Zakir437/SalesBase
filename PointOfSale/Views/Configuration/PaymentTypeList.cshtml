@@ -1,0 +1,54 @@
+﻿@model IEnumerable<PointOfSale.Models.PaymentType>
+
+@{
+    var count = 0;
+}
+@if (Model.Count() > 0)
+{
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Name</th>
+            <th></th>
+        </tr>
+        @foreach (var list in Model)
+        {
+            count++;
+            <tr>
+                <td>@count . </td>
+                <td>@list.Name</td>
+                <td>
+                    <button class="btn btnPaymentTypeEdit" style="background-color:#1c488e; color:white;" data-id="@list.PaymentTypeId" data-toggle="tooltip" title="Edit Payment Type Information"><i class="fa fa-pencil-square-o"></i></button>
+                    @if (list.Status == 1)
+                    {
+                        <button type="button" data-id="@list.PaymentTypeId" data-isactive="0" class="btn btn-danger inactivatePaymentType" data-toggle="tooltip" title="Inactivate payment type">
+                            <i class="fa fa-stop" aria-hidden="true"></i>
+                        </button>
+                    }
+                    else if(list.Status == 2)
+                    {
+
+                    }
+                    else
+                    {
+                        <button type="button" data-id="@list.PaymentTypeId" data-isactive="1" class="btn btn-success activatePaymentType" data-toggle="tooltip" title="Activate payment type">
+                            <i class="fa fa-play" aria-hidden="true"></i>
+                        </button>
+                        <span data-id="@list.PaymentTypeId" style="cursor:pointer;" data-toggle="tooltip" title="Delete Payment Type" class="btn btn-danger btnPaymentTypeDelete">
+                            <i class="fa fa-trash"></i>
+                        </span>
+                    }
+                </td>
+            </tr>
+        }
+    </table>
+}
+else
+{
+    <h4>There is no record to display</h4>
+}
+
+<script>
+    $('[data-toggle="tooltip"]').tooltip();
+</script>
+

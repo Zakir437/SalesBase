@@ -1,0 +1,63 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewTagItem>
+@using System.Globalization
+@{
+    var count = 0;
+}
+<table class="table table-bordered table-hover table-responsive table-condensed table-striped" id="tblTagItems">
+    <tr>
+        <th>Name</th>
+        <th>Price</th>
+        <th></th>
+    </tr>
+    <tr id="emptyRow">
+        <td colspan="3">
+            <h4>There is no record to display</h4>
+            <script>
+                $("#btnTagItemSave").prop('disabled', true);
+            </script>
+        </td>
+    </tr>
+    @if (Model.Any())
+     {
+        foreach (var list in Model)
+        {
+            count++;
+            <tr id="tagItem_@count" class="tagItem" data-id="@count" data-productid="@list.OwnerId" data-transid="@list.Id">
+                <td>@list.ProductName</td>
+                <td>@list.Price</td>
+                <td>
+                    <span class="btnCancelItem" data-toggle="tooltip" title="Cancel item" data-transid="@list.Id" data-id="@count"><i class="fa fa-times" aria-hidden="true" style="font-size:24px;cursor:pointer"></i></span>
+                </td>
+            </tr>
+        }
+     }
+    @*else
+    {
+        <tr id="emptyRow">
+            <td colspan="3">
+                <h4>There is no record to display</h4>
+                <script>
+                    $("#btnTagItemSave").prop('disabled', true);
+                </script>
+            </td>
+        </tr>
+        
+    }*@
+</table>
+<script>
+    $(document).ready(function () {
+        count = @count;
+        if (count > 0)
+        {
+            $("#emptyRow").hide();
+            $("#btnTagItemSave").prop('disabled', false);
+        }
+        $('[data-toggle="tooltip"]').tooltip();
+    })
+</script>
+
+
+
+
+
+

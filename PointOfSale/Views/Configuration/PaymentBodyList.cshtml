@@ -1,0 +1,91 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewAccount>
+@using PointOfSale.Helpers
+@{
+    var count = 0;
+    PointOfSale.Models.PointOfSale_DBEntities db = new PointOfSale.Models.PointOfSale_DBEntities();
+}
+@if (Model.Count() > 0)
+{
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Name</th>
+            <th>Payment Type</th>
+            <th>In/Out</th>
+            <th>Balance</th>
+            <th>Selected Methods</th>
+            <th>Description</th>
+            <th></th>
+        </tr>
+        @foreach (var list in Model)
+        {
+            var assignedMethodName = db.ViewAssignedMethodNames.Where(a => a.AccountId == list.PaymentBodyId).Select(s=> new { s.MethodName }).ToList();
+            count++;
+            <tr>
+                <td>@count. </td>
+                <td>
+                    <a data-toggle="tooltip" title="Account Details" href="@Html.EncodedParam("AccountDetails", "Accounting", new { AccId = list.PaymentBodyId}, null)">@list.PaymentBodyName @if (list.SerialNumber != null) { <span>(@list.SerialNumber)</span> }</a>
+                </td>
+                <td>@list.PaymentTypeName</td>
+                @if (list.InOut == 1)
+                {
+                    <td>Receive</td>
+                }
+                else if(list.InOut == 2)
+                {
+                    <td>Release</td>
+                }
+                else
+                {
+                    <td>Both</td>
+                }
+                <td>Tk. @list.Balance</td>
+                <td>
+                    @if (assignedMethodName != null)
+                     {
+                        foreach (var aMethod in assignedMethodName)
+                        {
+                            if (assignedMethodName.Last() == aMethod)
+                            {
+                                <span>@aMethod.MethodName</span>
+                            }
+                            else
+                            {
+                                <span>@aMethod.MethodName,</span>
+                            }
+                        }
+                     }
+                </td>
+                <td>@list.Description</td>
+                <td>
+                    <button class="btn btnPaymentBodyEdit" style="background-color:#1c488e; color:white;" data-id="@list.PaymentBodyId" data-toggle="tooltip" title="Edit Account Information"><i class="fa fa-pencil-square-o"></i></button>
+                    @if (list.Status == true)
+                     {
+                        <button type="button" data-id="@list.PaymentBodyId" data-isactive="0" class="btn btn-danger inactivatePaymentBody" data-toggle="tooltip" title="Inactivate Account">
+                            <i class="fa fa-stop" aria-hidden="true"></i>
+                        </button>
+                     }
+                    else
+                    {
+                        <button type="button" data-id="@list.PaymentBodyId" data-isactive="1" class="btn btn-success activatePaymenBody" data-toggle="tooltip" title="Activate Account">
+                            <i class="fa fa-play" aria-hidden="true"></i>
+                        </button>
+                        <span data-id="@list.PaymentBodyId" style="cursor:pointer;" data-toggle="tooltip" title="Delete Account" class="btn btn-danger btnPaymentBodyDelete">
+                            <i class="fa fa-trash"></i>
+                        </span>
+                    }
+                </td>
+            </tr>
+         }
+    </table>
+}
+else
+{
+    <h4>There is no record to display</h4>
+}
+
+<script>
+    $('[data-toggle="tooltip"]').tooltip();
+</script>
+
+

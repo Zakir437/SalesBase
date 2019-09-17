@@ -1,0 +1,32 @@
+﻿@model IEnumerable<PointOfSale.Models.EmpSalaryPayment>
+@using System.Globalization
+<style>
+    .pMarginLeft{
+        margin-left:5em;
+    }
+</style>
+<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" style="margin-bottom:4%;">
+    <div class="editor-label" style="float:left;padding-left:0px;"><label for="PackageName"></label></div>
+    <div class="editor-field" style="float:left;">
+        <div class="col-sm-11 col-xs-11" style="float:right;padding-right:0px;padding-top:7px;">
+            @foreach (var list in Model)
+             {
+                <P>@Convert.ToDateTime(list.StartDate).ToString("MMMM yyyy") <button class="btn btn-default btnPay" data-id="@list.Id" data->Pay</button></P>
+                <p class="pMarginLeft">Salary = @list.ActualSalary.ToString("C", new CultureInfo("bn-BD")) </p>
+                <p class="pMarginLeft">Salary to pay = @list.TotalAmount.ToString("C", new CultureInfo("bn-BD")) </p>
+                <p class="pMarginLeft">Present = @list.TotalPresent</p>
+                <p class="pMarginLeft">Paid Leave = @list.TotalPaidLeave</p>
+                <p class="pMarginLeft">Working Days = @list.TotalWorkingDays</p>
+                <p class="pMarginLeft">Holiday = @list.TotalHoliday</p>
+                <p class="pMarginLeft">Paid = @list.PaidAmount.ToString("C", new CultureInfo("bn-BD"))</p>
+                <p class="pMarginLeft">Due = @list.DueAmount.ToString("C", new CultureInfo("bn-BD"))</p>
+             }
+        </div>
+    </div>
+    <div class="editor-label" style="float:left;padding-left:0px;"><label for="PackageName"></label></div>
+    <div class="editor-field" style="float:left;">
+        <div class="col-sm-11 col-xs-11" style="float:right;padding-right:0px;padding-top:7px;">
+            Total Outstanding = @Model.Sum(a => a.DueAmount).ToString("C", new CultureInfo("bn-BD"))
+        </div>
+    </div>
+</div>

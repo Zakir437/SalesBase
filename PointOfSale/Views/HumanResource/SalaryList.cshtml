@@ -1,0 +1,51 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewEmpSalary>
+@using System.Globalization
+@{
+    var count = 0;
+}
+@if (Model.Any())
+{
+    <table class="table table-bordered table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Salary</th>
+            <th>Salary to pay</th>
+            <th>Paid</th>
+            <th>Due</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+        </tr>
+        @foreach (var list in Model)
+        {
+            count++;
+            <tr>
+                <td>@count. </td>
+                <td>@list.ActualSalary.ToString("C", new CultureInfo("bn-BD"))</td>
+                <td>@list.TotalAmount.ToString("C", new CultureInfo("bn-BD"))</td>
+                <td>@list.PaidAmount.ToString("C", new CultureInfo("bn-BD"))</td>
+                <td>@list.DueAmount.ToString("C", new CultureInfo("bn-BD"))</td>
+                <td>@Convert.ToDateTime(list.StartDate).ToString("MMMM dd,yyyy")</td>
+                <td>@Convert.ToDateTime(list.EndDate).ToString("MMMM dd,yyyy")</td>
+            </tr>
+        }
+        <tr style="font-weight:bold">
+            <td></td>
+            <td style="text-align:center">Total</td>
+            <td>@Model.Sum(a => a.TotalAmount).ToString("C", new CultureInfo("bn-BD"))</td>
+            <td>@Model.Sum(a => a.PaidAmount).ToString("C", new CultureInfo("bn-BD"))</td>
+            <td>@Model.Sum(a => a.DueAmount).ToString("C", new CultureInfo("bn-BD"))</td>
+            <td></td>
+            <td></td>
+        </tr>
+    </table>
+}
+else
+{
+    <h4>There is no record to display</h4>
+}
+<script>
+    $('[data-toggle="tooltip"]').tooltip();
+</script>
+
+
+

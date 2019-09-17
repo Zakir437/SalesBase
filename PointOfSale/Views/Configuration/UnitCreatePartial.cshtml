@@ -1,0 +1,13 @@
+﻿@model PointOfSale.ModelViews.UnitModelView
+@Html.HiddenFor(m => m.UnitId)
+<div class="editor-label"><label for="CustomerName">Name</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.UnitName, new { htmlattributes = new { @class = "k-textbox form-control" } })
+    @Html.ValidationMessageFor(model => model.UnitName, "", new { @class = "text-Danger" })
+</div>
+
+<script>
+    
+
+</script>
+

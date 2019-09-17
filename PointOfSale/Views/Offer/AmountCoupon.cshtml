@@ -1,0 +1,572 @@
+﻿@{
+    ViewBag.Title = "AmountCoupon";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+    int countNumber = ViewBag.Count;
+}
+<style>
+    .k-input {
+        height: 26px !important;
+    }
+
+    .padding {
+        padding-left: 0px;
+        padding-bottom: 5px;
+    }
+
+    .noPadding-Right {
+        padding-right: 0px;
+    }
+
+    .row {
+        margin: 0px;
+        margin-bottom: 5px;
+    }
+</style>
+<section class="content">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4 class="uppercase">Amount Coupon</h4>
+            </div>
+            <div class="pull-right">
+                <a class="btn btn-default" href="/Offer/CouponOfferType"><i class="fa fa-arrow-left"></i> Back</a>
+            </div>
+        </div>
+        <div class="panel-body">
+            <button class="btn btn-success" id="btnAddCoupon"><i class="fa fa-plus-circle" aria-hidden="true"></i> Add</button>
+            <button type="button" class="btn btn-primary pull-right" id="btnPrint" data-toggle="tooltip" title="Print"><i class="fa fa-print"></i></button>
+            <hr />
+            <div class="col-md-6 padding">
+                @(Html.Kendo().MultiSelect()
+                        .Name("OfferMultiSelect")
+                        .DataTextField("Text")
+                        .DataValueField("Value")
+                        .Placeholder("Type offer name...")
+                        .AutoBind(false)
+                        //.MinLength(3)
+                        .Events(e => e.Change("onChangeOffer"))
+                        .HtmlAttributes(new { style = "width: 100%;" })
+                        .DataSource(source =>
+                        {
+                            source.Read(read =>
+                            {
+                                read.Action("GetOfferName", "Offer").Data("additionInfo");
+                            })
+                            .ServerFiltering(false);
+                        }))
+                <span class="k-icon k-i-search" style="margin-top:-25px;float:right;margin-right:10px; position:relative">&nbsp;</span>
+            </div>
+            <div class="col-md-3 padding">
+                @(Html.Kendo().DropDownList()
+                  .Name("SortTypeDropdown")
+                  .DataTextField("Text")
+                  .DataValueField("Value")
+                  .Events(e => e.Change("onChangeSortType"))
+                  .BindTo(new List<SelectListItem>() {
+                      new SelectListItem() {
+                          Text = "Active",
+                          Value = "1"
+                      },
+                      new SelectListItem() {
+                          Text = "Inactive",
+                          Value = "2"
+                      },
+                      new SelectListItem() {
+                          Text = "Delete",
+                          Value = "3"
+                      }
+                  })
+                  .Value("1")
+                 .HtmlAttributes(new { style = "width: 100%" })
+                )
+            </div>
+            <div class="col-md-3 padding noPadding-Right">
+                @(Html.Kendo().DropDownList()
+                      .Name("SortByDropdown")
+                      .DataTextField("Text")
+                      .DataValueField("Value")
+                      .OptionLabel("--Sort By--")
+                      .Events(e => e.Change("onChangeSortBy"))
+                      .BindTo(new List<SelectListItem>() {
+                          new SelectListItem() {
+                              Text = "Date Created Recent",
+                              Value = "1"
+                          },
+                          new SelectListItem() {
+                              Text = "Date Created Oldest",
+                              Value = "2"
+                          },
+                          new SelectListItem() {
+                              Text = "Date Expire Recent",
+                              Value = "3"
+                          },
+                          new SelectListItem() {
+                              Text = "Date Expire Oldest",
+                              Value = "4"
+                          },
+                          new SelectListItem() {
+                              Text = "Alphabetic",
+                              Value = "5"
+                          }
+                      })
+                     .HtmlAttributes(new { style = "width: 100%" })
+                )
+            </div>
+        </div>
+        <div class="panel-body" style="padding:0px 15px;">
+            <div class="row">
+                <div id="divSelectedActionButton">
+                    <div class="pull-right">
+                        <button type="button" class="btn btn-primary" id="btnValidityEdit">Validity Edit</button>
+                        <button type="button" class="btn btn-primary" id="btnActiveSelected">Active</button>
+                        <button type="button" class="btn btn-primary" id="btnInactiveSelected">Inactive</button>
+                        <button type="button" class="btn btn-primary" id="btnDeleteSelected">Delete</button>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div id="divCouponList" style="overflow-x:auto"></div>
+                <div class="text-center" style="margin-bottom:10px">
+                    <button class="btn btn-primary" id="btnSeeMore"><i class="fa fa-arrow-down"></i> See more</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<div id="divAddCouponWin"></div>
+<div id="divValidityEditWin"></div>
+<script id="temp_win_delete_entry" type="text/x-kendo-template">
+    <div style="padding:1em;">
+        <p style="font-size: 14px; padding: 10px"> #=msg# </p>
+        <div style="text-align: right;">
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btn_delete_Entry_noty_ok"><span class="k-icon k-update"></span>OK</button>
+            <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btn_delete_Entry_noty_cancel"><span class="k-icon k-cancel"></span>Cancel</button>
+        </div>
+    </div>
+</script>
+<script id="temp_win_Active_All" type="text/x-kendo-template">
+    <div style="padding:1em;">
+        <p style="font-size: 14px; padding: 10px"> #=msg# </p>
+        <div style="text-align: right;">
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btn_Active_All_ok"><span class="k-icon k-update"></span>OK</button>
+            <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btn_Active_All_cancel"><span class="k-icon k-cancel"></span>Cancel</button>
+        </div>
+    </div>
+</script>
+<script id="temp_win_inactive_All" type="text/x-kendo-template">
+    <div style="padding:1em;">
+        <p style="font-size: 14px; padding: 10px"> #=msg# </p>
+        <div style="text-align: right;">
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btn_inactive_All_ok"><span class="k-icon k-update"></span>OK</button>
+            <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btn_inactive_All_cancel"><span class="k-icon k-cancel"></span>Cancel</button>
+        </div>
+    </div>
+</script>
+<script id="temp_win_delete_All" type="text/x-kendo-template">
+    <div style="padding:1em;">
+        <p style="font-size: 14px; padding: 10px"> #=msg# </p>
+        <div style="text-align: right;">
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btn_delete_All_ok"><span class="k-icon k-update"></span>OK</button>
+            <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btn_delete_All_cancel"><span class="k-icon k-cancel"></span>Cancel</button>
+        </div>
+    </div>
+</script>
+<script>
+    var id = 0, sortById = 0, sortTypeId = 1, selectedIds = [], selectedOne = "", multiSelectIds = "", count = 10;
+    $(document).ready(function () {
+        $("#liForSalesMenu").addClass('active');
+        $("#liForOffers").addClass('active');
+        loadCouponList();
+    });
+
+    function loadCouponList() {
+        $("#divCouponList").empty();
+        $("#divCouponList").append('<div class="loading_partial"></div>');
+        $("#divCouponList").load('/Offer/AmountCouponList?sortTypeId=' + sortTypeId + '&sortBy=' + sortById + '&selectedIds=' + multiSelectIds + '&count=' + count);
+
+        $("#btnSeeMore").hide();
+        if (sortTypeId == 1 && multiSelectIds == "") {
+            if (@countNumber > count)
+            {
+                $("#btnSeeMore").show();
+            }
+        }
+        else
+        {
+            count = 10;
+        }
+
+        if (multiSelectIds == "") {
+            loadOfferMulti();
+        }
+
+        actionButton();
+
+    }
+
+    function actionButton() {
+        $("#divSelectedActionButton").hide();
+
+        $("#btnActiveSelected").hide();
+        $("#btnInactiveSelected").hide();
+        $("#btnDeleteSelected").hide();
+
+        if ($("#divCouponList .check:checked").length > 0) {
+            $("#divSelectedActionButton").show();
+            if (sortTypeId == 1) {
+                $("#btnInactiveSelected").show();
+            }
+            else if (sortTypeId == 2) {
+                $("#btnActiveSelected").show();
+                $("#btnDeleteSelected").show();
+            }
+            else if (sortTypeId == 3) {
+                $("#btnActiveSelected").show();
+            }
+        }
+    }
+
+
+    function loadOfferMulti()
+    {
+        $("#OfferMultiSelect").data("kendoMultiSelect").value("");
+        $("#OfferMultiSelect").data("kendoMultiSelect").dataSource.read();
+    }
+
+    //***********************add discount *****************************
+    $("#btnAddCoupon").click(function () {
+        $("#divValidityEditWin").empty();
+        $("#divAddCouponWin").empty();
+        $("#divAddCouponWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 873,
+            height: 540,
+            title: 'Coupon',
+            resizable: false,
+            close: onWindowClose
+        });
+        var addCouponWin = $("#divAddCouponWin").data("kendoWindow");
+        addCouponWin.refresh('/Offer/AmountCouponCreate');
+        addCouponWin.center().open();
+        document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+        document.body.scroll = "no";
+    });
+
+
+    //***********************edit discount *****************************
+    $("#divCouponList").on('click', '.btnEdit', function () {
+        id = parseInt($(this).data("id"));
+        $("#divValidityEditWin").empty();
+        $("#divAddCouponWin").empty();
+        $("#divAddCouponWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 873,
+            height: 540,
+            title: 'Coupon',
+            resizable: false,
+            close: onWindowClose
+        });
+        var addCouponWin = $("#divAddCouponWin").data("kendoWindow");
+        addCouponWin.refresh('/Offer/AmountCouponCreate?id=' + id);
+        addCouponWin.center().open();
+        document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+        document.body.scroll = "no";
+    });
+
+      //**********************offer multiselect ********************************
+    function additionInfo() {
+        return {
+            type: 4, //amount coupon offer
+            sortTypeId: sortTypeId
+        }
+    }
+
+    function onChangeOffer()
+    {
+        multiSelectIds = "";
+        multiSelectIds = this.value();
+        loadCouponList();
+    }
+
+    //************************change sort by*******************************
+    function onChangeSortBy() {
+        sortById = 0;
+        if (this.value() > 0) {
+            sortById = this.value();
+        }
+        loadCouponList();
+    }
+
+
+     //****************************Sort Type Change ************************************
+    function onChangeSortType()
+    {
+        sortTypeId = this.value();
+        sortById = 0;
+        selectedIds = "";
+        count = 10;
+
+        $("#SortByDropdown").data("kendoDropDownList").value("");
+
+        loadCouponList();
+    }
+
+    //****************************Print function*******************************
+    $("#btnPrint").click(function () {
+        var data = "sortTypeId=" + sortTypeId + "?selectedIds=" + multiSelectIds + '?sortBy=' + sortById + '?count=' + count + '?Type=4';
+        window.open('/Offer/DiscountPrint?q=' + getDataEncrypted(data), '_blank');
+    });
+
+    //See more data
+    $("#btnSeeMore").click(function () {
+        count = count + 10;
+        multiSelectIds = "";
+        loadCouponList();
+    });
+
+    //**************************Active/Inactive status*****************************************
+    $("#divCouponList").on("click", ".inactivateDiscount,.activateDiscount", function () {
+        id = parseInt($(this).data("id"));
+        status = $(this).data("isactive");
+        var sendData = {
+            id: id,
+            status: status,
+            createdBy: userId
+        };
+        $.ajax({
+            url: '/Offer/OfferStatusChange',
+            type: 'POST',
+            data: sendData,
+            success: function (res) {
+                if (res == "success") {
+                    multiSelectIds = "";
+                    loadCouponList();
+                }
+                else {
+                    alert("Error Status Update");
+                }
+            }
+        });
+    });
+
+    //************************************Delete*****************************************
+    $("#divCouponList").on('click', ".btnDiscountDelete", function () {
+        id = parseInt($(this).data("id"));
+        var kendoWindow = $("<div />").kendoWindow({
+            actions: ["Close"],
+            title: "Alert",
+            resizable: false,
+            width: "30%",
+            modal: true
+        });
+        msg = "Are you sure want to delete this Item?";
+        var template = kendo.template($("#temp_win_delete_entry").html());
+        kendoWindow.data("kendoWindow").content(template).center().open();
+
+        kendoWindow.find("#btn_delete_Entry_noty_cancel").click(function () {
+            kendoWindow.data("kendoWindow").close();
+            document.documentElement.style.overflow = "auto";
+        }).end();
+        kendoWindow.find("#btn_delete_Entry_noty_ok").click(function () {
+            kendoWindow.data("kendoWindow").close();
+            document.documentElement.style.overflow = "auto";
+            deleteItem(id);
+        }).end();
+        document.documentElement.style.overflow = "hidden";
+    });
+    function deleteItem(id) {
+        var sendData = {
+            id: id,
+            status: 2,
+            createdBy: userId
+        };
+        $.ajax({
+            url: '/Offer/OfferStatusChange',
+            type: 'POST',
+            data: sendData,
+            success: function (res) {
+                if (res == "success") {
+                    multiSelectIds = "";
+                    loadCouponList();
+                }
+                else {
+                    alert("Error Status Update");
+                }
+            }
+        });
+    }
+
+    //Check/uncheck all
+    $("#divCouponList").on('click', '#checkAll', function () {
+        if ($(this).is(":checked")) {
+            $(".check").each(function () {
+                id = parseInt($(this).data("id"));
+                $("#check_" + id).prop('checked', true);
+            });
+        }
+        else {
+            $(".check").each(function () {
+                id = parseInt($(this).data("id"));
+                $("#check_" + id).prop('checked', false);
+            });
+        }
+        actionButton();
+    });
+
+    //check/uncheck single
+    $("#divCouponList").on('click', '.check', function () {
+        var checkAll = true;
+        $('.check').each(function () {
+            id = parseInt($(this).data("id"));
+            if ($("#check_" + id).is(":checked") == false) {
+                checkAll = false;
+            }
+        });
+        if (checkAll) {
+            $("#checkAll").prop('checked', true);
+        }
+        else {
+            $("#checkAll").prop('checked', false);
+        }
+        actionButton();
+    });
+
+
+
+    //*****************************Validity date edit***************************
+    $("#btnValidityEdit").click(function () {
+        selectedIds = [];
+        $('.check').each(function () {
+            id = parseInt($(this).data("id"));
+            if ($("#check_" + id).is(":checked") == true) {
+                selectedIds.push(id);
+            }
+        });
+        $("#divAddCouponWin").empty();
+        $("#divValidityEditWin").empty();
+        $("#divValidityEditWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 767,
+            height: 276,
+            title: 'Discount Validity',
+            resizable: false,
+            close: onWindowClose
+        });
+        var couponValidityEdit = $("#divValidityEditWin").data("kendoWindow");
+        couponValidityEdit.refresh('/Offer/CouponValidityEdit?selectedIds=' + selectedIds);
+        couponValidityEdit.center().open();
+        document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+        document.body.scroll = "no";
+    });
+
+    //********************active selected Item **************************************
+    $("#btnActiveSelected").click(function () {
+        var kendoWindow = $("<div />").kendoWindow({
+            actions: ["Close"],
+            title: "Alert",
+            resizable: false,
+            width: "30%",
+            modal: true
+        });
+        msg = "Are you sure want to active selected Items?";
+        var template = kendo.template($("#temp_win_Active_All").html());
+        kendoWindow.data("kendoWindow").content(template).center().open();
+
+        kendoWindow.find("#btn_Active_All_cancel").click(function () {
+            kendoWindow.data("kendoWindow").close();
+            document.documentElement.style.overflow = "auto";
+        }).end();
+        kendoWindow.find("#btn_Active_All_ok").click(function () {
+            kendoWindow.data("kendoWindow").close();
+            document.documentElement.style.overflow = "auto";
+            offerStatusChange(1);
+        }).end();
+        document.documentElement.style.overflow = "hidden";
+    });
+
+    //********************************Inactive selected item***********************************
+    $("#btnInactiveSelected").click(function () {
+        var kendoWindow = $("<div />").kendoWindow({
+            actions: ["Close"],
+            title: "Alert",
+            resizable: false,
+            width: "30%",
+            modal: true
+        });
+        msg = "Are you sure want to inactive selected Items?";
+        var template = kendo.template($("#temp_win_inactive_All").html());
+        kendoWindow.data("kendoWindow").content(template).center().open();
+
+        kendoWindow.find("#btn_inactive_All_cancel").click(function () {
+            kendoWindow.data("kendoWindow").close();
+            document.documentElement.style.overflow = "auto";
+        }).end();
+        kendoWindow.find("#btn_inactive_All_ok").click(function () {
+            kendoWindow.data("kendoWindow").close();
+            document.documentElement.style.overflow = "auto";
+            offerStatusChange(0);
+        }).end();
+        document.documentElement.style.overflow = "hidden";
+    });
+
+    //********************************delete selected item***********************************
+    $("#btnDeleteSelected").click(function () {
+        var kendoWindow = $("<div />").kendoWindow({
+            actions: ["Close"],
+            title: "Alert",
+            resizable: false,
+            width: "30%",
+            modal: true
+        });
+        msg = "Are you sure want to delete selected Items?";
+        var template = kendo.template($("#temp_win_delete_All").html());
+        kendoWindow.data("kendoWindow").content(template).center().open();
+
+        kendoWindow.find("#btn_delete_All_cancel").click(function () {
+            kendoWindow.data("kendoWindow").close();
+            document.documentElement.style.overflow = "auto";
+        }).end();
+        kendoWindow.find("#btn_delete_All_ok").click(function () {
+            kendoWindow.data("kendoWindow").close();
+            document.documentElement.style.overflow = "auto";
+            offerStatusChange(2);
+        }).end();
+        document.documentElement.style.overflow = "hidden";
+    });
+
+    //*************************************Status update****************************
+    function offerStatusChange(status) {
+        selectedIds = [];
+
+        $('.check').each(function () {
+            id = parseInt($(this).data("id"));
+            if ($("#check_" + id).is(":checked") == true) {
+                selectedIds.push(id);
+            }
+        });
+
+        $.ajax({
+            url: '/Offer/OfferStatusChange',
+            type: 'POST',
+            data: { selectedIds: selectedIds.join(","), status: status, createdBy: userId },
+            success: function (res) {
+                if (res == "success") {
+                    multiSelectIds = "";
+                    loadCouponList();
+                }
+                else {
+                    alert("Error Status Update");
+                }
+            }
+        });
+    }
+</script>

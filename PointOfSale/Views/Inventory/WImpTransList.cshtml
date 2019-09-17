@@ -1,0 +1,39 @@
+﻿@model IEnumerable<PointOfSale.Models.WImpTran>
+@using System.Globalization
+@{
+    var count = 0;
+}
+@if (Model.Any())
+{
+    <table class="table table-bordered table-responsive">
+        <tr>
+            <th>SL.</th>
+            <th>Product Name</th>
+            <th>Quantity</th>
+            <th>Peritem cost</th>
+            <th>Cost</th>
+        </tr>
+        @foreach (var list in Model)
+         {
+            count++;
+            <tr>
+                <td>@count.</td>
+                <td>@list.ProductName</td>
+                <td>@list.Quantity</td>
+                <td>@list.PeritemCost.ToString("C", new CultureInfo("bn-BD"))</td>
+                <td>@list.Cost.ToString("C", new CultureInfo("bn-BD"))</td>
+            </tr>
+         }
+    </table>
+ }
+else
+{
+    <h3>There is no data to display</h3>
+}
+
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    })
+</script>
+

@@ -1,0 +1,86 @@
+﻿@{
+    ViewBag.Title = "WastePrint";
+    Layout = "~/Views/Shared/_LayoutPrintPage.cshtml";
+}
+<section class="content-header" style="text-align:center;">
+    <div class="row">
+        <div class="col-xs-3"></div>
+        <div class="col-xs-6">
+            <h3>Waste Products</h3>
+            <p>Sales Base</p>
+        </div>
+        <div class="col-xs-3">
+            <button class="btn btn-default pull-right" id="btnPrint" style="margin-top:10px;"><i class="fa fa-print"></i>Print</button>
+        </div>
+    </div>
+    <hr />
+</section>
+<div class="row">
+    <div class="col-xs-offset-6 col-xs-6 text-left">
+        <p>
+            Generate By : @HttpContext.Current.Request.Cookies["CookieUserInfo"].Values["UserName"]<br>
+            Generate Date : @DateTime.Now.ToString("MMM dd yyyy hh:mm:ss tt") <br>
+            @if (ViewBag.Days == 1)
+            {
+                <span>Generate parameter : Today</span>
+            }
+            else if (ViewBag.Days == 7)
+            {
+                <span>Generate parameter : Last 7 Days</span>
+            }
+            else if (ViewBag.Days == 30)
+            {
+                <span>Generate parameter : Last 30 Days</span>
+            }
+            else if (ViewBag.From != null)
+            {
+                <span>From : @Convert.ToDateTime(ViewBag.From).ToString("MMM dd yyyy")</span><br />
+                <span>To : @Convert.ToDateTime(ViewBag.To).ToString("MMM dd yyyy")</span>
+            }
+            else
+            {
+                <span>Generate parameter : All</span>
+            }
+        </p>
+    </div>
+    <div class="col-xs-offset-6 col-xs-6 text-right">
+
+    </div>
+</div>
+<div class="row">
+    <div class="col-xs-12">
+        <div id="divList"></div>
+    </div>
+</div>
+<script>
+    var passdata = '';
+    $(document).ready(function () {
+        passdata = {
+            from: new Date("@ViewBag.From").toISOString(),
+            to: new Date("@ViewBag.To").toISOString(),
+            days: "@ViewBag.Days",
+            supplierId: '@ViewBag.SupplierId',
+            isPrint: true,
+            status: '@ViewBag.Status',
+            type: '@ViewBag.Type'
+        };
+
+        if ('@ViewBag.IsWHWastePrint' == 'True')
+        {
+            $("#divList").empty();
+            $("#divList").append('<div class="loading_partial"></div>');
+            $("#divList").load('/Inventory/WHWasteList', passdata);
+        }
+        else
+        {
+            $("#divList").empty();
+            $("#divList").append('<div class="loading_partial"></div>');
+            $("#divList").load('/Inventory/WasteList', passdata);
+        }
+    });
+    $("#btnPrint").click(function () {
+        $("#btnPrint").hide();
+        window.print();
+        $("#btnPrint").show();
+    });
+</script>

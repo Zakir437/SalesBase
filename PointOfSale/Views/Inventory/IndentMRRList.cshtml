@@ -1,0 +1,71 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewIndentMRR>
+@using PointOfSale.Helpers
+@{
+    var count = 0;
+}
+@if (Model.Any() == true)
+{
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>MRR</th>
+            <th>Status</th>
+            <th>Indent Voucher</th>
+            <th>Created By</th>
+            <th>Created Date</th>
+            @if (ViewBag.IsListForProc != true)
+             {
+                <th></th>
+             }
+        </tr>
+        @foreach (var list in Model)
+        {
+            count++;
+            <tr>
+                <td>@count.</td>
+                <td>@list.MRR</td>
+                <td>
+                    @if (list.Status == 1)
+                    {
+                        <span class="label label-primary">Pending Import</span>
+                    }
+                    else if (list.Status == 2)
+                    {
+                        <span class="label label-success">Completed</span>
+                    }
+                </td>
+                <td>@list.IndentVoucher</td>
+                <td>@list.CreatedBy</td>
+                <td>@Convert.ToDateTime(list.CreatedDate).ToString("MMM dd,yyyy hh:mm:ss tt")</td>
+                @if (ViewBag.IsListForProc != true)
+                {
+                    <td>
+                        <a class="btn btn-primary" data-toggle="tooltip" title="View MRR" href="@Html.EncodedParam("IndentMRRDetails", "Inventory", new { mrrId = list.Id }, null)"><i class="fa fa-eye"></i></a>
+                        @if (list.Status == 1)
+                        {
+                            <button class="btn btn-success btnImportConfirm" data-id="@list.Id" data-toggle="tooltip" title="Import"><i class="fa fa-check"></i></button>
+                        }
+                    </td>
+                }
+            </tr>
+        }
+    </table>
+}
+else
+{
+    <h3>There is no record to display</h3>
+}
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    })
+</script>
+
+
+
+
+
+
+
+
+

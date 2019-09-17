@@ -1,0 +1,43 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewProduct>
+@{
+    var count = 0;
+    PointOfSale.Models.PointOfSale_DBEntities db = new PointOfSale.Models.PointOfSale_DBEntities();
+}
+@if (Model.Count() > 0)
+{
+    <table class="table table-bordered table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Product Name</th>
+            <th>Quantity</th>
+        </tr>
+        @foreach (var item in Model)
+        {
+            count++;
+            <tr>
+                <td>@count.</td>
+                <td>@item.ProductName</td>
+                @{ 
+                    var stock = db.Stocks.FirstOrDefault(a => a.ProductId == item.ProductId && a.DistributeId == item.DistributeId);
+                    if(stock != null)
+                    {
+                        <td>
+                            @stock.Quantity
+                        </td>
+                    }
+                    else
+                    {
+                        <td>0</td>
+                    }
+                }
+            </tr>
+         }
+    </table>
+}
+else
+{
+    <h3>There is no product to Inventory</h3>
+}
+
+
+

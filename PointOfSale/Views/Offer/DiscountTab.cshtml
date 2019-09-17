@@ -1,0 +1,286 @@
+﻿@{ 
+    long discItemCount = ViewBag.DiscItemCount;
+    long amountDiscCount = ViewBag.AmountDiscCount;
+    long deliveryChargeDiscCount = ViewBag.DelChargeDiscCount;
+}
+<div class="panel-heading">
+    <ul class="nav nav-tabs">
+        <li class="active" id="liForItem"><a href="#tab1ForItem" data-toggle="tab">Item</a></li>
+        <li id="liForAmount"><a href="#tab2ForAmount" data-toggle="tab">Amount</a></li>
+        <li id="liForDeliverCharge"><a href="#tab3ForDelCharge" data-toggle="tab">Delivery Charge</a></li>
+    </ul>
+</div>
+<div class="panel-body" style="border:none!important; padding:0px;">
+    <div class="tab-content">
+        <div class="tab-pane fade in active" id="tab1ForItem">
+            <div id="div_Item"></div>
+        </div>
+        <div id="tab2ForAmount" class="tab-pane fade">
+            <div id="div_Amount"></div>
+        </div>
+        <div id="tab3ForDelCharge" class="tab-pane fade">
+            <div id="div_DeliveryCharge"></div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    discTab = 1;
+    $(document).ready(function () {
+        $("#div_Item").append('<div class="loading_partial"></div>');
+        $("#div_Item").load('/Offer/DiscItemTab');
+    });
+    function clearBeforeClickInDisc() {
+
+        $("#divDiscItemEditWin").empty();
+        $("#divValidityEditWin").empty();
+        $("#divAddDiscountWin").empty();
+        $("#divDiscountWin").empty();
+        
+
+        $("#div_Item").empty();
+        $("#div_Amount").empty();
+        $("#div_DeliveryCharge").empty();
+    }
+    $("#liForItem").click(function () {
+        clearBeforeClickInDisc();
+        discTab = 1;
+        $("#div_Item").append('<div class="loading_partial"></div>');
+        $("#div_Item").load('/Offer/DiscItemTab');
+    });
+    $("#liForAmount").click(function () {
+        clearBeforeClickInDisc();
+        discTab = 2;
+        $("#div_Amount").append('<div class="loading_partial"></div>');
+        $("#div_Amount").load('/Offer/AmountTab');
+    });
+    $("#liForDeliverCharge").click(function () {
+        clearBeforeClickInDisc();
+        discTab = 3;
+        $("#div_DeliveryCharge").append('<div class="loading_partial"></div>');
+        $("#div_DeliveryCharge").load('/Offer/DeliveryChargeTab');
+    });
+
+
+    function reloadProductMulti() {
+        $("#ProductMultiselect").data("kendoMultiSelect").value("");
+        $("#ProductMultiselect").data("kendoMultiSelect").dataSource.read();
+    }
+
+    function loadProductList() {
+        actionButton();
+        if (multiSelectIds == "")
+        {
+            reloadProductMulti();
+        }
+
+        $("#btnSeeMore").hide();
+        if (sortTypeId == 1 && multiSelectIds == "") {
+            if (@discItemCount > count)
+            {
+                $("#btnSeeMore").show();
+            }
+        }
+        else {
+            count = 10;
+        }
+
+        $("#divDiscItemList").empty();
+        $("#divDiscItemList").append('<div class="loading_partial"></div>');
+        $("#divDiscItemList").load('/Offer/DiscountList?sortTypeId=' + sortTypeId + '&categoryId=' + categoryId + '&subCategoryId=' + subCategoryId + '&sortBy=' + sortById + '&selectedIds=' + multiSelectIds + '&count=' + count);
+    }
+
+    function actionButton() {
+        $("#divSelectedActionButton").hide();
+
+        $("#btnActiveSelected").hide();
+        $("#btnInactiveSelected").hide();
+        $("#btnDeleteSelected").hide();
+
+        if (discTab == 1)
+        {
+            if ($("#divDiscItemList .check:checked").length > 0) {
+                $("#divSelectedActionButton").show();
+                if (sortTypeId == 1) {
+                    $("#btnInactiveSelected").show();
+                }
+                else if (sortTypeId == 2) {
+                    $("#btnActiveSelected").show();
+                    $("#btnDeleteSelected").show();
+                }
+                else if (sortTypeId == 3) {
+                    $("#btnActiveSelected").show();
+                }
+            }
+        }
+        else if (discTab == 2 || discTab == 3)
+        {
+            if ($("#divDiscountList .check:checked").length > 0) {
+                $("#divSelectedActionButton").show();
+                if (sortTypeId == 1) {
+                    $("#btnInactiveSelected").show();
+                }
+                else if (sortTypeId == 2) {
+                    $("#btnActiveSelected").show();
+                    $("#btnDeleteSelected").show();
+                }
+                else if (sortTypeId == 3) {
+                    $("#btnActiveSelected").show();
+                }
+            }
+        }
+    }
+
+    function loadDiscountList() {
+        if (discTab == 2) // amount discount tab
+        {
+            $("#divDiscountList").empty();
+            $("#divDiscountList").append('<div class="loading_partial"></div>');
+            $("#divDiscountList").load('/Offer/AmountDiscountList?sortTypeId=' + sortTypeId + '&sortBy=' + sortById + '&selectedIds=' + multiSelectIds + '&count=' + count);
+
+            $("#btnSeeMore").hide();
+            if (sortTypeId == 1 && multiSelectIds == "") {
+                if (@amountDiscCount > count)
+                {
+                    $("#btnSeeMore").show();
+                }
+            }
+            else {
+                count = 10;
+            }
+        }
+        else if (discTab == 3) // delivery charge discount tab
+        {
+            $("#divDiscountList").empty();
+            $("#divDiscountList").append('<div class="loading_partial"></div>');
+            $("#divDiscountList").load('/Offer/DChargeDiscountList?sortTypeId=' + sortTypeId + '&sortBy=' + sortById + '&selectedIds=' + multiSelectIds + '&count=' + count);
+
+            $("#btnSeeMore").hide();
+            if (sortTypeId == 1 && multiSelectIds == "") {
+                if (@deliveryChargeDiscCount > count)
+                {
+                    $("#btnSeeMore").show();
+                }
+            }
+            else {
+                count = 10;
+            }
+        }
+        if (multiSelectIds == "")
+        {
+            loadOfferMulti();
+        }
+
+        actionButton();
+
+    }
+
+    function loadOfferMulti() {
+        $("#OfferMultiSelect").data("kendoMultiSelect").value("");
+        $("#OfferMultiSelect").data("kendoMultiSelect").dataSource.read();
+    }
+
+     //****************************Sort Type Change ************************************
+    function onChangeSortType()
+    {
+        sortTypeId = this.value();
+        count = 10;
+        sortById = 0;
+        selectedIds = [];
+        multiSelectIds = "";
+
+        if (discTab == 1)
+        {
+            categoryId = 0;
+            subCategoryId = 0;
+            $("#Category").data("kendoDropDownList").value("");
+            $("#SubCategory").data("kendoDropDownList").value("");
+
+            loadProductList();
+        }
+        else
+        {
+            loadDiscountList();
+        }
+        $("#SortByDropdown").data("kendoDropDownList").value("");
+    }
+
+     //*************************Onchange sort by*************************************
+    function onChangeSortBy()
+    {
+        sortById = 0;
+        if (this.value() > 0)
+        {
+            sortById = this.value();
+        }
+        if (discTab == 1)
+        {
+            loadProductList();
+        }
+        else
+        {
+            loadDiscountList();
+        }
+    }
+
+    //*******************Product multiselect**************
+    function onChangeProduct() {
+        multiSelectIds = "";
+        multiSelectIds = this.value();
+        loadProductList();
+    }
+    //product multiselect additonal info
+    function additionInfo() {
+        return {
+            text: ($.trim($("#ProductMultiselect").data("kendoMultiSelect").input.val()) == "Type product name..." ? "" : $.trim($("#ProductMultiselect").data("kendoMultiSelect").input.val())),
+            categoryId: categoryId,
+            subCategoryId: subCategoryId,
+            sortTypeId: sortTypeId
+        }
+    }
+
+    //category change
+    function onChangeCategory() {
+        selectedOne = "";
+        selectedOne = this.value();
+        subCategoryId = 0;
+        multiSelectIds = "";
+        categoryId = 0;
+        if (selectedOne.length > 0) {
+            categoryId = parseInt(selectedOne);
+        }
+        loadProductList();
+    }
+    //subcategory change
+    function onChangeSubCategory() {
+        selectedOne = "";
+        selectedOne = this.value();
+        multiSelectIds = "";
+        subCategoryId = 0;
+        if (selectedOne.length > 0) {
+            subCategoryId = parseInt(selectedOne);
+        }
+        loadProductList();
+    }
+
+    function filterCategory() {
+        return {
+            categoryId: $("#Category").val()
+        };
+    }
+
+    //**********************offer multiselect ********************************
+    function additionInfoForOffer() {
+        return {
+            type: (discTab == 2 ? 6 : 5), // 6 amount discount offer, 5 delivery charge discount
+            sortTypeId: sortTypeId
+        }
+    }
+
+    function onChangeOffer() {
+        multiSelectIds = "";
+        multiSelectIds = this.value();
+        loadDiscountList();
+    }
+</script>

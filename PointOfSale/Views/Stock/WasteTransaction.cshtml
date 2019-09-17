@@ -1,0 +1,57 @@
+﻿@model PointOfSale.Models.ViewStockWaste
+@{
+    ViewBag.Title = "WasteTransaction";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+    var wasteId = Model.StockWasteId;
+}
+<section class="content-header">
+    <h1>
+        Waste Transaction
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="/Inventory/Dashboard"><i class="fa fa-dashboard"></i> Inventory</a></li>
+        <li><a href="/Stock/WasteHistory"><i class="fa fa-list-ul"></i> Waste History</a></li>
+        <li class="active">Waste Transaction</li>
+    </ol>
+</section>
+<section class="content">
+    <div class="panel panel-info" style="margin-top:20px;">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4 class="uppercase">Waste Transaction</h4>
+            </div>
+            <div class="pull-right">
+                <a class="btn btn-default" href="/Stock/WasteHistory"><i class="fa fa-arrow-left"></i> Back</a>
+            </div>
+        </div>
+        <div class="panel-body">
+            <dl class="dl-horizontal">
+                <dt>Refference No</dt>
+                <dd>@Model.WasteVoucherNo</dd>
+                <dt>Created By</dt>
+                <dd>@Model.CreatedBy</dd>
+                <dt>Created Date</dt>
+                <dd>@Convert.ToDateTime(@Model.CreatedDate).ToString("MMM dd yyyy")</dd>
+                <dt>Comments</dt>
+                <dd>@Model.Comments</dd>
+            </dl>
+        </div>
+        <hr />
+        <div class="panel-body">
+            <div id="divWasteTransactionList"></div>
+        </div>
+    </div>
+</section>
+<div id="divTransactionWin"></div>
+<script>
+    var wasteId = @wasteId;
+    $(document).ready(function () {
+        $("#liForInventory").addClass('active');
+        $("#liForWasteHistory").addClass('active');
+
+        $("#divWasteTransactionList").empty();
+        $("#divWasteTransactionList").append('<div class="loading_partial"></div>');
+        $("#divWasteTransactionList").load('@Url.Action("WasteTransactionList", "Stock")?wasteId=' + wasteId);
+    });
+</script>
+

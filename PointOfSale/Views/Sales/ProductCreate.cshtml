@@ -1,0 +1,418 @@
+﻿<style>
+    #divProductForm .editor-label {
+        width: 34%;
+    }
+</style>
+<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin-bottom:4%;margin-top:2%;">
+    <div class="editor-field">
+        <label class="radio-inline">
+            <input type="radio" checked class="" name="type" id="chkSingle"/> Single
+        </label>
+        <label class="radio-inline">
+            <input type="radio" name="type" id="chkMultiple" /> Multiple
+        </label>
+    </div>
+    <div id="divProductForm"></div>
+    <div class="editor-field">
+        @if (ViewBag.ProductId > 0)
+         {
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnProductCreate"><span class="k-icon k-update"></span>Update</button>
+         }
+        else
+        {
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnProductCreate"><span class="k-icon k-update"></span>Create</button>
+        }
+        <button type="reset" class="k-button k-button-icontext k-grid-update" id="btnRefresh"><span class="k-icon k-i-refresh"></span>Refresh</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+
+<script>
+    var selectedValue = "", masterId = 0, id = 0, deletedIds = [];
+    var size = false, color = false, price = false, cost = false, code = false, plu = false, mQuantity = false, distributeCount = 0, sizeType = 0;
+    $(document).ready(function () {
+        $("#divProductForm").append('<div class="tiny_loading"></div>');
+        $("#divProductForm").load('@Url.Action("ProductCreatePartial", "Sales")?id=' + '@ViewBag.ProductId');
+    });
+    $("#btnRefresh").click(function () {
+        if ($('#chkSingle').is(':checked'))
+        {
+            deletedIds = [];
+            $("#divProductForm").empty();
+            $("#divProductForm").append('<div class="tiny_loading"></div>');
+            $("#divProductForm").load('@Url.Action("ProductCreatePartial", "Sales")?id=' + '@ViewBag.ProductId');
+        }
+        else {
+            $("#divProductForm").empty();
+            $("#divProductForm").append('<div class="tiny_loading"></div>');
+            $("#divProductForm").load('@Url.Action("MasterProductCreatePartial", "Sales")?id=' + '@ViewBag.ProductId');
+        }
+    });
+
+    $("#btnCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+
+    $("#chkSingle").click(function () {
+        $("#divProductForm").empty();
+        $("#divProductForm").append('<div class="tiny_loading"></div>');
+        $("#divProductForm").load('@Url.Action("ProductCreatePartial", "Sales")?id=' + '@ViewBag.ProductId');
+    });
+
+    $("#chkMultiple").click(function () {
+        $("#divProductForm").empty();
+        $("#divProductForm").append('<div class="tiny_loading"></div>');
+        $("#divProductForm").load('@Url.Action("MasterProductCreatePartial", "Sales")?id=' + '@ViewBag.ProductId');
+    });
+
+    //filter sub category by category 
+    function filterCategory() {
+        return {
+            categoryId: $("#ProductCategoryId").val()
+        };
+    }
+  
+    function dataSubMulti()
+    {
+        return {
+            categoryIds: $("#CategoryMultiSelect").data("kendoMultiSelect").value().join(","),
+            isMultiselect : true
+        };
+    }
+    //sub category data bound
+    function onDataBoundSubCategory()
+    {
+        //Sub Category of Master Product
+        $.ajax({
+            url: '/Sales/GetSubCategories',
+            type: 'GET',
+            dataType: 'json',
+            data: { masterProId: masterId },
+            success: function (data) {
+                if (data != "NotFound") {
+                    $("#SubCategoryMultiSelect").data("kendoMultiSelect").value(data);
+                }
+                else {
+                    $("#SubCategoryMultiSelect").data("kendoMultiSelect").value("");
+                }
+            }
+        });
+    }
+    // tag data bound
+    function onDataBound() {
+        //$.ajax({
+        //    url: '/Sales/GetTagByMasterProductId',
+        //    type: 'GET',
+        //    dataType: 'json',
+        //    data: { id: masterId },
+        //    success: function (data)
+        //    {
+        //        if (data != "NotFound")
+        //        {
+        //            $("#tagMultiSelect").data("kendoMultiSelect").value(data);
+        //        }
+        //    }
+        //});
+    }
+    //category data bound
+    function onDataBoundCategory()
+    {
+
+    }
+    function onChangeCategoryMulti()
+    {
+        $('#SubCategoryMultiSelect').data('kendoMultiSelect').dataSource.read();
+    }
+    function onChangeMaster() {
+        masterId = 0;
+        selectedValue = this.value();
+        if (selectedValue.length > 0)
+        {
+            masterId = parseInt(selectedValue);
+            //Get Tag of Master Product
+            $.ajax({
+                url: '/Sales/GetTagByMasterProductId',
+                type: 'GET',
+                dataType: 'json',
+                data: { id: masterId },
+                success: function (data) {
+                    if (data != "NotFound") {
+                        $("#tagMultiSelect").data("kendoMultiSelect").value(data);
+                    }
+                    else {
+                        $("#tagMultiSelect").data("kendoMultiSelect").value("");
+                    }
+                }
+            });
+
+            //Category of Master Product
+            $.ajax({
+                url: '/Sales/GetCategoryByMasterProductId',
+                type: 'GET',
+                dataType: 'json',
+                data: { masterProductId: masterId },
+                success: function (data) {
+                    if (data != "NotFound") {
+                        $("#CategoryMultiSelect").data("kendoMultiSelect").value(data);
+                    }
+                    else {
+                        $("#CategoryMultiSelect").data("kendoMultiSelect").value("");
+                    }
+                    $('#SubCategoryMultiSelect').data('kendoMultiSelect').dataSource.read();
+                }
+            });
+
+            $("#divMaster").show();
+            $('#QuantityOrName').prop('required', true);
+            $('#MasterUnit').prop('required', true);
+        }
+        else {
+            $("#tagMultiSelect").data("kendoMultiSelect").value("");
+            $("#CategoryMultiSelect").data("kendoMultiSelect").value("");
+            $('#SubCategoryMultiSelect').data('kendoMultiSelect').dataSource.read();
+            $("#divMaster").hide();
+            $('#QuantityOrName').prop('required', false);
+            $('#MasterUnit').prop('required', false);
+        }
+    }
+
+    function onChangeProduct()
+    {
+        selectedValue = this.value();
+        if (selectedValue.length > 0) {
+            $("#divMaster").show();
+            $('#QuantityOrName').prop('required', true);
+            $('#MasterUnit').prop('required', true);
+        }
+        else {
+            $("#divMaster").hide();
+            $('#QuantityOrName').prop('required', false);
+            $('#MasterUnit').prop('required', false);
+        }
+    }
+
+    var validation = $("#divProductForm").kendoValidator({
+        rules: {
+            remoteBarCode: function (input) {
+                var remoteAttr = input.attr("data-val-remote-url");
+                if (typeof remoteAttr === typeof undefined || remoteAttr === false) {
+                    return true;
+                }
+                var isInvalid;
+                var data = {};
+                var Id = $("#ProductId").val();
+                var BarCode = $.trim($("#BarCode").val());
+                data = { Id: Id, BarCode: BarCode };
+                $.ajax({
+                    url: remoteAttr,
+                    mode: "abort",
+                    port: "validate" + input.attr('name'),
+                    dataType: "json",
+                    type: input.attr("data-val-remote-type"),
+                    data: data,
+                    async: false,
+                    success: function (response) {
+                        isInvalid = response;
+                        if (isInvalid === true) {
+                            isInvalid = true;
+                        }
+                        else {
+                            isInvalid = false;
+                        }
+                    }
+                });
+                return isInvalid;
+            },
+            //remoteSubProductName: function (input) {
+            //    var remoteAttr = input.attr("data-val-remote-url");
+            //    if (typeof remoteAttr === typeof undefined || remoteAttr === false) {
+            //        return true;
+            //    }
+            //    var isInvalid;
+            //    var data = {};
+            //    var Id = $("#Id").val();
+            //    var Name = $.trim($("#Name").val());
+            //    data = { Id: Id, Name: Name };
+            //    $.ajax({
+            //        url: remoteAttr,
+            //        mode: "abort",
+            //        port: "validate" + input.attr('name'),
+            //        dataType: "json",
+            //        type: input.attr("data-val-remote-type"),
+            //        data: data,
+            //        async: false,
+            //        success: function (response) {
+            //            isInvalid = response;
+            //            if (isInvalid === true) {
+            //                isInvalid = true;
+            //            }
+            //            else {
+            //                isInvalid = false;
+            //            }
+            //        }
+            //    });
+            //    return isInvalid;
+            //}
+        },
+        messages: {
+            remoteBarCode: function (input) {
+                return input.data('val-remote');
+            },
+            //remoteSubProductName: function (input) {
+            //    return input.data('val-remote');
+            //}
+        }
+    }).data("kendoValidator");
+
+    $("#btnProductCreate").click(function () {
+        if (validation.validate())
+        {
+            if ($('#chkSingle').is(':checked'))
+            {
+                var distributeItems = [];
+                $(".distItems").each(function () {
+                    id = parseInt($(this).data("id"));
+                    distributeItems.push({
+                        Id: parseInt($(this).data("transid")),
+                        SizeId: $("#size_" + id).val(),
+                        ColorId: $("#color_" + id).val(),
+                        Price: $("#price_" + id).val(), 
+                        BarCode: $("#barcode_" + id).val(),
+                        Cost: $("#cost_" + id).val(),
+                        SizeName: ($("#sizeName_" + id).length > 0 ? $("#sizeName_" + id).val() : ""),
+                        Code: ($("#code_" + id).length > 0 ? $("#code_" + id).val() : ""),
+                        Plu: ($("#plu_" + id).length > 0 ? $("#plu_" + id).val() : ""),
+                        MQuantity: $("#mQuantity_" + id).val()
+                    });
+                });
+
+                var fileUpload = $("#file1").get(0);
+                var files = fileUpload.files;
+
+                // Create FormData object
+                var fileData = new FormData();
+
+                // Looping over all files and add it to FormData object
+                for (var i = 0; i < files.length; i++) {
+                    fileData.append(files[i].name, files[i]);
+                }
+                // Adding one more key to FormData object
+                fileData.append('ProductId', $("#ProductId").val());
+                fileData.append('SubMasterId', $("#SubMasterId").val());
+                fileData.append('QuantityOrName', $.trim($("#QuantityOrName").val()));
+                fileData.append('TagIds', $("#tagMultiSelect").data("kendoMultiSelect").value().join(","));
+                fileData.append('MasterUnit', $("#MasterUnit").val());
+                fileData.append('ProductName', $.trim($("#ProductName").val()));
+                fileData.append('Code', $("#Code").val());
+                fileData.append('BarCode', $.trim($("#BarCode").val()));
+                fileData.append('PLU', $("#PLU").val());
+                fileData.append('CategoryIds', $("#CategoryMultiSelect").data("kendoMultiSelect").value().join(",")); 
+                fileData.append('SubCategoryIds', $("#SubCategoryMultiSelect").data("kendoMultiSelect").value().join(",")); 
+                fileData.append('SubCategoryId', $("#SubCategoryId").val()); 
+                fileData.append('Unit', $("#Unit").val());
+                fileData.append('Price', $("#Price").val());
+                fileData.append('Cost', $("#Cost").val());
+                fileData.append('MinimalQuantity', $("#MinimalQuantity").val());
+                fileData.append('Color', $("#Color").val());
+                fileData.append('VatRateId', $("#VatRateId").val());
+                fileData.append('IsVatIncluded', $("#IsVatIncluded").val());
+                fileData.append('IsPriceChangeAllow', $("#IsPriceChangeAllow").val());
+                fileData.append('IsDiscountAllow', $("#IsDiscountAllow").val());
+                fileData.append('IsRefundAllow', $("#IsRefundAllow").val());
+                fileData.append('IsAfterSaleService', $("#IsAfterSaleService").val());
+                fileData.append('ServiceTypeId', $("#ServiceTypeId").val());
+                fileData.append('ServiceDays', $("#ServiceDays").val());
+                fileData.append('Isperishable', $("#Isperishable").val());
+                fileData.append('ExpireDays', $("#ExpireDays").val());
+                fileData.append('IsFixed', $("#IsFixed").val());
+                fileData.append('IsUnitWise', $("#IsUnitWise").val());  
+                fileData.append('IsPointBased', $("#IsPointBased").val());  
+                fileData.append('Points', $("#Points").val()); 
+                fileData.append('IsUniqueItem', $("#IsUniqueItem").val()); 
+                fileData.append('RestrictionId', $("#RestrictionId").val()); 
+                fileData.append('IsUsingDefaultQuantity', $("#IsUsingDefaultQuantity").val());
+
+                fileData.append('IsDynamic', $("#IsDynamic").val());
+                fileData.append('SizeCheckBox', $("#SizeCheckBox").val());
+                fileData.append('ColorCheckbox', $("#ColorCheckbox").val());
+                fileData.append('PriceCheckBox', $("#PriceCheckBox").val());
+                fileData.append('CostCheckBox', $("#CostCheckBox").val()); 
+                fileData.append('CodeCheckbox', $("#CodeCheckbox").val());
+                fileData.append('PluCheckbox', $("#PluCheckbox").val());
+                fileData.append('MinimumQuantityCheckbox', $("#MinimumQuantityCheckbox").val()); 
+                fileData.append('SizeType', sizeType);
+
+                if (distributeItems != "")
+                {
+                    var index = 0;
+                    for (var item of distributeItems) {
+                        fileData.append("DistributeItems[" + index + "].Id", item.Id);
+                        fileData.append("DistributeItems[" + index + "].SizeId", item.SizeId);
+                        fileData.append("DistributeItems[" + index + "].ColorId", item.ColorId);
+                        fileData.append("DistributeItems[" + index + "].Price", item.Price); 
+                        fileData.append("DistributeItems[" + index + "].BarCode", item.BarCode); 
+                        fileData.append("DistributeItems[" + index + "].Cost", item.Cost); 
+                        fileData.append("DistributeItems[" + index + "].SizeName", item.SizeName); 
+                        fileData.append("DistributeItems[" + index + "].Code", item.Code); 
+                        fileData.append("DistributeItems[" + index + "].Plu", item.Plu); 
+                        fileData.append("DistributeItems[" + index + "].MQuantity", item.MQuantity); 
+                        index++;
+                    }
+                }
+                fileData.append('Description', $("#Description").val());
+                fileData.append('Image', $("#Image").val());
+                fileData.append('CreatedBy', userId);
+
+                $.ajax({
+                    url: '@Url.Action("ProductCreateSave", "Sales")',
+                    type: "POST",
+                    contentType: false, // Not to set any content header
+                    processData: false, // Not to process data
+                    data: fileData,
+                    success: function (result) {
+                        if (result == "success") {
+                            $("#divProductWindow").data("kendoWindow").close();
+                            $("#divProductList").empty();
+                            $("#divProductList").append('<div class="loading_partial"></div>');
+                            $("#divProductList").load('@Url.Action("ProductList", "Sales")');
+                        }
+                        else {
+                            $("#divProductWindow").data("kendoWindow").close();
+                            alert("Save Error");
+                        }
+                    }
+
+                });
+            }
+            else {
+                var sendData = {
+                    Id: $("#Id").val(),
+                    Name: $.trim($("#Name").val()),
+                    Brand: $.trim($("#Brand").val()),
+                    ProductId: $("#ProductId").val(),
+                    QuantityOrName: $("#QuantityOrName").val(),
+                    MasterUnit: $("#MasterUnit").val(),
+                    CreatedBy : userId
+                }
+                $.ajax({
+                    url: '@Url.Action("SubProductSave", "Sales")',
+                    type: "POST",
+                    data: sendData,
+                    success: function (result) {
+                        if (result == "success") {
+                            $("#divProductWindow").data("kendoWindow").close();
+                            $("#divProductList").empty();
+                            $("#divProductList").append('<div class="loading_partial"></div>');
+                            $("#divProductList").load('@Url.Action("ProductList", "Sales")');
+                        }
+                        else {
+                            $("#divProductWindow").data("kendoWindow").close();
+                            alert("Save Error");
+                        }
+                    }
+
+                });
+            }
+        }
+    });
+</script>

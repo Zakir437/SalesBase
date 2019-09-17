@@ -1,0 +1,189 @@
+﻿@model PointOfSale.ModelViews.Offer.CouponModelView
+@Html.HiddenFor(a => a.Id)
+@Html.HiddenFor(a => a.OfferId)
+<style>
+    #divPriceRange table tr td {
+        border-top: 0px;
+    }
+    .radio {
+        display: inline;
+    }
+    .checkbox{
+        margin-top:5px;
+        margin-bottom:5px;
+    }
+</style>
+<div class="editor-label"><label for="OfferName">Offer Name</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.OfferName, new { htmlattributes = new { @class = "k-textbox", @style = "width:100%; max-width:100%" } })
+    @Html.ValidationMessageFor(model => model.OfferName, "", new { @class = "text-Danger" })
+</div>
+<div class="editor-label"><label for="Code">Code</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.Code, new { htmlattributes = new { @class = "k-textbox", @style = "width:100%; max-width:100%" } })
+    @Html.ValidationMessageFor(model => model.Code, "", new { @class = "text-Danger" })
+</div>
+<div class="editor-label"><label for="Amount">Amount</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.Amount, new { htmlattributes = new { @class = "k-textbox", min = "1", @style = "width:100%; max-width:100%", @required = "required", @validationMessage = "Please enter valid amount" } })
+    @Html.ValidationMessageFor(model => model.Amount, "", new { @class = "text-Danger" })
+</div>
+<div class="editor-field">
+    <div class="checkbox">
+        <label>@Html.CheckBoxFor(model => model.IsPercentile) Is Percentile</label>
+    </div>
+</div>
+<div class="editor-field">
+    <div class="checkbox">
+        <label>@Html.CheckBoxFor(model => model.IsInfinite) Is Infinite</label>
+    </div>
+</div>
+<div class="editor-label"><label>Price Range</label></div>
+<div class="editor-field" id="divPriceRange">
+    <table class="table" style="margin-bottom:0px;">
+        <tr>
+            <td width="45%" style="padding:0px;">
+                @Html.EditorFor(model => model.FromPrice, new { htmlattributes = new { @class = "k-textbox", @style = "width:100%; max-width:100%" } })
+                @Html.ValidationMessageFor(model => model.FromPrice, "", new { @class = "text-Danger" })
+            </td>
+            <td style="text-align:center; padding:0px; padding-top:7px;" width="10%">To</td>
+            <td width="45%" style="padding:0px;">
+                @Html.EditorFor(model => model.ToPrice, new { htmlattributes = new { @class = "k-textbox", @style = "width:100%; max-width:100%" } })
+                @Html.ValidationMessageFor(model => model.ToPrice, "", new { @class = "text-Danger" })
+            </td>
+        </tr>
+    </table>
+</div>
+<div class="editor-label"><label>Validity</label></div>
+<div class="editor-field" style="margin-top:7px;">
+    <div class="radio" style="margin-right: 10px;">
+        <label><input type="radio" name="optradio" id="checkDate" checked>Date</label>
+    </div>
+    <div class="radio">
+        <label><input type="radio" name="optradio" id="checkDays">Days</label>
+    </div>
+</div>
+<div id="divDateValidity">
+    <div class="editor-label"><label for="StartDate">Start Date</label></div>
+    <div class="editor-field">
+        @(Html.Kendo().DateTimePickerFor(m => m.StartDate)
+                            .Format("MMMM dd yyyy hh:mm tt")
+                            .Min(DateTime.Now)
+                            .Events(e => { e.Change("onEndChange"); })
+                            .Events(e => { e.Change("onStartChange"); })
+                            .HtmlAttributes(new { style = "width: 100%; max-width:100%", required = "required", @validationMessage = "Please enter valid date!" })
+        )
+        @Html.ValidationMessageFor(model => model.StartDate, "", new { @class = "text-Danger" })
+    </div>
+    <div class="editor-label"><label for="EndDate">End Date</label></div>
+    <div class="editor-field">
+        @(Html.Kendo().DateTimePickerFor(m => m.EndDate)
+                            .Format("MMMM dd yyyy hh:mm tt")
+                            .Min(DateTime.Now)
+                            .HtmlAttributes(new { style = "width: 100%; max-width:100%", required = "required", @validationMessage = "Please enter valid date!" })
+        )
+        @Html.ValidationMessageFor(model => model.EndDate, "", new { @class = "text-Danger" })
+    </div>
+</div>
+<div id="divDaysValidity" style="display:none">
+    <div class="editor-field">
+        <div style="width:49%" class="pull-left">
+            @Html.EditorFor(model => model.ValidityDays, new { htmlattributes = new { @class = "k-textbox", @style = "width:100%; max-width:100%", @min = 1, required = "required", @validationMessage = "Please enter validity days" } })
+            @Html.ValidationMessageFor(model => model.ValidityDays, "", new { @class = "text-Danger" })
+        </div>
+        <div style="width:49%" class="pull-right">
+            @(Html.Kendo().TimePickerFor(m => m.ValidityTime)
+                                .HtmlAttributes(new { style = "width: 100%; max-width:100%", required = "required", @validationMessage = "Please enter validity time" })
+            )
+            @Html.ValidationMessageFor(model => model.ValidityTime, "", new { @class = "text-Danger" })
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        if ($("#IsPercentile").attr('checked')) {
+            $("#IsPercentile").val(true);
+            $("#Amount").prop("max", 100);
+        }
+        else {
+            $("#IsPercentile").val(false);
+        }
+
+        if ($("#IsInfinite").attr('checked')) {
+            $("#IsInfinite").val(true);
+            $("#ToPrice").prop("disabled", true);
+            $("#ToPrice").val("");
+            $("#ToPrice").prop("placeholder", "Infinite");
+        }
+        else {
+            $("#IsInfinite").val(false);
+        }
+
+        $("#ValidityDays").prop("disabled", true);
+        $("#ValidityTime").prop("disabled", true);
+
+
+        start = $("#StartDate").data("kendoDateTimePicker");
+        end = $("#EndDate").data("kendoDateTimePicker");
+        start.max(end.value());
+        end.min(start.value());
+    });
+
+    $('#IsPercentile').change(function () {
+        if ($(this).is(":checked")) {
+            $('#IsPercentile').val(true);
+            $("#Amount").prop("max", 100);
+        }
+        else {
+            $('#IsPercentile').val(false);
+            $("#Amount").removeAttr("max");
+        }
+    });
+
+    $('#IsInfinite').change(function () {
+        if ($(this).is(":checked")) {
+            $('#IsInfinite').val(true);
+            $("#ToPrice").prop("disabled", true);
+            $("#ToPrice").prop("placeholder", "Infinite");
+        }
+        else {
+            $('#IsInfinite').val(false);
+            $("#ToPrice").prop("disabled", false);
+            $("#ToPrice").prop("placeholder", "");
+        }
+    });
+
+    $("#checkDate").change(function () {
+        if ($(this).is(":checked")) {
+            $("#IsDateValidity").val(true);
+            $("#divDateValidity").show();
+            $("#divDaysValidity").hide();
+
+            $("#StartDate").prop("disabled", false);
+            $("#EndDate").prop("disabled", false);
+
+            $("#ValidityDays").prop("disabled", true);
+            $("#ValidityTime").prop("disabled", true);
+
+            $("#ValidityDays").val("");
+            $("#ValidityTime").val("");
+        }
+    });
+
+    $("#checkDays").change(function () {
+        if ($(this).is(":checked")) {
+            $("#IsDateValidity").val(false);
+            $("#divDateValidity").hide();
+            $("#divDaysValidity").show();
+
+            $("#StartDate").prop("disabled", true);
+            $("#EndDate").prop("disabled", true);
+
+            $("#StartDate").val("");
+            $("#EndDate").val("");
+
+            $("#ValidityDays").prop("disabled", false);
+            $("#ValidityTime").prop("disabled", false);
+        }
+    });
+</script>

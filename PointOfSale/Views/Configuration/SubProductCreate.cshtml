@@ -1,0 +1,103 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin-bottom:4%;margin-top:2%;">
+    <div id="divMasterProductForm"></div>
+    <div class="k-edit-buttons k-state-default" style="margin-left:30px;">
+        @if (ViewBag.Id > 0)
+         {
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnMasterProductCreate"><span class="k-icon k-update"></span>Update</button>
+         }
+        else
+        {
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnMasterProductCreate"><span class="k-icon k-update"></span>Create</button>
+        }
+        <button type="reset" class="k-button k-button-icontext k-grid-update" id="btnRefresh"><span class="k-icon k-i-refresh"></span>Refresh</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#divMasterProductForm").append('<div class="tiny_loading"></div>');
+        $("#divMasterProductForm").load('@Url.Action("SubProductCreatePartial", "Configuration")?id=' + '@ViewBag.Id');
+    });
+    $("#btnRefresh").click(function () {
+        $("#divMasterProductForm").empty();
+        $("#divMasterProductForm").append('<div class="tiny_loading"></div>');
+        $("#divMasterProductForm").load('@Url.Action("SubProductCreatePartial", "Configuration")?id=' + '@ViewBag.Id');
+    });
+
+    $("#btnCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+
+    function onChangeProduct() {
+        selectedValue = this.value();
+        if (selectedValue.length > 0) {
+            $("#divMaster").show();
+            $('#QuantityOrName').prop('required', true);
+            $('#MasterUnit').prop('required', true);
+        }
+        else {
+            $("#divMaster").hide();
+            $('#QuantityOrName').prop('required', false);
+            $('#MasterUnit').prop('required', false);
+        }
+    }
+
+    var validation = $("#divMasterProductForm").kendoValidator({
+    }).data("kendoValidator");
+
+    $("#btnMasterProductCreate").click(function () {
+
+        if (validation.validate())
+        {
+            var sendData = {
+                Id: $("#Id").val(),
+                Name: $.trim($("#Name").val()),
+                Brand: $.trim($("#Brand").val()),
+                ProductId: $("#ProductId").val(),
+                CreatedBy : userId
+            }
+            $.ajax({
+                url: '@Url.Action("SubProductSave", "Configuration")',
+                type: "POST",
+                data: sendData,
+                success: function (result) {
+                    if (result == "success") {
+                        $("#divMasterProductWindow").data("kendoWindow").close();
+                        if (tab == 1)
+                        {
+                            $("#div_All").empty();
+                            $("#div_All").append('<div class="loading_partial"></div>');
+                            $("#div_All").load('@Url.Action("MasterProductList", "Configuration")');
+                        }
+                        else if (tab == 2)
+                        {
+                            status = 1;
+                            passdata = { status: status };
+                            $("#div_Active").append('<div class="loading_partial"></div>');
+                            $("#div_Active").load('@Url.Action("MasterProductList", "Configuration")', passdata);
+                        }
+                        else if (tab == 3)
+                        {
+                            status = 0;
+                            passdata = { status: status};
+                            $("#div_Inactive").append('<div class="loading_partial"></div>');
+                            $("#div_Inactive").load('@Url.Action("MasterProductList", "Configuration")', passdata);
+                        }
+                        else if (tab == 4)
+                        {
+                            status = 2;
+                            passdata = { status: status };
+                            $("#div_Deleted").append('<div class="loading_partial"></div>');
+                            $("#div_Deleted").load('@Url.Action("MasterProductList", "Configuration")', passdata);
+                        }
+                    }
+                    else {
+                        $("#divMasterProductWindow").data("kendoWindow").close();
+                        alert("Save Error");
+                    }
+                }
+            });
+        }
+    });
+</script>
+

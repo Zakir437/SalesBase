@@ -1,0 +1,29 @@
+﻿@model PointOfSale.ModelViews.Inventory.WasteTypeModelView
+@Html.HiddenFor(a => a.Id)
+<div class="editor-label"><label for="TypeName">Name</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.TypeName, new { htmlattributes = new { @class = "k-textbox", @style = "width:100%; max-width:100%" } })
+    @Html.ValidationMessageFor(model => model.TypeName, "", new { @class = "text-Danger" })
+</div>
+<div class="editor-label"><label for="Type">Type</label></div>
+<div class="editor-field">
+    @(Html.Kendo().DropDownListFor(a => a.Type)
+          .DataTextField("Text")
+          .DataValueField("Value")
+          .OptionLabel("--Select one--")
+          .BindTo(new List<SelectListItem>() {
+              new SelectListItem() {
+                  Text = "Store/Warehouse",
+                  Value = "1"
+              },
+              new SelectListItem() {
+                  Text = "After Sales",
+                  Value = "2"
+              }
+          })
+          .HtmlAttributes(new { style = "width: 100%" })
+    )
+    @Html.ValidationMessageFor(model => model.Type, "", new { @class = "text-Danger" })
+</div>
+
+

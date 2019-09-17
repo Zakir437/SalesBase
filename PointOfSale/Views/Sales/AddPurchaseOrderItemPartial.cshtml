@@ -1,0 +1,83 @@
+﻿@model PointOfSale.Models.PurchaseTransaction
+<style>
+    .k-textbox {
+        width: 100%;
+        max-width: 100%;
+    }
+</style>
+@if (Model != null)
+ {
+    <div class="editor-label"><label for="ProductName">Product Name</label></div>
+    <div class="editor-field">
+        @Html.DisplayFor(model => model.ProductName, new { htmlattributes = new { } })
+    </div>
+ }
+else
+{
+    <div class="editor-label"><label for="ProductName">Product Name</label></div>
+    <div class="editor-field">
+        @(Html.Kendo().DropDownList()
+                        .Name("ProductDropdown")
+                        .BindTo(ViewBag.ProductList as SelectList)
+                        .DataTextField("Text")
+                        .DataValueField("Value")
+                        .Filter("contains")
+                        .OptionLabel("--Select product--")
+                        .Events(e =>
+                        {
+                            e.Change("onChangeProduct");
+                        })
+                        .HtmlAttributes(new { style = "width:100%", required = "required", validationMessage = "Please select a product" })
+        )
+        @Html.ValidationMessage("ProductDropdown", "", new { @class = "text-Danger" })
+    </div>
+}
+@if (ViewBag.IsQuantityEdit == false)
+{
+    <div class="editor-label"><label for="RequestQuantity">Quantity</label></div>
+    <div class="editor-field">
+        @Html.EditorFor(model => model.RequestQty, new { htmlattributes = new { @class = "k-textbox", min = "1", required = "required", validationMessage = "Please enter quantity", onclick = "setSubtotalCost()", onkeyup = "setSubtotalCost()" } })
+        @Html.ValidationMessageFor(model => model.RequestQty, "", new { @class = "text-Danger" })
+    </div>
+    <div class="editor-label"><label for="PeritemCost">Price(Peritem)</label></div>
+    <div class="editor-field">
+        @Html.EditorFor(model => model.PeritemCost, new { htmlattributes = new { @class = "k-textbox", type = "number", min = "1", required = "required", validationMessage = "Please enter peritem price", onclick = "setSubtotalCost()", onkeyup = "setSubtotalCost()" } })
+        @Html.ValidationMessageFor(model => model.PeritemCost, "", new { @class = "text-Danger" })
+    </div>
+    <div class="editor-label"><label for="Cost">Price</label></div>
+    <div class="editor-field">
+        @Html.EditorFor(model => model.Cost, new { htmlattributes = new { @class = "k-textbox", type = "number", min = "1", required = "required", validationMessage = "Please enter price", onclick = "totalCostFunc()", onkeyup = "totalCostFunc()" } })
+        @Html.ValidationMessageFor(model => model.Cost, "", new { @class = "text-Danger" })
+    </div>
+}
+else
+{
+    <div class="editor-field">
+        <span class="text-info">Current Quantity : @Model.RequestQty Piece/s</span>
+    </div>
+    <div class="editor-label"><label for="ChangeQty">Quantity</label></div>
+    <div class="editor-field">
+        <input type="number" placeholder="Quantity" data-qty="@Model.RequestQty" id="Quantity" name="Quantity" class="k-textbox" />
+        @Html.ValidationMessage("Quantity", new { @class = "text-Danger" })
+    </div>
+}
+
+<script>
+    var totalCost = 0, quantity = 0, perItemCost = 0;
+    //set sub total cost by input per item cost or input quantity
+    function setSubtotalCost() {
+        totalCost = 0;
+        quantity = 0;
+        quantity = $("#RequestQty").val();
+        totalCost = quantity * $("#PeritemCost").val();
+        $("#Cost").val(totalCost.toFixed(2));
+    }
+    //***********calculate total cost*****************
+    function totalCostFunc() {
+        totalCost = 0;
+        quantity = 0;
+        quantity = $("#RequestQty").val();
+        perItemCost = $("#Cost").val() / quantity;
+        $("#PeritemCost").val(perItemCost.toFixed(2));
+    }
+</script>

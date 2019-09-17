@@ -1,0 +1,251 @@
+﻿@{
+    ViewBag.Title = "SupplementaryItems";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+}
+<section class="content">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4 class="uppercase">Supplementary Items</h4>
+            </div>
+        </div>
+        <div class="panel-body">
+            <button class="btn btn-success" id="btnAddItems"><i class="fa fa-plus-circle" aria-hidden="true"></i> Add</button>
+        </div>
+        <div class="panel-heading">
+            <ul class="nav nav-tabs StatusTab">
+                <li class="active" id="liForAll"><a href="#tab1liForAll" data-toggle="tab">All</a></li>
+                <li id="liForActive"><a href="#tab2liForActive" data-toggle="tab">Active</a></li>
+                <li id="liForInactive"><a href="#tab3InactiveList" data-toggle="tab">Inactive</a></li>
+                <li id="liForDelete"><a href="#tab4DeleteList" data-toggle="tab">Deleted</a></li>
+            </ul>
+        </div>
+        <div class="panel-body" style="border:none!important;">
+            <div class="tab-content">
+                <div class="tab-pane fade in active" id="tab1liForAll">
+                    <div id="div_All"></div>
+                </div>
+                <div id="tab2liForActive" class="tab-pane fade">
+                    <div id="div_Active"></div>
+                </div>
+                <div id="tab3InactiveList">
+                    <div id="div_Inactive"></div>
+                </div>
+                <div id="tab4DeleteList">
+                    <div id="div_Deleted"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<div id="divSupplementaryItemWin"></div>
+<script id="temp_win_delete_entry" type="text/x-kendo-template">
+    <div style="padding:1em;">
+        <p style="font-size: 14px; padding: 10px"> #=msg# </p>
+        <div style="text-align: right;">
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btn_delete_Entry_noty_ok"><span class="k-icon k-update"></span>OK</button>
+            <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btn_delete_Entry_noty_cancel"><span class="k-icon k-cancel"></span>Cancel</button>
+        </div>
+    </div>
+</script>
+<script>
+    var tab = 0, status = 0, id = 0, passdata;
+    $(document).ready(function () {
+        $("#liForAll").click();
+        $("#liForSalesMenu").addClass('active');
+        $("#liForAfterSaleService").addClass('active');
+    });
+    function clearBeforeClick()
+    {
+        $("#div_All").empty();
+        $("#div_Active").empty();
+        $("#div_Inactive").empty();
+        $("#div_Deleted").empty();
+    }
+    $("#liForAll").click(function () {
+        tab = 1;
+        clearBeforeClick();
+        $("#div_All").append('<div class="loading_partial"></div>');
+        $("#div_All").load('@Url.Action("SupplementaryItemList", "Sales")');
+    });
+    $("#liForActive").click(function () {
+        clearBeforeClick();
+        tab = 2; status = 1;
+        passdata = { status: status };
+        $("#div_Active").append('<div class="loading_partial"></div>');
+        $("#div_Active").load('@Url.Action("SupplementaryItemList", "Sales")', passdata);
+    });
+
+    $("#liForInactive").click(function () {
+        clearBeforeClick();
+        tab = 3; status = 0;
+        passdata = { status: status};
+        $("#div_Inactive").append('<div class="loading_partial"></div>');
+        $("#div_Inactive").load('@Url.Action("SupplementaryItemList", "Sales")', passdata);
+    });
+    $("#liForDelete").click(function () {
+        clearBeforeClick();
+        tab = 4; status = 2;
+        passdata = { status: status };
+        $("#div_Deleted").append('<div class="loading_partial"></div>');
+        $("#div_Deleted").load('@Url.Action("SupplementaryItemList", "Sales")', passdata);
+    });
+
+    //add supplementary
+    $("#btnAddItems").click(function () {
+        $("#divSupplementaryItemWin").empty();
+        $("#divSupplementaryItemWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 767,
+            height: 375,
+            title: 'Supplementary Item',
+            resizable: false,
+            close: onWindowClose
+        });
+        var suppleWin = $("#divSupplementaryItemWin").data("kendoWindow");
+        suppleWin.refresh('/Sales/SupplementaryCreate');
+        suppleWin.center().open();
+        document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+        document.body.scroll = "no";
+    });
+
+    //supplementary edit
+    $("#div_All, #div_Active, #div_Inactive, #div_Deleted").on('click', ".btnSuppEdit", function () {
+        id = $(this).data("id");
+        $("#divSupplementaryItemWin").empty();
+        $("#divSupplementaryItemWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 767,
+            height: 375,
+            title: 'Supplementary Item',
+            resizable: false,
+            close: onWindowClose
+        });
+        var suppleWin = $("#divSupplementaryItemWin").data("kendoWindow");
+        suppleWin.refresh('/Sales/SupplementaryCreate?id=' + id);
+        suppleWin.center().open();
+        document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+        document.body.scroll = "no";
+    });
+
+    $("#div_All, #div_Active, #div_Inactive").on('click', ".btnSupplementaryDelete", function () {
+        id = $(this).data("id");
+        var kendoWindow = $("<div />").kendoWindow({
+            actions: ["Close"],
+            title: "Alert",
+            resizable: false,
+            width: "30%",
+            modal: true
+        });
+        msg = "Are you sure want to delete this supplementary item?";
+        var template = kendo.template($("#temp_win_delete_entry").html());
+        kendoWindow.data("kendoWindow").content(template).center().open();
+
+        kendoWindow.find("#btn_delete_Entry_noty_cancel").click(function () {
+            kendoWindow.data("kendoWindow").close();
+            document.documentElement.style.overflow = "auto";
+        }).end();
+        kendoWindow.find("#btn_delete_Entry_noty_ok").click(function () {
+            kendoWindow.data("kendoWindow").close();
+            document.documentElement.style.overflow = "auto";
+            deleteItem(id);
+        }).end();
+        document.documentElement.style.overflow = "hidden";
+    });
+    function deleteItem(id) {
+        $.ajax({
+            url: '@Url.Action("ChangeSupplementaryStatus", "Sales")',
+            type: 'Post',
+            data: { id: id, status: 2, updateBy: userId },
+            success: function (data) {
+                if (data === "success") {
+                    if (tab == 1)
+                    {
+                        $("#div_All").empty();
+                        $("#div_All").append('<div class="loading_partial"></div>');
+                        $("#div_All").load('@Url.Action("SupplementaryItemList", "Sales")');
+                    }
+                    else if (tab == 2)
+                    {
+                        status = 1;
+                        passdata = { status: status };
+                        $("#div_Active").append('<div class="loading_partial"></div>');
+                        $("#div_Active").load('@Url.Action("SupplementaryItemList", "Sales")', passdata);
+                    }
+                    else if (tab == 3)
+                    {
+                        status = 0;
+                        passdata = { status: status};
+                        $("#div_Inactive").append('<div class="loading_partial"></div>');
+                        $("#div_Inactive").load('@Url.Action("SupplementaryItemList", "Sales")', passdata);
+                    }
+                    else if (tab == 4)
+                    {
+                        status = 2;
+                        passdata = { status: status };
+                        $("#div_Deleted").append('<div class="loading_partial"></div>');
+                        $("#div_Deleted").load('@Url.Action("SupplementaryItemList", "Sales")', passdata);
+                    }
+                } else {
+                    alert("Error Delete");
+                }
+            }
+        });
+    }
+    $("#div_All, #div_Active, #div_Inactive, #div_Deleted").on("click", ".inactivateSupplementary,.activateSupplementary", function () {
+        id = $(this).data("id");
+        status = $(this).data("isactive");
+        var sendData = {
+            id: id,
+            status: status,
+            updateBy: userId
+        };
+        $.ajax({
+            url: '@Url.Action("ChangeSupplementaryStatus", "Sales")',
+            method: 'POST',
+            data: sendData,
+            success: function (res) {
+                if (res == "success") {
+                    if (tab == 1)
+                    {
+                        $("#div_All").empty();
+                        $("#div_All").append('<div class="loading_partial"></div>');
+                        $("#div_All").load('@Url.Action("SupplementaryItemList", "Sales")');
+                    }
+                    else if (tab == 2)
+                    {
+                        status = 1;
+                        passdata = { status: status };
+                        $("#div_Active").append('<div class="loading_partial"></div>');
+                        $("#div_Active").load('@Url.Action("SupplementaryItemList", "Sales")', passdata);
+                    }
+                    else if (tab == 3)
+                    {
+                        status = 0;
+                        passdata = { status: status};
+                        $("#div_Inactive").append('<div class="loading_partial"></div>');
+                        $("#div_Inactive").load('@Url.Action("SupplementaryItemList", "Sales")', passdata);
+                    }
+                    else if (tab == 4)
+                    {
+                        status = 2;
+                        passdata = { status: status };
+                        $("#div_Deleted").append('<div class="loading_partial"></div>');
+                        $("#div_Deleted").load('@Url.Action("SupplementaryItemList", "Sales")', passdata);
+                    }
+                }
+                else {
+                    alert("Error Status Update");
+                }
+            }
+        });
+    });
+
+</script>
+

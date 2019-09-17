@@ -1,0 +1,15 @@
+﻿@model PointOfSale.ModelViews.Holiday.HolidayPachakgeModelView
+@Html.HiddenFor(a => a.HolidayPackId)
+<div class="editor-label"><label for="HolidayPackName">Package Name</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.HolidayPackName, new { htmlAttributes = new { @class = "k-textbox", style="width:100%" } })
+    @Html.ValidationMessageFor(model => model.HolidayPackName, "", new { @class = "text-danger" })
+</div>
+<div class="editor-label"><label for="NoOfPaidLeave">No. Of Paid Leave</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.NoOfPaidLeave, new { htmlAttributes = new { @class = "k-textbox", style = "width:100%" } })
+    @Html.ValidationMessageFor(model => model.NoOfPaidLeave, "", new { @class = "text-danger" })
+</div>
+
+
+

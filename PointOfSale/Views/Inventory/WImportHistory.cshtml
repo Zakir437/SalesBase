@@ -1,0 +1,114 @@
+﻿@{
+    ViewBag.Title = "WImportHistory";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+    long impCount = ViewBag.ImpCount;
+}
+<style>
+    .k-input {
+        height: 26px !important;
+    }
+</style>
+<section class="content">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4 class="uppercase"> Warehouse Import</h4>
+            </div>
+            <div class="pull-right">
+                <a class="btn btn-default" href="/Inventory/Warehouse"><i class="fa fa-arrow-left"></i> Back</a>
+            </div>
+        </div>
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-md-12">
+                    <div style="width:50%!important; margin:15px 0 5px 0" class="pull-left">
+                        @(Html.Kendo().MultiSelect()
+                        .Name("WImpMultiSelect")
+                        .DataTextField("Text")
+                        .DataValueField("Value")
+                        .Placeholder("Type refference no...")
+                        .AutoBind(false)
+                        .Events(e => e.Change("onChange"))
+                        .HtmlAttributes(new { style = "width: 100%;" })
+                        .DataSource(source =>
+                        {
+                            source.Read(read =>
+                            {
+                                read.Action("GetWImpReffList", "Inventory").Data("additionalInfo");
+                            })
+                            .ServerFiltering(true);
+                        })
+                        )
+                        <span class="k-icon k-i-search" style="margin-top:-25px;float:right;margin-right:10px; position:relative">&nbsp;</span>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div id="divHistoryList"></div>
+                    <div class="text-center" style="margin-bottom:10px">
+                        <button class="btn btn-primary" id="btnSeeMore"><i class="fa fa-arrow-down"></i> See more</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<script>
+    var count = 10;
+    $(document).ready(function () {
+        $("#liForInventory").addClass('active');
+        $("#liForWarehouse").addClass('active');
+
+        $("#btnSeeMore").hide();
+        if (@impCount > count)
+        {
+            $("#btnSeeMore").show();
+        }
+        $("#divHistoryList").empty();
+        $("#divHistoryList").append('<div class="loading_partial"></div>');
+        $("#divHistoryList").load('/Inventory/WImportList?count=' + count);
+    });
+
+    //**********************warehouse import voucher multiselect*************************
+    function onChange()
+    {
+        var selectId = "";
+        selectId = this.value();
+        if (selectId.length > 0)
+        {
+            $("#divHistoryList").empty();
+            $("#divHistoryList").append('<div class="loading_partial"></div>');
+            $("#divHistoryList").load('/Inventory/WImportList?importIds=' + selectId);
+        }
+        else
+        {
+            if (@impCount > count)
+            {
+                $("#btnSeeMore").show();
+            }
+            $("#divHistoryList").empty();
+            $("#divHistoryList").append('<div class="loading_partial"></div>');
+            $("#divHistoryList").load('/Inventory/WImportList?count=' + count);
+        }
+    }
+
+    function additionalInfo() {
+        return {
+            text: $.trim($("#WImpMultiSelect").data("kendoMultiSelect").input.val()),
+        }
+    }
+
+    //See more data
+    $("#btnSeeMore").click(function () {
+        count = count + 10;
+        if(count >= @impCount)
+        {
+            $("#btnSeeMore").hide();
+        }
+        $("#divHistoryList").empty();
+        $("#divHistoryList").append('<div class="loading_partial"></div>');
+        $("#divHistoryList").load('/Inventory/WImportList?count=' + count);
+    });
+
+</script>

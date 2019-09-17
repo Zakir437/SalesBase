@@ -1,0 +1,71 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewMainProduct>
+@using System.Globalization;
+@using PointOfSale.Helpers
+@{ 
+    var count = 0;
+}
+@if (Model.Any() == true)
+{
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Name</th>
+            <th>Category</th>
+            <th>Sub Category</th>
+            <th>Unit</th>
+            <th>Price</th>
+            <th>Cost</th>
+            <th></th>
+        </tr>
+        @foreach (var list in Model)
+         {
+            count++;
+            <tr>
+                <td>@count. </td>
+                <td>
+                   <img src="~/Images/ProductImage/@list.Image" class="img-circle" width="30" height="30"/>
+                   <a href="@Html.EncodedParam("ProductInfo","Sales", new { productId = list.ProductId }, null)" data-toggle="tooltip" title="View product info">@list.ProductName</a>
+                </td>
+                <td>@list.Categorys</td>
+                <td>@list.SubCategorys</td>
+                <td>@list.Unit</td>
+                <td>@list.Price.ToString("C", new CultureInfo("bn-BD"))</td>
+                <td>@list.Cost.ToString("C", new CultureInfo("bn-BD"))</td>
+                <td>
+                    <button class="btn productEdit" style="background-color:#1c488e; color:white;" data-id="@list.ProductId" data-toggle="tooltip" title="Edit Product Information"><i class="fa fa-pencil-square-o"></i></button>
+                    @if (list.Status == true)
+                     {
+                        <button type="button" data-id="@list.ProductId" data-isactive="0" class="btn btn-danger inactivateProduct" data-toggle="tooltip" title="Inactivate Product">
+                            <i class="fa fa-stop" aria-hidden="true"></i>
+                        </button>
+                     }
+                    else
+                    {
+                        <button type="button" data-id="@list.ProductId" data-isactive="1" class="btn btn-success activateProduct" data-toggle="tooltip" title="Activate Product">
+                            <i class="fa fa-play" aria-hidden="true"></i>
+                        </button>
+                        <span data-id="@list.ProductId" style="cursor:pointer;" data-toggle="tooltip" title="Delete Product" class="btn btn-danger btnProductDelete">
+                            <i class="fa fa-trash"></i>
+                        </span>
+                    }
+                    @if (list.IsDynamic == false)
+                     {
+                        <button class="btn minimalQuantityEdit" style="background-color:#1a5863; color:white;" data-id="@list.ProductId" data-toggle="tooltip" title="Edit Minimum Quantity"><i class="fa fa-pencil-square-o"></i></button>
+                     }
+                </td>
+            </tr>
+         }
+    </table>
+}
+else
+{
+    <h3>There is no Product</h3>
+}
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    })
+    
+</script>
+
+

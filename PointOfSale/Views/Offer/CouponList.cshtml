@@ -1,0 +1,133 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewOffer>
+@{
+    var count = 0;
+}
+@if (Model.Any() == true)
+{
+    <table class="table table-bordered table-hover table-responsive">
+        <tr>
+            <th>SL.</th>
+            <th>
+                <div class="checkbox">
+                    <label style="font-weight:bold; font-size:14px; color:#333"><input type="checkbox" id="checkAll" /> Offer Name</label>
+                </div>
+            </th>
+            <th>Coupon</th>
+            <th>Type</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>CreatedBy</th>
+            <th>Created Date</th>
+            <th></th>
+        </tr>
+        @foreach (var list in Model)
+        {
+            count++;
+            <tr>
+                <td>@count. </td>
+                <td>
+                    <div class="checkbox">
+                        <label><input type="checkbox" data-id="@list.Id" class="check" id="check_@list.Id" /> @list.OfferName</label>
+                    </div>
+                </td>
+                <td>@list.Coupon</td>
+                <td>
+                    @if(list.SubOfferId == 1)
+                    {
+                        <span>Buy 1 Get 1</span>
+                    }
+                    else if(list.SubOfferId == 2)
+                    {
+                        <span>Buy 2 Get 1</span>
+                    }
+                    else if(list.SubOfferId == 3)
+                    {
+                        <span>Discount Multiple</span>
+                    }
+                    else if(list.SubOfferId == 4)
+                    {
+                        <span>Discount Single</span>
+                    }
+                    else if(list.SubOfferId == 5)
+                    {
+                        <span>Discount Category</span>
+                    }
+                    else if(list.SubOfferId == 6)
+                    {
+                        <span>Discount Tag</span>
+                    }
+                    else if(list.SubOfferId == 7)
+                    {
+                        <span>Delivery Charge</span>
+                    }
+                    else if(list.SubOfferId == 8)
+                    {
+                        <span>Amount</span>
+                    }
+                </td>
+                <td>@Convert.ToDateTime(list.StartDate).ToString("MMM dd,yyyy hh:mm:ss tt")</td>
+                <td>@Convert.ToDateTime(list.EndDate).ToString("MMM dd,yyyy hh:mm:ss tt")</td>
+                <td>@list.CreatedBy</td>
+                <td>@Convert.ToDateTime(list.CreatedDate).ToString("MMM dd,yyyy")</td>
+                @*<td>@list.UpdatedBy</td>
+                    <td>
+                        @if (list.UpdatedDate != null)
+                        {
+                            @Convert.ToDateTime(list.UpdatedDate).ToString("MMM dd,yyyy")
+                        }
+                        else
+                        {
+                            <span>not yet updated</span>
+                        }
+                    </td>*@
+                <td>
+                    @if (list.Type == 3) //type 3 is delivery charge coupon
+                    {
+                        <button class="btn btn-primary btnDelChargeEdit" data-id="@list.DeliveryChargeCouponId" data-toggle="tooltip" title="Edit Discount Information"><i class="fa fa-pencil-square-o"></i></button>
+                    }
+                    else if (list.Type == 4) // type 4 is amount coupon
+                    {
+                        <button class="btn btn-primary btnAmountCouponEdit" data-id="@list.AmountCouponId" data-toggle="tooltip" title="Edit Discount Information"><i class="fa fa-pencil-square-o"></i></button>
+                    }
+
+                    @if (list.Status == true)
+                    {
+                        <button type="button" data-id="@list.Id" data-isactive="0" class="btn btn-danger inactivateDiscount" data-toggle="tooltip" title="Inactivate Discount">
+                            <i class="fa fa-stop" aria-hidden="true"></i>
+                        </button>
+                    }
+                    else
+                    {
+                        <button type="button" data-id="@list.Id" data-isactive="1" class="btn btn-success activateDiscount" data-toggle="tooltip" title="Activate Discount">
+                            <i class="fa fa-play" aria-hidden="true"></i>
+                        </button>
+                    }
+                    @if (@list.Status == false)
+                    {
+                        <span data-id="@list.Id" style="cursor:pointer;" data-toggle="tooltip" title="Delete Discount" class="btn btn-danger btnDiscountDelete">
+                            <i class="fa fa-trash"></i>
+                        </span>
+                    }
+                </td>
+
+            </tr>
+        }
+    </table>
+}
+else
+{
+    <h4>There is no record to display</h4>
+}
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    })
+</script>
+
+
+
+
+
+
+
+

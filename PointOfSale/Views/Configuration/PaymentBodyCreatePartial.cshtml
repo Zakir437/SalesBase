@@ -1,0 +1,162 @@
+﻿@model PointOfSale.ModelViews.PaymentBodyModel
+<style>
+    .k-input {
+        height: 26px !important;
+        /*max-width:70%;*/
+    }
+</style>
+
+@{ 
+    PointOfSale.Models.PointOfSale_DBEntities db = new PointOfSale.Models.PointOfSale_DBEntities();
+    //if (Model != null)
+    //{
+    //    if (Model.PaymentBodyId > 0)
+    //    {
+    //        var methodIds = db.AccountAssignedWithMethods.Where(a => a.AccountId == Model.PaymentBodyId).Select(s => new { s.MethodId }).ToList();
+    //        if (methodIds != null)
+    //        {
+    //            foreach (var id in methodIds)
+    //            {
+
+    //            }
+    //        }
+    //    }
+    //}
+}
+    @Html.HiddenFor(m => m.PaymentBodyId)
+<div class="editor-label"><label for="Name">Name</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.Name, new { htmlattributes = new { @class = "k-textbox form-control" } })
+    @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-Danger" })
+</div>
+<div class="editor-label"><label for="Balance">Current Balance</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.Balance, new { htmlattributes = new { @class = "k-textbox form-control" } })
+    @Html.ValidationMessageFor(model => model.Balance, "", new { @class = "text-Danger" })
+</div>
+<div class="editor-label"><label for="PaymentTypeId">Payment Category</label></div>
+<div class="editor-field">
+    @(Html.Kendo().DropDownListFor(a => a.PaymentCategoryId)
+                     .BindTo(ViewBag.PaymentType as SelectList)
+                     .DataTextField("Text")
+                     .DataValueField("Value")
+                     .OptionLabel("--Select one category--")
+                     .HtmlAttributes(new { style = "width:87%" })
+                     .Events(e => { e.Change("onChange"); })
+    )
+    @Html.ValidationMessageFor(model => model.PaymentCategoryId, "", new { @class = "text-Danger" })
+</div>
+<div class="editor-label"><label for="Inout">Payment Type</label></div>
+<div class="editor-field">
+    @(Html.Kendo().DropDownListFor(a => a.Inout)
+          .OptionLabel("--Select One Type--")
+          .DataTextField("Text")
+          .DataValueField("Value")
+          .HtmlAttributes(new { style = "width:87%" })
+          .BindTo(new List<SelectListItem>() {
+              new SelectListItem() {
+                  Text = "Both",
+                  Value = "0"
+              },
+              new SelectListItem() {
+                  Text = "Receive",
+                  Value = "1"
+              },
+              new SelectListItem() {
+                  Text = "Release",
+                  Value = "2"
+              }
+          })
+    )
+</div>
+<div class="editor-label"><label for="PaymentMethod">Payment Method</label></div>
+<div class="editor-field">
+    @*@(Html.Kendo().DropDownListFor(a => a.PaymentMethod)
+                     .BindTo(ViewBag.PaymentMethod as SelectList)
+                     .DataTextField("Text")
+                     .DataValueField("Value")
+                     .OptionLabel("--Select one method--")
+                     .HtmlAttributes(new { style = "width:87%" })
+    )
+    @Html.ValidationMessageFor(model => model.PaymentMethod, "", new { @class = "text-Danger" })*@
+    @(Html.Kendo().MultiSelect()
+                    .Name("Method")
+                    .Placeholder("Select method...")
+                    .DataTextField("Text")
+                    .DataValueField("Value")
+                    .Filter("contains")
+                    //.AutoBind(false)
+                    .HtmlAttributes(new { style = "width: 87%;" })
+                    .DataSource(source =>
+                    {
+                        source.Read(read =>
+                        {
+                            read.Action("GetMethodList", "Configuration");
+                        })
+                        .ServerFiltering(false);
+                    })
+                    .Events(e =>
+                    {
+                        e.DataBound("selectedValue");
+                    })
+    //.Value(ViewBag.SelectedMethods)
+    )
+    <span class="field-validation-valid text-danger" data-valmsg-for="Method" data-valmsg-replace="true"></span>
+</div>
+@if (Model != null)
+{
+    if (Model.PaymentCategoryId == 2 || Model.PaymentCategoryId == 6)
+    {
+        <div id="divSerialNumber">
+            <div class="editor-label"><label for="SerialNumber">Serial Number</label></div>
+            <div class="editor-field">
+                @Html.EditorFor(model => model.SerialNumber, new { htmlattributes = new { @class = "k-textbox form-control" } })
+                @Html.ValidationMessageFor(model => model.SerialNumber, "", new { @class = "text-Danger" })
+            </div>
+        </div>
+    }
+}
+else
+{
+    <div id="divSerialNumber" style="display:none">
+        <div class="editor-label"><label for="SerialNumber">Serial Number</label></div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.SerialNumber, new { htmlattributes = new { @class = "k-textbox form-control" } })
+            @Html.ValidationMessageFor(model => model.SerialNumber, "", new { @class = "text-Danger" })
+        </div>
+    </div>
+}
+<div class="editor-label"><label for="Description">Description</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.Description, new { htmlattributes = new { @class = "k-textbox form-control" } })
+    @Html.ValidationMessageFor(model => model.Description, "", new { @class = "text-Danger" })
+</div>
+<script>
+    $(document).ready(function () {
+
+         
+
+
+        //$("#Method").data("kendoMultiSelect").value([array]);
+
+       // var multiselect = $("#Method").data("kendoMultiSelect");
+
+        // get the value of the multiselect.
+        //var value = multiselect.value();
+
+        // set the value of the multiselect.
+        //multiselect.value(); //select items which have value respectively "1" and "2"
+    });
+
+    //var multiselect = $("#Method").data("kendoMultiSelect");
+
+    //var multiselect = $("#Method").data("kendoMultiSelect");
+    //multiselect.value(["1", "2"]);
+
+        // get the value of the multiselect.
+        //var value = multiselect.value();
+    // set the value of the multiselect.
+   //multiselect.value([]); //select items which have value respectively "1" and "2"
+
+</script>
+

@@ -1,0 +1,248 @@
+﻿@model PointOfSale.ModelViews.HR.UserInformationModelView
+<style>
+    .image-uploader {
+        width: 100%;
+        /*height: 260px;*/
+        height: 270px;
+        display: block;
+        text-align: center;
+    }
+
+    .imgPreview {
+        background-color: #e8e4d0;
+        margin-bottom: 20px;
+        position: relative;
+        width: 100%;
+        height: 160px;
+        border: 1px solid #808080;
+        display: block;
+        overflow: hidden;
+    }
+
+        .imgPreview img {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            margin: auto;
+            display: block;
+            max-width: 90%;
+            height: auto;
+        }
+
+    .lblForPics {
+        text-align: center;
+        max-width: 100%;
+        width: 100%;
+        height: 175px;
+        vertical-align: middle;
+        border: 1px dashed blue;
+    }
+
+        .lblForPics span {
+            color: #083bb5 !important;
+        }
+
+    .previewImgClose {
+        position: relative;
+        width: 36px;
+        height: 36px;
+        cursor: pointer;
+        float: right;
+        right: -1.8em;
+        bottom: -1.8em;
+        z-index: 9999;
+        margin-top: -3em;
+    }
+</style>
+@Html.HiddenFor(m => m.UserId)
+<div class="col-md-5 col-sm-5">
+    <div class="editor-label"><label for="Title">Title</label></div>
+    <div class="editor-field">
+        @(Html.Kendo().DropDownListFor(model => model.Title)
+                              .OptionLabel("--Select One--")
+                              .BindTo(ViewBag.TitleId)
+                              .HtmlAttributes(new { style = "width:100%" })
+        )
+        @Html.ValidationMessageFor(model => model.Title, "", new { @class = "text-danger" })
+    </div>
+    <div class="editor-label"><label for="MiddleName">Middle Name</label></div>
+    <div class="editor-field">
+        @Html.EditorFor(model => model.MiddleName, new { htmlAttributes = new { @class = "form-control k-textbox" } })
+        @Html.ValidationMessageFor(model => model.MiddleName, "", new { @class = "text-danger" })
+    </div>
+    <div class="editor-label"><label for="DateOfBirth">Date of Birth</label></div>
+    <div class="editor-field">
+        @(Html.Kendo().DatePickerFor(m => m.DateOfBirth)
+              //.Start(CalendarView.Year)
+              //.Format("dd-MMM-yyyy")
+              //.Format("MMM dd yyyy")
+              .HtmlAttributes(new { style = "width:100%" })
+        )
+        @Html.ValidationMessageFor(model => model.DateOfBirth, "", new { @class = "text-danger" })
+    </div>
+    <div class="editor-label"><label for="Gender">Gender</label></div>
+    <div class="editor-field">
+        @(Html.Kendo().DropDownListFor(a => a.Gender)
+                      .Name("Gender")
+                      .DataTextField("Text")
+                      .DataValueField("Value")
+                      .OptionLabel("--Select One--")
+                      .HtmlAttributes(new { style = "width:100%" })
+                      .BindTo(new List<SelectListItem>() {
+                                  new SelectListItem() {
+                                      Text = "Male",
+                                      Value = "1"
+                                  },
+                                  new SelectListItem() {
+                                      Text = "Female",
+                                      Value = "2"
+                                  },
+                              })
+        )
+        @Html.ValidationMessageFor(model => model.Gender, "", new { @class = "text-danger" })
+    </div>
+    <div class="editor-label"><label for="NationalId">National Id</label></div>
+    <div class="editor-field">
+        @Html.EditorFor(model => model.NationalId, new { htmlAttributes = new { @class = "form-control k-textbox" } })
+        @Html.ValidationMessageFor(model => model.NationalId, "", new { @class = "text-danger" })
+    </div>
+    <div class="editor-label"><label for="NationalIdBackImg">Back Image of NID</label></div>
+    <div class="editor-field">
+        <div class="col-md-9 col-sm-9 col-xs-9 divForPic" id="divForPic-1" style="padding-left:0px;">
+            <span id="UserImgClose-1">
+                <img src="/Content/Icon/modal_close.png" class="previewImgClose" id="UserImgClose-1" data-count="1" />
+            </span>
+            <div id="imgPreview-1" class="imgPreview">
+                @if (Model.NationalIdBackImg != null && Model.NationalIdBackImg != "")
+                {
+                    <img src="~/Images/UserPicture/NationalId/Original/@Model.NationalIdBackImg" />
+                }
+            </div>
+            <div id="imgUpload-1" class="image-uploader" style="display:none;">
+                <input type="file" name="files" id="file-1" class="inputfile inputfile-4" data-count="1" style="display:none;" />
+                <label for="file-1" id="lbl-1" class="lblForPics">
+                    <span style="font-size: 26px;padding-top:2em;display:block;" class="lbl_Span_plus">+</span>
+                    <span style="font-size: 15px;font-weight:bold;">Add Photos</span>
+                </label>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="col-md-5 col-sm-5">
+    <div class="editor-label"><label for="FirstName">First Name</label></div>
+    <div class="editor-field">
+        @Html.EditorFor(model => model.FirstName, new { htmlAttributes = new { @class = "form-control k-textbox" } })
+        @Html.ValidationMessageFor(model => model.FirstName, "", new { @class = "text-danger" })
+    </div>
+    <div class="editor-label"><label for="LastName">Last Name</label></div>
+    <div class="editor-field">
+        @Html.EditorFor(model => model.LastName, new { htmlAttributes = new { @class = "form-control k-textbox" } })
+        @Html.ValidationMessageFor(model => model.LastName, "", new { @class = "text-danger" })
+    </div>
+    <div class="editor-label"><label for="Religion">Religion</label></div>
+    <div class="editor-field">
+        @(Html.Kendo().DropDownListFor(model => model.Religion)
+                                      .Name("Religion")
+                                      .OptionLabel("--Select Religion--")
+                                      .BindTo(ViewBag.Religion)
+                                      .HtmlAttributes(new { style = "width:100%" })
+        )
+        @Html.ValidationMessageFor(model => model.Religion, "", new { @class = "text-danger" })
+    </div>
+    <div class="editor-label"><label for="Nationality">Nationality</label></div>
+    <div class="editor-field">
+        @(Html.Kendo().DropDownListFor(model => model.Nationality)
+                              .OptionLabel("--Select Country--")
+                              .BindTo(ViewBag.CountryId)
+                              .HtmlAttributes(new { style = "width:100%" })
+        )
+        @Html.ValidationMessageFor(model => model.Nationality, "", new { @class = "text-danger" })
+    </div>
+
+    <div class="editor-label"><label for="NationalIdFontImg">Front Image of NID</label></div>
+    <div class="editor-field">
+        <div class="col-md-9 col-sm-9 col-xs-9 divForPic" id="divForPic-2" style="padding-left:0px;">
+            <span id="UserImgClose-2">
+                <img src="/Content/Icon/modal_close.png" class="previewImgClose" id="UserImgClose-2" data-count="2" />
+            </span>
+            <div id="imgPreview-2" class="imgPreview">
+                @if (Model.NationalIdFontImg != null && Model.NationalIdFontImg != "")
+                {
+                    <img src="~/Images/UserPicture/NationalId/Original/@Model.NationalIdFontImg" />
+                }
+            </div>
+            <div id="imgUpload-2" class="image-uploader" style="display:none;">
+                <input type="file" name="files" id="file-2" class="inputfile inputfile-4" data-count="2" style="display:none;" />
+                <label for="file-2" id="lbl-2" class="lblForPics">
+                    <span style="font-size: 26px;padding-top:2em;display:block;" class="lbl_Span_plus">+</span>
+                    <span style="font-size: 15px;font-weight:bold;">Add Photos</span>
+                </label>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var allMainFile = [];
+    var allFileCount = [];
+    var id;
+    var UserId;
+    var PictureName;
+    $(document).ready(function () {
+        //$("#DateOfBirth").kendoDatePicker({ format: "dd-MMM-yyyy" });
+         if ('@Model.NationalIdFontImg' === null || '@Model.NationalIdFontImg' === '') {
+            $("#imgPreview-2").hide();
+            $("#UserImgClose-2").hide();
+            $("#imgUpload-2").show();
+         }
+        if ('@Model.NationalIdBackImg' === null || '@Model.NationalIdBackImg' === '') {
+            $("#imgPreview-1").hide();
+            $("#UserImgClose-1").hide();
+            $("#imgUpload-1").show();
+        }
+    });
+
+    $(".divForPic").on('change', '.inputfile-4', function (e) {
+        id = $(this).data("count");
+        var countFiles = $("#file-" + id)[0].files.length;
+        var imgPath = $("#file-" + id)[0].value;
+        var extn = imgPath.substring(imgPath.lastIndexOf('.') + 1).toLowerCase();
+        var image_holder = $("#imgPreview-" + id);
+        var files = e.target.files;
+        image_holder.empty();
+        if (extn == "gif" || extn == "png" || extn == "jpg" || extn == "jpeg") {
+            if (typeof (FileReader) != "undefined") {
+                allFileCount.push(id);
+                allMainFile.push(files[0]);
+                //for (var i = 0; i < countFiles; i++) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    $("<img />", { "src": e.target.result }).appendTo(image_holder);
+                }
+                $("#imgUpload-" + id).hide();
+                $("#UserImgClose-" + id).show();
+                image_holder.show();
+                $("#file-" + id).hide();
+                $("#lblfile-" + id).hide();
+                $("#PictureName").val($("#file-" + id)[0].files[0]);
+                reader.readAsDataURL($("#file-" + id)[0].files[0]);
+                $(".lbl_Span_plus").text("+");
+                //}
+                id++;
+            } else {
+                alert("This browser does not support FileReader.");
+            }
+        } else {
+            alert("Pls select only images");
+        }
+    });
+    $(".divForPic").on('click', '.previewImgClose', function (e) {
+        var id = $(this).data("count");
+        $("#imgPreview-" + id).hide();
+        $("#UserImgClose-" + id).hide();
+        $("#imgUpload-" + id).show();
+    });
+
+</script>
+

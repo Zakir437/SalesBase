@@ -1,0 +1,30 @@
+﻿<div class="panel-body">
+    <div class="row" style="margin:0; padding:0">
+        <div class="col-md-12" style="padding:0">
+            <div class="col-md-3" style="padding:0 5px 5px 0px">
+                @(Html.Kendo().DropDownList()
+                        .Name("ProductDropdown")
+                        .BindTo(ViewBag.ProductList as SelectList)
+                        .DataTextField("Text")
+                        .DataValueField("Value")
+                        .Filter("contains")
+                        .OptionLabel("Filter by Product")
+                        .HtmlAttributes(new { style = "width:100%" })
+                    .Events(e =>
+                    {
+                        e.Change("onChangeProduct");
+                    })
+                )
+            </div>
+        </div>
+    </div>
+    <div class="row" style="margin:0; padding:0 5px 5px 0px;">
+        <div id="divCouponOffertList"></div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#divCouponOffertList").append('<div class="loading_partial"></div>');
+        $("#divCouponOffertList").load('@Url.Action("OfferProductList", "PointOfSale")?isCouponOffer=true');
+    });
+</script>

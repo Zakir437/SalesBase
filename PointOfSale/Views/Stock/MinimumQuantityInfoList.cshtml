@@ -1,0 +1,74 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewProduct>
+@{
+    var count = 0;
+    PointOfSale.Models.PointOfSale_DBEntities db = new PointOfSale.Models.PointOfSale_DBEntities();
+}
+@if (Model.Any() == true)
+{
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Name</th>
+            <th>Minimum Quantity</th>
+            <th>Quantity</th>
+            <th>Status</th>
+        </tr>
+        @foreach (var list in Model)
+        {
+            count++;
+            <tr>
+                <td>@count. </td>
+                <td>
+                    @list.ProductName
+                </td>
+                <td>
+                    @if(list.MinimumQuantity > 0)
+                     {
+                        <span>@list.MinimumQuantity</span>
+                     }
+                    else
+                    {
+                        <span>N/A</span>
+                    }
+                </td>
+                @{
+                    var stock = db.Stocks.FirstOrDefault(a => a.ProductId == list.ProductId && a.DistributeId == list.DistributeId);
+                    if (stock != null)
+                    {
+                        var quantity = list.MinimumQuantity * ViewBag.MinimumQuantityPercent / 100; //Minimum quantity percent
+
+                        if (stock.Quantity <= list.MinimumQuantity || stock.Quantity <= 0) //For red
+                        {
+                            <td>@stock.Quantity</td>
+                            <td>Red</td>
+                        }
+                        else if (stock.Quantity <= list.MinimumQuantity + quantity) // For Yellow
+                        {
+                            <td>@stock.Quantity</td>
+                            <td>Yellow</td>
+                        }
+                        else
+                        {
+                            <td>@stock.Quantity</td>
+                            <td></td>
+                        }
+                    }
+                    else
+                    {
+                        <td>0</td>
+                        <td>Red</td>
+                    }
+                }
+            </tr>
+         }
+    </table>
+ }
+else
+{
+    <h3>There is no record to display</h3>
+}
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    })
+</script>

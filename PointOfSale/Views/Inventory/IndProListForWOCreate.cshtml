@@ -1,0 +1,142 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewIndentItem>
+@using System.Globalization
+@{
+    var count = 0;
+    var productList = Model.GroupBy(g => new { g.ProductName })
+                            .Select(s => new
+                            {
+                                s.FirstOrDefault().ProductName,
+                                s.FirstOrDefault().ProductId,
+                                s.FirstOrDefault().DistributeId,
+                                Indent = s
+                            }).ToList();
+    PointOfSale.Models.PointOfSale_DBEntities db = new PointOfSale.Models.PointOfSale_DBEntities();
+    int woRemainingQty = 0;
+    int worecv = 0;
+    int warehouseQty = 0;
+    int remainingQty = 0;
+    int mrrStock = 0;
+}
+@if (productList.Any() == true)
+{
+    <table class="table table-bordered table-responsive">
+        <tr>
+            <th>Product Name</th>
+            <th></th>
+        </tr>
+        @foreach (var list in productList)
+        {
+            <tr>
+                <td>@list.ProductName</td>
+                <td>
+                    <table class="table table-bordered" style="margin-bottom:0px;">
+                        <tr>
+                            <th>Indent</th>
+                            <th>Indent Order</th>
+                            <th>Indent Received</th>
+                            <th>Work Order</th>
+                            <th>WO Received</th>
+                            <th>Warehous Stock</th>
+                            <th>MRR Stock</th>
+                            <th style="width:150px;"></th>
+                        </tr>
+                        @foreach (var indList in list.Indent)
+                        {
+                            if (db.ViewWorkOrderItems.Any(a => a.Status == 1 && a.IndentId == indList.IndentId && a.ProductId == list.ProductId && a.DistributeId == list.DistributeId && a.WorkOrderStatus < 4))
+                            {
+                                woRemainingQty = db.ViewWorkOrderItems.Where(a => a.Status == 1 && a.IndentId == indList.IndentId && a.ProductId == list.ProductId && a.DistributeId == list.DistributeId && a.WorkOrderStatus < 4).Sum(s => s.RemainingQty);
+                                worecv = db.ViewWorkOrderItems.Where(a => a.Status == 1 && a.IndentId == indList.IndentId && a.ProductId == list.ProductId && a.DistributeId == list.DistributeId && a.WorkOrderStatus < 4).Sum(s => s.ReceiveQty);
+                            }
+                            else
+                            {
+                                woRemainingQty = 0;
+                                worecv = 0;
+                            }
+                            //warehouse qty
+                            if (db.StockWarehouses.Any(a =>a.IndentId == indList.IndentId && a.ProductId == list.ProductId && a.DistributeId == list.DistributeId && a.Quantity > 0))
+                            {
+                                warehouseQty = db.StockWarehouses.Where(a => a.IndentId == indList.IndentId && a.ProductId == list.ProductId && a.DistributeId == list.DistributeId && a.Quantity > 0).Sum(s => s.Quantity);
+                            }
+                            else
+                            {
+                                warehouseQty = 0;
+                            }
+                            //mrr stock
+                            if (db.IndMRRItems.Any(a => a.IndentId == a.IndentId && a.ProductId == list.ProductId && a.DistributeId == list.DistributeId && a.Status == 1))
+                            {
+                                mrrStock = db.IndMRRItems.Where(a => a.IndentId == a.IndentId && a.ProductId == list.ProductId && a.DistributeId == list.DistributeId && a.Status == 1).Sum(a => a.Quantity);
+                            }
+                            else
+                            {
+                                mrrStock = 0;
+                            }
+                            remainingQty = indList.RequestQuantity - (indList.ReceiveQuantity + woRemainingQty + warehouseQty + mrrStock);
+                            count++;
+                            <tr>
+                                <td>@indList.IndentVoucher</td>
+                                <td>@indList.RequestQuantity</td>
+                                <td>@indList.ReceiveQuantity</td>
+                                <td>@woRemainingQty</td>
+                                <td>@worecv</td>
+                                <td>@warehouseQty</td>
+                                <td>@mrrStock</td>
+                                <td>
+                                    @if (remainingQty > 0)
+                                     {
+                                        <button class="btn btn-success btnAddItem" id="btnAddItem_@count" data-id="@count" data-qty="@remainingQty" data-name="@list.ProductName" data-productid="@list.ProductId" data-distributeid="@list.DistributeId" data-indvoucher="@indList.IndentVoucher" data-indid="@indList.IndentId"><i class="fa fa-cart-plus"></i> Add to Cart</button>
+                                        <div id="divForOrder_@count" style="font-size: 16px; display: none;">
+                                            <span class="fa fa-minus cartItemMinus" data-id="@count" style="cursor:pointer;"></span>
+                                            <span class="qtyInList ProductInCart" id="qtyInList_@count" data-id="@count" style="display: inline-block;">1</span>
+                                            <input class="k-textbox txt_quantity" style="width: 100px; display: none;" data-max="@remainingQty" data-id="@count" data-val-required="Please enter amount" id="txt_quan_@count" name="txt_quan_@count" value="1" type="text">
+                                            <span class="fa fa-plus cartItemPlus" data-id="@count" data-qty="@remainingQty" style="cursor:pointer;"></span>
+                                        </div>
+                                     }
+                                </td>
+                            </tr>
+                         }
+                    </table>
+                </td>
+                @*@if (ViewBag.IsListForProc != true)
+                {
+                    <td>
+                        @if (remainingQty > 0)
+                        {
+                            <button class="btn btn-success btnAddItem" id="btnAddItem_@count" data-id="@count" data-qty="@remainingQty" data-name="@list.ProductName" data-productid="@list.ProductId" data-distributeid="@list.DistributeId"><i class="fa fa-cart-plus"></i> Add to Cart</button>
+                            <div id="divForOrder_@count" style="font-size: 16px; display: none;">
+                                <span class="fa fa-minus cartItemMinus" data-id="@count" style="cursor:pointer;"></span>
+                                <span class="qtyInList ProductInCart" id="qtyInList_@count" data-id="@count" style="display: inline-block;">1</span>
+                                <input class="k-textbox txt_quantity" style="width: 25% !important; display: none;" data-max="@remainingQty" data-id="@count" data-val-required="Please enter amount" id="txt_quan_@count" name="txt_quan_@count" value="1" type="text">
+                                <span class="fa fa-plus cartItemPlus" data-id="@count" data-qty="@remainingQty" style="cursor:pointer;"></span>
+                            </div>
+                        }
+                    </td>
+                }*@
+            </tr>
+        }
+    </table>
+}
+else
+{
+    <h3>There is no record to display</h3>
+}
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    })
+
+    $('.txt_quantity').keypress(function (event) {
+        if (event.which != 8 && isNaN(String.fromCharCode(event.which))) {
+            event.preventDefault(); //stop character from entering input
+        }
+    });
+
+</script>
+
+
+
+
+
+
+
+
+

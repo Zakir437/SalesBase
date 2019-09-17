@@ -1,0 +1,56 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewProduct>
+<table class="table table-bordered table-hover table-responsive table-condensed table-striped" id="tblProducts">
+    <tr>
+        <th></th>
+        <th>Product Name</th>
+        <th>Price</th>
+        <th width="120px;">Points</th>
+    </tr>
+    @if (Model.Any() == true)
+    {
+        foreach (var list in Model)
+        {
+            <tr id="product_@list.RowID" class="Products" data-id="@list.RowID"  data-points="@list.Points">
+                <td>
+                    <input type="checkbox" checked data-id="@list.RowID" class="check" id="check_@list.RowID"  />
+                </td>
+                <td>@list.ProductName</td>
+                <td>@list.Price</td>
+                <td>
+                    <div id="divPoints_@list.RowID">
+                        @if (list.Points > 0)
+                         {
+                            <span id="points_@list.RowID" class="Points" data-id="@list.RowID">@list.Points</span>
+                        }
+                        else
+                        {
+                            <span id="points_@list.RowID" class="Points" data-id="@list.RowID">0</span>
+                        }
+                    </div>
+                </td>
+            </tr>
+        }
+     }
+    else
+    {
+       <tr>
+           <td colspan="4">
+               <h4>There is no record to display</h4>
+               <script>
+                   $("#btnSave").prop('disabled', true);
+               </script>
+           </td>
+       </tr> 
+    }
+</table>
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    })
+</script>
+
+
+
+
+
+

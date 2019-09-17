@@ -1,0 +1,53 @@
+﻿@model IEnumerable<PointOfSale.Models.User>
+
+@{
+    var count = 0;
+}
+@if (Model.Count() > 0)
+{
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Name</th>
+            <th>Username</th>
+            <th>ID</th>
+            <th></th>
+        </tr>
+        @foreach (var list in Model)
+         {
+            count++;
+            <tr>
+                <td>@count . </td>
+                <td>@list.FirstName @list.LastName</td>
+                <td>@list.Username</td>
+                <td>@list.UserId</td>
+                <td>
+                    <button class="btn btnUserEdit" style="background-color:#1c488e; color:white;" data-id="@list.Id" data-toggle="tooltip" title="Edit User Information"><i class="fa fa-pencil-square-o"></i></button>
+                    @if (list.Status == true)
+                     {
+                        <button type="button" data-id="@list.Id" data-isactive="0" class="btn btn-danger inactivateUser" data-toggle="tooltip" title="Inactivate User">
+                            <i class="fa fa-stop" aria-hidden="true"></i>
+                        </button>
+                     }
+                    else
+                    {
+                        <button type="button" data-id="@list.Id" data-isactive="1" class="btn btn-success activateUser" data-toggle="tooltip" title="Activate User">
+                            <i class="fa fa-play" aria-hidden="true"></i>
+                        </button>
+                        <span data-id="@list.Id" style="cursor:pointer;" data-toggle="tooltip" title="Delete User" class="btn btn-danger btnUserDelete">
+                            <i class="fa fa-trash"></i>
+                        </span>
+                    }
+                </td>
+            </tr>
+         }
+    </table>
+}
+else
+{
+    <h4>There is no record to display</h4>
+}
+
+<script>
+    $('[data-toggle="tooltip"]').tooltip();
+</script>

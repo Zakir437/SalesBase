@@ -1,0 +1,47 @@
+﻿@model PointOfSale.Models.ViewOffer
+@using System.Globalization
+@using PointOfSale.Helpers
+@{
+    ViewBag.Title = "AddOfferItem";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="panel panel-default" style="margin-top:20px;">
+    <div class="panel-heading" style="padding-bottom:46px;">
+        <div class="pull-left">
+            <h4 class="uppercase">Add Offer Items</h4>
+        </div>
+    </div>
+    <div class="panel-body">
+        <dl class="dl-horizontal">
+            <dt>Offer Name</dt>
+            <dd>@Model.OfferName</dd>
+            <dt>Total Price</dt>
+            <dd>@Model.TotalPrice.ToString("C", new CultureInfo("bn-BD"))</dd>
+            <dt>Validity</dt>
+            <dd>@Convert.ToDateTime(Model.Validity).ToString("MMM dd,yyyy hh:mm:ss tt")</dd>
+            <dt>Created By</dt>
+            <dd>@Model.CreatedBy</dd>
+            <dt>Created Date</dt>
+            <dd>@Convert.ToDateTime(Model.CreatedDate).ToString("MMM dd,yyyy")</dd>
+            @if (Model.UpdatedDate != null)
+            {
+                <dt>Updated By</dt>
+                <dd>@Model.UpdatedBy</dd>
+                    <dt>Updated Date</dt>
+                    <dd>@Convert.ToDateTime(Model.UpdatedDate).ToString("MMM dd,yyyy")</dd>
+            }
+        </dl>
+    </div>
+    <hr style="margin:0;" />
+    <div class="panel-body">
+
+        <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+            <tr>
+
+            </tr>
+        </table>
+    </div>
+</div>
+<script>
+
+</script>

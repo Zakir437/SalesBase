@@ -1,0 +1,20 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin:2%;">
+    <div id="divConditionHistoryList"></div>
+    <div class="k-edit-buttons k-state-default">
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnConditionHistoryCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#divConditionHistoryList").append('<div class="tiny_loading"></div>');
+        $("#divConditionHistoryList").load('@Url.Action("ConditionHistoryList", "Sales")?id=' + '@ViewBag.Id');
+    });
+    $("#btnConditionHistoryCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+</script>
+
+
+
+
+

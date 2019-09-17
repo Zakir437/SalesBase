@@ -1,0 +1,155 @@
+﻿<div class="row" style="margin:0">
+    <div class="col-md-3">
+        <div class="pull-right">
+            @Html.CheckBox("chkAverage", new { htmlattributes = new { @class = "k-textbox" } }) <label for="chkAverage">Multiple</label>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div id="divPointsValue">
+            <label>Points</label>
+            <input type="number" min="0" class="" style="max-width:30%" id="pointTextBox" onchange="changeHandler(this)" onclick="setPoints(this)"  onkeyup="setPoints(this)" value="0" />
+        </div>
+     </div>
+</div>
+<div class="row" style="margin:0; margin-top:5px;">
+    <div class="col-md-12">
+        <div id="divProductList">
+        </div>
+        <div class="text-right">
+                <button class="btn btn-default" id="btnSave"><span class="k-icon k-update"></span> Save</button>
+                <button class="btn btn-default" id="btnRefresh"><span class="k-icon k-i-refresh"></span> Refresh</button>
+                <a class="btn btn-default btnBox" href="/Offer/OfferCreate">
+                    <span class="k-icon k-cancel"></span> Cancel
+                </a>
+         </div>
+    </div>
+</div>
+<script>
+    var points = 0;
+
+    $(document).ready(function () {
+        $("#chkAverage").prop('checked', true);
+        $("#divProductList").empty();
+        $("#divProductList").append('<div class="loading_partial"></div>');
+        $("#divProductList").load('@Url.Action("SelectedProList", "PointOfSale")?ids=' + '@ViewBag.Ids');
+    });
+
+    $("#btnRefresh").click(function () {
+        $("#chkAverage").prop('checked', true);
+        $("#divPointsValue").show();
+        $("#pointTextBox").val(0);
+
+        $("#divProductList").empty();
+        $("#divProductList").append('<div class="loading_partial"></div>');
+        $("#divProductList").load('@Url.Action("SelectedProList", "PointOfSale")?ids=' + '@ViewBag.Ids');
+    });
+
+    //check/uncheck single
+    $("#divProductList").on('click', '.check', function () {
+        id = $(this).data("id");
+        if ($("#check_" + id).is(":checked")) {
+            if (selectedIds.indexOf(id) == -1) {
+                selectedIds.push(id);
+            }
+        }
+        else {
+            selectedIds = selectedIds.filter(item => item !== id);
+        }
+        if ($("#divProductList .check:checked").length > 0) {
+            $("#btnSave").prop('disabled', false);
+        }
+        else {
+            $("#btnSave").prop('disabled', true);
+        }
+    });
+
+    $("#chkAverage").click(function () {
+        $("#pointTextBox").val(0);
+        if ($(this).is(":checked")) {
+            $("#divPointsValue").show();
+            $('#chkAverage').val(true);
+            $(".Products").each(function () {
+                id = parseInt($(this).data("id"));
+                points = parseInt($(this).data("points"));
+                if (points > 0)
+                {
+
+                }
+                else {
+                    points = 0;
+                }
+                $("#divPoints_" + id).empty();
+                $("#divPoints_" + id).append('<span id="points_' + id + '" class="Points" data-id="' + id + '">' + points + '</span>');
+            });
+        }
+        else {
+            $('#chkAverage').val(false);
+            $("#divPointsValue").hide();
+            $(".Products").each(function () {
+                id = parseInt($(this).data("id"));
+                points = parseInt($("#points_" + id).text());
+                $("#divPoints_" + id).empty();
+                $("#divPoints_" + id).append('<input type="number" min="0" id="points_' + id + '" onchange="changeHandler(this)" name="points_' + id + '" class="Points" data-id="' + id + '"  value="' + points + '" />');
+            });
+        }
+    });
+
+    //points input handler
+    function changeHandler(val) {
+        if (Number(val.value) <= 0) {
+            val.value = 0;
+        }
+    }
+    //set points
+    function setPoints(val)
+    {
+        if (val.value <= 0)
+        {
+            points = 0
+        }
+        else {
+            points = val.value;
+        }
+        $(".Products").each(function () {
+            id = parseInt($(this).data("id"));
+            if ($("#check_" + id).is(":checked"))
+            {
+                $("#points_" + id).empty();
+                $("#points_" + id).append(points);
+            }
+        });
+    }
+
+    $("#btnSave").click(function () {
+        var products = [];
+        $('.Products').each(function () {
+            id = parseInt($(this).data("id"));
+            if ($("#check_" + id).is(":checked")) {
+                if ($("#chkAverage").is(":checked"))
+                {
+                    points = parseInt($("#points_" + id).text());
+                }
+                else {
+                    points = parseInt($("#points_" + id).val());
+                }
+                products.push({ Id: id, Points: points });
+            }
+        });
+        $.ajax({
+            url: '/Offer/PointsSave',
+            type: "POST",
+            data: JSON.stringify({ products: products, CreatedBy : userId }),
+            contentType: 'application/json',
+            success: function (data) {
+                if (data == "success") {
+                    location.href = "/Offer/Points";
+                }
+                else {
+                    alert("Save error...");
+                }
+            }
+        });
+    });
+
+
+</script>

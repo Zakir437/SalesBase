@@ -1,0 +1,52 @@
+﻿@model IEnumerable<PointOfSale.Models.Brand>
+@{
+    var count = 0;
+}
+@if (Model.Any())
+{
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Name</th>
+            <th></th>
+        </tr>
+        @foreach (var list in Model)
+        {
+            count++;
+            <tr>
+                <td>@count. </td>
+                <td>@list.BrandName</td>
+                <td>
+                    <button class="btn btnBrandEdit" style="background-color:#1c488e; color:white;" data-id="@list.BrandId" data-toggle="tooltip" title="Edit Brand Information"><i class="fa fa-pencil-square-o"></i></button>
+                    @if (list.Status == true)
+                    {
+                        <button type="button" data-id="@list.BrandId" data-isactive="0" class="btn btn-danger inactivateBrandType" data-toggle="tooltip" title="Inactivate Brand Status Type">
+                            <i class="fa fa-stop" aria-hidden="true"></i>
+                        </button>
+                     }
+                    else
+                    {
+                        <button type="button" data-id="@list.BrandId" data-isactive="1" class="btn btn-success activateBrandType" data-toggle="tooltip" title="Activate Brand Status Type">
+                            <i class="fa fa-play" aria-hidden="true"></i>
+                        </button>
+                    }
+                    @if (@list.Status == false)
+                     {
+                        <span data-id="@list.BrandId" style="cursor:pointer;" data-toggle="tooltip" title="Delete Brand" class="btn btn-danger btnBrandDelete">
+                            <i class="fa fa-trash"></i>
+                        </span>
+                     }
+                </td>
+            </tr>
+        }
+    </table>
+}
+else
+{
+    <h4>There is no record to display</h4>
+}
+
+
+<script>
+    $('[data-toggle="tooltip"]').tooltip();
+</script>

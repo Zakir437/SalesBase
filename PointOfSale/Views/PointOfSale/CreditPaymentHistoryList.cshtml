@@ -1,0 +1,49 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewPayment>
+@using System.Globalization
+@{
+    var count = 0;
+}
+@if (Model.Any())
+{
+    <table class="table table-bordered">
+        <tr>
+            <th>SL.</th>
+            <th>Voucher</th>
+            <th>Payment Type</th>
+            <th>Payment Body</th>
+            <th>Amount</th>
+            <th>Transaction No</th>
+        </tr>
+        @foreach (var list in Model)
+         {
+            count++;
+            <tr>
+                <td>@count.</td>
+                <td>@list.CreditVoucherNo</td>
+                <td>@list.PaymentTypeName</td>
+                <td>
+                    @list.PaymentBodyName @if (list.SerialNumber != null)
+                    { <span>(@list.SerialNumber)</span> }
+                </td>
+                <td>
+                    @list.Amount.ToString("C", new CultureInfo("bn-BD")) @if (list.IsCreditPayment == true)
+                    { <span>(Credit Payment)</span> }
+                </td>
+                <td>@list.TransactionNo</td>
+            </tr>
+         }
+        <tr style="font-weight:bold">
+            <td></td>
+            <td colspan="3" style="text-align:center">Total</td>
+            <td>@Model.Sum(s => s.Amount).ToString("C", new CultureInfo("bn-BD"))</td>
+            <td></td>
+        </tr>
+    </table>
+ }
+else
+{
+    <h4>There is no record to display</h4>
+}
+<script>
+    $('[data-toggle="tooltip"]').tooltip();
+</script>

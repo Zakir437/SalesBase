@@ -1,0 +1,101 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewWasteType>
+@{
+    var count = 0;
+}
+@if (Model.Any() == true)
+{
+    <table class="table table-bordered table-responsive">
+        <tr>
+            <th>SL.</th>
+            <th>Name</th>
+            <th>Status</th>
+            <th>Type</th>
+            <th>CreatedBy</th>
+            <th>Created Date</th>
+            <th>UpdatedBy</th>
+            <th>Updated Date</th>
+            <th></th>
+        </tr>
+        @foreach (var list in Model)
+        {
+            count++;
+            <tr>
+                <td>@count. </td>
+                <td>@list.TypeName</td>
+                <td>
+                    @if(list.Status == true)
+                    {
+                        <span>Active</span>
+                    }
+                    else if(list.Status == false)
+                    {
+                        <span>Inactive</span>
+                    }
+                    else
+                    {
+                        <span>Delete</span>
+                    }
+                </td>
+                <td>
+                    @if(list.Type == 1)
+                    {
+                        <span>Store/Warehouse</span>
+                    }
+                    else
+                    {
+                        <span>After Sales</span>
+                    }
+                </td>
+                <td>@list.CreatedBy</td>
+                <td>@Convert.ToDateTime(list.CreatedDate).ToString("MMM dd,yyyy")</td>
+                <td>@list.UpdatedBy</td>
+                <td>
+                    @if (list.UpdatedDate != null)
+                    {
+                        @Convert.ToDateTime(list.UpdatedDate).ToString("MMM dd,yyyy")
+                    }
+                    else
+                    {
+                        <span>Not yet updated</span>
+                    }
+                </td>
+                <td>
+                    <button class="btn btn-primary btnWTypeEdit" data-id="@list.Id" data-toggle="tooltip" title="Edit waste type Information"><i class="fa fa-pencil-square-o"></i></button>
+                    @if (list.Status == true)
+                     {
+                        <button type="button" data-id="@list.Id" data-isactive="0" class="btn btn-danger inactivateWType" data-toggle="tooltip" title="Inactivate waste type">
+                            <i class="fa fa-stop" aria-hidden="true"></i>
+                        </button>
+                     }
+                    else
+                    {
+                        <button type="button" data-id="@list.Id" data-isactive="1" class="btn btn-success activateWType" data-toggle="tooltip" title="Activate waste type">
+                            <i class="fa fa-play" aria-hidden="true"></i>
+                        </button>
+                    }
+                    @if (list.Status == false)
+                    {
+                        <span data-id="@list.Id" style="cursor:pointer;" data-toggle="tooltip" title="Delete Waste Type" class="btn btn-danger btnWasteTypeDelete">
+                            <i class="fa fa-trash"></i>
+                        </span>
+                    }
+                </td>
+            </tr>
+        }
+    </table>
+}
+else
+{
+    <h4>There is no record to display</h4>
+}
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    })
+</script>
+
+
+
+
+
+

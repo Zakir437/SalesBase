@@ -1,0 +1,45 @@
+﻿<ul id="NumpadFunction">
+    <li class="btn-key-header" data-value="1">Quantity</li>
+    <li class="btn-key-header" id="btnDiscount">Discount</li>
+    <li class="btn-key-header">Refund</li>
+    @if (ViewBag.IsDeliveryChargeAuto == 1)
+     {
+        <li class="btn-key-header">D.Charge(A)</li>
+     }
+    else
+    {
+        <li class="btn-key-header" id="btnDeliveryCharge">D.Charge(M)</li>
+    }
+    <li class="btn-key-header">Customer</li>
+    <li class="btn-key-header" data-value="6">Price</li>
+    <li class="btn-key-header" style="width:302px;" id="">Lock out</li>
+</ul>
+
+<ul id="keyboard" style="height:340px; width:311px; font: 71%/1.5 Verdana; padding-left:63px;">
+    @*<li class="switch" id="btnCash">Cash</li>*@
+    <li class="letter">1</li>
+    <li class="letter">2</li>
+    <li class="letter">3</li>
+   @* <li class="switch" id="btnCard">Card</li>*@
+    <li class="letter clearl">4</li>
+    <li class="letter">5</li>
+    <li class="letter">6</li>
+    @*<li class="switch">Multi</li>*@
+    <li class="letter clearl">7</li>
+    <li class="letter ">8</li>
+    <li class="letter">9</li>
+    <li class="pay hvr-icon-forward" id="btnPlaceOrder">Checkout</li>
+    <li class="letter clearl">0</li>
+</ul>
+<script>
+    $(document).ready(function () {
+        $('ul#NumpadFunction li').click(function (e) {
+            $('ul#NumpadFunction li').css('background', '');
+            $(this).css('background', 'lightgray');
+            numpadFunction = $(this).data("value");
+            totalNumber = [];
+        });
+    });
+</script>
+
+       

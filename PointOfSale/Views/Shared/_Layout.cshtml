@@ -1,0 +1,126 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title</title>
+    @Styles.Render("~/Content/kendo")
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+    <script src="~/Scripts/jquery-2.2.4.min.js"></script>
+    <link href="~/Content/font-awesome.min.css" rel="stylesheet" />
+    <link href="~/Content/Loading/loading.css" rel="stylesheet" />
+    <link href="~/Content/loading_partial.css" rel="stylesheet" />
+    <link href="~/Content/bootstrap-toggle-master/css/bootstrap-toggle.min.css" rel="stylesheet" />
+    <script src="~/Scripts/moment.min.js"></script>
+    <link href="~/Content/Date Range Picker/daterangepicker.css" rel="stylesheet" />
+    <link href="~/Scripts/intl-tel-input-master/build/css/intlTelInput.css" rel="stylesheet" />
+    <script src="~/Content/Date Range Picker/daterangepicker.js"></script>
+
+    <link href="~/Content/SmartWizard-master/dist/css/smart_wizard.min.css" rel="stylesheet" />
+    <link href="~/Content/SmartWizard-master/dist/css/smart_wizard_theme_arrows.min.css" rel="stylesheet" />
+
+    <style>
+        .uppercase {
+            text-transform: uppercase
+        }
+        .selected {
+            border: 1px solid #483c3c;
+        }
+        .btnList {
+            margin-bottom: 5px;
+        }
+        input[type="checkbox"] {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="loading">
+    </div>
+    <div class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                @Html.ActionLink("Dashboard", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
+            </div>
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    @if (HttpContext.Current.Request.Cookies["CookieUserInfo"] != null)
+                     {
+                        <li>@Html.ActionLink("POS", "Index", "PointOfSale")</li>
+                        <li>@Html.ActionLink("Inventory", "StockList", "Stock")</li>
+                        <li>@Html.ActionLink("Accounts", "PaymentBody", "Configuration")</li>
+                        <li>@Html.ActionLink("Report", "Report", "PointOfSale")</li>
+                        <li>@Html.ActionLink("CRM", "Customer", "Configuration")</li>
+                        <li>@Html.ActionLink("HR", "AllUserLists", "HumanResource")</li>
+                        <li>@Html.ActionLink("Offer", "Offer", "PointOfSale")</li>
+                        <li>@Html.ActionLink("After Sale Service", "AfterSaleService", "Stock")</li>
+                        <li>@Html.ActionLink("Configuration", "MiscFunction", "Configuration")</li>
+                     }
+                </ul>
+                @Html.Partial("_PartialLogin")
+            </div>
+        </div>
+    </div>
+    <div class="container body-content">
+        @RenderBody()
+        <hr />
+        <footer>
+            <p>&copy; @DateTime.Now.Year - SpicyBinary</p>
+        </footer>
+    </div>
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/kendo")
+    @Scripts.Render("~/bundles/bootstrap")
+    @RenderSection("scripts", required: false)
+    <script src="~/Content/bootstrap-toggle-master/js/bootstrap-toggle.min.js"></script>
+    <script src="~/Scripts/intl-tel-input-master/build/js/intlTelInput.min.js"></script>
+    <script src="~/Content/SmartWizard-master/dist/js/jquery.smartWizard.min.js"></script>
+    @*<script src="~/Scripts/jquery-ui-1.12.1.min.js"></script>*@
+
+    <div id="divUserWindow"></div>
+    <script>
+        $(window).load(function () {
+            $('.loading').hide(); // hide message when finished with load
+        });
+        $("#signUp").click(function () {
+            var userId = $(this).data("id");
+            $("#divUserWindow").empty();
+            $("#divUserWindow").kendoWindow({
+                actions: ["Close"],
+                draggable: false,
+                modal: true,
+                visible: false,
+                width: "40%",
+                height: "450px",
+                title: 'User',
+            });
+            var UserWindow = $("#divUserWindow").data("kendoWindow");
+            UserWindow.refresh('/Configuration/CreateUser?id=' + userId);
+            UserWindow.center().open();
+        });
+        function onWindowClose() {
+            document.documentElement.style.overflow = 'auto';
+            document.body.scroll = "yes";
+        }
+        function getDataEncrypted(text) {
+            var encryptedData;
+            $.ajax({
+                method: 'GET',
+                url: "/Home/GetEncryptedData?text=" + text,
+                async: false,
+                success: function (res) {
+                    encryptedData = res;
+                }
+            });
+            return encryptedData;
+        }
+    </script>
+</body>
+</html>

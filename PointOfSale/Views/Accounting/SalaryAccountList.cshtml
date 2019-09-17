@@ -1,0 +1,55 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewAssignedMethodName>
+@using PointOfSale.Helpers
+@{
+    var count = 0;
+}
+@if (Model.Count() > 0)
+{
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Name</th>
+            <th>Payment Type</th>
+            <th>In/Out</th>
+            <th>Balance</th>
+            <th>Description</th>
+        </tr>
+        @foreach (var list in Model)
+        {
+            count++;
+            <tr>
+                <td>@count. </td>
+                <td>
+                    <a data-toggle="tooltip" title="Account Details" href="@Html.EncodedParam("SalaryAccountDetails", "Accounting", new { accId = list.AccountId}, null)">@list.AccountName @if (list.SerialNumber != null)
+                    { <span>(@list.SerialNumber)</span> }</a>
+                </td>
+                <td>@list.PaymentTypeName</td>
+                @if (list.InOut == 1)
+                {
+                    <td>Receive</td>
+                }
+                else if (list.InOut == 2)
+                {
+                    <td>Release</td>
+                }
+                else
+                {
+                    <td>Both</td>
+                }
+                <td>Tk. @list.Balance</td>
+                <td>@list.Description</td>
+            </tr>
+        }
+    </table>
+}
+else
+{
+    <h4>There is no record to display</h4>
+}
+
+<script>
+    $('[data-toggle="tooltip"]').tooltip();
+</script>
+
+
+

@@ -1,0 +1,456 @@
+﻿@{
+    ViewBag.Title = "PurchaseOrderCreate";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+}
+<style>
+    #divProductWindow input {
+        max-width: 100%;
+    }
+
+    textarea {
+        max-width: 100%
+    }
+
+    .image-uploader {
+        width: 67%;
+        height: 150px;
+        display: inline;
+        text-align: center;
+    }
+
+    .imgPreview {
+        background-color: #e8e4d0;
+        /*margin-bottom: 20px;*/
+        position: relative;
+        width: 67%;
+        height: 150px;
+        border: 1px solid #808080;
+        display: none;
+        overflow: hidden;
+    }
+
+        .imgPreview img {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            margin: auto;
+            display: block;
+            max-width: 100%;
+            height: auto;
+        }
+
+    .lblForPics {
+        text-align: center;
+        max-width: 100%;
+        width: 67%;
+        height: 150px;
+        vertical-align: middle;
+        border: 1px dashed blue;
+    }
+
+        .lblForPics span {
+            color: #083bb5 !important;
+        }
+
+    #divForPic .span4 {
+        padding-top: 10px !important;
+        padding-bottom: 10px !important;
+    }
+
+    .previewImgClose {
+        position: relative;
+        width: 36px;
+        height: 36px;
+        cursor: pointer;
+        float: right;
+        right: 8.2em;
+        bottom: -1.8em;
+        z-index: 9999;
+        margin-top: -3em;
+    }
+
+    input[type=number] {
+        width: 100%;
+        max-width: 100%;
+        padding-left: 8px;
+    }
+
+    .k-input {
+        height: 26px !important;
+    }
+</style>
+<section class="content" id="divForm">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4 class="uppercase">Purchase Order Create</h4>
+            </div>
+        </div>
+        <div class="panel-body">
+            <div class="row" style="margin:5px 0px;">
+                <div style="width:25%; max-width:50%">
+                    @(Html.Kendo().DateTimePicker()
+                            .Name("DeliveryDate")
+                            .Format("MMMM dd yyyy hh:mm tt")
+                            .Min(DateTime.Now)
+                            .HtmlAttributes(new { style = "width: 100%; max-width:100%" })
+                    )
+                    @Html.ValidationMessage("DeliveryDate", "", new { @class = "text-Danger" })
+                </div>
+            </div>
+            <div class="row" style=" margin-bottom:5px;">
+                <div class="col-md-10" style="padding-right:0px;">
+                    <div style="width:100%!important; padding-right:3px;" class="pull-left">
+                        @(Html.Kendo().DropDownList()
+                            .Name("Customer")
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .Filter("contains")
+                            .OptionLabel("--Select customer--")
+                            .HtmlAttributes(new { style = "width:100%", required = "required" })
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("GetCustomerList", "Sales");
+                                })
+                                .ServerFiltering(false);
+                            })
+                        //.Events(e =>
+                        //{
+                        //    e.Change("onChangeCustomer");
+                        //})
+                        )
+                        <span class="field-validation-valid text-danger" data-valmsg-for="Customer" data-valmsg-replace="true"></span>
+                    </div>
+                </div>
+                <div class="col-md-2 pull-right">
+                    <button style="width:100%" class="btn btn-primary" id="btnCustomerCreateWin">Add Customer</button>
+                </div>
+            </div>
+            <div class="row" style="margin-top:5px;">
+                <div class="col-md-10" style="padding-right:0px;">
+                    <div style="width:100%!important;">
+                        @(Html.Kendo().AutoComplete()
+                            .Name("productsAutoComplete")
+                            .Placeholder("Type product name...")
+                            .HtmlAttributes(new { style = "width:100%; max-width:100%" })
+                            .MinLength(3)
+                            .DataTextField("Text")
+                            .Filter("contains")
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("GetProductList", "Sales")
+                                       .Data("additionInfo");
+                                })
+                               .ServerFiltering(true);
+                            })
+                            .Events(e =>
+                            {
+                                e.Change("onChangeText").Select("onSelect");
+                            })
+                        )
+                        <span class="k-icon k-i-search" style="margin-top:-25px;float:right;margin-right:10px; position:relative">&nbsp;</span>
+                    </div>
+                </div>
+                <div class="col-md-2 pull-right">
+                    <button style=" width:100%" class="btn btn-primary" id="btnProductCreateWin">Add Product</button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div style="width:100%!important; margin-top:10px;">
+                        <table class="table table-bordered table-responsive" id="purchasetbl">
+                            <tr>
+                                <th>Product Name</th>
+                                <th>Quantity</th>
+                                <th>Cost(Peritem)</th>
+                                <th>Sub Total Cost</th>
+                                <th></th>
+                            </tr>
+                            <tr id="emptyRow">
+                                <td colspan="5">
+                                    <h3>Please select product</h3>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="pull-right" style="font-size:18px;">
+                        <label>Invoice Amount : </label> <span id="invoiceAmount">0.00</span>Tk<br />
+                        <label>Tax : @ViewBag.TaxPercent%</label>(<span id="taxAmount">0.00</span>Tk)<br />
+                        <label>Total Cost : </label> <span id="totalCost">0.00</span>Tk
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <label for="comment">Comment:</label>
+                    <textarea class="form-control" rows="3" cols="30" id="comment"></textarea>
+                </div>
+                <div class="col-md-12">
+                    <p>
+                        <div class="pull-right">
+                            <button class="btn btn-success" id="btnPurchaseOrderSave"><i class="fa fa-save"></i> Save</button>
+                            <a class="btn btn-info" href="/Sales/PurchaseOrderCreate"><i class="fa fa-refresh"></i> Refresh</a>
+                            <a class="btn btn-warning" href="/Sales/PurchaseOrder"><i class="fa fa-times"></i> Cancel</a>
+                        </div>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<div id="divProductWindow"></div>
+<div id="divCustomerWindow"></div>
+<div id="divImportPayWin"></div>
+<script>
+    var selectedId = "";
+    var CustomerId = 0;
+    var formValidation;
+    var invoiceAmount = 0;
+    var quantity = 0;
+    var rowId = 0;
+    var perItemCost = 0;
+    var taxPercent = 0, taxAmount = 0;
+
+    taxPercent = parseInt('@ViewBag.TaxPercent');
+    $(document).ready(function () {
+        $("#liForSalesMenu").addClass('active');
+        $("#liForPurchaseOrder").addClass('active');
+        formValidation = $("#divForm").kendoValidator({
+            rules: {
+                datepicker: function (input) {
+                    if (input.is("[data-role=datetimepicker]")) {
+                        return input.data("kendoDateTimePicker").value();
+                    } else {
+                        return true;
+                    }
+                }
+            },
+            messages: {
+                datepicker: "Please enter valid delivery date!"
+            }
+        }).data("kendoValidator");
+        $("#btnPurchaseOrderSave").prop('disabled', true);
+    });
+
+    //***********************Product Create *****************************
+    $("#btnProductCreateWin").click(function () {
+        $("#divProductWindow").empty();
+        $("#divCustomerWindow").empty();
+        $("#divProductWindow").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: "767px",
+            height: "537px",
+            title: 'Product',
+            resizable: false,
+            close: onWindowClose
+        });
+        var productWindow = $("#divProductWindow").data("kendoWindow");
+        productWindow.refresh('@Url.Action("ProductCreate", "Sales")');
+        productWindow.maximize().center().open();
+
+        document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+        document.body.scroll = "no";
+    });
+
+    //*****************Customer Create*****************************
+    $("#btnCustomerCreateWin").click(function () {
+        $("#divCustomerWindow").empty();
+        $("#divProductWindow").empty();
+        $("#divCustomerWindow").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: "50%",
+            height: "45%",
+            title: 'Customer',
+            close: onWindowClose
+        });
+        var CustomerWin = $("#divCustomerWindow").data("kendoWindow");
+        CustomerWin.refresh('/Sales/CustomerCreate');
+        CustomerWin.center().open();
+        document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+        document.body.scroll = "no";
+    });
+
+    //*******************Product Autocomplete**************
+    function additionInfo() {
+        var ids = [];
+        $(".purchaseItems").each(function () {
+            ids.push($(this).data("rowid"));
+        });
+        return {
+            ids: ids.join(","),
+            text: $("#productsAutoComplete").val()
+        }
+    }
+    function onChangeText()
+    {
+        $("#productsAutoComplete").data("kendoAutoComplete").value("");
+    }
+    function onSelect(e)
+    {
+        rowId = this.dataItem(e.item.index()).Value;
+        $.ajax({
+                url: '@Url.Action("GetProductByRowId", "Sales")',
+                type: 'Get',
+                data: { rowId: rowId },
+                success: function (data)
+                {
+                    if (data == "error")
+                    {
+                        alert("Not Found...");
+                    }
+                    else
+                    {
+                        $("#btnPurchaseOrderSave").prop('disabled', false);
+                        if ($("#emptyRow").length == 1)
+                        {
+                            $("#emptyRow").hide();
+                        }
+                        if ($("#purchase_" + rowId).length == 1) {
+                            alert("This product already add to list")
+                        }
+                        else
+                        {
+                            $("#purchasetbl").append('<tr id="purchase_' + rowId + '" class="purchaseItems" data-rowid="' + rowId + '" data-productid="' + data.ProductId + '" data-distributeid="' + data.DistributeId + '" data-productname="' + data.ProductName + '">' +
+                                '<td>' + data.ProductName + '</td>' +
+                                '<td>' +
+                                '<input type="number" min="1" class="quantity k-input" onclick="setSubtotalCost(' + rowId + ')" onkeyup="setSubtotalCost(' + rowId + ')" id="quantity_' + rowId + '" name="quantity_' + rowId + '" data-id="' + rowId + '" required validationMessage="*"/>' +
+                                '<span class="field-validation-valid text-danger" data-valmsg-for="quantity_' + rowId + '" data-valmsg-replace="true"></span>' +
+                                '</td>' +
+                                '<td>' +
+                                '<input type="number" min="0" class="k-input" placeholder="'+ data.Price +' (SP)" onclick="setSubtotalCost(' + rowId + ')"  onkeyup="setSubtotalCost(' + rowId + ')"  id="perItemcost_' + rowId + '" name="perItemcost_' + rowId + '" data-id="' + rowId + '" required validationMessage="*" />' +
+                                '<span class="field-validation-valid text-danger" data-valmsg-for="perItemcost_' + rowId + '" data-valmsg-replace="true"></span>' +
+                                '</td>' +
+                                '<td>' +
+                                '<input type="number" min="0" class="cost k-input" onclick="totalCostFunc(' + rowId + ')" onkeyup="totalCostFunc(' + rowId + ')"  id="cost_' + rowId + '" name="cost_' + rowId + '" data-id="' + rowId + '" required validationMessage="*" />' +
+                                '<span class="field-validation-valid text-danger" data-valmsg-for="cost_' + rowId + '" data-valmsg-replace="true"></span>' +
+                                '</td>' +
+                                '<td>' +
+                                '<span id="btnCancelProduct" data-id="' + rowId + '"><i class="fa fa-times" aria-hidden="true" style="font-size:24px;cursor:pointer"></i></span>' +
+                                '</td>' +
+                                '</tr > ');
+                        }
+                    }
+                },
+                error: function() {
+                    alert("Not Found...");
+                    $("#productsAutoComplete").data("kendoAutoComplete").value("");
+                }
+        });
+    }
+    // Product search additional info
+
+    // supplier search additional info
+    //function additionalInfoForSupplier() {
+    //    return {
+    //        text: $.trim($("#Supplier").data("kendoMultiSelect").input.val())
+    //    }
+    //}
+
+    //******************cancel product from import list
+    $("#purchasetbl").on('click', '#btnCancelProduct', function () {
+        rowId = $(this).data("id");
+        $("#purchase_" + rowId).remove();
+        totalCostFunc();
+        if ($("#purchasetbl tr").length == 2) {
+            invoiceAmount = 0;
+            $("#btnPurchaseOrderSave").prop('disabled', true);
+            $("#emptyRow").show();
+            $("#invoiceAmount").empty();
+            $("#invoiceAmount").append(invoiceAmount.toFixed(2));
+        }
+    });
+    //set sub total cost by input per item cost
+    function setSubtotalCost(id) {
+        invoiceAmount = 0;
+        quantity = 0;
+        quantity = $("#quantity_" + id).val();
+        invoiceAmount = quantity * $("#perItemcost_" + id).val();
+        $("#cost_" + id).val(invoiceAmount.toFixed(2));
+        totalCostFunc();
+    }
+    //***********calculate total cost*****************
+    function totalCostFunc(id) {
+        invoiceAmount = 0;
+        taxAmount = 0;
+       
+        if (id > 0) {
+            quantity = 0;
+            quantity = $("#quantity_" + id).val();
+            perItemCost = $("#cost_" + id).val() / quantity;
+            $("#perItemcost_" + id).val(perItemCost.toFixed(2));
+        }
+        $(".cost").each(function () {
+            if ($(this).val() != "") {
+                invoiceAmount = invoiceAmount + parseFloat($(this).val());
+            }
+        });
+        $("#invoiceAmount").empty();
+        $("#invoiceAmount").append(invoiceAmount.toFixed(2));
+
+        //calculate tax amount
+        taxAmount = invoiceAmount * (taxPercent / 100);
+        invoiceAmount = invoiceAmount + taxAmount;
+
+        $("#totalCost").empty();
+        $("#totalCost").append(invoiceAmount.toFixed(2));
+
+        $("#taxAmount").empty();
+        $("#taxAmount").append(taxAmount.toFixed(2));
+    }
+
+    $("#btnPurchaseOrderSave").click(function () {
+        if (formValidation.validate())
+        {
+            $(this).prop('disabled', true);
+
+            var purchaseData = [];
+            $(".purchaseItems").each(function () {
+                rowId = parseInt($(this).data("rowid"));
+                purchaseData.push({
+                    ProductId: parseInt($(this).data("productid")),
+                    DistributeId: $(this).data("distributeid"),
+                    ProductName: $(this).data("productname"),
+                    Quantity: $("#quantity_" + rowId).val(),
+                    PeritemCost: $("#perItemcost_" + rowId).val(),
+                    Cost: $("#cost_" + rowId).val()
+                });
+            });
+
+            $.ajax({
+                url: '@Url.Action("PurchaseOrderSave","Sales")',
+                type: 'POST',
+                data: JSON.stringify({
+                    UserId: userId,
+                    ImportData: purchaseData,
+                    Comments: $("#comment").val(),
+                    CustomerId: $("#Customer").val(),
+                    DeliveryDate: new Date($("#DeliveryDate").val()).toISOString(),
+                    TaxPercent: taxPercent,
+                    TotalCost: parseFloat($("#totalCost").text()),
+                    TaxAmount: parseFloat($("#taxAmount").text())}),
+                contentType: 'application/json',
+                success: function (data) {
+                    if (data == "success") {
+                        window.location.href = '/Sales/PurchaseOrder';
+                    }
+                    else {
+                        alert("Save error...");
+                    }
+                }
+            });
+        }
+    });
+
+</script>

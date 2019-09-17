@@ -1,0 +1,71 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewBorrowProduct>
+@{
+    var count = 0;
+}
+@if (Model.Any() == true)
+{
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Shop</th>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Price</th>
+            <th>Voucher</th>
+            <th>Date</th>
+            <th>Status</th>
+            @if (ViewBag.IsPrint == false)
+            {
+                <th></th>
+            }
+        </tr>
+        @foreach (var list in Model)
+        {
+            count++;
+            <tr>
+                <td>@count. </td>
+                <td>@list.AssociateName</td>
+                <td>@list.ProductName</td>
+                <td>@list.Quantity</td>
+                <td>@list.Price</td>
+                <td>@list.OrderNumber</td>
+                <td>@Convert.ToDateTime(list.OrderDate).ToString("MMM dd,yyyy")</td>
+                <td>
+                    @if (list.IsBorrowPaid == true)
+                     {
+                        <span>Paid</span>
+                     }
+                    else
+                    {
+                        <span>Unpaid</span>
+                    }
+                </td>
+                @if (ViewBag.IsPrint == false)
+                 {
+                    <td>
+                        @if (list.IsBorrowPaid != true)
+                        {
+                            <button class="btn btn-primary btnBorrowPaid" data-id="@list.OrderTransactionId" data-toggle="tooltip" title="Borrow Products pay"><i class="fa fa-money"></i></button>
+                        }
+                    </td>
+                 }
+            </tr>
+        }
+    </table>
+}
+else
+{
+    <h4>There is no record to display</h4>
+}
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    })
+</script>
+
+
+
+
+
+
+

@@ -1,0 +1,31 @@
+﻿@model PointOfSale.ModelViews.Accounting.MultipleMonthModelView
+@Html.HiddenFor(a => a.UserId)
+@Html.HiddenFor(a => a.CreatedBy)
+@{ 
+    var list = ViewBag.List as SelectList;
+}
+@if (list.Any())
+{
+    <div class="editor-label"><label for="MonthDate">Select Month</label></div>
+    <div class="editor-field">
+        @(Html.Kendo().DropDownListFor(a => a.MonthDate)
+                     .BindTo(ViewBag.List as SelectList)
+                     .DataTextField("Text")
+                     .DataValueField("Value")
+                     .OptionLabel("--Select a month--")
+                     .HtmlAttributes(new { style = "width:100%" })
+        )
+        @Html.ValidationMessageFor(model => model.MonthDate, "", new { @class = "text-Danger" })
+    </div>
+}
+else
+{
+    <div class="editor-field">
+        <h4>There is no month to generate</h4>
+    </div>
+    <script>
+        $("#btnSpecificMonthGenerate").css('display', "none");
+    </script>
+}
+
+

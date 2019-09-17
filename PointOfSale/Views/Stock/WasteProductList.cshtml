@@ -1,0 +1,35 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewStockWaste>
+@using PointOfSale.Helpers
+@{
+    var count = 0;
+}
+@if (Model.Any())
+{
+    <table class="table table-bordered table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Reff.</th>
+            <th>Created By</th>
+            <th>Created Date</th>
+            <th>Comments</th>
+        </tr>
+        @foreach (var list in Model)
+        {
+            count++;
+            <tr>
+                <td>@count.</td>
+                <td>
+                    <a href="@Html.EncodedParam("WasteTransaction", "Stock", new { stockWasteId = list.StockWasteId}, null)">@list.WasteVoucherNo</a>
+                </td>
+                <td>@list.CreatedBy</td>
+                <td>@Convert.ToDateTime(list.CreatedDate).ToString("MMM dd yyyy")</td>
+                <td>@list.Comments</td>
+            </tr>
+        }
+    </table>
+}
+else
+{
+    <h3>There is no record to display</h3>
+}
+

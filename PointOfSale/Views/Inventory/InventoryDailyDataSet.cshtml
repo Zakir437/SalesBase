@@ -1,0 +1,185 @@
+﻿@{
+    ViewBag.Title = "InventoryDailyDataSet";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+    long countNumber = ViewBag.CountNumber;
+}
+<section class="content-header">
+    <ol class="breadcrumb">
+        <li><a href="/Inventory/TaskScheduler"><i class="fa fa-list-ul"></i> Task Scheduler</a></li>
+        <li class="active">Inventory Daily Data</li>
+    </ol>
+</section>
+<section class="content">
+    <div class="panel panel-info" style="margin-top:20px;">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4 class="uppercase">Inventory Daily Data</h4>
+            </div>
+            <div class="pull-right">
+                <a class="btn btn-primary" href="/Inventory/TaskScheduler"><i class="fa fa-arrow-left"></i> Back</a>
+            </div>
+        </div>
+        <div class="panel-body">
+            <div class="pull-right" style="max-width: 48%!important;">
+                <div class="pull-left" style="padding: 5px 10px;padding-right:5px!important;" id="show_Days_Title"></div>
+                <button class="btn btn-primary btnPrint pull-right" style="height:32px; margin-right:5px;"><i class="fa fa-print"></i></button>
+                <div class="btn-group btn-group-devided pull-right" data-toggle="buttons" style="padding-right:5px;">
+                    <div id="reportrange" class="pull-right" style="background: #fff; cursor: pointer; padding: 5px 10px; border: 1px solid #ccc; width: 100%">
+                        <span></span> <b class="caret"></b>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="panel-body" style="padding:0px 15px;">
+            <div id="divInventoryDataList" style="padding-top:5px;"></div>
+            <div class="text-center" style="margin-bottom:10px">
+                <button class="btn btn-primary" id="btnSeeMore"><i class="fa fa-arrow-down"></i> See more</button>
+            </div>
+        </div>
+    </div>
+</section>
+<script>
+    var count = 20;
+    var days = 0, from = null, to = null;
+    var passdata = '';
+    var start = moment();
+    var end = moment().subtract(1, 'days');
+    $(document).ready(function () {
+        $('.ranges li').first().click();
+        $("#liForTaskScheduler").addClass('active');
+    });
+
+    @***************DateRange Start******************@
+    $('#reportrange').daterangepicker({
+        startDate: start,
+        endDate: end,
+        ranges: {
+            'Select Date': [moment(), moment().subtract(1, 'days')],
+            'Today': [moment(), moment()],
+            'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+            'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+        }
+    }, cb);
+    cb(start, end);
+    start = moment(); end = moment();
+    $(".applyBtn").click(function () {
+        from = $("input[name*='daterangepicker_start']").val();
+        to = $("input[name*='daterangepicker_end']").val();
+        btn_CustomDate(from, to);
+    });
+
+    $('.ranges').on("click", "li", function () {
+        var day = $(this).text();
+        if (day == "Select Date") {
+            btn_All();
+        } else {
+            if (day == "Today") {
+                btn_today();
+            } else if (day == "Last 7 Days") {
+                btn_last_seven();
+            } else if (day == "Last 30 Days") {
+                btn_last_thirty();
+            }
+        }
+    });
+    function cb(start, end) {
+        if (start == null && end == null) {
+            $('#reportrange span').html("Select Date");
+            return;
+        }
+        else if ((!start._isValid && !end._isValid)) {
+            $('#reportrange span').html("Select Date");
+            return;
+        } else if (start._d > end._d) {
+            $('#reportrange span').html("Select Date");
+            return;
+        }
+        $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+    }
+    function btn_today() {
+        days = 1;
+        from = null;
+        to = null;
+        $(".btnPrint").prop("disabled", false);
+        $("#btnSeeMore").hide();
+        $('#show_Days_Title').html("Today");
+        passdata = { days: 1 };
+        $("#divInventoryDataList").empty();
+        $("#divInventoryDataList").append('<div class="loading_partial"></div>');
+        $("#divInventoryDataList").load('@Url.Action("InventoryDailyDataList", "Inventory")', passdata);
+    }
+    function btn_last_seven() {
+        days = 7;
+        from = null;
+        to = null;
+        $(".btnPrint").prop("disabled", false);
+        $("#btnSeeMore").hide();
+        $('#show_Days_Title').html("Last 7 Days");
+        passdata = { days: 7};
+        $("#divInventoryDataList").empty();
+        $("#divInventoryDataList").append('<div class="loading_partial"></div>');
+        $("#divInventoryDataList").load('@Url.Action("InventoryDailyDataList", "Inventory")', passdata);
+    }
+    function btn_last_thirty() {
+        days = 30;
+        from = null;
+        to = null;
+        $(".btnPrint").prop("disabled", false);
+        $("#btnSeeMore").hide();
+        $('#show_Days_Title').html("Last 30 Days");
+        passdata = { days: 30 };
+         $("#divInventoryDataList").empty();
+        $("#divInventoryDataList").append('<div class="loading_partial"></div>');
+        $("#divInventoryDataList").load('@Url.Action("InventoryDailyDataList", "Inventory")', passdata);
+    }
+    function btn_All() {
+        days = 0;
+        from = null;
+        to = null;
+        count = 20;
+        $(".btnPrint").prop("disabled", true);
+        $("#btnSeeMore").hide();
+        $('#show_Days_Title').html("");
+        $('#reportrange span').html("Select Date");
+        passdata = { count: count };
+
+        if (@countNumber > count)
+        {
+            $("#btnSeeMore").show();
+        }
+        $("#divInventoryDataList").empty();
+        $("#divInventoryDataList").append('<div class="loading_partial"></div>');
+        $("#divInventoryDataList").load('@Url.Action("InventoryDailyDataList", "Inventory")', passdata);
+    }
+    function btn_CustomDate(from, to) {
+        days = 0;
+        $(".btnPrint").prop("disabled", false);
+        $("#btnSeeMore").hide();
+        passdata = { from: new Date(from).toISOString(), to: new Date(to).toISOString() };
+        $('#show_Days_Title').html("Custom Range");
+        $("#divInventoryDataList").empty();
+        $("#divInventoryDataList").append('<div class="loading_partial"></div>');
+        $("#divInventoryDataList").load('@Url.Action("InventoryDailyDataList", "Inventory")', passdata);
+    }
+    @***************DateRange End******************@
+
+     //See more data
+    $("#btnSeeMore").click(function () {
+        count = count + 20;
+        passdata = { count: count };
+        if(count >= @countNumber)
+        {
+            $("#btnSeeMore").hide();
+        }
+        $("#divInventoryDataList").empty();
+        $("#divInventoryDataList").append('<div class="loading_partial"></div>');
+        $("#divInventoryDataList").load('@Url.Action("InventoryDailyDataList", "Inventory")', passdata);
+    });
+
+    //Print
+    $(".btnPrint").click(function () {
+        var data = "days=" + days + "?from=" + new Date(from).toISOString() + "?to=" + new Date(to).toISOString();
+        window.open('@Url.Action("InvDailyDataPrint", "Inventory")?q=' + getDataEncrypted(data), '_blank');
+    });
+</script>
+

@@ -1,0 +1,66 @@
+﻿<div class="row" style="margin:0; padding-bottom:5px;">
+    <div style="width:50%!important; padding-right:10px;" class="pull-left">
+        <div style="margin-bottom:5px;">
+            @(Html.Kendo().AutoComplete()
+                            .Name("searchAutocomplete")
+                            .Placeholder("Search by serial number...")
+                            .HtmlAttributes(new { style = "width:100%; max-width:100%" })
+                            .DataTextField("Text")
+                            .Filter("contains")
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("GetAfterSaleService", "Stock")
+                                    .Data("additionInfo");
+                                })
+                               .ServerFiltering(true);
+                            })
+                            .Events(e =>
+                            {
+                                e.Change("onChangeItem").Select("onSelectItem");
+                            })
+            )
+            <span class="k-icon k-i-search" style="margin-top:-25px;float:right;margin-right:10px; position:relative">&nbsp;</span>
+        </div>
+    </div>
+    <div>
+        <button class="btn btn-default selected" id="btnSearchBySerialNumber" data-toggle="tooltip" title="Search by device serial number">S/N</button>
+        <button class="btn btn-default" id="btnSearchByInvoice" data-toggle="tooltip" title="Search by invoice number">Invoice</button>
+        <button class="btn btn-default" id="btnSearchByTemporaryOrderNo" data-toggle="tooltip" title="Search by temporary order number">Temp order</button>
+    </div>
+</div>
+<div id="divServiceList"></div>
+<script>
+    status = 1, searchType = 1;
+    $(document).ready(function () {
+        $("#divServiceList").append('<div class="loading_partial"></div>');
+        $("#divServiceList").load('/Stock/AfterSaleServiceList?status=' + status);
+    });
+
+    $("#btnSearchBySerialNumber").click(function () {
+        searchType = 1;
+        $("#searchAutocomplete").attr("placeholder", "Search by serial number");
+        $(this).addClass("selected");
+        $("#btnSearchByInvoice").removeClass("selected");
+        $("#btnSearchByTemporaryOrderNo").removeClass("selected");
+    });
+
+    $("#btnSearchByInvoice").click(function () {
+        searchType = 2;
+        $("#searchAutocomplete").attr("placeholder", "Search by invoice no.");
+        $(this).addClass("selected");
+        $("#btnSearchBySerialNumber").removeClass("selected");
+        $("#btnSearchByTemporaryOrderNo").removeClass("selected");
+    });
+
+    $("#btnSearchByTemporaryOrderNo").click(function () {
+        searchType = 4;
+        $("#searchAutocomplete").attr("placeholder", "Search by temporary order no.");
+        $(this).addClass("selected");
+        $("#btnSearchBySerialNumber").removeClass("selected");
+        $("#btnSearchByInvoice").removeClass("selected");
+    });
+
+</script>
+

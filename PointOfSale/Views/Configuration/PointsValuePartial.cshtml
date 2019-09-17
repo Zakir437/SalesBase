@@ -1,0 +1,42 @@
+﻿@model PointOfSale.ModelViews.MiscFuncModel
+@Html.HiddenFor(a => a.MiscId)
+<div class="row">
+    <div class="col-sm-12">
+        @if (Model.Status == true) // Loyalty points redeem
+         {
+            <div class="col-sm-5">
+                <div class="editor-label"><label>Points</label></div>
+                <div class="editor-field">
+                    @Html.EditorFor(model => model.Points, new { htmlattributes = new { @min = 0, @class = "k-textbox form-control", style = "width:100%; max-width:100%;" } })
+                    @Html.ValidationMessageFor(model => model.Points, "", new { @class = "text-Danger" })
+                </div>
+            </div>
+            <div class="col-sm-1"><div class="editor-label"><label>=</label></div></div>
+            <div class="col-sm-4" style="margin:0; padding:0">
+                <div class="editor-field" style="float:left">
+                    @Html.EditorFor(model => model.PointsValue, new { htmlattributes = new { @min = 0, @class = "k-textbox form-control", style = "width:85%; max-width:85%; display:inline" } }) Tk
+                    @Html.ValidationMessageFor(model => model.PointsValue, "", new { @class = "text-Danger" })
+                </div>
+            </div>
+         }
+        else
+        {
+            <div class="col-sm-5">
+                <div class="editor-label"><label>BDT</label></div>
+                <div class="editor-field">
+                    @Html.EditorFor(model => model.PointsValue, new { htmlattributes = new { @min = 0, @class = "k-textbox form-control", style = "width:100%; max-width:100%;" } })
+                    @Html.ValidationMessageFor(model => model.PointsValue, "", new { @class = "text-Danger" })
+                </div>
+            </div>
+            <div class="col-sm-1"><div class="editor-label"><label>=</label></div></div>
+            <div class="col-sm-4" style="margin:0; padding:0">
+                <div class="editor-field" style="float:left">
+                    @Html.EditorFor(model => model.Points, new { htmlattributes = new { @min = 0, @class = "k-textbox form-control", style = "width:66%; max-width:66%; display:inline" } }) Points
+                    @Html.ValidationMessageFor(model => model.Points, "", new { @class = "text-Danger" })
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+

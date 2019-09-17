@@ -1,0 +1,204 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewPayment>
+@using System.Globalization
+@{
+    var count = 0;
+}
+@if (Model.Any())
+{
+    <table class="table table-bordered">
+        <tr>
+            <th>SL.</th>
+            <th>Reff NO.</th>
+            @if (ViewBag.TransForMethod == true)
+             {
+                <th>Type</th>
+             }
+            <th>Debit</th>
+            <th>Credit</th>
+            <th>Transaction No</th>
+            <th>Date</th>
+            @if (ViewBag.IsPrint == false)
+             {
+                <th></th>
+             }
+        </tr>
+        @foreach (var list in Model)
+         {
+            count++;
+            if (list.InOut == true) //true for payment receive
+            {
+                <tr style="background-color:#e4f8ff">
+                    <td>@count.</td>
+                    @if (list.Type == 1) // order payment transaction
+                     {
+                        <td>
+                            <a class="btnShowOrderDetails" data-toggle="tooltip" title="View voucher details" data-id="@list.PaymentId">@list.OrderNumber</a>
+                        </td>
+                    }
+                    else if (list.Type == 4)
+                    {
+                        <td>
+                            <a class="btnShowImportDetails" data-toggle="tooltip" title="View voucher details" data-id="@list.ReturnImportId">@list.ReturnImportNumber</a>
+                        </td>
+                    }
+                    else if (list.Type == 8)
+                    {
+                        <td>
+                            @list.SalaryTransNo
+                        </td>
+                    }
+                    else if (list.Type == 9)
+                    {
+                        <td>
+                            @list.WarehouseVoucher
+                        </td>
+                    }
+                    else
+                    {
+                        <td></td>
+                    }
+                    @if (ViewBag.TransForMethod == true)
+                    {
+                        <td>@list.PaymentTypeName</td>
+                    }
+                    <td>
+                        @list.Amount.ToString("C", new CultureInfo("bn-BD")) @if (list.IsCreditPayment == true)
+                        { <span>(Credit Payment)</span> }
+                    </td>
+                    <td></td>
+
+                    @*@if (list.InOut == true)
+                     {
+                       
+                     }
+                    else if (list.InOut == false)
+                    {
+                        <td></td>
+                        <td>
+                            @list.Amount.ToString("C", new CultureInfo("bn-BD")) @if (list.IsCreditPayment == true)
+                            { <span>(Credit Payment)</span> }
+                        </td>
+                    }*@
+                    <td>@list.TransactionNo</td>
+                    <td>@Convert.ToDateTime(list.Date).ToString("MMM dd yyyy")</td>
+                    @if (ViewBag.IsPrint == false)
+                     {
+                        <td></td>
+                     }
+                </tr>
+            }
+            else if (list.InOut == false)
+            {
+                <tr style="background-color:#fafff6" data-id="@list.PaymentTransactionId">
+                    <td>@count.</td>
+                    @if (list.Type == 1) // order payment transaction
+                     {
+                        <td>
+                            <a class="btnShowOrderDetails" data-toggle="tooltip" title="View voucher details" data-id="@list.PaymentId">@list.OrderNumber</a>
+                        </td>
+                     }
+                    else if (list.Type == 3 || list.Type == 2) //import
+                    {
+                        <td>
+                            <a class="btnShowImportDetails" data-toggle="tooltip" title="View voucher details" data-id="@list.PaymentId">@list.ImportNumber</a>
+                        </td>
+                    }
+                    else if (list.Type == 5) // salary payment transaction
+                    {
+                        <td>
+                            @list.SalaryTransNo
+                            @*<a class="" data-toggle="tooltip" title="View voucher details" data-id="@list.PaymentId">@list.ImportNumber</a>*@
+                        </td>
+                    }
+                    else if (list.Type == 6) // salary paysheet payment transaction
+                    {
+                        <td>
+                            @list.PaySheetTransNo
+                            @*<a class="" data-toggle="tooltip" title="View voucher details" data-id="@list.PaymentId">@list.ImportNumber</a>*@
+                        </td>
+                    }
+                    else if (list.Type == 9)
+                    {
+                        <td>
+                            @list.WarehouseVoucher
+                        </td>
+                    }
+                    else if (list.Type == 10)
+                    {
+                        <td>
+                            <span>Supplier Debit Refill</span>
+                        </td>
+                    }
+                    else
+                    {
+                        <td></td>
+                    }
+
+                    @if (ViewBag.TransForMethod == true)
+                     {
+                        <td>@list.PaymentTypeName</td>
+                     }
+                    @*@if (list.InOut == true)
+                    {
+                        <td>
+                            @list.Amount.ToString("C", new CultureInfo("bn-BD")) @if (list.IsCreditPayment == true)
+                            { <span>(Credit Payment)</span> }
+                        </td>
+                        <td></td>
+                    }
+                    else if (list.InOut == false)
+                    {
+                        
+                    }*@
+                    <td></td>
+                    <td>
+                        @list.Amount.ToString("C", new CultureInfo("bn-BD")) @if (list.IsCreditPayment == true)
+                        { <span>(Credit Payment)</span> }
+                    </td>
+
+                    <td>@list.TransactionNo</td>
+                    <td>@Convert.ToDateTime(list.Date).ToString("MMM dd yyyy")</td>
+                    @if (ViewBag.IsPrint == false)
+                     {
+                        if (list.Type == 5)
+                        {
+                            <td>
+                                <button class="btn btn-danger btnDeletePaymentTrans" data-id="@list.PaymentTransactionId"><i class="fa fa-trash"></i></button>
+                            </td>
+                        }
+                        else
+                        {
+                            <td></td>
+                        }
+                     }
+                </tr>
+            }
+         }
+        <tr style="font-weight:bold">
+            <td></td>
+            @if (ViewBag.TransForMethod == true)
+             {
+                <td colspan="2" style="text-align:center">Total</td>
+             }
+            else
+            {
+                <td style="text-align:center">Total</td>
+            }
+            <td>@Model.Where(a => a.InOut == true).Sum(s => s.Amount).ToString("C", new CultureInfo("bn-BD"))</td>
+            <td>@Model.Where(a => a.InOut == false).Sum(s => s.Amount).ToString("C", new CultureInfo("bn-BD"))</td>
+            <td></td>
+            <td></td>
+            @if (ViewBag.IsPrint == false)
+             {
+                <td></td>
+             }
+        </tr>
+    </table>
+}
+else
+{
+    <h4>There is no record to display</h4>
+}
+<script>
+    $('[data-toggle="tooltip"]').tooltip();
+</script>

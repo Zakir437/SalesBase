@@ -1,0 +1,23 @@
+﻿@model PointOfSale.ModelViews.Configuration.DebitLimitModelView
+@Html.HiddenFor(a => a.Id)
+@if (ViewBag.IsAmountEdit == true)
+{
+    <div class="editor-label"><label for="Limit">Limit(Tk)</label></div>
+    <div class="editor-field">
+        @Html.DisplayFor(model => model.Limit, new { htmlattributes = new { @class = "k-textbox", @style = "width:100%; max-width:100%;", type = "number" } })
+    </div>
+    <div class="editor-label"><label for="Amount">Amount(Tk)</label></div>
+    <div class="editor-field">
+        @Html.EditorFor(model => model.Amount, new { htmlattributes = new { @min=0, @max=Model.Limit, @class = "k-textbox", @style = "width:100%; max-width:100%;", type = "number", required="required", validationMessage="Please enter valid amount" } })
+        @Html.ValidationMessageFor(model => model.Amount, "", new { @class = "text-Danger" })
+    </div>
+ }
+else
+{
+    <div class="editor-label"><label for="Limit">Limit(Tk)</label></div>
+    <div class="editor-field">
+        @Html.EditorFor(model => model.Limit, new { htmlattributes = new { @class = "k-textbox", @style = "width:100%; max-width:100%;", type = "number" } })
+        @Html.ValidationMessageFor(model => model.Limit, "", new { @class = "text-Danger" })
+    </div>
+
+}

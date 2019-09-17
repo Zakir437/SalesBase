@@ -1,0 +1,249 @@
+﻿@{
+    ViewBag.Title = "MiscFunction";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+}
+@*<section class="content-header">
+    <h1>
+        Miscellaneous Function
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-cog"></i> Configuration</a></li>
+        <li class="active">Miscellaneous Function</li>
+    </ol>
+</section>*@
+<section class="content">
+    @*<div class="row">
+        <div class="col-md-12">
+            @Html.ActionLink("Miscellaneous Function", "MiscFunction", "Configuration", routeValues: null, htmlAttributes: new { @class = "btn btn-default selected" })
+            @Html.ActionLink("Unit", "Unit", "Configuration", routeValues: null, htmlAttributes: new { @class = "btn btn-default" })
+            @Html.ActionLink("Brand", "Brand", "Configuration", routeValues: null, htmlAttributes: new { @class = "btn btn-default" })
+            @Html.ActionLink("Vat", "Vat", "Configuration", routeValues: null, htmlAttributes: new { @class = "btn btn-default" })
+            @Html.ActionLink("Payment Type", "PaymentType", "Configuration", routeValues: null, htmlAttributes: new { @class = "btn btn-default" })
+            @Html.ActionLink("Payment Method", "PaymentMethod", "Configuration", routeValues: null, htmlAttributes: new { @class = "btn btn-default" })
+            @Html.ActionLink("Schedule", "Schedule", "Configuration", routeValues: null, htmlAttributes: new { @class = "btn btn-default" })
+            @Html.ActionLink("Restriction", "Restriction", "Configuration", routeValues: null, htmlAttributes: new { @class = "btn btn-default" })
+            @Html.ActionLink("CreditLimit", "CreditLimit", "Configuration", routeValues: null, htmlAttributes: new { @class = "btn btn-default" })
+        </div>
+    </div>*@
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4 class="uppercase">Miscellaneous Function</h4>
+            </div>
+        </div>
+        <div class="panel-body">
+            <div id="divMiscFuncList" style="overflow-x:auto"></div>
+        </div>
+    </div>
+  
+</section>
+<div id="divTaxWin"></div>
+<div id="divMinimumQuantityWin"></div>
+<div id="divTaxFunctionWin"></div>
+<div id="divSalaryPayDayWin"></div>
+<div id="divShopTimeWin"></div>
+<div id="divAgeRestrictedWin"></div>
+<div id="divPointsValueWin"></div>
+<div id="divGenerateCountValueWin"></div>
+<div id="divDeliveryChargeFuncEdit"></div>
+<script>
+    var miscId = 0;
+    var status = 0;
+    $(document).ready(function () {
+        $("#divMiscFuncList").empty();
+        $("#divMiscFuncList").append('<div class="loading_partial"></div>');
+        $("#divMiscFuncList").load('@Url.Action("MiscFuncList","Configuration")');
+
+        $("#liForConfiguration").addClass('active');
+        $("#liForMiscFunction").addClass('active');
+    });
+    //**************** Tax Rate edit Start*********************
+    $("#divMiscFuncList").on('click', '.btnTaxEdit', function () {
+        miscId = $(this).data("id");
+        $("#divTaxWin").empty();
+        $("#divTaxWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 600,
+            height: 175,
+            title: 'Tax',
+            resizable: false
+        });
+        var taxWin = $("#divTaxWin").data("kendoWindow");
+        taxWin.refresh('@Url.Action("TaxEdit", "Configuration")?miscId=' + miscId);
+        taxWin.center().open();
+    });
+
+    //**************** Minimum Quantity Edit ********************************
+    $("#divMiscFuncList").on('click', '.btnMiniQuantityEdit', function () {
+        miscId = $(this).data("id");
+        $("#divMinimumQuantityWin").empty();
+        $("#divMinimumQuantityWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 600,
+            height: 175,
+            title: 'Minimum Quantity',
+            resizable: false
+        });
+        var minimumQuantity = $("#divMinimumQuantityWin").data("kendoWindow");
+        minimumQuantity.refresh('@Url.Action("MinimumQuantityPercent", "Configuration")?miscId=' + miscId);
+        minimumQuantity.center().open();
+    });
+
+    //*****************Tax Function Edit ******************************
+    $("#divMiscFuncList").on('click', '.btnTaxFunctionEdit', function () {
+        miscId = $(this).data("id");
+        $("#divTaxFunctionWin").empty();
+        $("#divTaxFunctionWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 600,
+            height: 175,
+            title: 'Tax Function',
+            resizable: false
+        });
+        var taxFunc = $("#divTaxFunctionWin").data("kendoWindow");
+        taxFunc.refresh('@Url.Action("TaxFunction", "Configuration")?miscId=' + miscId);
+        taxFunc.center().open();
+    });
+
+
+    //*****************Salary pay day edit*******************************
+    $("#divMiscFuncList").on('click', '.btnSalaryPayDayEdit', function () {
+        miscId = $(this).data("id");
+        $("#divSalaryPayDayWin").empty();
+        $("#divSalaryPayDayWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 600,
+            height: 175,
+            title: 'Pay Day',
+            resizable: false
+        });
+        var payDayWin = $("#divSalaryPayDayWin").data("kendoWindow");
+        payDayWin.refresh('@Url.Action("SalaryPayDay", "Configuration")?miscId=' + miscId);
+        payDayWin.center().open();
+    });
+
+    //shop time edit
+    $("#divMiscFuncList").on('click', ".btnShopTimeEdit", function () {
+        miscId = $(this).data("id");
+        $("#divShopTimeWin").empty();
+        $("#divShopTimeWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 767,
+            height: 288,
+            title: 'Shop Time',
+            resizable: false,
+            close: onWindowClose
+        });
+        var shopTimeWin = $("#divShopTimeWin").data("kendoWindow");
+        shopTimeWin.refresh('/Configuration/ShopTime?id=' + miscId);
+        shopTimeWin.center().open();
+        document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+        document.body.scroll = "no";
+    });
+
+    //restricted age edit
+    $("#divMiscFuncList").on('click', ".btnAgeRestrictedEdit", function () {
+        miscId = $(this).data("id");
+        $("#divAgeRestrictedWin").empty();
+        $("#divAgeRestrictedWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 767,
+            height: 288,
+            title: 'Age Restricted',
+            resizable: false,
+            close: onWindowClose
+        });
+        var ageRestrictedWin = $("#divAgeRestrictedWin").data("kendoWindow");
+        ageRestrictedWin.refresh('/Configuration/AgeRestricted?id=' + miscId);
+        ageRestrictedWin.center().open();
+        document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+        document.body.scroll = "no";
+    });
+
+    //Points value edit
+    $("#divMiscFuncList").on('click', ".btnPointsEdit", function () {
+        miscId = $(this).data("id");
+        $("#divPointsValueWin").empty();
+        $("#divPointsValueWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 767,
+            height: 202,
+            title: 'Loyalty Points',
+            resizable: false,
+            close: onWindowClose
+        });
+        var pointsValueWin = $("#divPointsValueWin").data("kendoWindow");
+        pointsValueWin.refresh('/Configuration/PointsValue?id=' + miscId);
+        pointsValueWin.center().open();
+        document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+        document.body.scroll = "no";
+    });
+
+    //Generate count value edit
+    $("#divMiscFuncList").on('click', ".btnGenerateCountEdit", function () {
+        miscId = $(this).data("id");
+        $("#divGenerateCountValueWin").empty();
+        $("#divGenerateCountValueWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 767,
+            height: 202,
+            title: 'Generate Count',
+            resizable: false,
+            close: onWindowClose
+        });
+        var generateCountValueWin = $("#divGenerateCountValueWin").data("kendoWindow");
+        generateCountValueWin.refresh('/Configuration/GenerateCount?miscId=' + miscId);
+        generateCountValueWin.center().open();
+        document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+        document.body.scroll = "no";
+    });
+
+    //***********************Delivery charge function edit*****************************
+    $("#divMiscFuncList").on('click', ".btnDeliveryChargeFuncEdit", function () {
+        miscId = $(this).data("id");
+        $("#divDeliveryChargeFuncEdit").empty();
+        $("#divDeliveryChargeFuncEdit").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 575,
+            height: 140,
+            title: 'Delivery Charge',
+            resizable: false,
+            close: onWindowClose
+        });
+        var deliveryCharge = $("#divDeliveryChargeFuncEdit").data("kendoWindow");
+        deliveryCharge.refresh('/Configuration/DeliveryChargeFunc?miscId=' + miscId);
+        deliveryCharge.center().open();
+        document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+        document.body.scroll = "no";
+    });
+
+
+
+</script>

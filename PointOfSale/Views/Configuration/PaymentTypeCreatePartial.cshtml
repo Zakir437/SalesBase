@@ -1,0 +1,28 @@
+﻿@model PointOfSale.ModelViews.PaymentTypeModel
+
+@Html.HiddenFor(m => m.PaymentTypeId)
+<div class="editor-label"><label for="Name">Name</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.Name, new { htmlattributes = new { @class = "k-textbox form-control" } })
+    @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-Danger" })
+</div>
+<div class="editor-label"><label for="PaymentTypeId">Type</label></div>
+<div class="editor-field">
+    @(Html.Kendo().DropDownListFor(a => a.Type)
+          .OptionLabel("--Select One Type--")
+          .DataTextField("Text")
+          .DataValueField("Value")
+          .HtmlAttributes(new { style = "width:87%" })
+          .BindTo(new List<SelectListItem>() {
+              new SelectListItem() {
+                  Text = "Cash refund allowed",
+                  Value = "1"
+              },
+              new SelectListItem() {
+                  Text = "Cash refund not allowed",
+                  Value = "2"
+              }
+          })
+    )
+</div>
+

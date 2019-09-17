@@ -1,0 +1,73 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewImportHistory>
+@using System.Globalization;
+@{
+    var count = 0;
+    var productList = Model.GroupBy(g => new { g.ProductId })
+                       .Select(s => new
+                       {
+                           ProductId = s.FirstOrDefault().ProductId,
+                           ProductName = s.FirstOrDefault().ProductName,
+                           Quantity = s.Sum(a => a.Quantity),
+                           Products = s
+                       })
+                       .OrderBy(a => a.ProductName);
+}
+<style>
+    a {
+        cursor: pointer;
+    }
+</style>
+@if (productList.Any() == true)
+{
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Products</th>
+            <th>Quantity</th>
+        </tr>
+        @foreach (var list in productList)
+        {
+            count++;
+            <tr>
+                <td>@count. </td>
+                <td>
+                    @list.ProductName
+                    <table class="table">
+                        <tr>
+                            <th>Date</th>
+                            <th>Quantity</th>
+                            <th>Cost(peritem)</th>
+                            <th>Total</th>
+                        </tr> 
+                        @foreach (var product in list.Products)
+                        {
+                            <tr>
+                                <td>@Convert.ToDateTime(product.Date).ToString("MMM dd yyyy")</td>
+                                <td>@product.Quantity</td>
+                                <td>@product.PeritemCost.ToString("C", new CultureInfo("bn-BD"))</td>
+                                <td>@product.Cost.ToString("C", new CultureInfo("bn-BD"))</td>
+                            </tr>
+                        }
+                    </table>
+                </td>
+                <td>
+                    @list.Quantity
+                </td>
+            </tr>
+        }
+    </table>
+}
+else
+{
+    <h3>There is no record to display</h3>
+}
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    })
+</script>
+
+
+
+
+

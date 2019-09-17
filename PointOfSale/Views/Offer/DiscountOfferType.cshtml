@@ -1,0 +1,53 @@
+﻿@using PointOfSale.Helpers
+@{
+    ViewBag.Title = "DiscountOfferType";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+}
+<style>
+    .btnBox {
+        height: 200px;
+        width: 100%;
+        border: 1px solid #808080;
+        margin-bottom: 15px;
+    }
+
+    h1 {
+        padding: 50px 0px;
+    }
+</style>
+<section class="content">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4 class="uppercase">Discount Offer</h4>
+            </div>
+            <div class="pull-right">
+                <a class="btn btn-default" href="/Offer/OfferCreate"><i class="fa fa-arrow-left"></i> Back</a>
+            </div>
+        </div>
+        <div class="panel-body">
+            <div class="col-md-4">
+                <a class="btn btn-default btnBox" href="/Offer/DiscountOffer" data-toggle="tooltip" title="Discount Offer">
+                    <h1>Discount Item</h1>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a class="btn btn-default btnBox" href="/Offer/DeliveryChargeDiscount" data-toggle="tooltip" title="Delivery Charge Discount">
+                    <h1>Delivery Charge</h1>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a class="btn btn-default btnBox" href="/Offer/AmountDiscount" data-toggle="tooltip" title="Amount Discount">
+                    <h1>Amount</h1>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+        $("#liForSalesMenu").addClass('active');
+        $("#liForOffers").addClass('active');
+    })
+</script>

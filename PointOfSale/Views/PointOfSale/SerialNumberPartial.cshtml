@@ -1,0 +1,8 @@
+﻿
+
+
+<div class="editor-label"><label for="SerialNumber">Serial Number</label></div>
+<div class="editor-field">
+    @Html.Editor("SerialNumber", new { htmlattributes = new { @class = "k-textbox", @style = "width:100%", required="required", validationMessage="Please enter serial number" } }) 
+    @Html.ValidationMessage("SerialNumber", "", new { @class = "text-Danger", @style = "float:left;" })
+</div>

@@ -1,0 +1,108 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin-bottom:4%;margin-top:2%;">
+    <div id="divHolidayForm"></div>
+    <div class="k-edit-buttons k-state-default" style="margin-left:30px;">
+        @if (ViewBag.HolidayId > 0)
+        {
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnHolidayCreate"><span class="k-icon k-update"></span>Update</button>
+        }
+        else
+        {
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnHolidayCreate"><span class="k-icon k-update"></span>Create</button>
+        }
+        <button type="reset" class="k-button k-button-icontext k-grid-update" id="btnHolidayRefresh"><span class="k-icon k-i-refresh"></span>Refresh</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnHolidayCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+      $(document).ready(function () {
+         $("#divHolidayForm").append('<div class="tiny_loading"></div>');
+         $("#divHolidayForm").load('@Url.Action("_HolidayCreate", "Holiday")?holidayId=' + '@ViewBag.HolidayId');
+     });
+    $("#btnHolidayRefresh").click(function ()
+    {
+        $("#divHolidayForm").empty();
+        $("#divHolidayForm").append('<div class="tiny_loading"></div>');
+        $("#divHolidayForm").load('@Url.Action("_HolidayCreate", "Holiday")?holidayId=' + '@ViewBag.HolidayId');
+    });
+    $("#btnHolidayCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+
+    var holidayValidation = $("#divHolidayForm").kendoValidator({
+        rules: {
+            singleDate: function (input) {
+                if (input.attr('name') === "Date" && $("#Date").val() === '' && $("#ChForMultiple").prop("checked") === false) {
+                    return false;
+                }
+                return true;
+            },
+            StartDate: function (input) {
+                if (input.attr('name') === "StartDate" && $("#ChForMultiple").prop("checked") === true && $("#StartDate").val() === '') {
+                    return false;
+                }
+                return true;
+            },
+            EndDate: function (input) {
+                if (input.attr('name') === "EndDate" && $("#ChForMultiple").prop("checked") === true && $("#EndDate").val() === '') {
+                    return false;
+                }
+                return true;
+            },
+            DateValidate: function (input) {
+                if ($("#ChForMultiple").prop("checked") === true && input.attr('name') === "DateValidate") {
+                    var startTime = $("#StartDate").val();
+                    var endTime = $("#EndDate").val();
+                    if (new Date(startTime) >= new Date(endTime)) {
+                        return false;
+                    }
+                    return true;
+                }
+                return true;
+            }
+        },
+        messages: {
+            singleDate: "Please select one date",
+            StartDate: "Please select start date",
+            EndDate: "Please select end date",
+            DateValidate: "Start date can not greater than end date"
+        }
+    }).data("kendoValidator");
+
+    $("#btnHolidayCreate").click(function () {
+        if (holidayValidation.validate()) {
+            var sendData =
+            {
+                Id: $("#Id").val(),
+                HolidayPackId: '@ViewBag.PackageId',
+                HolidayName: $("#HolidayName").val(),
+                IsMultipleDay: $("#ChForMultiple").prop("checked"),
+                Date: $("#Date").val(),
+                StartDate: $("#StartDate").val(),
+                EndDate: $("#EndDate").val(),
+                CreatedBy: userId
+            };
+
+            $.ajax({
+                url: '@Url.Action("HolidaySave", "Holiday")',
+                type: 'Post',
+                data: sendData,
+                success: function (data)
+                {
+                    $("#divHolidayAddWin").data("kendoWindow").close();
+                    if (data === "success") {
+                        $("#divHolidayList").empty();
+                        $("#divHolidayList").append('<div class="loading_partial"></div>');
+                        $("#divHolidayList").load('@Url.Action("HolidayList", "Holiday")?packageId=' + '@ViewBag.PackageId');
+                    }
+                    else
+                    {
+                        alert("Save error...");
+                    }
+                },
+                error: function (err) {
+                    alert("Save error...");
+                }
+            });
+        }
+    });
+</script>

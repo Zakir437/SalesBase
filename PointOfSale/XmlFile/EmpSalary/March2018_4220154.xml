@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ArrayOfEmpSalaryXmlModelView xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <EmpSalaryXmlModelView>
+    <Id>107</Id>
+    <TotalAmount>2499.99</TotalAmount>
+    <TotalPresent>2</TotalPresent>
+    <TotalPaidLeave>1</TotalPaidLeave>
+    <TotalWorkingDays>26</TotalWorkingDays>
+    <TotalHoliday>2</TotalHoliday>
+    <DueAmount>0.00</DueAmount>
+    <PaidAmount>2499.99</PaidAmount>
+    <PaidBy xsi:nil="true">1</PaidBy>
+    <PaidDate xsi:nil="true">2018-04-18T00:00:00Z</PaidDate>
+    <StartDate>2018-03-01T00:00:00</StartDate>
+    <EndDate>2018-03-31T00:00:00</EndDate>
+    <GeneratedDate>2018-04-18T00:00:00</GeneratedDate>
+    <UserId>3</UserId>
+    <EmpName>Mr Soikot  Ahmed</EmpName>
+    <Picture>Emp3040116.jpg</Picture>
+    <ActualSalary>20000.00</ActualSalary>
+    <AssignUserId>4</AssignUserId>
+    <XmlGenerateDate>2018-04-18T09:41:33.1676834+06:00</XmlGenerateDate>
+    <XmlGenerateBy>1</XmlGenerateBy>
+    <UpdatedBy xsi:nil="true" />
+    <UpdatedDate xsi:nil="true" />
+    <Status>1</Status>
+  </EmpSalaryXmlModelView>
+  <EmpSalaryXmlModelView>
+    <Id>108</Id>
+    <TotalAmount>1250.00</TotalAmount>
+    <TotalPresent>2</TotalPresent>
+    <TotalPaidLeave>0</TotalPaidLeave>
+    <TotalWorkingDays>26</TotalWorkingDays>
+    <TotalHoliday>2</TotalHoliday>
+    <DueAmount>1250.00</DueAmount>
+    <PaidAmount>0.00</PaidAmount>
+    <PaidBy xsi:nil="true" />
+    <PaidDate xsi:nil="true" />
+    <StartDate>2018-03-01T00:00:00</StartDate>
+    <EndDate>2018-03-31T00:00:00</EndDate>
+    <GeneratedDate>2018-04-18T00:00:00</GeneratedDate>
+    <UserId>4</UserId>
+    <EmpName> Haidor  Ali</EmpName>
+    <Picture>Emp4328003.png</Picture>
+    <ActualSalary>15000.00</ActualSalary>
+    <AssignUserId>4</AssignUserId>
+    <XmlGenerateDate>2018-04-18T09:41:33.1676834+06:00</XmlGenerateDate>
+    <XmlGenerateBy>1</XmlGenerateBy>
+    <UpdatedBy xsi:nil="true" />
+    <UpdatedDate xsi:nil="true" />
+    <Status>2</Status>
+  </EmpSalaryXmlModelView>
+  <EmpSalaryXmlModelView>
+    <Id>109</Id>
+    <TotalAmount>1041.66</TotalAmount>
+    <TotalPresent>4</TotalPresent>
+    <TotalPaidLeave>1</TotalPaidLeave>
+    <TotalWorkingDays>26</TotalWorkingDays>
+    <TotalHoliday>2</TotalHoliday>
+    <DueAmount>0.00</DueAmount>
+    <PaidAmount>1041.66</PaidAmount>
+    <PaidBy xsi:nil="true">1</PaidBy>
+    <PaidDate xsi:nil="true">2018-04-18T00:00:00Z</PaidDate>
+    <StartDate>2018-03-01T00:00:00</StartDate>
+    <EndDate>2018-03-31T00:00:00</EndDate>
+    <GeneratedDate>2018-04-18T00:00:00</GeneratedDate>
+    <UserId>5</UserId>
+    <EmpName> Shahidul  Islam</EmpName>
+    <Picture>Emp5903377.jpg</Picture>
+    <ActualSalary>5000.00</ActualSalary>
+    <AssignUserId>4</AssignUserId>
+    <XmlGenerateDate>2018-04-18T09:41:33.1676834+06:00</XmlGenerateDate>
+    <XmlGenerateBy>1</XmlGenerateBy>
+    <UpdatedBy xsi:nil="true" />
+    <UpdatedDate xsi:nil="true" />
+    <Status>1</Status>
+  </EmpSalaryXmlModelView>
+</ArrayOfEmpSalaryXmlModelView>

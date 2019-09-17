@@ -1,0 +1,83 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewAssignedMethodName>
+<style>
+    .k-edit-form-container .editor-field {
+        width: 47%;
+    }
+    .k-edit-form-container .editor-label {
+        width: 46%;
+    }
+</style>
+@{ 
+    PointOfSale.Models.PointOfSale_DBEntities db = new PointOfSale.Models.PointOfSale_DBEntities();
+    var PaymentTypeList = Model.GroupBy(g => g.PaymentTypeId)
+        .Select(s => new
+        {
+            s.FirstOrDefault().PaymentTypeId,
+            s.FirstOrDefault().PaymentTypeName,
+            Accounts = s,
+        });
+    var defaultList = ViewBag.DefaultList as List<PointOfSale.Models.DefaultAccount>;
+}
+@if (Model.Any())
+{
+    <div class="editor-field">
+        <span class="k-invalid-msg" data-for="mode"></span><br />
+    </div>
+    foreach (var list in PaymentTypeList)
+    {
+        <div class="editor-label"><label>@list.PaymentTypeName</label></div>
+        <div class="editor-field">
+            @foreach (var aList in list.Accounts)
+            {
+                if (defaultList.Any(a => a.AccountId == aList.AccountId))
+                {
+                    if (aList.PaymentTypeId == 1)
+                    {
+                        <input type="radio" checked="checked" name="mode" class="default" data-accountid="@aList.AccountId" data-methodid="@aList.MethodId" data-paymenttypeid="@list.PaymentTypeId" id="check_@aList.AccountId" /> <label for="check_@aList.AccountId">@aList.AccountName</label><br />
+                    }
+                    else
+                    {
+                        <input type="checkbox" checked class="default" data-accountid="@aList.AccountId" data-methodid="@aList.MethodId" data-paymenttypeid="@list.PaymentTypeId" id="check_@aList.AccountId" /> <label for="check_@aList.AccountId">@aList.AccountName</label><br />
+                    }
+                }
+                else
+                {
+                    if (aList.PaymentTypeId == 1)
+                    {
+                        <input type="radio" name="mode" required data-accountid="@aList.AccountId" data-methodid="@aList.MethodId" data-paymenttypeid="@list.PaymentTypeId" id="check_@aList.AccountId" /> <label for="check_@aList.AccountId">@aList.AccountName</label><br />
+                    }
+                    else
+                    {
+                        <input type="checkbox" data-accountid="@aList.AccountId" data-methodid="@aList.MethodId" data-paymenttypeid="@list.PaymentTypeId" id="check_@aList.AccountId" /> <label for="check_@aList.AccountId">@aList.AccountName</label><br />
+                    }
+                }
+            }
+        </div>
+    }
+}
+else
+{
+    <h4>There is no record to display</h4>
+}
+<script>
+    $('input[type="checkbox"]').on('change', function () {
+        $(this).siblings('input[type="checkbox"]').prop('checked', false);
+        if ($(this).prop('checked') == false)
+        {
+            $(this).removeClass("default");
+        }
+        else {
+            $(this).siblings().removeClass("default");
+            $(this).addClass("default");
+        }
+      
+    });
+
+    $('input[type="radio"]').on('click', function () {
+        $(this).siblings().removeClass("default");
+        $(this).addClass("default");
+    });
+
+
+
+</script>

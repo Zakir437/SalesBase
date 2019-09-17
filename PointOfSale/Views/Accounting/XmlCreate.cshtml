@@ -1,0 +1,29 @@
+﻿@model IEnumerable<PointOfSale.Models.EmpSalaryPayment>
+@{
+    ViewBag.Title = "XmlCreate";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var count = 0;
+}
+
+@if (Model.Any())
+{
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>TotalAmount</th>
+            <th>PaidAmount</th>
+            <th>DueAmount</th>
+        </tr>
+        @foreach (var list in Model)
+        {
+            count++;
+            <tr>
+                <td>@count. </td>
+                <td>@list.TotalAmount</td>
+                <td>@list.DueAmount</td>
+                <td>@list.PaidAmount</td>
+            </tr>
+        }
+    </table>
+}
+

@@ -1,0 +1,121 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin : 2%;">
+    <div id="divTypeForm"></div>
+    <div class="k-edit-buttons k-state-default">
+        @if (ViewBag.Id > 0)
+         {
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnWTypeCreate"><span class="k-icon k-update"></span>Update</button>
+         }
+        else
+        {
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnWTypeCreate"><span class="k-icon k-update"></span>Create</button>
+        }
+        <button type="reset" class="k-button k-button-icontext k-grid-update" id="btnWTypeRefresh"><span class="k-icon k-i-refresh"></span>Refresh</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnWTypeCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#divTypeForm").append('<div class="tiny_loading"></div>');
+        $("#divTypeForm").load('/Inventory/WasteTypeCreatePartial?id=' + '@ViewBag.Id');
+    });
+    $("#btnWTypeRefresh").click(function () {
+        $("#divTypeForm").empty();
+        $("#divTypeForm").append('<div class="tiny_loading"></div>');
+        $("#divTypeForm").load('/Inventory/WasteTypeCreatePartial?id=' + '@ViewBag.Id');
+    });
+
+    $("#btnWTypeCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+
+    var validation = $("#divTypeForm").kendoValidator({
+        rules: {
+            name: function (input) {
+                var remoteAttr = input.attr("data-val-remote-url");
+                if (typeof remoteAttr === typeof undefined || remoteAttr === false) {
+                    return true;
+                }
+                var isInvalid;
+                var data = {};
+                var Id = $("#Id").val();
+                var Name = $.trim($("#TypeName").val());
+                data = { Id: Id, Name: Name };
+                $.ajax({
+                    url: remoteAttr,
+                    mode: "abort",
+                    port: "validate" + input.attr('name'),
+                    dataType: "json",
+                    type: input.attr("data-val-remote-type"),
+                    data: data,
+                    async: false,
+                    success: function (response) {
+                        isInvalid = response;
+                        if (isInvalid === true) {
+                            isInvalid = true;
+                        }
+                        else {
+                            isInvalid = false;
+                        }
+                    }
+                });
+                return isInvalid;
+            }
+        },
+        messages: {
+            name: function (input) {
+                return input.data('val-remote');
+            }
+        }
+    }).data("kendoValidator");
+
+    $("#btnWTypeCreate").click(function () {
+
+        if (validation.validate())
+        {
+            var sendData = {
+                Id: $("#Id").val(),
+                TypeName: $.trim($("#TypeName").val()),
+                Type: $("#Type").val(),
+                CreatedBy : userId
+            }
+            $.ajax({
+                url: '/Inventory/WTypeSave',
+                type: "POST",
+                data: sendData,
+                success: function (result) {
+                    $("#divTypeCreateWin").data("kendoWindow").close();
+                    if (result == "success") {
+                            clearBeforeClick();
+                            if (tab == 1) {
+                                $("#div_All").append('<div class="loading_partial"></div>');
+                                $("#div_All").load('/Inventory/WasteTypeList');
+                            }
+                            else if (tab == 2) {
+                                status = 1;
+                                $("#div_Active").append('<div class="loading_partial"></div>');
+                                $("#div_Active").load('/Inventory/WasteTypeList?status=' + status);
+
+                            }
+                            else if (tab == 3) {
+                                status = 0;
+                                $("#div_Inactive").append('<div class="loading_partial"></div>');
+                                $("#div_Inactive").load('/Inventory/WasteTypeList?status=' + status);
+                            }
+                            else if (tab == 4) {
+                                status = 2;
+                                $("#div_Deleted").append('<div class="loading_partial"></div>');
+                                $("#div_Deleted").load('/Inventory/WasteTypeList?status=' + status);
+                            }
+                    }
+                    else {
+                        alert("Save Error");
+                    }
+                }
+            });
+        }
+    });
+</script>
+
+
+
+

@@ -1,0 +1,36 @@
+﻿@model PointOfSale.Models.ViewStockProduct
+<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin-bottom:4%;margin-top:2%;">
+    <div id="divRefundCreate">
+         @if(Model.ProductId > 0)
+          {
+             <div class="editor-field" style="margin-right:7%">
+                 <span>Available products for return in stock:</span>
+                 <ul style="margin-left:40px;">
+                     <li>@Model.ProductName | @Model.Quantity</li>
+                 </ul>
+             </div>
+            
+          }
+        <div class="editor-label"><label for="ReturnQuantity">Quantity</label></div>
+        <div class="editor-field">
+            @Html.Editor("ReturnQuantity", new { htmlattributes = new { @class = "k-textbox form-control", @min = "1", @max = ViewBag.ReturnQuantity, @validationMessage = "Please enter valid quantity", @type = "number" } })
+           
+            @*<span>Tk</span> <button class="btn btn-default" id="btnCardTotalPaid"><i class="fa fa-money" aria-hidden="true"></i></button>
+            <button class="btn btn-default" id="btnBackInCard"><i class="fa fa-arrow-circle-left"></i></button>*@
+            @Html.ValidationMessage("ReturnQuantity", "", new { @class = "text-Danger" })
+        </div>
+        @*<span>Are you sure want to return this products?</span>*@
+    </div>
+    <div class="k-edit-buttons k-state-default">
+        <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnRefundConfirm"><span class="k-icon k-update"></span>Confirm</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnReturnAlertCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+    $("#btnReturnAlertCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+
+    var validation = $("#divRefundCreate").kendoValidator().data("kendoValidator");
+
+</script>

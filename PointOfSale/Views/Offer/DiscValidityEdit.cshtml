@@ -1,0 +1,115 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin:2%;">
+    <div id="divDiscValidityForm"></div>
+    <div class="k-edit-buttons k-state-default">
+        <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnDiscValidityUpdate"><span class="k-icon k-update"></span>Update</button>
+        <button type="reset" class="k-button k-button-icontext k-grid-update" id="btnDiscValidityRefresh"><span class="k-icon k-i-refresh"></span>Refresh</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnDiscValidityCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+    var start;
+    var end;
+    $(document).ready(function () {
+        $("#divDiscValidityForm").append('<div class="tiny_loading"></div>');
+        $("#divDiscValidityForm").load('/Offer/DiscValidityEditPartial');
+    });
+    $("#btnDiscValidityRefresh").click(function () {
+        $("#divDiscValidityForm").empty();
+        $("#divDiscValidityForm").append('<div class="tiny_loading"></div>');
+        $("#divDiscValidityForm").load('/Offer/DiscValidityEditPartial');
+    });
+
+    $("#btnDiscValidityCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+
+    var validation = $("#divDiscValidityForm").kendoValidator({
+        rules: {
+            dateTimepicker: function (input) {
+                if (input.is("[data-role=datetimepicker]")) {
+                    return input.data("kendoDateTimePicker").value();
+                } else {
+                    return true;
+                }
+            }
+        },
+        messages: {
+            dateTimepicker: "Please enter valid date!"
+        }
+    }).data("kendoValidator");
+
+    $("#btnDiscValidityUpdate").click(function () {
+
+        if (validation.validate())
+        {
+            $(this).prop('disabled', true);
+            var offer;
+            offer = {
+                StartDate: $("#StartDate").val(),
+                EndDate: $("#EndDate").val(),
+                ValidityDays: $("#ValidityDays").val(),
+                ValidityTime: $("#ValidityTime").val(),
+                IsDateValidity: $("#checkDate").is(":checked"),
+                CreatedBy: userId, 
+                SelectedIds: '@ViewBag.SelectedIds'
+            }
+
+            $.ajax({
+                url: '/Offer/DiscountItemUpdate',
+                type: "POST",
+                data: offer,
+                success: function (result) {
+                    $("#divValidityEditWin").data("kendoWindow").close();
+                    if (result == "success") {
+                        multiSelectIds = "";
+                        loadProductList();
+                    }
+                    else {
+                        alert("Save Error");
+                    }
+                }
+            });
+        }
+    });
+
+    //***************************Date validation ******************************
+    function onStartChange() {
+        var startDate = start.value(),
+            endDate = end.value();
+
+        if (startDate) {
+            startDate = new Date(startDate);
+            startDate.setDate(startDate.getDate());
+            end.min(startDate);
+        } else if (endDate) {
+            start.max(new Date(endDate));
+        } else {
+            endDate = new Date();
+            start.max(endDate);
+            end.min(endDate);
+        }
+    }
+
+    function onEndChange() {
+        var endDate = end.value(),
+            startDate = start.value();
+
+        if (endDate) {
+            endDate = new Date(endDate);
+            endDate.setDate(endDate.getDate());
+            start.max(endDate);
+        } else if (startDate) {
+            end.min(new Date(startDate));
+        } else {
+            endDate = new Date();
+            start.max(endDate);
+            end.min(endDate);
+        }
+    }
+
+</script>
+
+
+
+
+

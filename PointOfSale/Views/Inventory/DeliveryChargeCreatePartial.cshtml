@@ -1,0 +1,46 @@
+﻿@model PointOfSale.ModelViews.Inventory.DeliveryChargeModelView
+@Html.HiddenFor(a => a.Id)
+<style>
+    .radio{
+        display:inline;
+    }
+</style>
+<div class="editor-label"><label>Price Range</label></div>
+<div class="editor-field">
+    <table class="table" style="margin-bottom:0px;">
+        <tr>
+            <td width="45%" style="padding:0px;">
+                @Html.EditorFor(model => model.FromPrice, new { htmlattributes = new { @class = "k-textbox", @style = "width:100%; max-width:100%" } })
+                @Html.ValidationMessageFor(model => model.FromPrice, "", new { @class = "text-Danger" })
+            </td>
+            <td style="text-align:center; padding:0px; padding-top:7px;" width="10%">To</td>
+            <td width="45%" style="padding:0px;">
+                @Html.EditorFor(model => model.ToPrice, new { htmlattributes = new { @class = "k-textbox", @style = "width:100%; max-width:100%" } })
+                @Html.ValidationMessageFor(model => model.ToPrice, "", new { @class = "text-Danger" })
+            </td>
+        </tr>
+    </table>
+</div>
+<div class="editor-label"><label>Type</label></div>
+<div class="editor-field" style="margin-top:7px;">
+    <div class="radio" style="margin-right: 10px;">
+        <label><input type="radio" name="optradio" id="checkStatic" checked>Static</label>
+    </div>
+    <div class="radio">
+        <label><input type="radio" name="optradio" id="checkPercentile">Percentile</label>
+    </div>
+</div>
+<div class="editor-label"><label>Amount</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.Amount, new { htmlattributes = new { @class = "k-textbox", min="0", @style = "width:100%; max-width:100%" } })
+    @Html.ValidationMessageFor(model => model.Amount, "", new { @class = "text-Danger" })
+</div>
+@if(Model != null)
+{
+    if(Model.IsParcentile == true)
+    {
+        <script>
+            $("#checkPercentile").prop('checked', true);
+        </script>
+    }
+}

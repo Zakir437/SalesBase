@@ -1,0 +1,128 @@
+﻿@{
+    ViewBag.Title = "AccountGroup";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<h2>Account Holder</h2>
+<br />
+<div class="row">
+    <div class="col-md-12">
+        <button class="btn btn-default" id="btn_Acc_Create"><i class="fa fa-plus-circle" aria-hidden="true"></i> Add</button>
+    </div>
+</div>
+<div class="row" style="margin-top:5px;">
+    <div class="col-md-12">
+        <div id="divAccList"></div>
+    </div>
+</div>
+<div id="div_Acc_Create_Win"></div>
+<div id="div_Acc_Info_Win"></div>
+<script>
+    var accId = 0;
+    $(document).ready(function () {
+        $("#divAccList").append('<div class="loading_partial"></div>');
+        $("#divAccList").load('@Url.Action("_ShowAllAcc_Group", "Accounting")');
+    });
+
+    $("#btn_Acc_Create").click(function () {
+        $("#div_Acc_Create_Win").kendoWindow({
+            actions: ["Close"],
+            draggable: true,
+            modal: true,
+            visible: false,
+            pinned: false,
+            position: { top: 100, left: 100 },
+            title: 'Add New Account Group',
+            content: "/Accounting/AddAccountGroup",
+            close: onWindowClose
+        });
+        $("#div_Acc_Create_Win").data("kendoWindow").maximize().open();
+        document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+        document.body.scroll = "no"; // i
+    });
+
+    $("#divAccList").on("click", ".btn_acc_grp_details", function () {
+        accId = $(this).data("id");
+        location.href = '@Url.Action("AccountDetails", "Accounting")?q='+getDataEncrypted("AccId=" + accId);
+    });
+
+    $("#divAccList").on("click", ".btn_acc_grp_info", function () {
+        accId = $(this).data("id");
+        var accName = $(this).data("name");
+
+        $("#div_Acc_Info_Win").empty();
+        $("#div_Acc_Info_Win").kendoWindow({
+            actions: ["Close"],
+            draggable: true,
+            modal: true,
+            visible: false,
+            width: 939,
+            height:498,
+            title: 'Account Info',
+            close: onWindowClose,
+            resizable:false
+        });
+        var accInfoWin = $("#div_Acc_Info_Win").data("kendoWindow");
+        accInfoWin.refresh('@Url.Action("AccountInfo", "Accounting")?AccId=' + accId);
+        accInfoWin.open().center();
+        document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+        document.body.scroll = "no"; // ie
+    });
+
+     //****************************************************** Account Name Delete Function ********************************************************************************
+    @*$("#divAccList").on("click", ".btn_acc_grp_delete", function (e) {
+        e.preventDefault();
+        accId = $(this).data("id");
+        var name = $(this).data("name");
+        var kendoWindow = $("<div />").kendoWindow({
+            actions: ["Close"],
+            title: "Alert",
+            resizable: false,
+            width: "30%",
+            modal: true,
+            close: onWindowClose
+        });
+        message = "Are you sure want to delete this account name?";
+        var template = kendo.template($("#temp_for_confirmation").html());
+        kendoWindow.data("kendoWindow").content(template).center().open();
+        document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+        document.body.scroll = "no"; // ie only
+        kendoWindow.find("#btn_confirm_cancel").click(function () {
+            kendoWindow.data("kendoWindow").close();
+        }).end();
+        kendoWindow.find("#btn_confirm_ok").click(function () {
+            kendoWindow.data("kendoWindow").close();
+            deleteAccount(id, name);
+        }).end();
+    });
+
+    function deleteAccount(id, name) {
+        notification.show({ message: "Account name is deleting...", showTime: startTime() }, "upload-progress");
+        $.ajax({
+            url: '@Url.Action("DeleteAccountName", "Accounting")',
+            type: 'Post',
+            data: { id: id, name: name, userId: userId },
+            success: function (data) {
+                notification.hide(); notification.setOptions({ autoHideAfter: 5000 });
+                if (data === "Success") {
+                    notification.show({ message: "Account name '" + name + "' deletion was successful. ", showTime: startTime() }, "upload-success");
+                    $("#Div_Acc_Group").empty();
+                    $("#Div_Acc_Group").append('<div class="loading_partial"></div>');
+                    $("#Div_Acc_Group").load('@Url.Action("_ShowAllAcc_Group", "Accounting")');
+
+                } else {
+                    var msg = (data !== "Error") ? data : "Account name '" + name + "' deletion was successful. ";
+                    notification.show({ message: msg, showTime: startTime() }, "upload-error");
+                }
+            },
+            error: function (error) {
+                notification.hide(); notification.setOptions({ autoHideAfter: 5000 });
+                notification.show({ message: "Error occurred.", showTime: startTime() }, "upload-warning");
+            }
+        });
+    }*@
+
+
+
+
+
+</script>

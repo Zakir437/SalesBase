@@ -1,0 +1,124 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin-bottom:4%;margin-top:2%;">
+    <div id="div_Category_Create"></div>
+    <div class="k-edit-buttons k-state-default" style="margin-left:30px;">
+        @if (ViewBag.CategoryId > 0)
+        {
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnCategoryCreate"><span class="k-icon k-update"></span>Update</button>
+        }
+        else
+        {
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnCategoryCreate"><span class="k-icon k-update"></span>Create</button>
+        }
+        <button type="reset" class="k-button k-button-icontext k-grid-update" id="btnRefresh"><span class="k-icon k-i-refresh"></span>Refresh</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#div_Category_Create").empty();
+        $("#div_Category_Create").append('<div class="tiny_loading"></div>');
+        $("#div_Category_Create").load('@Url.Action("CategoryCreatePartial", "Configuration")?id=' + '@ViewBag.CategoryId');
+    });
+
+    $("#btnRefresh").click(function () {
+        $("#div_Category_Create").empty();
+        $("#div_Category_Create").append('<div class="tiny_loading"></div>');
+        $("#div_Category_Create").load('@Url.Action("CategoryCreatePartial", "Configuration")?id=' + '@ViewBag.CategoryId');
+    });
+
+     $("#btnCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+
+     var validation = $("#div_Category_Create").kendoValidator({
+        rules: {
+            remoteCategoryName: function (input) {
+                var remoteAttr = input.attr("data-val-remote-url");
+                if (typeof remoteAttr === typeof undefined || remoteAttr === false) {
+                    return true;
+                }
+                var isInvalid;
+                var data = {};
+                var Id = $("#CategoryId").val();
+                var CategoryName = $.trim($("#CategoryName").val());
+                data = { Id: Id, CategoryName: CategoryName };
+                $.ajax({
+                    url: remoteAttr,
+                    mode: "abort",
+                    port: "validate" + input.attr('name'),
+                    dataType: "json",
+                    type: input.attr("data-val-remote-type"),
+                    data: data,
+                    async: false,
+                    success: function (response) {
+                        isInvalid = response;
+                        if (isInvalid === true) {
+                            isInvalid = true;
+                        }
+                        else {
+                            isInvalid = false;
+                        }
+                    }
+                });
+                return isInvalid;
+            }
+        },
+        messages: {
+            remoteCategoryName: function (input) {
+                return input.data('val-remote');
+            }
+        }
+    }).data("kendoValidator");
+
+    $("#btnCategoryCreate").click(function () {
+        if(validation.validate())
+        {
+            var sendData = {
+                CategoryId: $("#CategoryId").val(),
+                CategoryName: $("#CategoryName").val(),
+                RestrictionId: $("#RestrictionId").val(),
+                CreatedBy : userId
+            }
+            $.ajax({
+                url: '@Url.Action("CategorySave", "Configuration")',
+                type: "POST",
+                data: sendData,
+                success: function (data) {
+                    $("#divCategoryWindow").data("kendoWindow").close();
+                    if (data = "success") {
+                        if (tab == 1)
+                        {
+                            $("#div_All").empty();
+                            $("#div_All").append('<div class="loading_partial"></div>');
+                            $("#div_All").load('@Url.Action("CategoryList", "Configuration")');
+                        }
+                        else if (tab == 2)
+                        {
+                            status = 1;
+                            passdata = { status: status };
+                            $("#div_Active").append('<div class="loading_partial"></div>');
+                            $("#div_Active").load('@Url.Action("CategoryList", "Configuration")', passdata);
+                        }
+                        else if (tab == 3)
+                        {
+                            status = 0;
+                            passdata = { status: status};
+                            $("#div_Inactive").append('<div class="loading_partial"></div>');
+                            $("#div_Inactive").load('@Url.Action("CategoryList", "Configuration")', passdata);
+                        }
+                        else if (tab == 4)
+                        {
+                            status = 2;
+                            passdata = { status: status };
+                            $("#div_Deleted").append('<div class="loading_partial"></div>');
+                            $("#div_Deleted").load('@Url.Action("CategoryList", "Configuration")', passdata);
+                        }
+                    }
+                    else {
+                        alert("Upload Error...");
+                    }
+                }
+            });
+        }
+    });
+</script>

@@ -1,0 +1,31 @@
+﻿@model PointOfSale.ModelViews.MiscFuncModel
+@Html.HiddenFor(a => a.MiscId)
+@Html.HiddenFor(a => a.TaxFunction)
+<div class="editor-field" style="margin-right:12%">
+    <label class="radio-inline">
+        <input type="radio" name="mode" id="onActual" style="cursor:pointer"><span style="cursor:pointer">On Actual Amount</span>
+    </label>
+    <label class="radio-inline">
+        <input type="radio" name="mode" id="onDiscount" style="cursor:pointer"><span style="cursor:pointer">On Discounted Amount</span>
+    </label>
+</div>
+<script>
+    $(document).ready(function () {
+        if("@Model.TaxFunction" == "True")
+        {
+            $("#onActual").prop('checked', true)
+        }
+        else {
+            $("#onDiscount").prop('checked', true)
+        }
+    });
+
+    $("#onActual").click(function () {
+        $("#TaxFunction").val(true);
+    });
+
+    $("#onDiscount").click(function () {
+        $("#TaxFunction").val(false);
+    });
+
+</script>

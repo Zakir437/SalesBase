@@ -1,0 +1,57 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewPosOrder>
+@using System.Globalization;
+@{
+    ViewBag.Title = "PrintSaleReport";
+    Layout = "~/Views/Shared/_LayoutPrintPage.cshtml";
+    var count = 0;
+}
+<section class="content-header" style="text-align:center;">
+    <h3>Sales Report</h3>
+    <p>Cost-POS</p>
+    <hr />
+</section>
+<div class="row">
+    <div class="col-xs-offset-6 col-xs-6 text-left">
+        <p>
+            Generate By : @HttpContext.Current.Request.Cookies["CookieUserInfo"].Values["UserName"]<br>
+            Generate Date : @DateTime.Now.ToString("MMM dd yyyy hh:mm:ss tt") <br>
+            Total Sale : @Model.Sum(a => a.InvoiceAmount).ToString("C", new CultureInfo("bn-BD"))<br />
+            Total Item : @Model.Count()
+        </p>
+    </div>
+    <div class="col-xs-offset-6 col-xs-6 text-right">
+        <p>
+            From Date : @ViewBag.FromDate.ToString("MMM dd yyyy hh:mm:ss tt") <br />
+            To Date : @ViewBag.ToDate.ToString("MMM dd yyyy hh:mm:ss tt") <br />
+        </p>
+    </div>
+</div>
+<div class="row" style="margin-top:10px;">
+    <div class="col-md-12">
+        <table class="table table-bordered">
+            <tr>
+                <th>SL.</th>
+                <th>Order No</th>
+                <th>Created By</th>
+                <th>Total Cost</th>
+                <th>Date</th>
+            </tr>
+            @foreach (var list in Model)
+             {
+                count++;
+                <tr>
+                    <td>@count . </td>
+                    <td>@list.OrderNumber</td>
+                    <td>@list.CreatedBy</td>
+                    <td>@list.InvoiceAmount.ToString("C", new CultureInfo("bn-BD"))</td>
+                    <td>@Convert.ToDateTime(list.OrderDate).ToString("MMM dd yyyy hh:mm:ss tt")</td>
+                </tr>
+             }
+        </table>
+    </div>
+</div>
+<script>
+    window.onload = function () {
+        window.print();
+    }
+</script>

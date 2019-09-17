@@ -1,0 +1,129 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin-bottom:4%;margin-top:2%;">
+    <div id="divCreditLimitForm"></div>
+    <div class="k-edit-buttons k-state-default" style="margin-left:30px;">
+        @if (ViewBag.Id > 0)
+        {
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnCreditLimitCreate"><span class="k-icon k-update"></span>Update</button>
+        }
+        else
+        {
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnCreditLimitCreate"><span class="k-icon k-update"></span>Create</button>
+        }
+        <button type="reset" class="k-button k-button-icontext k-grid-update" id="btnCreditLimitRefresh"><span class="k-icon k-i-refresh"></span>Refresh</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnCreditLimitCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#divCreditLimitForm").append('<div class="tiny_loading"></div>');
+        $("#divCreditLimitForm").load('@Url.Action("CreditLimitCreatePartial", "Configuration")?id=' + '@ViewBag.Id');
+    });
+    $("#btnCreditLimitRefresh").click(function () {
+        $("#divCreditLimitForm").empty();
+        $("#divCreditLimitForm").append('<div class="tiny_loading"></div>');
+        $("#divCreditLimitForm").load('@Url.Action("CreditLimitCreatePartial", "Configuration")?id=' + '@ViewBag.Id');
+    });
+
+    $("#btnCreditLimitCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+
+    var validation = $("#divCreditLimitForm").kendoValidator({
+        rules: {
+            remoteName: function (input) {
+                var remoteAttr = input.attr("data-val-remote-url");
+                if (typeof remoteAttr === typeof undefined || remoteAttr === false) {
+                    return true;
+                }
+                var isInvalid;
+                var data = {};
+                var Id = $("#Id").val();
+                var Name = $.trim($("#Name").val());
+                data = { Id: Id, Name: Name };
+                $.ajax({
+                    url: remoteAttr,
+                    mode: "abort",
+                    port: "validate" + input.attr('name'),
+                    dataType: "json",
+                    type: input.attr("data-val-remote-type"),
+                    data: data,
+                    async: false,
+                    success: function (response) {
+                        isInvalid = response;
+                        if (isInvalid === true) {
+                            isInvalid = true;
+                        }
+                        else {
+                            isInvalid = false;
+                        }
+                    }
+                });
+                return isInvalid;
+            }
+        },
+        messages: {
+            remoteName: function (input) {
+                return input.data('val-remote');
+            }
+        }
+    }).data("kendoValidator");
+
+    $("#btnCreditLimitCreate").click(function () {
+
+        if (validation.validate())
+        {
+            $(this).prop('disabled', true);
+
+            var sendData = {
+                Id: $("#Id").val(),
+                Name: $.trim($("#Name").val()),
+                Limit: $.trim($("#Limit").val()),
+                CreatedBy : userId
+            }
+            $.ajax({
+                url: '@Url.Action("CreditLimitSave", "Configuration")',
+                type: "POST",
+                data: sendData,
+                success: function (result) {
+                    $("#divCreditLimitWin").data("kendoWindow").close();
+                    if (result == "success") {
+                        if (tab == 1)
+                        {
+                            $("#div_All").empty();
+                            $("#div_All").append('<div class="loading_partial"></div>');
+                            $("#div_All").load('@Url.Action("CreditLimitList", "Configuration")');
+                        }
+                        else if (tab == 2)
+                        {
+                            status = 1;
+                            passdata = { status: status };
+                            $("#div_Active").append('<div class="loading_partial"></div>');
+                            $("#div_Active").load('@Url.Action("CreditLimitList", "Configuration")', passdata);
+                        }
+                        else if (tab == 3)
+                        {
+                            status = 0;
+                            passdata = { status: status};
+                            $("#div_Inactive").append('<div class="loading_partial"></div>');
+                            $("#div_Inactive").load('@Url.Action("CreditLimitList", "Configuration")', passdata);
+                        }
+                        else if (tab == 4)
+                        {
+                            status = 2;
+                            passdata = { status: status };
+                            $("#div_Deleted").append('<div class="loading_partial"></div>');
+                            $("#div_Deleted").load('@Url.Action("CreditLimitList", "Configuration")', passdata);
+                        }
+                    }
+                    else {
+                        alert("Save Error");
+                    }
+                }
+            });
+        }
+    });
+</script>
+
+
+
+

@@ -1,0 +1,53 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewOrderTransaction>
+<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" style="margin:2%;">
+    <div id="divRefundCreate" style="text-align:center">
+        @if (ViewBag.IsRefundableItemExist == true)
+         {
+            if (Model.Any())
+            {
+                var count = 0;
+                <span>Invoice includes the following non refundable items :</span><br />
+                foreach (var product in Model)
+                {
+                    count++;
+                    <span>@count. @product.ProductName</span><br />
+                }
+            }
+            <span>Are you sure want to refund this order?</span>
+         }
+        else
+        {
+            <span>Refundable items are not available</span>
+        }
+    </div>
+    <div class="k-edit-buttons k-state-default">
+        @if (ViewBag.IsRefundableItemExist == true)
+         {
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnRefundConfirm"><span class="k-icon k-update"></span>Confirm</button>
+         }
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnRefundAlertCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+    $("#btnRefundAlertCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+    @*$("#btnRefundConfirm").click(function () {
+        $.ajax({
+            url: '@Url.Action("RefundOrder","PointOfSale")',
+            type: "POST",
+            data: { orderId: @ViewBag.OrderId, userId: userId },
+            success: function (data)
+            {
+                if (data == "success")
+                {
+                    $("#divRefundAlertWin").data("kendoWindow").close();
+                    $('.ranges li').first().click();
+                }
+                else {
+                    alert("Refund error...");
+                }
+            }
+        });
+    });*@
+</script>

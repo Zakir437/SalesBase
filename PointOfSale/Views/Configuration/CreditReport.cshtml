@@ -1,0 +1,257 @@
+﻿@model PointOfSale.Models.ViewSupplier
+@using PointOfSale.Helpers
+@using System.Globalization
+@{
+    ViewBag.Title = "CreditReport";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+    PointOfSale.Models.PointOfSale_DBEntities db = new PointOfSale.Models.PointOfSale_DBEntities();
+    var importList = db.ViewStockImports.Where(a => a.SupplierId == Model.SupplierId).ToList();
+    decimal totalPurchase = 0;
+    decimal totalDue = 0;
+    long totalImport = 0;
+    decimal averageImportValue = 0;
+    if (importList.Any())
+    {
+        totalPurchase = importList.Sum(a => a.TotalCost);
+        if (importList.Any(a => a.DueAmount > 0))
+        {
+            totalDue = importList.Where(a => a.DueAmount > 0).Sum(a => a.DueAmount);
+        }
+        totalImport = importList.Count();
+        averageImportValue = totalPurchase / totalImport;
+    }
+}
+<link href="~/Content/numpad.css" rel="stylesheet" />
+<link href="~/Content/myCss.css" rel="stylesheet" />
+<link href="~/Content/Hover/hover.css" rel="stylesheet" />
+<style>
+    hr{
+        margin:0px;
+    }
+    h3 {
+        margin-top: 10px;
+    }
+</style>
+<section class="content">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4 class="uppercase">
+                    @if (Model.Type == true)
+                    {
+                        <span>Supplier Credit Invoice</span>
+                    }
+                    else
+                    {
+                        <span>Associate Credit iffo</span>
+                    }
+                </h4>
+            </div>
+            <div class="pull-right">
+                <a class="btn btn-default" href="@Html.EncodedParam("CreditPaymentLedger", "Configuration", new { supplierId = Model.SupplierId }, null)">Credit Payment Ledger</a>
+                <a class="btn btn-default" href="@Html.EncodedParam("CreditPaymentHistory", "Configuration", new { supplierId = Model.SupplierId }, null)">Credit Payment History</a>
+                <a class="btn btn-default" href="@Html.EncodedParam("SupplierInvoiceInfo", "Configuration", new { supplierId = Model.SupplierId }, null)"><i class="fa fa-arrow-left"></i> Back</a>
+            </div>
+        </div>
+        <div class="panel-body" style="padding:0px 0px 0px 15px;">
+            <h3>@Model.Name</h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <dl class="dl-horizontal">
+                        <dt>Phone</dt>
+                        <dd>@Model.Phone</dd>
+                        @if (Model.Email != null)
+                        {
+                            <dt>E-mail</dt>
+                            <dd>@Model.Email</dd>
+                        }
+                        @if (Model.SupplierSince != null)
+                        {
+                            <dt>Supplier Since</dt>
+                            <dd>@Convert.ToDateTime(Model.SupplierSince).ToString("yyyy MMMM")</dd>
+                        }
+                        <dt>CreatedBy</dt>
+                        <dd>@Model.CreatedBy</dd>
+                        <dt>CreatedDate</dt>
+                        <dd>@Convert.ToDateTime(Model.CreatedDate).ToString("MMM dd,yyyy")</dd>
+                        <dt>UpdatedBy</dt>
+                        <dd>@Model.UpdatedBy</dd>
+                        <dt>UpdatedDate</dt>
+                        <dd>
+                            @if (Model.UpdatedDate != null)
+                            {
+                                @Convert.ToDateTime(Model.CreatedDate).ToString("MMM dd,yyyy")
+                            }
+                            else
+                            {
+                                <span>not yet updated</span>
+                            }
+                        </dd>
+                        <dt>Address</dt>
+                        <dd>@Model.Address</dd>
+                    </dl>
+                </div>
+                <div class="col-md-6">
+                    <dl class="dl-horizontal">
+                        <dt>Debit Amount</dt>
+                        <dd>
+                            @if (Model.DebitAmount > 0)
+                            {
+                                @Model.DebitAmount.Value.ToString("C", new CultureInfo("bn-BD"))
+                            }
+                            else
+                            {
+                                <span>0.00</span>
+                            }
+                        </dd>
+                        <dt>Total Purchase</dt>
+                        <dd>@totalPurchase.ToString("C", new CultureInfo("bn-BD"))</dd>
+                        <dt>Total Due</dt>
+                        <dd>@totalDue.ToString("C", new CultureInfo("bn-BD"))</dd>
+                        <dt>Total Import</dt>
+                        <dd>@totalImport</dd>
+                        <dt>Average Import Value</dt>
+                        <dd>@averageImportValue.ToString("C", new CultureInfo("bn-BD"))</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+        <hr />
+        <div class="panel-body">
+            <div id="divCreditReportList"></div>
+        </div>
+    </div>
+</section>
+<div id="divImportDetailsWin"></div>
+<div id="divImportPayWin"></div>
+<script>
+    var importId = 0, totalDue = 0, isTotalPay = false;
+    $(document).ready(function () {
+        $("#liForCRM").addClass('active');
+        if ('@Model.Type' == 'True')
+        {
+            $("#liForSupplier").addClass('active');
+        }
+        else
+        {
+            $("#liForAssociate").addClass('active');
+        }
+
+         $("#divCreditReportList").empty();
+         $("#divCreditReportList").append('<div class="loading_partial"></div>');
+         $("#divCreditReportList").load('@Url.Action("CreditReportList", "Configuration")?supplierId=' + @Model.SupplierId);
+    });
+
+    //View Import transaction details
+     $("#divCreditReportList").on('click', ".btnImportDetails", function () {
+        importId = $(this).data("id");
+        $("#divImportDetailsWin").empty();
+        $("#divImportDetailsWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 892,
+            height: 582,
+            title: 'Import Transaction',
+            resizable: false
+        });
+        var impTranWin = $("#divImportDetailsWin").data("kendoWindow");
+        impTranWin.refresh('@Url.Action("ImportTransaction", "PointOfSale")?importId=' + importId);
+        impTranWin.center().open();
+    });
+
+    //import Credit pay indivisually
+     $("#divCreditReportList").on('click', '.btnPay', function () {
+        isTotalPay = false;
+        importId = $(this).data("id");
+        totalDue = parseFloat($(this).data("due")).toFixed(2);
+        $("#divImportPayWin").empty();
+        $("#divImportPayWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            title: 'Pay',
+            resizable: false
+        });
+        var importPayWin = $("#divImportPayWin").data("kendoWindow");
+        importPayWin.refresh('@Url.Action("ImportCreditPay", "Stock")?totalDue=' + totalDue + '&supplierId=' + @Model.SupplierId);
+        importPayWin.center().open().maximize();
+     });
+
+    //import Credit total pay
+     $("#divCreditReportList").on('click', '.btnTotalPay', function () {
+        isTotalPay = true;
+        totalDue = @totalDue;
+        importId = 0;
+        $("#divImportPayWin").empty();
+        $("#divImportPayWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            title: 'Pay',
+            resizable: false
+        });
+        var importPayWin = $("#divImportPayWin").data("kendoWindow");
+        importPayWin.refresh('@Url.Action("ImportCreditPay", "Stock")?totalDue=' + totalDue + '&supplierId=' + @Model.SupplierId);
+        importPayWin.center().open().maximize();
+     });
+
+     //Import Credit pay save
+      $("#divImportPayWin").on('click', "#btnPay", function () {
+        var payments = [];
+        $(".amountInTransaction").each(function () {
+            if ($(this).data("id") == 1) {
+                payments.push({
+                    PaymentTypeId: 1,
+                    PaymentBodyId: parseInt($(this).data("cashbodyid")),
+                    AmountPaid: cashAmount
+                });
+            }
+            else if ($(this).data("id") == 2) {
+                payments.push({
+                    PaymentTypeId: 2,
+                    PaymentBodyId: parseInt($(this).data("cardbodyid")),
+                    AmountPaid: parseFloat($(this).data("cardamount")),
+                    TransactionNo: $(this).data("transactionno")
+                });
+            }
+            else if ($(this).data("id") == 3) {
+                payments.push({
+                    PaymentTypeId: 3,
+                    PaymentBodyId: parseInt($(this).data("bkashbodyid")),
+                    AmountPaid: parseFloat($(this).data("bkashamount")),
+                    TransactionNo: $(this).data("transactionno")
+                });
+            }
+            else if ($(this).data("id") == 4) {
+                payments.push({
+                    PaymentTypeId: 6,
+                    PaymentBodyId: parseInt($(this).data("checkbodyid")),
+                    AmountPaid: parseFloat($(this).data("checkamount")),
+                    TransactionNo: $(this).data("transactionno")
+                });
+            }
+        });
+
+        $.ajax({
+            url: '@Url.Action("ImportCreditPaySave", "Stock")',
+            type: 'POST',
+            data: JSON.stringify({ UserId: userId, MethodId: methodId, Payments: payments, SupplierId: @Model.SupplierId, ImportId: importId, IsTotalPay: isTotalPay }),
+            contentType: 'application/json',
+            success: function (data) {
+                if (data == "success") {
+                    window.location.reload();
+                }
+                else {
+                    alert("Import credit payment save error...");
+                }
+            }
+        });
+      });
+
+
+
+</script>

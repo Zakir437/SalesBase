@@ -1,0 +1,114 @@
+﻿@model PointOfSale.Models.ViewIndentMRR
+@{
+    ViewBag.Title = "IndentMRRDetails";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+}
+<style>
+    .label {
+        font-size: 90%;
+    }
+</style>
+@*<section class="content-header">
+    <ol class="breadcrumb">
+        <li><a href=""><i class="fa fa-shopping-cart"></i> Inventory</a></li>
+        <li class="active"><a href=""><i class="fa fa-list-ul"></i> Indent MRR Details</a></li>
+    </ol>
+</section>*@
+<section class="content">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4 class="uppercase">Indent MRR Details</h4>
+            </div>
+            <div class="pull-right">
+                <a class="btn btn-default" href="/Inventory/ImportByIndentMRR"><i class="fa fa-arrow-left"></i> Back</a>
+            </div>
+        </div>
+        <div class="panel-body">
+            <h2>@Model.MRR @if (Model.Status == 1)
+            { <button class="btn btn-success btnImportConfirm" data-toggle="tooltip" title="Import" data-id="@Model.Id"><i class="fa fa-check"></i></button>}</h2>
+            <dl class="dl-horizontal">
+                <dt>Indent Voucher</dt>
+                <dd>@Model.IndentVoucher</dd>
+                <dt>Created By</dt>
+                <dd>@Model.CreatedBy</dd>
+                <dt>Created Date</dt>
+                <dd>@Convert.ToDateTime(Model.CreatedDate).ToString("MMMM dd yyyy hh:mm:ss tt")</dd>
+                <dt>Status</dt>
+                <dd>
+                    @if (Model.Status == 1)
+                     {
+                        <span class="label label-primary">Pending Import</span>
+                     }
+                    else if (Model.Status == 2)
+                    {
+                        <span class="label label-success">Completed</span>
+                    }
+                </dd>
+            </dl>
+        </div>
+        <hr />
+        <div class="panel-body">
+            <div id="divMRRItemList"></div>
+        </div>
+    </div>
+</section>
+<script id="temp_win_voucherConfirm" type="text/x-kendo-template">
+    <div style="padding:1em;">
+        <p style="font-size: 14px; padding: 10px"> #=msg# </p>
+        <div style="text-align: right;">
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btn_VoucherConfirm_noty_ok"><span class="k-icon k-update"></span>OK</button>
+            <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btn_VoucherConfirm_noty_cancel"><span class="k-icon k-cancel"></span>Cancel</button>
+        </div>
+    </div>
+</script>
+<script>
+    var id = 0;
+    $(document).ready(function () {
+        $("#liForInventory").addClass('active');
+        $("#liForStock").addClass('active');
+
+        $("#divMRRItemList").append('<div class="loading_partial"></div>');
+        $("#divMRRItemList").load('@Url.Action("MRRItemList", "Inventory")?mrrId=' + "@Model.Id");
+    });
+    
+    //******************************** MRR IMPORT CONFIRM *****************************************************
+    $(".btnImportConfirm").click(function () {
+        id = $(this).data("id");
+        var kendoWindow = $("<div />").kendoWindow({
+            actions: ["Close"],
+            title: "Alert",
+            resizable: false,
+            width: "30%",
+            modal: true,
+            close: onWindowClose
+        });
+        msg = "Are you sure want to import this MRR?";
+        var template = kendo.template($("#temp_win_voucherConfirm").html());
+        kendoWindow.data("kendoWindow").content(template).center().open();
+        document.documentElement.style.overflow = 'hidden';
+        document.body.scroll = "no";
+        kendoWindow.find("#btn_VoucherConfirm_noty_cancel").click(function () {
+            kendoWindow.data("kendoWindow").close();
+        }).end();
+        kendoWindow.find("#btn_VoucherConfirm_noty_ok").click(function () {
+            $.ajax({
+                url: '/Inventory/IndentMRRImportSave',
+                type: 'POST',
+                data: { mrrId: id, createdBy: userId },
+                success: function (data) {
+                    if (data == "success") {
+                        window.location.reload();
+                    }
+                    else {
+                        alert("error");
+                    }
+                }
+            });
+            kendoWindow.data("kendoWindow").close();
+        }).end();
+    });
+
+</script>
+
+

@@ -1,0 +1,19 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin:2%;">
+    <div id="divqtyInfoList"></div>
+    <div class="k-edit-buttons k-state-default">
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnQtyInfoCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#divqtyInfoList").append('<div class="tiny_loading"></div>');
+        $("#divqtyInfoList").load('/Inventory/WarehouseQtyInfoList?id=' + '@ViewBag.Id');
+    });
+    $("#btnQtyInfoCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+</script>
+
+
+
+

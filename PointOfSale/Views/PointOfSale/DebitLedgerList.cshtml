@@ -1,0 +1,53 @@
+﻿@model IEnumerable<PointOfSale.ModelViews.Ledger>
+@using System.Globalization
+@{
+    var count = 0;
+}
+@if (Model.Any())
+{
+    <table class="table table-bordered">
+        <tr>
+            <th>SL.</th>
+            <th>Voucher</th>
+            <th>Debit</th>
+            <th>Credit</th>
+            <th>Date</th>
+        </tr>
+        @foreach (var list in Model)
+         {
+            count++;
+            <tr>
+                <td>@count.</td>
+                <td>
+                    <a class="btnShowOrderDetails" data-toggle="tooltip" title="View Order Details" data-id="@list.OrderId">@list.OrderNumber</a>
+                </td>
+                @if (list.IsDebit) //debit
+                 {
+                    <td>@list.Amount.ToString("C", new CultureInfo("bn-BD"))</td>
+                    <td></td>
+                 }
+                else //credit
+                {
+                    <td></td>
+                    <td>@list.Amount.ToString("C", new CultureInfo("bn-BD"))</td>
+                }
+                <td>@Convert.ToDateTime(list.Date).ToString("MMM dd,yyyy hh:mm:ss tt")</td>
+            </tr>
+         }
+        @*<tr style="font-weight:bold">
+            <td></td>
+            <td colspan="3" style="text-align:center">Total</td>
+            <td>@Model.Sum(s => s.Amount).ToString("C", new CultureInfo("bn-BD"))</td>
+            <td></td>
+        </tr>*@
+    </table>
+}
+else
+{
+    <h4>There is no record to display</h4>
+}
+<script>
+    $('[data-toggle="tooltip"]').tooltip();
+</script>
+
+

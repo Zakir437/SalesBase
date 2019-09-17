@@ -1,0 +1,47 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin-bottom:4%;margin-top:2%;">
+    <div id="divTaxFunction"></div>
+    <div class="k-edit-buttons k-state-default" style="margin-left:30px;">
+        <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnTaxFunctionUpdate"><span class="k-icon k-update"></span>Update</button>
+        <button type="reset" class="k-button k-button-icontext k-grid-update" id="btnTaxFunctionRefresh"><span class="k-icon k-i-refresh"></span>Refresh</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnTaxFunctionCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#divTaxFunction").empty();
+        $("#divTaxFunction").load('@Url.Action("TaxFunctionPartial", "Configuration")?miscId=' + '@ViewBag.MiscId');
+    });
+    $("#btnTaxFunctionRefresh").click(function () {
+        $("#divTaxFunction").empty();
+        $("#divTaxFunction").load('@Url.Action("TaxFunctionPartial", "Configuration")?miscId=' + '@ViewBag.MiscId');
+    });
+    $("#btnTaxFunctionCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+    $("#btnTaxFunctionUpdate").click(function () {
+       
+        var sendData = {
+            MiscId: $("#MiscId").val(),
+            TaxFunction: $("#TaxFunction").val()
+        }
+        $.ajax({
+            url: '@Url.Action("TaxFunctionUpdate","Configuration")',
+            type: 'POST',
+            data: sendData,
+            success: function (data)
+            {
+                if (data == "success")
+                {
+                    $("#divTaxFunctionWin").data("kendoWindow").close();
+                    $("#divMiscFuncList").empty();
+                    $("#divMiscFuncList").append('<div class="loading_partial"></div>');
+                    $("#divMiscFuncList").load('@Url.Action("MiscFuncList","Configuration")');
+                }
+                else {
+                    alert("Update error...");
+                }
+            }
+        })
+        
+    });
+</script>

@@ -1,0 +1,43 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewProduct>
+@using System.Globalization
+@{
+    var count = 0;
+}
+@if (Model.Any() == true)
+{
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Name</th>
+            <th>Quantity/Name</th>
+            <th>Price</th>
+        </tr>
+        @foreach (var list in Model)
+        {
+            count++;
+            <tr>
+                <td>@count. </td>
+                <td>
+                    @list.ProductName
+                </td>
+                <td>
+                    @list.QuantityOrName @if(list.IsQuantity == true) { <span>@list.MasterUnit</span> }
+                </td>
+                <td>@list.Price.Value.ToString("C", new CultureInfo("bn-BD"))</td>
+            </tr>
+         }
+    </table>
+}
+else
+{
+    <h4>There is no record to display</h4>
+}
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    })
+</script>
+
+
+
+

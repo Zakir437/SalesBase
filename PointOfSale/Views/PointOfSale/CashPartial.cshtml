@@ -1,0 +1,128 @@
+﻿@model PointOfSale.ModelViews.CashModel
+<style>
+   #keyboard li {
+        border: 1px solid #c9ccd0;
+    }
+</style>
+@{ 
+    var validAmount = ViewBag.TotalPrice;
+    if (ViewBag.CashPayment > 0)
+    {
+        if (ViewBag.CashPayment < ViewBag.TotalPrice)
+        {
+            validAmount = ViewBag.CashPayment;
+        }
+    }
+}
+<div class="editor-label"><label>Total Amount :</label></div>
+<div class="editor-field" style="padding-top:6px;">
+    <span id="TotalAmountInCash">@ViewBag.TotalPrice</span>Tk
+</div>
+<div class="editor-label"><label for="PaymentBodyId">Payment Category</label></div>
+<div class="editor-field">
+    @(Html.Kendo().DropDownListFor(a => a.CashBodyId)
+                     .BindTo(ViewBag.CashBody as SelectList)
+                     .DataTextField("Text")
+                     .DataValueField("Value")
+                     .OptionLabel("--Select one category--")
+                     .HtmlAttributes(new { style = "width:95%" })
+    )
+    @Html.ValidationMessageFor(a => a.CashBodyId, "", new { @class = "text-Danger" })
+</div>
+@if (ViewBag.CashPayment > 0)
+ {
+    <div class="editor-label"><label for="AmountPaid">Refund paid:</label></div>
+ }
+else
+{
+    <div class="editor-label"><label for="AmountPaid">Amount paid :</label></div>
+}
+<div class="editor-field">
+    @if (ViewBag.IsRelease == true || ViewBag.IsReturn == true || ViewBag.DefaultType == false)
+     {
+        @Html.EditorFor(m => m.AmountPaid, new { htmlattributes = new { @class = "k-textbox form-control", @min = "1", @type = "number", @max = validAmount, @validationMessage = "Please enter valid paid amount", style = "width:200px; display:inline" } })
+     }
+    else if(ViewBag.CashPayment > 0)
+    {
+        @Html.EditorFor(m => m.AmountPaid, new { htmlattributes = new { @class = "k-textbox form-control", @min = "1", @max = @validAmount,  @validationMessage = "Please enter valid refund amount", @type = "number", style = "width:200px; display:inline" } })
+    }
+    else
+    {
+        @Html.EditorFor(m => m.AmountPaid, new { htmlattributes = new { @class = "k-textbox form-control", @min = "1", @validationMessage = "Please enter valid paid amount", @type = "number", style = "width:200px; display:inline" } })
+    }
+    <span>Tk</span> <button class="btn btn-default" id="btnTotalPaid"><i class="fa fa-money" aria-hidden="true"></i></button>
+    <button class="btn btn-default" id="btnBack"><i class="fa fa-arrow-circle-left"></i></button>
+    @Html.ValidationMessageFor(model => model.AmountPaid, "", new { @class = "text-Danger" })
+</div>
+@*<div class="editor-label"><label>Return Amount :</label></div>
+<div class="editor-field" style="padding-top:6px;">
+    <span id="RefundAmountInCash">0.00</span>Tk
+</div>*@
+<div class="editor-field" style="padding-top:6px;">
+    <ul id="keyboard" style="height:267px; width: 201px; font: 71%/1.5 Verdana;">
+        <li class="clearl letter">1</li>
+        <li class="letter" id="two">2</li>
+        <li class="letter" id="three">3</li>
+        <li class="clearl letter" id="four">4</li>
+        <li class="letter">5</li>
+        <li class="letter">6</li>
+        <li class="clearl letter">7</li>
+        <li class="letter">8</li>
+        <li class="letter">9</li>
+        <li class="clearl letter" style="width:194px;">0</li>
+    </ul>
+</div>
+<script>
+    var number = 0;
+    var totalPaidNumber = [];
+    @*$(document).ready(function () {
+        $("#AmountPaid").keyup(function () {
+            refundAmount = $(this).val() - @ViewBag.TotalPrice;
+            $("#RefundAmountInCash").empty();
+            $("#RefundAmountInCash").append(refundAmount.toFixed(2));
+        });
+
+        $("#AmountPaid").change(function () {
+            refundAmount = $(this).val() - @ViewBag.TotalPrice;
+            $("#RefundAmountInCash").empty();
+            $("#RefundAmountInCash").append(refundAmount.toFixed(2));
+        });
+    });*@
+
+
+    $("#btnTotalPaid").click(function () {
+        totalPaidNumber = [];
+        $("#AmountPaid").val('@validAmount');
+    });
+
+    $(".letter").click(function () {
+        number = $(this).text();
+        totalPaidNumber.push(number);
+        number = parseInt(totalPaidNumber.join(""));
+        $("#AmountPaid").val(number);
+        @*refundAmount = number - @ViewBag.TotalPrice;
+        $("#RefundAmountInCash").empty();
+        $("#RefundAmountInCash").append(refundAmount.toFixed(2));*@
+    });
+
+    //$('body').on('click', function (e) {
+    //    if ($(e.target).closest('#keyboard').length == 0) {
+    //        totalPaidNumber = [];
+    //    }
+    //});
+
+    $("#btnBack").click(function () {
+        totalPaidNumber.pop();
+        if (totalPaidNumber.length > 0) {
+            number = parseInt(totalPaidNumber.join(""));
+            $("#AmountPaid").val(number);
+        }
+        else {
+            number = null;
+            $("#AmountPaid").val(number);
+        }
+    });
+
+
+
+</script>

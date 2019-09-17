@@ -1,0 +1,109 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin-bottom:4%;margin-top:2%;">
+    <div id="divPaymentBodyCreate"></div>
+    <div class="k-edit-buttons k-state-default" style="margin-left:30px;">
+        @if (ViewBag.PaymentBodyId > 0)
+        {
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnPaymentBodyCreate"><span class="k-icon k-update"></span>Update</button>
+        }
+        else
+        {
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnPaymentBodyCreate"><span class="k-icon k-update"></span>Add</button>
+        }
+        <button type="reset" class="k-button k-button-icontext k-grid-update" id="btnRefresh"><span class="k-icon k-i-refresh"></span>Refresh</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#divPaymentBodyCreate").empty();
+        $("#divPaymentBodyCreate").load('@Url.Action("PaymentBodyCreatePartial", "Configuration")?id=' + '@ViewBag.PaymentBodyId');
+    });
+    $("#btnRefresh").click(function () {
+        $("#divPaymentBodyCreate").empty();
+        $("#divPaymentBodyCreate").load('@Url.Action("PaymentBodyCreatePartial", "Configuration")?id=' + '@ViewBag.PaymentBodyId');
+    });
+    $("#btnCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+
+    function onChange() {
+        var selectedId = this.value();
+        if (selectedId == 2 || selectedId == 6)
+        {
+            $("#divSerialNumber").show();
+        }
+        else {
+            $("#divSerialNumber").hide();
+        }
+    }
+    var validation = $("#divPaymentBodyCreate").kendoValidator({
+        rules: {
+            method: function (input) {
+                if (input.is("[name=Method]")) {
+                    var ms = input.data("kendoMultiSelect");
+                    if (ms.value().length === 0) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        },
+        messages: {
+            method: "Please select at least one method"
+        }
+
+    }).data("kendoValidator");
+    $("#btnPaymentBodyCreate").click(function () {
+        if (validation.validate()) {
+            var sendData = {
+                PaymentBodyId: $("#PaymentBodyId").val(),
+                PaymentCategoryId: $("#PaymentCategoryId").val(),
+                Inout: $("#Inout").val(),
+                Name: $.trim($("#Name").val()),
+                Balance: $.trim($("#Balance").val()),
+                Description: $.trim($("#Description").val()),
+                SerialNumber: $("#SerialNumber").val(),
+                MethodIds: $("#Method").data("kendoMultiSelect").value().join(","),
+                CreatedBy: userId
+            }
+            $.ajax({
+                url: '@Url.Action("PaymentBodySave", "Configuration")',
+                type: "POST",
+                data: sendData,
+                success: function (data) {
+                    if (data == "success") {
+                       $("#divPaymentBodyWin").data("kendoWindow").close();
+                       $("#divPaymentBodyList").empty();
+                       $("#divPaymentBodyList").append('<div class="loading_partial"></div>');
+                       $("#divPaymentBodyList").load('@Url.Action("PaymentBodyList", "Configuration")');
+                    }
+                    else {
+                        alert("Save Error");
+                    }
+                }
+            });
+        }
+    });
+
+    //method multiselect selected value if exists
+    function selectedValue() {
+        $.ajax({
+            url: '@Url.Action("MethodSelectedValue","Configuration")',
+            type: 'GET',
+            dataType: 'json',
+            data: { accId: '@ViewBag.PaymentBodyId' },
+            success: function (data)
+            {
+                if (data != "NotFound")
+                {
+                    $("#Method").data("kendoMultiSelect").value(data);
+                }
+            }
+        });
+    }
+
+
+</script>
+
+

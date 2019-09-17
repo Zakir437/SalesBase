@@ -1,0 +1,57 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewImportTransaction>
+@using System.Globalization;
+@{
+    var count = 0;
+}
+@if (Model.Count() > 0)
+{
+    <table class="table table-bordered table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Product Name</th>
+            <th>Quantity</th>
+            <th>Peritem Cost</th>
+            <th>Cost</th>
+            @if (ViewBag.IsPrint == false)
+            {
+                <th width="129px;"></th>
+            }
+            
+        </tr>
+        @foreach (var list in Model)
+        {
+            count++;
+            <tr>
+                <td>@count.</td>
+                <td>@list.ProductName</td>
+                <td>@list.Quantity</td>
+                <td>@list.PeritemCost.ToString("C", new CultureInfo("bn-BD"))</td>
+                <td>@list.Cost.ToString("C", new CultureInfo("bn-BD"))</td>
+                @if (ViewBag.IsPrint == false)
+                {
+                    if (list.SupplierId > 0)
+                    {
+                        <td>
+                            <button class="btn btnImportTransactionEdit" style="background-color:#1c488e; color:white;" data-id="@list.ImportTransactionId" data-toggle="tooltip" title="Edit Import Information"><i class="fa fa-pencil-square-o"></i></button>
+                            <button class="btn btn-danger btnReturn" data-id="@list.ImportTransactionId" data-toggle="tooltip" title="Return products">Return</button>
+                        </td>
+                    }
+                    else
+                    {
+                        <td></td>
+                    }
+                 }
+            </tr>
+         }
+    </table>
+}
+else
+{
+    <h3>There is no data to display</h3>
+}
+
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    })
+</script>

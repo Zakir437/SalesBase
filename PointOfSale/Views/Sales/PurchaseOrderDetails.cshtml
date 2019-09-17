@@ -1,0 +1,582 @@
+﻿@model PointOfSale.Models.ViewPurchaseOrder
+@using System.Globalization;
+@{
+    ViewBag.Title = "PurchaseOrderDetails";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+    decimal remainingAmount = 0;
+    if(Model.TotalAmount > 0)
+    {
+        remainingAmount = (decimal)Model.TotalAmount;
+        if (Model.DispatchAmount > 0)
+        {
+            remainingAmount =(decimal) (Model.TotalAmount - Model.DispatchAmount);
+        }
+    }
+}
+<style>
+    .label {
+        font-size: 90%;
+    }
+</style>
+<section class="content">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4 class="uppercase">Purchase Order Details Details</h4>
+            </div>
+            <div class="pull-right">
+                <a class="btn btn-default" href="/Sales/PurchaseOrder"><i class="fa fa-arrow-left"></i> Back</a>
+            </div>
+        </div>
+        <div class="panel-body">
+            <h2>
+                @Model.VoucherName
+                @if (ViewBag.IsView == false && Model.Status == 1)
+                 {
+                    <button class="btn btn-success btnapprovePurchaseOrder" data-toggle="tooltip" title="Approve purchase order" data-id="@Model.Id"><i class="fa fa-check"></i></button>
+                 }
+                <span class="pull-right">
+                    <button class="btn bg-purple" id="btnShowSalesOrder" data-toggle="tooltip" title="Sales order details">Sales order</button>
+                    <button class="btn btn-primary" id="btnPOPrint" data-toggle="tooltip" title="Purchase Order Print"><i class="fa fa-print"></i></button>
+                    <button class="btn btn-info" id="btnPOWithFinancePrint" data-toggle="tooltip" title="PO print with finance"><i class="fa fa-print"></i></button>
+                    <button class="btn btn-success" id="btnPoWithSalesOrderPrint" data-toggle="tooltip" title="po print with sales order"><i class="fa fa-print"></i></button>
+                    <button class="btn btn-warning" id="btnPOSalesFinancePrint" data-toggle="tooltip" title="PO and Sales and finance"><i class="fa fa-print"></i></button>
+                    <button class="btn btn-danger" id="btnOnlyFinancePrint" data-toggle="tooltip" title="Only finance"><i class="fa fa-print"></i></button>
+                </span>
+            </h2>
+            <div class="row">
+                <div class="col-xs-5">
+                    <dl class="dl-horizontal">
+                        <dt>Customer</dt>
+                        <dd>@Model.CustomerName</dd>
+                        <dt>Delivery Date</dt>
+                        <dd>@Convert.ToDateTime(Model.DeliveryDate).ToString("MMMM dd yyyy hh:mm:ss tt")</dd>
+                        <dt>Created By</dt>
+                        <dd>@Model.CreatedBy</dd>
+                        <dt>Created Date</dt>
+                        <dd>@Convert.ToDateTime(Model.CreatedDate).ToString("MMMM dd yyyy hh:mm:ss tt")</dd>
+                        <dt>Approved By</dt>
+                        <dd>@Model.ApprovedBy</dd>
+                        <dt>Approved Date</dt>
+                        <dd>
+                            @if (Model.ApprovedDate != null)
+                            {
+                                <span>
+                                    @Convert.ToDateTime(Model.ApprovedDate).ToString("MMMM dd yyyy hh:mm:ss tt")
+                                </span>
+                            }
+                            else
+                            {
+                                <span>not approved yet</span>
+                            }
+                        </dd>
+                        <dt>Status</dt>
+                        <dd>
+                            @if (Model.Status == 1)
+                            {
+                                <span class="label label-primary">Pending Approval</span>
+                            }
+                            else if (Model.Status == 2)
+                            {
+                                <span class="label label-warning">Partial Approved</span>
+                            }
+                            else if (Model.Status == 3)
+                            {
+                                <span class="label label-info">Approved but not completed</span>
+                            }
+                            else if (Model.Status == 4)
+                            {
+                                <span class="label label-success">Completed</span>
+                            }
+                            else if (Model.Status == 5)
+                            {
+                                <span class="label label-danger">Deleted</span>
+                            }
+                        </dd>
+                    </dl>
+                </div>
+                <div class="col-xs-5">
+                    <dl class="dl-horizontal">
+                        <dt>Total Amount</dt>
+                        <dd>
+                            @if (Model.TotalAmount > 0)
+                            {
+                                <span>@Model.TotalAmount.Value.ToString("C", new CultureInfo("bn-BD"))</span>
+                            }
+                            else
+                            {
+                                <span>N/A</span>
+                            }
+                        </dd>
+                        <dt>Tax</dt>
+                        <dd>
+                            @if (Model.TaxAmount > 0)
+                             {
+                                <span>@Model.TaxPercent% (@Model.TaxAmount.ToString("C", new CultureInfo("bn-BD")))</span>
+                             }
+                            else
+                            {
+                                <span>N/A</span>
+                            }
+                        </dd>
+                        <dt>Dispacth Amount</dt>
+                        <dd>
+                            @if(Model.DispatchAmount > 0)
+                             {
+                                <span>@Model.DispatchAmount.Value.ToString("C", new CultureInfo("bn-BD"))</span>
+                             }
+                            else
+                            {
+                                <span>N/A</span>
+                            }
+                        </dd>
+                        <dt>Dispacth Due Amount</dt>
+                        <dd>
+                            @if (Model.DueAmount > 0)
+                             {
+                                <span>@Model.DueAmount.Value.ToString("C", new CultureInfo("bn-BD"))</span>
+                             }
+                            else
+                            {
+                                <span>N/A</span>
+                            }
+                        </dd>
+                        <dt>Refund Amount</dt>
+                        <dd>
+                            @if (Model.RefundAmount > 0)
+                             {
+                                <span>@Model.RefundAmount.Value.ToString("C", new CultureInfo("bn-BD"))</span>
+                             }
+                            else
+                            {
+                                <span>N/A</span>
+                            }
+                        </dd>
+                        <dt>Remaining Amount</dt>
+                        <dd>
+                            @if (remainingAmount > 0)
+                             {
+                                <span>@remainingAmount.ToString("C", new CultureInfo("bn-BD"))</span>
+                             }
+                            else
+                            {
+                                <span>N/A</span>
+                            }
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+        <hr />
+        <div class="panel-body">
+            @if (ViewBag.IsView == false)
+            {
+                <p class="pull-right">
+                    <button class="btn btn-success btnAddProduct"><i class="fa fa-plus-circle"></i> Add New Product</button>
+                </p>
+            }
+            <div id="divPurchaseTransList"></div>
+        </div>
+    </div>
+</section>
+<div id="divAddProductWin"></div>
+<div id="divEditProductWin"></div>
+<div id="divEditQtyProductWin"></div>
+<div id="divSalesOrderWin"></div>
+
+<script id="temp_win_item_Delete" type="text/x-kendo-template">
+    <div style="padding:1em;">
+        <p style="font-size: 14px; padding: 10px"> #=msg# </p>
+        <div style="text-align: right;">
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btn_item_delete_noty_ok"><span class="k-icon k-update"></span>OK</button>
+            <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btn_item_delete_noty_cancel"><span class="k-icon k-cancel"></span>Cancel</button>
+        </div>
+    </div>
+</script>
+<script id="temp_win_edit" type="text/x-kendo-template">
+    <div style="padding:1em;">
+        <p style="font-size: 14px; padding: 10px"> #=msg# </p>
+        <div style="text-align: right;">
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btn_edit_noty_ok"><span class="k-icon k-update"></span>OK</button>
+            <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btn_edit_noty_cancel"><span class="k-icon k-cancel"></span>Cancel</button>
+        </div>
+    </div>
+</script>
+<script id="temp_win_Item_approve" type="text/x-kendo-template">
+    <div style="padding:1em;">
+        <p style="font-size: 14px; padding: 10px"> #=msg# </p>
+        <div style="text-align: right;">
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btn_item_approve_noty_ok"><span class="k-icon k-update"></span>OK</button>
+            <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btn_item_approve_noty_cancel"><span class="k-icon k-cancel"></span>Cancel</button>
+        </div>
+    </div>
+</script>
+<script id="temp_win_voucherApprove" type="text/x-kendo-template">
+    <div style="padding:1em;">
+        <p style="font-size: 14px; padding: 10px"> #=msg# </p>
+        <div style="text-align: right;">
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btn_VoucherApp_noty_ok"><span class="k-icon k-update"></span>OK</button>
+            <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btn_VoucherApp_noty_cancel"><span class="k-icon k-cancel"></span>Cancel</button>
+        </div>
+    </div>
+</script>
+<script>
+    var itemId = 0;
+    $(document).ready(function () {
+        $("#liForSalesMenu").addClass('active');
+        $("#liForPurchaseOrder").addClass('active');
+
+        $("#divPurchaseTransList").append('<div class="loading_partial"></div>');
+        $("#divPurchaseTransList").load('@Url.Action("PurchaseTransList", "Sales")?id=' + "@Model.Id" + '&IsView=' + '@ViewBag.IsView');
+    });
+
+    //**********************************add item*******************************
+    $(".btnAddProduct").click(function () {
+        winEmpty();
+        $("#divAddProductWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 911,
+            height: 374,
+            title: 'Add new product to voucher',
+            resizable: false,
+            close: onWindowClose
+        });
+        var addProWin = $("#divAddProductWin").data("kendoWindow");
+        addProWin.refresh('/Sales/AddPurchaseOrderItem?purchaseId=' + '@Model.Id');
+        addProWin.center().open();
+        document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+        document.body.scroll = "no";
+    });
+
+    function winEmpty()
+    {
+        $("#divAddProductWin").empty();
+        $("#divEditProductWin").empty();
+        $("#divEditQtyProductWin").empty();
+    }
+
+    function onChangeProduct()
+    {
+        if (this.value() > 0)
+        {
+            itemId = this.value();
+            $.ajax({
+                url: '@Url.Action("GetProductByRowId", "Sales")',
+                type: 'Get',
+                data: { rowId: itemId },
+                success: function (data)
+                {
+                    if (data == "error")
+                    {
+                        alert("Not Found...");
+                        $("#PeritemCost").attr("placeholder", "");
+                    }
+                    else
+                    {
+                        $("#PeritemCost").attr("placeholder", data.Price + "(SP)");
+                    }
+                },
+                error: function() {
+                    alert("Not Found...");
+                    $("#PeritemCost").attr("placeholder", "");
+                }
+            });
+        }
+        else
+        {
+            $("#PeritemCost").attr("placeholder", "");
+        }
+    }
+
+     //******************************** Edit item *****************************************************
+    $("#divPurchaseTransList").on("click", ".btnEditItem", function (e) {
+        itemId = parseInt($(this).data("id"));
+        var kendoWindow = $("<div />").kendoWindow({
+            actions: ["Close"],
+            title: "Alert",
+            resizable: false,
+            width: "30%",
+            modal: true,
+            close: onWindowClose
+        });
+        msg = "Are you sure want to edit this?";
+        var template = kendo.template($("#temp_win_edit").html());
+        kendoWindow.data("kendoWindow").content(template).center().open();
+        document.documentElement.style.overflow = 'hidden';
+        document.body.scroll = "no";
+        kendoWindow.find("#btn_edit_noty_cancel").click(function () {
+            kendoWindow.data("kendoWindow").close();
+        }).end();
+        kendoWindow.find("#btn_edit_noty_ok").click(function () {
+            editItem();
+            kendoWindow.data("kendoWindow").close();
+        }).end();
+    });
+    function editItem() {
+        winEmpty();
+        $("#divEditProductWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 911,
+            height: 374,
+            title: 'Edit Product',
+            resizable: false,
+            close: onWindowClose
+        });
+        var editProWin = $("#divEditProductWin").data("kendoWindow");
+        editProWin.refresh('/Sales/AddPurchaseOrderItem?purchaseId=' + '@Model.Id' + '&itemId=' + itemId);
+        editProWin.center().open();
+        document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+        document.body.scroll = "no";
+    }
+
+    //********************************Edit item Quantity *****************************************************
+    $("#divPurchaseTransList").on("click", ".btnEditItemQuantity", function (e) {
+        itemId = parseInt($(this).data("id"));
+        winEmpty();
+        $("#divEditQtyProductWin").empty();
+        $("#divEditQtyProductWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 911,
+            height: 374,
+            title: 'Edit Indent Product Quantity',
+            resizable: false,
+            close: onWindowClose
+        });
+        var editQtyProWin = $("#divEditQtyProductWin").data("kendoWindow");
+        editQtyProWin.refresh('/Sales/AddPurchaseOrderItem?purchaseId=' + '@Model.Id' + '&itemId=' + itemId + '&isQuantityEdit=true');
+        editQtyProWin.center().open();
+        document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+        document.body.scroll = "no";
+    });
+
+     //********************************approve changes *****************************************************
+
+    $("#divPurchaseTransList").on("click", ".btnapproveChanges", function (e) {
+        itemId = parseInt($(this).data("id"));
+         $.ajax({
+                url: '@Url.Action("PurchaseOrderItemStatusChange", "Sales")',
+                type: "POST",
+                data: { itemId: itemId, isChangesApprove : true },
+                success: function (result) {
+                    if (result == "success")
+                    {
+                        window.location.reload();
+                    }
+                    else
+                    {
+                        alert("Save Error");
+                    }
+                }
+         });
+    });
+
+    //********************************remove changes *****************************************************
+
+    $("#divPurchaseTransList").on("click", ".btnRemoveChanges", function (e) {
+        itemId = parseInt($(this).data("id"));
+         $.ajax({
+                url: '@Url.Action("PurchaseOrderItemStatusChange", "Sales")',
+                type: "POST",
+                data: { itemId: itemId, isRemoveChanges : true },
+                success: function (result) {
+                    if (result == "success")
+                    {
+                        window.location.reload();
+                    }
+                    else
+                    {
+                        alert("Save Error");
+                    }
+                }
+         });
+    });
+
+    //******************************** approve item *****************************************************
+    $("#divPurchaseTransList").on("click", ".btnapproveItem", function (e) {
+        itemId = $(this).data("id");
+        var kendoWindow = $("<div />").kendoWindow({
+            actions: ["Close"],
+            title: "Alert",
+            resizable: false,
+            width: "30%",
+            modal: true,
+            close: onWindowClose
+        });
+        msg = "Are you sure want to approve this product?";
+        var template = kendo.template($("#temp_win_Item_approve").html());
+        kendoWindow.data("kendoWindow").content(template).center().open();
+        document.documentElement.style.overflow = 'hidden';
+        document.body.scroll = "no";
+        kendoWindow.find("#btn_item_approve_noty_cancel").click(function () {
+            kendoWindow.data("kendoWindow").close();
+        }).end();
+        kendoWindow.find("#btn_item_approve_noty_ok").click(function () {
+            $.ajax({
+                url: '/Sales/PurchaseOrderItemStatusChange',
+                type: 'POST',
+                data: { itemId: itemId, isItemApprove : true },
+                success: function (data) {
+                    if (data == "success") {
+                        window.location.reload();
+                    }
+                    else {
+                        alert("error");
+                    }
+                }
+            });
+            kendoWindow.data("kendoWindow").close();
+        }).end();
+    });
+
+    //********************************delete item*****************************************************
+    $("#divPurchaseTransList").on("click", ".btnDeleteItem", function (e) {
+        itemId = parseInt($(this).data("id"));
+        var kendoWindow = $("<div />").kendoWindow({
+            actions: ["Close"],
+            title: "Alert",
+            resizable: false,
+            width: "30%",
+            modal: true,
+            close: onWindowClose
+        });
+        msg = "Are you sure you want to delete this item?";
+        var template = kendo.template($("#temp_win_item_Delete").html());
+        kendoWindow.data("kendoWindow").content(template).center().open();
+        document.documentElement.style.overflow = 'hidden';
+        document.body.scroll = "no";
+        kendoWindow.find("#btn_item_delete_noty_cancel").click(function () {
+            kendoWindow.data("kendoWindow").close();
+        }).end();
+        kendoWindow.find("#btn_item_delete_noty_ok").click(function () {
+            $.ajax({
+                url: '/Sales/PurchaseOrderItemStatusChange',
+                type: "POST",
+                data: { itemId: itemId, isDeleteItem : true },
+                success: function (result) {
+                    if (result == "success")
+                    {
+                        window.location.reload();
+                    }
+                    else
+                    {
+                        alert("Save Error");
+                    }
+                }
+            });
+            kendoWindow.data("kendoWindow").close();
+        }).end();
+    });
+
+     //*******************************  APPROVE VOUCHER *****************************************
+    $(".btnapprovePurchaseOrder").click(function () {
+        itemId = parseInt($(this).data("id"));
+        var kendoWindow = $("<div/>").kendoWindow({
+            actions: ["Close"],
+            title: "Alert",
+            resizable: false,
+            width: "30%",
+            modal: true,
+            close: onWindowClose
+        });
+        msg = "Are you sure want to approve this voucher?";
+        var template = kendo.template($("#temp_win_voucherApprove").html());
+        kendoWindow.data("kendoWindow").content(template).center().open();
+        document.documentElement.style.overflow = 'hidden';
+        document.body.scroll = "no";
+
+        kendoWindow.find("#btn_VoucherApp_noty_cancel").click(function () {
+            kendoWindow.data("kendoWindow").close();
+        }).end();
+        kendoWindow.find("#btn_VoucherApp_noty_ok").click(function () {
+            kendoWindow.data("kendoWindow").close();
+            //notification.show({ message: "Approving...", showTime: startTime() }, "upload-progress");
+            $.ajax({
+                url: '@Url.Action("PurchaseOrderStatusChange", "Sales")',
+                type: 'Post',
+                data: { id: itemId, CreatedBy: userId, status: 3 },
+                success: function (data) {
+                    //notification.hide(); notification.setOptions({ autoHideAfter: 5000 });
+                    if (data == "success")
+                    {
+                        //notification.show({ message: "Indent has been successfully approved.", showTime: startTime() }, "upload-success");
+                        //location.reload();
+                        window.location.reload();
+                    }
+                    else
+                    {
+                        alert("Save error...");
+                        //notification.show({ message: "Indent approved was unsuccessful.", showTime: startTime() }, "upload-error");
+                    }
+                },
+                error: function (err) {
+                    //notification.hide(); notification.setOptions({ autoHideAfter: 5000 });
+                    //notification.show({ message: "Error occurred.", showTime: startTime() }, "upload-warning");
+                }
+            });
+        }).end();
+    });
+
+
+    //*********************************Print function**********************************
+    $("#btnPOPrint").click(function () {
+        var data = "poId=" + '@Model.Id' + "?type=1";
+        window.open('@Url.Action("PO_Print", "Sales")?q=' + getDataEncrypted(data), '_blank');
+    });
+
+    $("#btnPOWithFinancePrint").click(function () {
+        var data = "poId=" + '@Model.Id' + "?type=2";
+        window.open('@Url.Action("PO_Print", "Sales")?q=' + getDataEncrypted(data), '_blank');
+    });
+
+    $("#btnPoWithSalesOrderPrint").click(function () {
+        var data = "poId=" + '@Model.Id' + "?type=3";
+        window.open('@Url.Action("PO_Print", "Sales")?q=' + getDataEncrypted(data), '_blank');
+    });
+
+
+    $("#btnPOSalesFinancePrint").click(function () {
+        var data = "poId=" + '@Model.Id' + "?type=4";
+        window.open('@Url.Action("PO_Print", "Sales")?q=' + getDataEncrypted(data), '_blank');
+    });
+
+    $("#btnOnlyFinancePrint").click(function () {
+        var data = "poId=" + '@Model.Id' + "?type=5";
+        window.open('@Url.Action("PO_Print", "Sales")?q=' + getDataEncrypted(data), '_blank');
+    });
+
+    //*********************************Sales order Details**********************************
+    $("#btnShowSalesOrder").click(function () {
+        $("#divSalesOrderWin").empty();
+        $("#divSalesOrderWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 911,
+            height: 374,
+            title: 'Sales Order',
+            resizable: false,
+            close: onWindowClose
+        });
+        var salesOrderWin = $("#divSalesOrderWin").data("kendoWindow");
+        salesOrderWin.refresh('/Sales/PO_SalesOrder?poId=' + '@Model.Id');
+        salesOrderWin.center().open().maximize();
+
+        document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+        document.body.scroll = "no";
+    });
+</script>
+
+
+
+
+

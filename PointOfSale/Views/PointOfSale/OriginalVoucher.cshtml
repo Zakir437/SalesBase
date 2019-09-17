@@ -1,0 +1,101 @@
+﻿@model PointOfSale.Models.ViewPosOrder
+@using System.Globalization;
+@using PointOfSale.Helpers;
+@{
+    ViewBag.Title = "OriginalVoucher";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var count = 0;
+}
+<style>
+    dt {
+        font-size: 18px;
+    }
+
+    dd {
+        font-size: 15px;
+    }
+</style>
+
+<div class="panel panel-default" style="margin-top:20px;">
+    <div class="panel-body">
+        <div class="row">
+            <a href="@Html.EncodedParam("OrderTransactionPrint","PointOfSale", new { orderId = Model.OrderId, IsOriginal = true },null)" target="_blank" style="float:right;margin-right:5%;font-size:14px">
+                <i class="fa fa-print"></i> Print
+            </a>
+        </div>
+        <div class="col-md-6 pull-left">
+            <dl>
+                <dt>Order Number : <span style="font-weight:100">@Model.OrderNumber</span></dt>
+            </dl>
+        </div>
+        <div class="col-md-4 pull-right text-right">
+            <dl>
+                <dt>@Model.FirstName @Model.LastName</dt>
+                <dd>@Convert.ToDateTime(@Model.OrderDate).ToString("MMM dd yyyy hh:mm:ss tt")</dd>
+                <dd>Sub Total : @Model.SubTotalPrice.ToString("C", new CultureInfo("bn-BD"))</dd>
+                @if (Model.Discount > 0)
+                 {
+                    if (Model.DiscountType == true)
+                    {
+                        <dd>Discount : <span>@Model.Discount.ToString("C", new CultureInfo("bn-BD"))</span>(@Model.DiscPercent%)</dd>
+                    }
+                    else
+                    {
+                        <dd>Discount : @Model.DiscPercent%(<span>@Model.Discount.ToString("C", new CultureInfo("bn-BD"))</span>)</dd>
+                    }
+                 }
+                @if (Model.Tax > 0)
+                 {
+                    <dd>Tax @if (Model.TaxFunc == true)
+                    { <span>(A)</span> }
+                    else
+                    { <span>(D)</span> }  : @Model.TaxPercent%(@Model.Tax.ToString("C", new CultureInfo("bn-BD")))</dd>
+                 }
+                <dd style="border-top:1px solid;">Total : @Model.TotalPrice.ToString("C", new CultureInfo("bn-BD"))</dd>
+            </dl>
+        </div>
+    </div>
+    <hr />
+    <div class="panel-body">
+        <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+            <tr>
+                <th>SL.</th>
+                <th>Product Name</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Total Price</th>
+            </tr>
+            @foreach (var list in ViewBag.OrderTransList as List<PointOfSale.Models.ViewOrderTransaction>)
+             {
+                count++;
+                <tr>
+                    <td>@count. </td>
+                    <td>
+                        @list.ProductName
+                        @if (list.Discount > 0)
+                        {
+                            <img src="~/Images/DiscountImage/272498.png" />
+                        }
+                    </td>
+                    <td>@list.PerItemPrice.ToString("C", new CultureInfo("bn-BD"))</td>
+                    <td>@list.OrderedQuantity</td>
+                    @if (list.Discount > 0)
+                     {
+                        if (list.DiscountType == true)
+                        {
+                                <td>@list.Price.ToString("C", new CultureInfo("bn-BD")) Discount(Fixed) <span>@list.Discount</span>Tk(<span>@list.DiscountPercent</span>%)</td>
+                        }
+                        else
+                        {
+                            <td>@list.Price.ToString("C", new CultureInfo("bn-BD")) Discount(Percent) @list.DiscountPercent%(<span>@list.Discount</span>Tk)</td>
+                        }
+                     }
+                    else
+                    {
+                        <td>@list.Price.ToString("C", new CultureInfo("bn-BD"))</td>
+                    }
+                </tr>
+             }
+        </table>
+</div>
+</div>

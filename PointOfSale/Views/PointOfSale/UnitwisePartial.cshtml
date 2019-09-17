@@ -1,0 +1,70 @@
+﻿@model PointOfSale.ModelViews.UnitWise
+<style>
+    #keyboard li {
+        border: 1px solid #c9ccd0;
+    }
+</style>
+<div class="text-center">
+    <label>
+        <input type="radio" name="unit" id="unitWeight" checked><i>Weight</i>
+    </label>
+    <label>
+        <input type="radio" name="unit" id="unitPrice"><i>Price</i>
+    </label><br />
+</div>
+
+@*<div style="padding-top:10px;">
+        @Html.EditorFor(model => model.UnitAmount, new { htmlattributes = new { @class = "k-textbox form-control" } }) <label id="unitLabel">kg</label><br />
+        @Html.ValidationMessageFor(model => model.UnitAmount, "", new { @class = "text-Danger" })
+        <input type="number" min="0" id="unitAmount" required/> <label id="unitLabel">kg</label>
+    </div>*@
+
+@*<div class="editor-label"><label for="Name">Name</label></div>*@
+<div class="editor-field" style="margin-right:44px">
+    @Html.EditorFor(model => model.UnitAmount, new { htmlattributes = new { @class = "k-textbox", @style="width:64%" } }) <label id="unitLabel">kg</label>
+    @Html.ValidationMessageFor(model => model.UnitAmount, "", new { @class = "text-Danger", @style="float:left;" })
+</div>
+
+<ul id="keyboard" style="height:277px; width:201px; font: 71%/1.5 Verdana; margin-left:160px; padding-top:18px">
+    <li class="clearl letter">1</li>
+    <li class="letter" id="two">2</li>
+    <li class="letter" id="three">3</li>
+    <li class="clearl letter" id="four">4</li>
+    <li class="letter">5</li>
+    <li class="letter">6</li>
+    <li class="clearl letter">7</li>
+    <li class="letter">8</li>
+    <li class="letter">9</li>
+    <li class="clearl letter">0</li>
+    <li class="letter">.</li>
+</ul>
+<script>
+    var number="";
+    var totalUnitAmount = [];
+    $("#unitWeight").click(function () {
+        unitType = 1;
+        $("#unitLabel").empty();
+        $("#unitLabel").append("kg");
+        $("#UnitAmount").val("");
+    });
+    $("#unitPrice").click(function () {
+        unitType = 2;
+        $("#unitLabel").empty();
+        $("#unitLabel").append("Tk");
+        $("#UnitAmount").val("");
+    });
+    $(".letter").click(function () {
+        number = $(this).text();
+        totalUnitAmount.push(number);
+        number = parseFloat(totalUnitAmount.join(""));
+        $("#UnitAmount").val(number);
+    });
+
+    $('body').on('click', function (e) {
+        if ($(e.target).closest('#keyboard').length == 0) {
+            totalUnitAmount = [];
+        }
+    });
+
+
+</script>

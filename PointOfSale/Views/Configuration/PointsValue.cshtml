@@ -1,0 +1,57 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin-bottom:4%;margin-top:2%;">
+    <div id="divPointsValueForm"></div>
+    <div class="k-edit-buttons k-state-default" style="margin-left:30px;">
+        <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnPointsValueCreate"><span class="k-icon k-update"></span>Update</button>
+        <button type="reset" class="k-button k-button-icontext k-grid-update" id="btnPointsValueRefresh"><span class="k-icon k-i-refresh"></span>Refresh</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnPointsValueCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#divPointsValueForm").append('<div class="tiny_loading"></div>');
+        $("#divPointsValueForm").load('@Url.Action("PointsValuePartial", "Configuration")?id=' + '@ViewBag.Id');
+    });
+    $("#btnPointsValueRefresh").click(function () {
+        $("#divPointsValueForm").empty();
+        $("#divPointsValueForm").append('<div class="tiny_loading"></div>');
+        $("#divPointsValueForm").load('@Url.Action("PointsValuePartial", "Configuration")?id=' + '@ViewBag.Id');
+    });
+
+    $("#btnPointsValueCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+
+    var validation = $("#divPointsValueForm").kendoValidator({
+    }).data("kendoValidator");
+
+    $("#btnPointsValueCreate").click(function () {
+        if (validation.validate())
+        {
+            $(this).prop('disabled', true);
+            var sendData = {
+                MiscId: $("#MiscId").val(),
+                PointsValue: $("#PointsValue").val(),
+                Points: $("#Points").val()
+            }
+            $.ajax({
+                url: '@Url.Action("PointsValueSave", "Configuration")',
+                type: "POST",
+                data: sendData,
+                success: function (result) {
+                    $("#divPointsValueWin").data("kendoWindow").close();
+                    if (result == "success") {
+                        $("#divMiscFuncList").empty();
+                        $("#divMiscFuncList").append('<div class="loading_partial"></div>');
+                        $("#divMiscFuncList").load('@Url.Action("MiscFuncList","Configuration")');
+                    }
+                    else {
+                        alert("Save Error");
+                    }
+                }
+            });
+        }
+    });
+</script>
+
+
+

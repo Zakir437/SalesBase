@@ -1,0 +1,92 @@
+﻿@model IEnumerable<PointOfSale.Models.IndentItem>
+@{
+    var count = 0;
+    var woCount = 0;
+    PointOfSale.Models.PointOfSale_DBEntities db = new PointOfSale.Models.PointOfSale_DBEntities();
+    int remainingQty = 0;
+}
+@if (Model.Any() == true)
+{
+    <table class="table table-bordered">
+        <tr>
+            <th>SL.</th>
+            <th>Product Name</th>
+            <th>Quantity</th>
+            <th>Warehouse Quantity</th>
+        </tr>
+        @foreach (var list in Model)
+         {
+            count++;
+            <tr>
+                <td>@count. </td>
+                <td>@list.ProductName</td>
+                <td>
+                    @{ 
+                        remainingQty = list.RemainingQuantity;
+                        if(db.IndMRRItems.Any(a => a.IndentId == list.IndentId && a.ProductId == list.ProductId && a.DistributeId == list.DistributeId && a.Status == 1))
+                        {
+                            var mrrQty = db.IndMRRItems.Where(a => a.IndentId == list.IndentId && a.ProductId == list.ProductId && a.DistributeId == list.DistributeId && a.Status == 1).Sum(s => s.Quantity);
+
+                            if (mrrQty > 0)
+                            {
+                                remainingQty = list.RemainingQuantity - mrrQty;
+                            }
+                        }
+                    }
+                 @remainingQty
+                </td>
+                <td>
+                    @{ 
+                        var warehouseProduct = db.ViewStockWarehouses.Where(a =>a.IndentId == list.IndentId && a.ProductId == list.ProductId && a.DistributeId == list.DistributeId && a.Quantity > 0).ToList();
+                    }
+                    @if (warehouseProduct.Any())
+                    {
+
+                        <table class="table table-bordered" style="margin-bottom:0px;">
+                            @foreach (var product in warehouseProduct)
+                            {
+                                woCount++;
+                                <tr>
+                                    <td>@product.WOVoucher</td>
+                                    <td>@product.Quantity</td>
+                                    <td style="width:150px;">
+                                        <button class="btn btn-success btnAddItem" id="btnAddItem_@woCount" data-woid="@product.WOId" data-wovoucher="@product.WOVoucher" data-listid="@list.Id" data-id="@woCount" data-qty="@remainingQty" data-woqty="@product.Quantity" data-name="@list.ProductName" data-productid="@list.ProductId" data-distributeid="@list.DistributeId"><i class="fa fa-cart-plus"></i> Add to Cart</button>
+                                        <div id="divForOrder_@woCount" style="font-size: 16px; display: none;">
+                                            <span class="fa fa-minus cartItemMinus" data-id="@woCount" style="cursor:pointer;"></span>
+                                            <span class="qtyInList ProductInCart" id="qtyInList_@woCount" data-id="@woCount" style="display: inline-block;">1</span>
+                                            <input class="k-textbox txt_quantity" style="width: 100px; display: none;" data-woqty="@product.Quantity" data-qty="@remainingQty" data-listid="@list.Id"  data-id="@woCount" data-val-required="Please enter amount" id="txt_quan_@woCount" name="txt_quan_@woCount" value="1" type="text">
+                                            <span class="fa fa-plus cartItemPlus" data-id="@woCount" data-qty="@remainingQty" data-woqty="@product.Quantity" data-listid="@list.Id" style="cursor:pointer;"></span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </table>
+                     }
+                    else
+                    {
+                        <span>0</span>
+                    }
+                </td>
+            </tr>
+         }
+    </table>
+ }
+else
+{
+    <h3>There is no record to display</h3>
+}
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    })
+</script>
+
+
+
+
+
+
+
+
+
+

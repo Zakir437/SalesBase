@@ -1,0 +1,87 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin-bottom:4%;margin-top:2%;">
+    <div id="divShopTimeForm"></div>
+    <div class="k-edit-buttons k-state-default" style="margin-left:30px;">
+        <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnShopTimeCreate"><span class="k-icon k-update"></span>Update</button>
+        <button type="reset" class="k-button k-button-icontext k-grid-update" id="btnShopTimeRefresh"><span class="k-icon k-i-refresh"></span>Refresh</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnShopTimeCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#divShopTimeForm").append('<div class="tiny_loading"></div>');
+        $("#divShopTimeForm").load('@Url.Action("ShopTimePartial", "Configuration")?id=' + '@ViewBag.Id');
+    });
+    $("#btnShopTimeRefresh").click(function () {
+        $("#divShopTimeForm").empty();
+        $("#divShopTimeForm").append('<div class="tiny_loading"></div>');
+        $("#divShopTimeForm").load('@Url.Action("ShopTimePartial", "Configuration")?id=' + '@ViewBag.Id');
+    });
+
+    $("#btnShopTimeCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+
+    function startChange() {
+        var startTime = this.value(),
+            endPicker = $("#EndTime").data("kendoTimePicker");
+
+        if (startTime) {
+            startTime = new Date(startTime);
+
+            endPicker.max(startTime);
+
+            startTime.setMinutes(startTime.getMinutes() + this.options.interval);
+
+            endPicker.min(startTime);
+            endPicker.value(startTime);
+        }
+    }
+
+    var validation = $("#divShopTimeForm").kendoValidator({
+        //rules: {
+        //    validDate: function (input) {
+        //        if (input.is("[data-role=timepicker]")) {
+        //            if (kendo.) {
+        //                return true;
+        //            }
+        //            return false;
+        //        }
+        //        return true;
+        //    }
+        //},
+        //messages: {
+        //    validDate: "Date should be: " + datepicker.options.format
+        //}
+    }).data("kendoValidator");
+
+    $("#btnShopTimeCreate").click(function () {
+
+        if (validation.validate())
+        {
+            $(this).prop('disabled', true);
+            var sendData = {
+                MiscId: $("#MiscId").val(),
+                Is24Hours: $("#Is24Hours").val(),
+                StartTime: $("#StartTime").val(),
+                EndTime: $("#EndTime").val(),
+            }
+            $.ajax({
+                url: '@Url.Action("ShopTimeSave", "Configuration")',
+                type: "POST",
+                data: sendData,
+                success: function (result) {
+                    $("#divShopTimeWin").data("kendoWindow").close();
+                    if (result == "success") {
+                        $("#divMiscFuncList").empty();
+                        $("#divMiscFuncList").append('<div class="loading_partial"></div>');
+                        $("#divMiscFuncList").load('@Url.Action("MiscFuncList","Configuration")');
+                    }
+                    else {
+                        alert("Save Error");
+                    }
+                }
+            });
+        }
+    });
+</script>
+

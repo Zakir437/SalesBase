@@ -1,0 +1,506 @@
+﻿@model PointOfSale.Models.ViewPosOrder
+@using System.Globalization;
+@{
+    var count = 0;
+    ViewBag.Title = "OrderTransactionPrint";
+    Layout = "~/Views/Shared/_LayoutPrintPage.cshtml";
+    PointOfSale.Models.PointOfSale_DBEntities db = new PointOfSale.Models.PointOfSale_DBEntities();
+    var orderTransactionList = ViewBag.OrderTransList as List<PointOfSale.Models.ViewOrderTransaction>;
+}
+<style>
+    hr {
+        margin: 0px;
+    }
+
+    .dl-horizontal dt {
+        float: left;
+        width: 160px;
+        overflow: hidden;
+        clear: left;
+        text-align: right;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .dl-horizontal dd {
+        margin-left: 180px;
+    }
+
+    .dl-horizontal dd:before,
+    .dl-horizontal dd:after {
+        display: table;
+        content: " ";
+    }
+
+    .dl-horizontal dd:after {
+        clear: both;
+    }
+
+    .dl-horizontal dd:before,
+    .dl-horizontal dd:after {
+        display: table;
+        content: " ";
+    }
+
+    .dl-horizontal dd:after {
+        clear: both;
+    }
+
+    a:link:after,
+    a:visited:after {
+        content: "";
+        font-size: 90%;
+    }
+    h2 {
+        margin-top: 0px;
+    }
+    /*.row {
+        margin: 0px;
+    }*/
+
+    .divCrossLine {
+        text-decoration: line-through;
+    }
+
+    .discountInfo {
+        font-weight: 400;
+        font-size: 11px;
+    }
+
+    .border-top {
+        border-top: 1px solid #a6a6a6;
+    }
+
+</style>
+<section class="content-header" style="text-align:center;">
+    <div class="row">
+        <div class="col-xs-3"></div>
+        <div class="col-xs-6">
+            <h3>Sales Order</h3>
+            <p>Sales Base</p>
+        </div>
+        <div class="col-xs-3">
+            <button class="btn btn-default pull-right" id="btnPrint" style="margin-top:10px;"><i class="fa fa-print"></i>Print</button>
+        </div>
+    </div>
+    <hr />
+</section>
+<div class="row">
+    <div class="col-xs-offset-6 col-xs-6 text-left">
+        <p>
+            Generate By : @HttpContext.Current.Request.Cookies["CookieUserInfo"].Values["UserName"]<br>
+            Generate Date : @DateTime.Now.ToString("MMM dd yyyy hh:mm:ss tt") <br>
+        </p>
+    </div>
+    <div class="col-xs-offset-6 col-xs-6 text-right">
+
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-body">
+        <h2>
+            @Model.OrderNumber
+        </h2>
+        <div class="row">
+            <div class="col-xs-6">
+                <dl class="dl-horizontal">
+                    @if (ViewBag.CurrentVoucherName != null)
+                    {
+                        <dt>Current Voucher</dt>
+                        <dd>@ViewBag.CurrentVoucherName</dd>
+                    }
+                    @if (Model.ASReffId > 0)
+                    {
+                        <dt>After Sale Reff.</dt>
+                        <dd>@Model.ASReff</dd>
+                    }
+                    <dt>Created By</dt>
+                    <dd>@Model.CreatedBy</dd>
+                    <dt>Order Date</dt>
+                    <dd>@Convert.ToDateTime(Model.OrderDate).ToString("MMMM dd yyyy hh:mm:ss tt")</dd>
+                    <dt>PO Voucher</dt>
+                    <dd>@Model.POVoucher</dd>
+                    @if (Model.CouponId > 0)
+                     {
+                        <dt>Coupon</dt>
+                        <dd>@Model.OfferName (@Model.Coupon)</dd>
+                     }
+                </dl>
+            </div>
+            <div class="col-xs-6">
+                @if(ViewBag.Type == 2)
+                {
+                    <dl class="dl-horizontal">
+                        <dt>Order Amount</dt>
+                        <dd>@Model.OrderAmount.ToString("C", new CultureInfo("bn-BD"))</dd>
+                        <dt>Item Discount</dt>
+                        @if (Model.ItemDiscount == null)
+                         {
+                            Model.ItemDiscount = 0;
+                         }
+                        <dd>@Model.ItemDiscount.Value.ToString("C", new CultureInfo("bn-BD"))</dd>
+                        <dt>
+                            Sub Total
+                            @if (Model.SubTotalBeforeDiscount > 0)
+                            { <span>(@Model.SubTotalBeforeDiscount.Value.ToString("C", new CultureInfo("bn-BD")))</span> }
+                        </dt>
+                        <dd>
+                            @Model.SubTotalPrice.ToString("C", new CultureInfo("bn-BD"))
+                            @if (Model.OfferType == 1 || Model.OfferType == 2)
+                            {
+                                if (Model.Discount > 0)
+                                {
+                                    <br />
+                                    <span class="discountInfo">
+                                        <span>
+                                            Discount Amount (@if (Model.DiscountType == true)
+                                            { <span>@Model.Discount.Value.ToString("C", new CultureInfo("bn-BD"))</span> }
+                                            else
+                                            { <span>@Model.Discount%</span> }) | @Model.DiscValue.Value.ToString("C", new CultureInfo("bn-BD")) | -@Model.DiscWorkValue.Value.ToString("C", new CultureInfo("bn-BD"))
+                                        </span>
+                                    </span>
+                                }
+                                if (Model.CouponDiscount > 0)
+                                {
+                                    <br />
+                                    <span class="discountInfo divCrossLine">
+                                        <span>
+                                            Coupon (@if (Model.CouponDiscType == true)
+                                            { <span>@Model.CouponDiscount.Value.ToString("C", new CultureInfo("bn-BD"))</span> }
+                                            else
+                                            { <span>@Model.CouponDiscount%</span> }) | @Model.CouponDiscValue.Value.ToString("C", new CultureInfo("bn-BD")) | -@Model.CoupDiscWorkValue.Value.ToString("C", new CultureInfo("bn-BD"))
+                                        </span>
+                                    </span>
+                                }
+                                }
+                                else if (Model.OfferType == 3)
+                                {
+                                    if (Model.Discount > 0)
+                                    {
+                                        <br />
+                                        <span class="discountInfo divCrossLine">
+                                            <span>
+                                                Discount(@if (Model.DiscountType == true)
+                                                { <span>@Model.Discount.Value.ToString("C", new CultureInfo("bn-BD"))</span> }
+                                                else
+                                                { <span>@Model.Discount%</span> }) | @Model.DiscValue.Value.ToString("C", new CultureInfo("bn-BD")) | -@Model.DiscWorkValue.Value.ToString("C", new CultureInfo("bn-BD"))
+                                            </span>
+                                        </span>
+                                    }
+                                    if (Model.CouponDiscount > 0)
+                                    {
+                                        <br />
+                                        <span class="discountInfo ">
+                                            <span>
+                                                Coupon (@if (Model.CouponDiscType == true)
+                                                { <span>@Model.CouponDiscount.Value.ToString("C", new CultureInfo("bn-BD"))</span> }
+                                                else
+                                                { <span>@Model.CouponDiscount%</span> }) | @Model.CouponDiscValue.Value.ToString("C", new CultureInfo("bn-BD")) | -@Model.CoupDiscWorkValue.Value.ToString("C", new CultureInfo("bn-BD"))
+                                            </span>
+                                        </span>
+                                    }
+                                }
+                        </dd>
+                        <dt>Tax(<span>@Model.TaxPercent</span>%)</dt>
+                        <dd>@Model.Tax.ToString("C", new CultureInfo("bn-BD"))</dd>
+                        <dt>Total Amount</dt>
+                        <dd>@Model.TotalAmount.Value.ToString("C", new CultureInfo("bn-BD"))</dd>
+                        
+                        <dt>
+                            Delivery Charge(<span>
+                            @if (Model.DelChargeType == true)
+                            { <span>@Model.DelChargeAmount.Value.ToString("C", new CultureInfo("bn-BD"))</span> }
+                            else
+                            { <span>@Model.DelChargeAmount%</span> } @if (Model.DelChargeBeforeDisc > 0)
+                            { <span> | @Model.DelChargeBeforeDisc.Value.ToString("C", new CultureInfo("bn-BD"))</span> }
+                            </span>)
+                        </dt>
+                        @if (Model.DeliveryCharge == null)
+                        {
+                            Model.DeliveryCharge = 0;
+                        }
+                        <dd>
+                            @Model.DeliveryCharge.Value.ToString("C", new CultureInfo("bn-BD"))
+                            @if (Model.DelOfferType == 2)
+                            {
+                                if (Model.DelDiscPercent > 0)
+                                {
+                                    <br />
+                                    <span class="discountInfo ">
+                                        <span>Discount(@Model.DelDiscPercent%) | -@Model.DelDiscValue.Value.ToString("C", new CultureInfo("bn-BD"))</span>
+                                    </span>
+
+                                }
+                                if (Model.CouponDelPercent > 0)
+                                {
+                                    <br />
+                                    <span class="discountInfo divCrossLine">
+                                        <span>Coupon(@Model.CouponDelPercent%) | -@Model.CouponDelValue.Value.ToString("C", new CultureInfo("bn-BD"))</span>
+                                    </span>
+                                }
+                            }
+                            else if (Model.DelOfferType == 3)
+                            {
+                                if (Model.DelDiscPercent > 0)
+                                {
+                                    <br />
+                                    <span class="discountInfo divCrossLine">
+                                        <span>Discount(@Model.DelDiscPercent%) | -@Model.DelDiscValue.Value.ToString("C", new CultureInfo("bn-BD"))</span>
+                                    </span>
+
+                                }
+                                if (Model.CouponDelPercent > 0)
+                                {
+                                    <br />
+                                    <span class="discountInfo">
+                                        <span>Coupon(@Model.CouponDelPercent%) | -@Model.CouponDelValue.Value.ToString("C", new CultureInfo("bn-BD"))</span>
+                                    </span>
+                                }
+                            }
+                        </dd>
+                        <dt>Invoice Amount</dt>
+                        <dd>@Model.InvoiceAmount.ToString("C", new CultureInfo("bn-BD"))</dd>
+                        <dt>Due Amount</dt>
+                        @if (Model.DueAmount == null)
+                        {
+                            Model.DueAmount = 0;
+                        }
+                        <dd>@Model.DueAmount.Value.ToString("C", new CultureInfo("bn-BD"))</dd>
+                    </dl>
+                 }
+                else
+                {
+                    <dl class="dl-horizontal">
+                        <dt>Order Amount</dt>
+                        <dd>@Model.OrderAmount.ToString("C", new CultureInfo("bn-BD"))</dd>
+                        <dt>Discount</dt>
+                        @if (Model.OrderAmountDiscount == null)
+                        {
+                            Model.OrderAmountDiscount = 0;
+                        }
+                        <dd>@Model.OrderAmountDiscount.Value.ToString("C", new CultureInfo("bn-BD"))</dd>
+                        <dt>Sub Total</dt>
+                        <dd>@Model.SubTotalPrice.ToString("C", new CultureInfo("bn-BD"))</dd>
+                        <dt>Tax</dt>
+                        <dd>@Model.Tax.ToString("C", new CultureInfo("bn-BD"))</dd>
+                        <dt>Delivery Charge</dt>
+                        @if (Model.DeliveryCharge == null)
+                        {
+                            Model.DeliveryCharge = 0;
+                        }
+                        <dd>@Model.DeliveryCharge.Value.ToString("C", new CultureInfo("bn-BD"))</dd>
+                        <dt>Invoice Amount</dt>
+                        <dd>@Model.InvoiceAmount.ToString("C", new CultureInfo("bn-BD"))</dd>
+                        <dt>Due Amount</dt>
+                        @if (Model.DueAmount == null)
+                        {
+                            Model.DueAmount = 0;
+                        }
+                        <dd>@Model.DueAmount.Value.ToString("C", new CultureInfo("bn-BD"))</dd>
+                    </dl>
+                }
+            </div>
+        </div>
+    </div>
+    <hr />
+    <div class="panel-body">
+        @if (orderTransactionList.Any())
+        {
+            <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+                <tr>
+                    <th>SL.</th>
+                    <th>Product Name</th>
+                    <th>Quantity</th>
+                    <th>Peritem Price</th>
+                    <th>Peritem Total</th>
+                    <th>Discount Price</th>
+                    <th>Total Price</th>
+                    <th>Refund Status</th>
+                </tr>
+                @foreach (var list in orderTransactionList)
+                {
+                    count++;
+                    <tr>
+                        <td>@count. </td>
+                        <td>
+                            @list.ProductName
+                            @if (list.TransactionType == 1) // product
+                             {
+                                if (list.Discount > 0 || list.CouponDiscount > 0)
+                                {
+                                    <img src="~/Images/DiscountImage/272498.png" />
+                                }
+                                if (list.RefundStatus == 1)
+                                {
+                                    <i class="fa fa-reply" aria-hidden="true"></i>
+                                }
+                             }
+                        </td>
+                        @if (list.TransactionType == 1)
+                        {
+                            <td>@list.Quantity</td>
+                            <td>@list.PerItemPrice.ToString("C", new CultureInfo("bn-BD"))</td>
+                        }
+                        else
+                        {
+                            <td>N/A</td>
+                            <td>N/A</td>
+                        }
+                        @if (list.Discount > 0 || list.CouponDiscount > 0)
+                        {
+                            <td>@list.PerItemTotal.Value.ToString("C", new CultureInfo("bn-BD"))</td>
+                            <td>
+                                @list.Price.ToString("C", new CultureInfo("bn-BD"))
+                                @if (ViewBag.Type == 2)
+                                {
+                                    <br />
+                                    if (list.OfferType == 1 || list.OfferType == 2)
+                                    {
+                                        if (list.Discount > 0)
+                                        {
+                                            <span>
+                                                Discount(
+                                                @if (list.DiscountType == true)
+                                                {
+                                                    <span>@list.Discount.Value.ToString("C", new CultureInfo("bn-BD"))</span>
+                                                }
+                                                else
+                                                {
+                                                    <span>@list.Discount</span><span>%</span>
+                                                }
+                                                ) | -<span>@list.DiscValue.Value.ToString("C", new CultureInfo("bn-BD"))</span>
+                                            </span>
+                                            if (list.CouponDiscount > 0)
+                                            {
+                                                <br />
+                                            }
+                                        }
+                                        if (list.CouponDiscount > 0)
+                                        {
+                                            if (list.SubOfferId == 1) //B1G1
+                                            {
+                                                <span class="divCrossLine">Coupon(B1G1 <i class="fa fa-times"></i> @list.CouponDiscount) | -<span>@list.CouponDiscValue.Value.ToString("C", new CultureInfo("bn-BD"))</span></span>
+                                            }
+                                            else if (list.SubOfferId == 2) //B2G1
+                                            {
+                                                <span class="divCrossLine">Coupon(B2G1 <i class="fa fa-times"></i> @list.CouponDiscount) | -<span>@list.CouponDiscValue.Value.ToString("C", new CultureInfo("bn-BD"))</span></span>
+                                            }
+                                            else
+                                            {
+                                                <span class="divCrossLine">
+                                                    Coupon(
+                                                    @if (list.CouponDiscType == true)
+                                                    {
+                                                        <span>@list.CouponDiscount.Value.ToString("C", new CultureInfo("bn-BD"))</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span>@list.CouponDiscount</span><span>%</span>
+                                                    }
+                                                    ) | -<span>@list.CouponDiscValue.Value.ToString("C", new CultureInfo("bn-BD"))</span>
+                                                </span>
+                                            }
+                                        }
+                                    }
+                                    else if (list.OfferType == 3)
+                                    {
+                                        if (list.Discount > 0)
+                                        {
+                                            <span class="divCrossLine">
+                                                Discount(
+                                                @if (list.DiscountType == true)
+                                                {
+                                                    <span>@list.Discount.Value.ToString("C", new CultureInfo("bn-BD"))</span>
+                                                }
+                                                else
+                                                {
+                                                    <span>@list.Discount</span><span>%</span>
+                                                }
+                                                ) | -<span>@list.DiscValue.Value.ToString("C", new CultureInfo("bn-BD"))</span>
+                                            </span>
+                                            if (list.CouponDiscount > 0)
+                                            {
+                                                <br />
+                                            }
+                                        }
+                                        if (list.CouponDiscount > 0)
+                                        {
+                                            if (list.SubOfferId == 1) //B1G1
+                                            {
+                                                <span>Coupon(B1G1 <i class="fa fa-times"></i> @list.CouponDiscount) | -<span>@list.CouponDiscValue.Value.ToString("C", new CultureInfo("bn-BD"))</span></span>
+                                            }
+                                            else if (list.SubOfferId == 2) //B2G1
+                                            {
+                                                <span>Coupon(B2G1 <i class="fa fa-times"></i> @list.CouponDiscount) | -<span>@list.CouponDiscValue.Value.ToString("C", new CultureInfo("bn-BD"))</span></span>
+                                            }
+                                            else
+                                            {
+                                                <span>
+                                                    Coupon(
+                                                    @if (list.CouponDiscType == true)
+                                                    {
+                                                        <span>@list.CouponDiscount.Value.ToString("C", new CultureInfo("bn-BD"))</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span>@list.CouponDiscount</span><span>%</span>
+                                                    }
+                                                    ) | -<span>@list.CouponDiscValue.Value.ToString("C", new CultureInfo("bn-BD"))</span>
+                                                </span>
+                                            }
+                                        }
+                                    }
+                                }
+                            </td>
+                            <td>@list.Price.ToString("C", new CultureInfo("bn-BD"))</td>
+                        }
+                        else
+                        {
+                            <td>@list.Price.ToString("C", new CultureInfo("bn-BD"))</td>
+                            <td>N/A</td>
+                            <td>@list.Price.ToString("C", new CultureInfo("bn-BD"))</td>
+                        }
+                        <td>
+                            @if (list.Quantity > 0 && list.IsRefundAllow == true)
+                             {
+                                <span>Allow</span>
+                                @*<button class="btn btn-danger btnRefundItem" data-id="@list.OrderTransactionId" data-quantity="@list.Quantity" data-productid="@list.ProductId" data-isrefundallow="@list.IsRefundAllow">Refund</button>*@
+                            }
+                            else
+                            {
+                                <span>Not Allow</span>
+                            }
+                        </td>
+                    </tr>
+                 }
+            </table>
+         }
+        else
+        {
+            <h4>There is no record to display</h4>
+        }
+    </div>
+</div>
+@if(ViewBag.Type == 3)
+{
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div id="divPaymentHistoryList"></div>
+        </div>
+    </div>
+    <script>
+        $("#divPaymentHistoryList").append('<div class="tiny_loading"></div>');
+        $("#divPaymentHistoryList").load('/Sales/PaymentHistoryList?orderId=' + '@Model.OrderId');
+    </script>
+}
+
+<script>
+    $("#btnPrint").click(function () {
+        $("#btnPrint").hide();
+        window.print();
+        $("#btnPrint").show();
+    });
+</script>
+
+
+

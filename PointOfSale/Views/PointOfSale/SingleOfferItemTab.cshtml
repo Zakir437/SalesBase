@@ -1,0 +1,89 @@
+﻿<div class="panel-body">
+    <div class="row" style="margin:0; padding:0">
+        <div class="col-md-12" style="padding:0">
+            <div class="col-md-3" style="padding:0 5px 5px 0px">
+                @(Html.Kendo().DropDownList()
+                        .Name("ProductDropdown")
+                        .BindTo(ViewBag.ProductList as SelectList)
+                        .DataTextField("Text")
+                        .DataValueField("Value")
+                        .Filter("contains")
+                        .OptionLabel("Filter by Product")
+                        .HtmlAttributes(new { style = "width:100%" })
+                    .Events(e =>
+                    {
+                        e.Change("onChangeProduct");
+                    })
+                )
+            </div>
+            <div class="col-md-3" style="padding:0 5px 5px 0px">
+                @(Html.Kendo().DatePicker()
+                    .Name("specificDate")
+                    .Format("MMM dd, yyyy")
+                    .Min(DateTime.Now)
+                    .HtmlAttributes(new { onkeydown = "javascript:return false;", style = "width: 100%", title = "datepicker" })
+                    .Events(e => { e.Change("onChangeDate"); })
+                )
+            </div>
+          
+        </div>
+    </div>
+    <div class="row" style="margin:0; padding:0">
+        <div class="col-md-3" style="padding:0 5px 5px 0px">
+            <button class="btn btn-default" id="btnAmountHightoLow" style="width:100%">Amount(High to low)</button>
+        </div>
+        <div class="col-md-3" style="padding:0 5px 5px 0px">
+            <button class="btn btn-default" id="btnAmountLowtoHigh" style="width:100%">Amount(Low to High)</button>
+        </div>
+        <div class="col-md-3" style="padding:0 5px 5px 0px">
+            <button class="btn btn-default" id="btnPercentileHightoLow" style="width:100%">Percentile(High to low)</button>
+        </div>
+        <div class="col-md-3" style="padding:0 5px 5px 0px">
+            <button class="btn btn-default" id="btnPercentileLowToHigh" style="width:100%">Percentile(Low to High)</button>
+        </div>
+    </div>
+    <div class="row" style="margin:0; padding:0 5px 5px 0px;">
+        <div id="divSingleOfferItemList"></div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#divSingleOfferItemList").append('<div class="loading_partial"></div>');
+        $("#divSingleOfferItemList").load('@Url.Action("OfferProductList", "PointOfSale")?isSingleOffer=' + isSingleOffer);
+    });
+    function clearFilter()
+    {
+        $("#ProductDropdown").data("kendoDropDownList").value("");
+        $("#specificDate").val("");
+    }
+     //Filter discount amount (High to low)
+    $("#btnAmountHightoLow").click(function () {
+        clearFilter();
+        sorterType = 1; // 1 for sort amount high to low
+        $("#divSingleOfferItemList").append('<div class="loading_partial"></div>');
+        $("#divSingleOfferItemList").load('@Url.Action("OfferProductList", "PointOfSale")?isSingleOffer=' + isSingleOffer + '&sorterType=' + sorterType);
+    });
+
+    //Filter discount amount (low to high)
+    $("#btnAmountLowtoHigh").click(function () {
+        clearFilter();
+        sorterType = 2; // 2 for sort amount low to high
+        $("#divSingleOfferItemList").append('<div class="loading_partial"></div>');
+        $("#divSingleOfferItemList").load('@Url.Action("OfferProductList", "PointOfSale")?isSingleOffer=' + isSingleOffer + '&sorterType=' + sorterType);
+    });
+
+    //Filter discount percentile (High to low)
+    $("#btnPercentileHightoLow").click(function () {
+        clearFilter();
+        sorterType = 3; // 3 for sort percentile high to low
+        $("#divSingleOfferItemList").append('<div class="loading_partial"></div>');
+        $("#divSingleOfferItemList").load('@Url.Action("OfferProductList", "PointOfSale")?isSingleOffer=' + isSingleOffer + '&sorterType=' + sorterType);
+    });
+    //Filter discount percentile (low to high)
+    $("#btnPercentileLowToHigh").click(function () {
+        clearFilter();
+        sorterType = 4; // 4 for sort percentile low to high
+        $("#divSingleOfferItemList").append('<div class="loading_partial"></div>');
+        $("#divSingleOfferItemList").load('@Url.Action("OfferProductList", "PointOfSale")?isSingleOffer=' + isSingleOffer + '&sorterType=' + sorterType);
+    });
+</script>

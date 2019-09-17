@@ -1,0 +1,33 @@
+﻿@model IEnumerable<PointOfSale.Models.SupplierDebitPayment>
+@using System.Globalization
+@{
+    var count = 0;
+}
+@if (Model.Any())
+ {
+    <table class="table table-bordered">
+        <tr>
+            <th>SL.</th>
+            <th>Amount</th>
+            <th>Date</th>
+        </tr>
+        @foreach (var list in Model)
+         {
+            count++;
+            <tr>
+                <td>@count.</td>
+                <td>@list.Amount.ToString("C", new CultureInfo("bn-BD"))</td>
+                <td>@Convert.ToDateTime(list.CreatedDate).ToString("MMM dd,yyyy hh:mm:ss tt")</td>
+            </tr>
+         }
+    </table>
+ }
+else
+{
+    <h4>There is no record to display</h4>
+}
+<script>
+    $('[data-toggle="tooltip"]').tooltip();
+</script>
+
+

@@ -1,0 +1,219 @@
+﻿@{
+    ViewBag.Title = "XmlFile";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+}
+<section class="content">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4>Pay Sheet of Employee Salary</h4>
+            </div>
+            <div class="pull-right">
+                <a class="btn btn-default" href="/Accounting/PaySalary"><i class="fa fa-arrow-left"></i> Back</a>
+            </div>
+        </div>
+        <div class="panel-body" style="padding:10px 15px 0px 15px;">
+            <div class="pull-left" style="width:48%!important;">
+                @(Html.Kendo().MultiSelect()
+                .Name("UserMultiselect")
+                .DataTextField("Text")
+                .DataValueField("Value")
+                .Placeholder("Type User name...")
+                .Events(e => e.Change("onChangeUser"))
+                .HtmlAttributes(new { style = "width: 100%;" })
+                .BindTo(ViewBag.UserList as SelectList)
+                )
+                <span class="k-icon k-i-search" style="margin-top:-25px;float:right;margin-right:10px; position:relative">&nbsp;</span>
+            </div>
+            <div class="pull-right" style="max-width: 48%!important;">
+                <div class="pull-left" style="padding: 5px 10px;padding-right:5px!important;" id="show_Days_Title"></div>
+                @*<button class="btn btn-primary btnPrint pull-right" style="height:31px;"><i class="fa fa-print"></i></button>*@
+                <div class="btn-group btn-group-devided pull-right" data-toggle="buttons">
+                    <div id="reportrange" class="pull-right" style="background: #fff; cursor: pointer; padding: 5px 10px; border: 1px solid #ccc; width: 100%">
+                        <span></span> <b class="caret"></b>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="panel-body" style="padding:0px 15px;">
+            <div id="divXmlFileInfoList" style="padding-top:5px; overflow-x:auto;"></div>
+        </div>
+    </div>
+</section>
+
+<div id="divSalaryPayWin"></div>
+<script>
+    var selectedUserId = "", transId = 0;
+    var days = 0, from = null, to = null;
+    var start = moment();
+    var end = moment().subtract(1, 'days');
+    $(document).ready(function () {
+        $("#liForAccount").addClass('active');
+        $("#liForPayroll").addClass('active');
+
+        $(".btnPrint").prop("disabled", true);
+        $('.ranges li').first().click();
+    });
+    function onChangeUser() {
+        selectedUserId = "";
+        selectedUserId = this.value();
+        $('.ranges li').first().click();
+    }
+    @***************DateRange Start******************@
+    $('#reportrange').daterangepicker({
+        startDate: start,
+        endDate: end,
+        ranges: {
+            'Select Date': [moment(), moment().subtract(1, 'days')],
+            'Today': [moment(), moment()],
+            'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+            'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+        }
+    }, cb);
+    cb(start, end);
+    start = moment(); end = moment();
+    $(".applyBtn").click(function () {
+        from = $("input[name*='daterangepicker_start']").val();
+        to = $("input[name*='daterangepicker_end']").val();
+        btn_CustomDate(from, to);
+    });
+
+    $('.ranges').on("click", "li", function () {
+        var day = $(this).text();
+        if (day == "Select Date") {
+            btn_All();
+        } else {
+            if (day == "Today") {
+                btn_today();
+            } else if (day == "Last 7 Days") {
+                btn_last_seven();
+            } else if (day == "Last 30 Days") {
+                btn_last_thirty();
+            }
+        }
+    });
+    function cb(start, end) {
+        onChangeUser
+        if (start == null && end == null) {
+            $('#reportrange span').html("Select Date");
+            return;
+        }
+        else if ((!start._isValid && !end._isValid)) {
+            $('#reportrange span').html("Select Date");
+            return;
+        } else if (start._d > end._d) {
+            $('#reportrange span').html("Select Date");
+            return;
+        }
+        $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+    }
+    function btn_today() {
+        days = 1;
+        from = null;
+        to = null;
+        $(".btnPrint").prop("disabled", false);
+        $('#show_Days_Title').html("Today");
+        $("#divXmlFileInfoList").empty();
+        $("#divXmlFileInfoList").append('<div class="loading_partial"></div>');
+        $("#divXmlFileInfoList").load('@Url.Action("XmlFileInfoList", "Accounting")?selectedUser=' + selectedUserId + '&days=' + days);
+    }
+    function btn_last_seven() {
+        days = 7;
+        from = null;
+        to = null;
+        $(".btnPrint").prop("disabled", false);
+        $("#btnSeeMore").hide();
+        $('#show_Days_Title').html("Last 7 Days");
+        $("#divXmlFileInfoList").empty();
+        $("#divXmlFileInfoList").append('<div class="loading_partial"></div>');
+        $("#divXmlFileInfoList").load('@Url.Action("XmlFileInfoList", "Accounting")?selectedUser=' + selectedUserId + '&days=' + days);
+    }
+    function btn_last_thirty() {
+        days = 30;
+        from = null;
+        to = null;
+        $(".btnPrint").prop("disabled", false);
+        $('#show_Days_Title').html("Last 30 Days");
+        $("#divXmlFileInfoList").empty();
+        $("#divXmlFileInfoList").append('<div class="loading_partial"></div>');
+        $("#divXmlFileInfoList").load('@Url.Action("XmlFileInfoList", "Accounting")?selectedUser=' + selectedUserId + '&days=' + days);
+    }
+    function btn_All() {
+        days = 0;
+        from = null;
+        to = null;
+        $(".btnPrint").prop("disabled", true);
+        $('#show_Days_Title').html("");
+        $('#reportrange span').html("Select Date");
+        $("#divXmlFileInfoList").empty();
+        $("#divXmlFileInfoList").append('<div class="loading_partial"></div>');
+        $("#divXmlFileInfoList").load('@Url.Action("XmlFileInfoList", "Accounting")?selectedUser=' + selectedUserId);
+    }
+    function btn_CustomDate(from, to) {
+        days = 0;
+        $(".btnPrint").prop("disabled", false);
+        $('#show_Days_Title').html("Custom Range");
+        $("#divXmlFileInfoList").empty();
+        $("#divXmlFileInfoList").append('<div class="loading_partial"></div>');
+        $("#divXmlFileInfoList").load('@Url.Action("XmlFileInfoList", "Accounting")?selectedUser=' + selectedUserId + '&from=' + new Date(from).toISOString() + '&to=' + new Date(to).toISOString() );
+    }
+
+    //print function
+    $("#divXmlFileInfoList").on('click', '.btnPrint', function () {
+        transId = $(this).data("id");
+        var data = "xmlFileId=" + transId;
+        window.open('@Url.Action("EmpSalaryXmlPrint", "Accounting")?q=' + getDataEncrypted(data), '_blank');
+    });
+
+    $("#divXmlFileInfoList").on('click', '.btnPrintForReceipt', function () {
+        transId = $(this).data("id");
+        var data = "xmlFileId=" + transId + "?isReceiptPrint=true";
+        window.open('@Url.Action("EmpSalaryXmlPrint", "Accounting")?q=' + getDataEncrypted(data), '_blank');
+    });
+
+    //Create Pay win
+    $("#divXmlFileInfoList").on('click', '.btnCreatePayWin', function () {
+        id = $(this).data("id");
+        $("#divSalaryPayWin").empty();
+        $("#divSalaryPayWin").append('<div class="tiny_loading"></div>');
+        $("#divSalaryPayWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            title: 'Pay',
+            close: onWindowClose
+            //resizable: false
+        });
+        var salaryPayWin = $("#divSalaryPayWin").data("kendoWindow");
+        salaryPayWin.refresh('@Url.Action("TotalSalaryPayWin", "Accounting")?transId=' + id);
+        salaryPayWin.center().open().maximize();
+        document.documentElement.style.overflow = 'hidden';
+        document.body.scroll = "no";
+    });
+
+    $("#divXmlFileInfoList").on('click', '.btnPayApproved', function () {
+        id = $(this).data("id");
+         $.ajax({
+             url: '@Url.Action("SalaryPayApproved", "Accounting")',
+             type:"POST",
+             data: { transId: id, createdBy : userId},
+             success: function (data) {
+                if (data == "success") {
+                    $('.ranges li').first().click();
+                }
+                else
+                {
+                    alert("Save error...");
+                }
+            }
+        });
+    });
+</script>
+
+@*<script>
+    history.pushState(null, document.title, location.href);
+    window.addEventListener('popstate', function (event) {
+        history.pushState(null, document.title, location.href);
+    });
+</script>*@

@@ -1,0 +1,164 @@
+﻿@{
+    ViewBag.Title = "StockDailySold";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+}
+<style>
+    .k-input {
+        height: 26px !important;
+    }
+</style>
+<section class="content-header">
+    <ol class="breadcrumb">
+        <li><a href="/Inventory/TaskScheduler"><i class="fa fa-list-ul"></i> Task Scheduler</a></li>
+        <li><a href="/Inventory/DailySoldGenerateDate"><i class="fa fa-list-ul"></i>Daily Sold Generate Date</a></li>
+        <li class="active">Stock Daily Sold</li>
+    </ol>
+</section>
+<section class="content">
+    <div class="panel panel-info" style="margin-top:20px;">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4 class="uppercase">Stock Daily Sold (@Convert.ToDateTime(ViewBag.Date).ToString("MMMM dd,yyyy"))</h4>
+            </div>
+            <div class="pull-right">
+                <a class="btn btn-primary" href="/Inventory/DailySoldGenerateDate"><i class="fa fa-arrow-left"></i> Back</a>
+            </div>
+        </div>
+        <div class="panel-body">
+            <div class="row" style="margin:0px;">
+                <div class="col-md-3">
+                    @(Html.Kendo().MultiSelect()
+                        .Name("productMultiSelect")
+                        .DataTextField("Text")
+                        .DataValueField("Value")
+                        .Placeholder("Type product name...")
+                        .AutoBind(false)
+                        .Events(e => e.Change("onChangeProduct"))
+                        .HtmlAttributes(new { style = "width: 100%;" })
+                        .DataSource(source =>
+                        {
+                            source.Read(read =>
+                            {
+                                read.Action("GetProductList", "Inventory").Data("additionalItemsGetProducts"); ;
+                            })
+                            .ServerFiltering(false);
+                        })
+                    )
+                    <span class="k-icon k-i-search" style="margin-top:-25px;float:right;margin-right:10px; position:relative">&nbsp;</span>
+                </div>
+                <div class="col-md-3">
+                    @(Html.Kendo().DropDownList()
+                         .Name("Category")
+                         .BindTo(ViewBag.CategoryList as SelectList)
+                         .DataTextField("Text")
+                         .DataValueField("Value")
+                         .OptionLabel("--Select One Category--")
+                         .HtmlAttributes(new { style = "width:100%" })
+                        .Events(e =>
+                        {
+                            e.Change("onChangeCategory");
+                        })
+                    )
+                </div>
+                <div class="col-md-3">
+                    @(Html.Kendo().DropDownList()
+                         .Name("SubCategory")
+                         .BindTo(ViewBag.SubCategoryList as SelectList)
+                         .DataTextField("Text")
+                         .DataValueField("Value")
+                         .OptionLabel("--Select One Subcategory--")
+                         .HtmlAttributes(new { style = "width:100%" })
+                        .Events(e =>
+                        {
+                            e.Change("onChangeSubCategory");
+                        })
+                    )
+                </div>
+            </div>
+            <div class="form-group">
+                <div style="width:50%!important; padding-right:10px;" class="pull-left">
+                     
+                </div>
+                @*<button class="btn btn-primary btnPrint pull-right"><i class="fa fa-print"></i></button>*@
+            </div>
+            <div id="divDailySoldList"></div>
+        </div>
+    </div>
+</section>
+<script>
+    var selectedIds = "", categoryId = 0, subCategoryId = 0;
+
+    $(document).ready(function () {
+        $("#liForTaskScheduler").addClass('active');
+        $("#divDailySoldList").append('<div class="loading_partial"></div>');
+        $("#divDailySoldList").load('/Inventory/StockDailySoldList?date=' + new Date("@ViewBag.Date").toISOString());
+    });
+
+    function additionalItemsGetProducts()
+    {
+        return {
+            date: new Date("@ViewBag.Date").toISOString(),
+            categoryId: categoryId,
+            subCategoryId: subCategoryId
+        }
+    }
+
+    function onChangeProduct()
+    {
+        selectedIds = this.value();
+        if (selectedIds.length > 0)
+        {
+            $("#divDailySoldList").append('<div class="loading_partial"></div>');
+            $("#divDailySoldList").load('/Inventory/StockDailySoldList?ids=' + selectedIds);
+        }
+        else
+        {
+            $("#divDailySoldList").append('<div class="loading_partial"></div>');
+            $("#divDailySoldList").load('/Inventory/StockDailySoldList?date=' + new Date("@ViewBag.Date").toISOString() + '&categoryId=' + categoryId + '&subCategoryId=' + subCategoryId);
+        }
+    }
+
+    function onChangeCategory()
+    {
+        subCategoryId = 0;
+        categoryId = this.value();
+        $('#productMultiSelect').data('kendoMultiSelect').value("");
+        $('#productMultiSelect').data('kendoMultiSelect').dataSource.read();
+        $("#SubCategory").data("kendoDropDownList").value("");
+
+        if (categoryId > 0)
+        {
+            $("#divDailySoldList").append('<div class="loading_partial"></div>');
+            $("#divDailySoldList").load('/Inventory/StockDailySoldList?date=' + new Date("@ViewBag.Date").toISOString() + '&categoryId=' + categoryId);
+        }
+        else
+        {
+            $("#divDailySoldList").append('<div class="loading_partial"></div>');
+            $("#divDailySoldList").load('/Inventory/StockDailySoldList?date=' + new Date("@ViewBag.Date").toISOString());
+        }
+    }
+    function onChangeSubCategory()
+    {
+        categoryId = 0;
+        subCategoryId = this.value();
+        $('#productMultiSelect').data('kendoMultiSelect').value("");
+        $('#productMultiSelect').data('kendoMultiSelect').dataSource.read();
+        $("#Category").data("kendoDropDownList").value("");
+
+        if (subCategoryId > 0)
+        {
+            $("#divDailySoldList").append('<div class="loading_partial"></div>');
+            $("#divDailySoldList").load('/Inventory/StockDailySoldList?date=' + new Date("@ViewBag.Date").toISOString() + '&subCategoryId=' + subCategoryId);
+        }
+        else
+        {
+            $("#divDailySoldList").append('<div class="loading_partial"></div>');
+            $("#divDailySoldList").load('/Inventory/StockDailySoldList?date=' + new Date("@ViewBag.Date").toISOString());
+        }
+    }
+    //Print
+    $(".btnPrint").click(function () {
+        var data = "date=" + new Date("@ViewBag.Date").toISOString();
+        window.open('@Url.Action("DailySoldPrint", "Inventory")?q=' + getDataEncrypted(data), '_blank');
+    });
+</script>

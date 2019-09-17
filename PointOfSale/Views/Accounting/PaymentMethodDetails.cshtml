@@ -1,0 +1,398 @@
+﻿@model PointOfSale.Models.PaymentMethod
+<style>
+    .selected {
+        border: 1px solid #483c3c;
+    }
+    a {
+        cursor:pointer;
+    }
+</style>
+@{
+    ViewBag.Title = "PaymentMethodDetails";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    PointOfSale.Models.PointOfSale_DBEntities db = new PointOfSale.Models.PointOfSale_DBEntities();
+    var transCount = 0;
+    var accWithMethodList = db.ViewAssignedMethodNames.Where(a => a.MethodId == Model.Id)
+        .GroupBy(g => new { g.AccountId })
+        .Select(s => new { s.FirstOrDefault().AccountId, s.FirstOrDefault().AccountName }).ToList();
+    var paymentListCount = db.PaymentTransactions.Where(a => a.MethodId == Model.Id && a.Status != false).Count();
+}
+<div class="panel panel-default" style="margin-top:20px;">
+    <div class="panel-heading" style="padding-bottom:46px;">
+        <div class="pull-left">
+            <h4>PAYMENT METHOD DETAILS</h4>
+        </div>
+        <div class="pull-right">
+            <a class="btn btn-default" href="/Configuration/PaymentMethod"><i class="fa fa-arrow-left"></i> Back</a>
+        </div>
+    </div>
+    <div class="panel-body">
+        <div>
+            <dl class="dl-horizontal">
+                <dt>Method Name</dt>
+                <dd>@Model.MethodName</dd>
+            </dl>
+        </div>
+    </div>
+    <hr style="margin:0px;"/>
+    <div class="panel-body">
+        <div class="pull-left" style="max-width:48%!important">
+            <button class="btn btn-default selected" style="margin-bottom:5px;" id="btnAllTrans">All</button>
+            @if (accWithMethodList.Any())
+             {
+                foreach(var account in accWithMethodList)
+                {
+                    transCount = db.PaymentTransactions.Where(a => a.MethodId == Model.Id && a.Status != false && a.PaymentBodyId == account.AccountId).Count();
+                    //transCount = paymentList.Where(a => a.PaymentBodyId == account.AccountId).Count();
+                    <button class="btn btn-default btnAccount" style="margin-bottom:5px;" data-transcount="@transCount" data-id="@account.AccountId">@account.AccountName</button>
+                }
+             }
+        </div>
+        <div class="pull-right" style="max-width: 48%!important;">
+            <div class="row" style="margin:0px; margin-bottom:5px;">
+                <div class="pull-left" style="padding: 5px 10px;padding-right:5px!important;" id="show_Days_Title"></div>
+                <button class="btn btn-primary btnProductDetailsPrint pull-right" style="height:32px; display:none"><i class="fa fa-print"></i></button>
+                <button class="btn btn-primary btnPrint pull-right" style="height:32px;"><i class="fa fa-print"></i></button>
+                <div class="btn-group btn-group-devided pull-right" data-toggle="buttons" style="padding-right:5px;">
+                    <div id="reportrange" class="pull-right" style="background: #fff; cursor: pointer; padding: 5px 10px; border: 1px solid #ccc; width: 100%">
+                        <span></span> <b class="caret"></b>
+                    </div>
+                </div>
+            </div>
+            @*<div class="row" style="margin:0px;">
+                <div class="pull-right" style="width: 65px;">
+                  @(Html.Kendo().DropDownList()
+                  .Name("inoutDropdown")
+                  .DataTextField("Text")
+                  .DataValueField("Value")
+                  .HtmlAttributes(new { style = "width:100%" })
+                  .BindTo(new List<SelectListItem>() {
+                      new SelectListItem() {
+                          Text = "All",
+                          Value = "0"
+                      },
+                      new SelectListItem() {
+                          Text = "In",
+                          Value = "1"
+                      },
+                      new SelectListItem() {
+                          Text = "Out",
+                          Value = "2"
+                      }
+                  })
+                  .Events(e =>
+                  {
+                      e.Change("onInOutChange");
+                  })
+                    )
+                </div>
+            </div>*@
+        </div>
+    </div>
+    <div class="panel-body" style="padding:0px 15px;">
+        @*<div class="pull-right" style="width:65px;">
+            @(Html.Kendo().DropDownList()
+                  .Name("inoutDropdown")
+                  .DataTextField("Text")
+                  .DataValueField("Value")
+                  .HtmlAttributes(new { style = "width:100%" })
+                  .BindTo(new List<SelectListItem>() {
+                      new SelectListItem() {
+                          Text = "All",
+                          Value = "0"
+                      },
+                      new SelectListItem() {
+                          Text = "In",
+                          Value = "1"
+                      },
+                      new SelectListItem() {
+                          Text = "Out",
+                          Value = "2"
+                      }
+                  })
+                  .Events(e =>
+                  {
+                      e.Change("onInOutChange");
+                  })
+            )
+        </div>*@
+    </div>
+    <div class="panel-body" style="padding:0px 15px;">
+        <div id="divPaymentList" style="padding-top:5px;"></div>
+        <div class="text-center" style="margin-bottom:10px">
+            <button class="btn btn-primary" id="btnSeeMore"><i class="fa fa-arrow-down"></i> See more</button>
+        </div>
+    </div>
+</div>
+<div id="divImportTranWin"></div>
+<div id="divSaleTranWin"></div>
+<script id="temp_win_delete_entry" type="text/x-kendo-template">
+    <div style="padding:1em;">
+        <p style="font-size: 14px; padding: 10px"> #=msg# </p>
+        <div style="text-align: right;">
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btn_delete_Entry_noty_ok"><span class="k-icon k-update"></span>OK</button>
+            <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btn_delete_Entry_noty_cancel"><span class="k-icon k-cancel"></span>Cancel</button>
+        </div>
+    </div>
+</script>
+<script>
+    var methodId = @Model.Id, accId = 0, count = 20, transCount = 0, inout = 0, transId = 0;
+    var listType = 1;
+    var days = 0, from = null, to = null;
+    var passdata = '';
+    var start = moment();
+    var end = moment().subtract(1, 'days');
+    $(document).ready(function () {
+        $('.ranges li').first().click();
+    });
+     //payment transaction delete
+    $("#divPaymentList").on('click', ".btnDeletePaymentTrans", function () {
+        transId = $(this).data("id");
+        var kendoWindow = $("<div />").kendoWindow({
+            actions: ["Close"],
+            title: "Alert",
+            resizable: false,
+            width: "30%",
+            modal: true
+        });
+        msg = "Are you sure want to delete this Transaction?";
+        var template = kendo.template($("#temp_win_delete_entry").html());
+        kendoWindow.data("kendoWindow").content(template).center().open();
+
+        kendoWindow.find("#btn_delete_Entry_noty_cancel").click(function () {
+            kendoWindow.data("kendoWindow").close();
+            document.documentElement.style.overflow = "auto";
+        }).end();
+        kendoWindow.find("#btn_delete_Entry_noty_ok").click(function () {
+            kendoWindow.data("kendoWindow").close();
+            document.documentElement.style.overflow = "auto";
+            deleteTransaction(transId);
+        }).end();
+        document.documentElement.style.overflow = "hidden";
+    });
+    function deleteTransaction(transId) {
+        $.ajax({
+            url: '@Url.Action("DeletePaymentTransaction", "Accounting")',
+            type: 'Post',
+            data: { transId: transId, createdBy: userId },
+            success: function (data) {
+                if (data === "success") {
+                  $('.ranges li').first().click();
+                } else {
+                    alert("Delete Error...");
+                }
+            }
+        });
+    }
+    function onInOutChange()
+    {
+        inout = this.value();
+    }
+    $(".btnAccount").click(function () {
+        accId = parseInt($(this).data("id"));
+        listType = 2;
+        $("#btnAllTrans").removeClass("selected");
+        $(this).siblings().removeClass("selected");
+        $(this).addClass("selected");
+        transCount = parseInt($(this).data("transcount"));
+        $('.ranges li').first().click();
+    });
+    $("#btnAllTrans").click(function () {
+        listType = 1;
+        accId = 0;
+        $("#btnAllTrans").addClass("selected");
+        $(".btnAccount").removeClass("selected");
+        $('.ranges li').first().click();
+    });
+
+
+    //View Import transaction details
+    $("#divPaymentList").on('click', ".btnShowImportDetails", function () {
+        var importId = $(this).data("id");
+        $("#divImportTranWin").empty();
+        $("#divImportTranWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 892,
+            height: 582,
+            title: 'Import Transaction',
+            resizable: false
+        });
+        var impTranWin = $("#divImportTranWin").data("kendoWindow");
+        impTranWin.refresh('@Url.Action("ImportTransaction", "PointOfSale")?importId=' + importId);
+        impTranWin.center().open();
+    });
+    //View Sale Transaction details
+    $("#divPaymentList").on('click', ".btnShowOrderDetails", function () {
+        var orderId = $(this).data("id");
+        $("#divSaleTranWin").empty();
+        $("#divSaleTranWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 892,
+            height: 582,
+            title: 'Sale Transaction',
+            resizable: false
+        });
+        var saleTranWin = $("#divSaleTranWin").data("kendoWindow");
+        saleTranWin.refresh('@Url.Action("OrderTransaction", "PointOfSale")?orderId=' + orderId);
+        saleTranWin.center().open();
+    });
+
+
+    @***************DateRange Start******************@
+    $('#reportrange').daterangepicker({
+        startDate: start,
+        endDate: end,
+        ranges: {
+            'Select Date': [moment(), moment().subtract(1, 'days')],
+            'Today': [moment(), moment()],
+            'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+            'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+        }
+    }, cb);
+    cb(start, end);
+    start = moment(); end = moment();
+    $(".applyBtn").click(function () {
+        from = $("input[name*='daterangepicker_start']").val();
+        to = $("input[name*='daterangepicker_end']").val();
+        btn_CustomDate(from, to);
+    });
+
+    $('.ranges').on("click", "li", function () {
+        var day = $(this).text();
+        if (day == "Select Date") {
+            btn_All();
+        } else {
+            if (day == "Today") {
+                btn_today();
+            } else if (day == "Last 7 Days") {
+                btn_last_seven();
+            } else if (day == "Last 30 Days") {
+                btn_last_thirty();
+            }
+        }
+    });
+    function cb(start, end) {
+        if (start == null && end == null) {
+            $('#reportrange span').html("Select Date");
+            return;
+        }
+        else if ((!start._isValid && !end._isValid)) {
+            $('#reportrange span').html("Select Date");
+            return;
+        } else if (start._d > end._d) {
+            $('#reportrange span').html("Select Date");
+            return;
+        }
+        $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+    }
+    function btn_today() {
+        days = 1;
+        from = null;
+        to = null;
+        $(".btnPrint").prop("disabled", false);
+        $("#btnSeeMore").hide();
+        $('#show_Days_Title').html("Today");
+        passdata = { days: 1, accId: accId, methodId: methodId };
+        $("#divPaymentList").empty();
+        $("#divPaymentList").append('<div class="loading_partial"></div>');
+        $("#divPaymentList").load('@Url.Action("PaymentTransaction", "Accounting")', passdata);
+    }
+    function btn_last_seven() {
+        days = 7;
+        from = null;
+        to = null;
+        $(".btnPrint").prop("disabled", false);
+        $("#btnSeeMore").hide();
+        $('#show_Days_Title').html("Last 7 Days");
+        passdata = { days: 7, accId: accId, methodId: methodId };
+        $("#divPaymentList").empty();
+        $("#divPaymentList").append('<div class="loading_partial"></div>');
+        $("#divPaymentList").load('@Url.Action("PaymentTransaction", "Accounting")', passdata);
+    }
+    function btn_last_thirty() {
+        days = 30;
+        from = null;
+        to = null;
+        $(".btnPrint").prop("disabled", false);
+        $("#btnSeeMore").hide();
+        $('#show_Days_Title').html("Last 30 Days");
+        passdata = { days: 30, accId: accId, methodId: methodId };
+        $("#divPaymentList").empty();
+        $("#divPaymentList").append('<div class="loading_partial"></div>');
+        $("#divPaymentList").load('@Url.Action("PaymentTransaction", "Accounting")', passdata);
+    }
+    function btn_All() {
+        days = 0;
+        from = null;
+        to = null;
+        count = 20;
+        $(".btnPrint").prop("disabled", true);
+        $("#btnSeeMore").hide();
+        $('#show_Days_Title').html("");
+        $('#reportrange span').html("Select Date");
+        passdata = { accId: accId, count: count, methodId: methodId };
+        if (listType == 1)
+        {
+            if (@paymentListCount > count)
+            {
+                $("#btnSeeMore").show();
+            }
+        }
+        else if (listType == 2)
+        {
+            if (transCount > count)
+             {
+                $("#btnSeeMore").show();
+             }
+        }
+        $("#divPaymentList").empty();
+        $("#divPaymentList").append('<div class="loading_partial"></div>');
+        $("#divPaymentList").load('@Url.Action("PaymentTransaction", "Accounting")', passdata);
+
+    }
+    function btn_CustomDate(from, to) {
+        days = 0;
+        $(".btnPrint").prop("disabled", false);
+        $("#btnSeeMore").hide();
+        passdata = { from: new Date(from).toISOString(), to: new Date(to).toISOString(), accId: accId, methodId: methodId };
+        $('#show_Days_Title').html("Custom Range");
+        $("#divPaymentList").empty();
+        $("#divPaymentList").append('<div class="loading_partial"></div>');
+        $("#divPaymentList").load('@Url.Action("PaymentTransaction", "Accounting")', passdata);
+    }
+    @***************DateRange End******************@
+
+    //Payment transaction Print
+    $(".btnPrint").click(function () {
+        var data = "accId=" + accId + "?days=" + days + "?from=" + from + "?to=" + to + "?methodId=" + methodId;
+        window.open('@Url.Action("PaymentTransactionPrint", "Accounting")?q=' + getDataEncrypted(data), '_blank');
+    });
+    //See more data
+    $("#btnSeeMore").click(function () {
+        count = count + 20;
+        passdata = { accId: accId, count: count, methodId: methodId };
+        if (listType == 1)
+        {
+            if (count >= @paymentListCount)
+            {
+                $("#btnSeeMore").hide();
+            }
+        }
+        else if (listType == 2)
+        {
+            if (count >= transCount)
+            {
+                $("#btnSeeMore").hide();
+            }
+        }
+        $("#divPaymentList").empty();
+        $("#divPaymentList").append('<div class="loading_partial"></div>');
+        $("#divPaymentList").load('@Url.Action("PaymentTransaction", "Accounting")', passdata);
+    });
+</script>

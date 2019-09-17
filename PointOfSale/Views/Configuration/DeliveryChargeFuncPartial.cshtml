@@ -1,0 +1,26 @@
+﻿<style>
+    .radio {
+        display: inline;
+    }
+
+    .checkbox {
+        margin-top: 5px;
+        margin-bottom: 5px;
+    }
+</style>
+<div class="editor-field">
+    <div class="radio" style="margin-right: 10px;">
+        <label><input type="radio" name="optradio" id="checkAuto" checked>Auto</label>
+    </div>
+    <div class="radio">
+        <label><input type="radio" name="optradio" id="checkManual">Manual</label>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        if ('@ViewBag.Status' == 'False')
+        {
+            $("#checkManual").prop('checked', true);
+        }
+    });
+</script>

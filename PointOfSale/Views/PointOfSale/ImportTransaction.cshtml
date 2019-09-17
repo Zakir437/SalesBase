@@ -1,0 +1,40 @@
+﻿@model PointOfSale.Models.ViewStockImport
+@using System.Globalization;
+<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" style="margin-left:19px;">
+    <div class="panel panel-default" style="margin-top:20px;">
+        <div class="panel-body">
+            <dl class="dl-horizontal">
+                <dt>Import By</dt>
+                <dd>@Model.ImportBy</dd>
+                <dt>Refference No</dt>
+                <dd>@Model.RefferenceNo</dd>
+                <dt>Supplier</dt>
+                <dd>@Model.SupplierName</dd>
+                <dt>Total Cost</dt>
+                <dd>@Model.TotalCost.ToString("C", new CultureInfo("bn-BD"))</dd>
+                <dt>Due Amount</dt>
+                <dd>@Model.DueAmount.ToString("C", new CultureInfo("bn-BD"))</dd>
+                <dt>Date</dt>
+                <dd>@Convert.ToDateTime(Model.Date).ToString("MMM dd yyyy hh:mm:ss tt")</dd>
+            </dl>
+        </div>
+        <hr />
+        <div class="panel-body">
+            <div id="divImportTransactionList"></div>
+        </div>
+    </div>
+    <div class="k-edit-buttons k-state-default">
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnImpTransactionCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#divImportTransactionList").append('<div class="tiny_loading"></div>');
+        $("#divImportTransactionList").load('@Url.Action("ImportTransactionList", "Stock")?importId=' + @Model.StockImportId + '&isPrint=true');
+         @*$("#divImportTransaction").empty();
+         $("#divImportTransaction").load('@Url.Action("ImportTransactionPartial", "PointOfSale")?importId=' + '@ViewBag.ImportId');*@
+    });
+    $("#btnImpTransactionCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+</script>

@@ -1,0 +1,18 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" style="margin : 2%;">
+    <div id="divRefundTransList"></div>
+    <div class="k-edit-buttons k-state-default">
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnRefundInfoCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#divRefundTransList").append('<div class="tiny_loading"></div>');
+        $("#divRefundTransList").load('@Url.Action("OrderArchiveList", "Sales")?orderId=' + '@ViewBag.OrderId');
+       
+    });
+
+    $("#btnRefundInfoCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+
+</script>

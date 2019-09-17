@@ -1,0 +1,33 @@
+﻿@model PointOfSale.Models.ViewProduct
+@using System.Globalization;
+<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin-bottom:4%;margin-top:2%;">
+    <div id="">
+        <dl class="dl-horizontal">
+            <dt>Name</dt>
+            <dd>@Model.ProductName</dd>
+            <dt>Category</dt>
+            <dd>@Model.CategoryName</dd>
+            <dt>Unit</dt>
+            <dd>@Model.Unit</dd>
+            <dt>Minimum Quantity</dt>
+            <dd>@Model.MinimalQuantity</dd>
+            <dt>Created By</dt>
+            <dd>@Model.CreatedBy</dd>
+            <dt>Created Date</dt>
+            <dd>@Convert.ToDateTime(Model.DateTime).ToString("MMM dd yyyy")</dd>
+            <dt>Cost</dt>
+            <dd>@Model.Cost.ToString("C", new CultureInfo("bn-BD"))</dd>
+            <dt>Price</dt>
+            <dd>@Model.Price.Value.ToString("C", new CultureInfo("bn-BD"))</dd>
+        </dl>
+    </div>
+    <div class="k-edit-buttons k-state-default" style="margin-left:30px;">
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnProductInfoCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+
+<script>
+    $("#btnProductInfoCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+</script>

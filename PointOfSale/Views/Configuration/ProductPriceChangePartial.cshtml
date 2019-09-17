@@ -1,0 +1,6 @@
+﻿@model PointOfSale.ModelViews.ProductModelView
+<div class="editor-label"><label for="Price">Price</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.Price, new { htmlattributes = new { @class = "k-textbox form-control" } })
+    @Html.ValidationMessageFor(model => model.Price, "", new { @class = "text-Danger" })
+</div>

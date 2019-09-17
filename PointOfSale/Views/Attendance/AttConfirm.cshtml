@@ -1,0 +1,34 @@
+﻿@model PointOfSale.Models.DailyAttendance
+<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin-bottom:4%;margin-top:2%;">
+    <div id="divConfirm">
+        @if(Model.Id > 0)
+         {
+            <span>Attendance already exists.</span><br />
+            <span>Attendance Type is 
+            @if (Model.AttType == 1)
+            {
+                <span>Present</span> 
+            }
+            else if (Model.AttType == 2)
+            {
+                <span>Absent</span>
+            }
+            else if (Model.AttType == 3)
+            {
+                <span>Leave</span>
+            }
+            </span><br />
+            <span>Are you sure want to change this attendance type?</span>
+         }
+    </div>
+    <div class="k-edit-buttons k-state-default" style="margin-left:30px;">
+        <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnAttConfirmOk"><span class="k-icon k-update"></span>Ok</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnAttConfirmCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+    $("#btnAttConfirmCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+</script>
+

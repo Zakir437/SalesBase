@@ -1,0 +1,40 @@
+﻿@model PointOfSale.Models.WasteProduct
+<div class="editor-label"><label for="ProductName">Product</label></div>
+<div class="editor-field" style="padding-top:5px;">
+    <span>@Model.ProductName</span>
+</div>
+<div class="editor-field">
+    <div class="radio">
+        <label><input type="radio" name="optradio" id="invFull" checked>Full</label>
+    </div>
+    <div class="radio">
+        <label><input type="radio" name="optradio" id="invPartial">Partial</label>
+    </div>
+    <div id="divPartialQtyInput" style="margin-bottom:5px; display:none">
+        <span class="text-info">Current Quantity : @Model.Quantity Piece/s</span>
+        <input type="number" style="width:100%; max-width:100%" id="invQty" name="invQty" min="1" class="k-textbox" validationMessage="*" />
+        <span class="field-validation-valid text-danger" data-valmsg-for="invQty" data-valmsg-replace="true"></span>
+    </div>
+</div>
+
+<script>
+
+     $("#invFull").click(function () {
+        if ($(this).is(":checked")) {
+            $("#divPartialQtyInput").hide();
+            $('#invQty').prop('required', false);
+            $('#invQty').val("");
+        }
+    });
+
+
+    $("#invPartial").click(function () {
+        if ($(this).is(":checked")) {
+            $("#divPartialQtyInput").show();
+            $('#invQty').prop('required', true);
+
+            $('#invQty').prop('max', @Model.Quantity);
+            $('#invQty').attr('placeholder', "Max " + @Model.Quantity);
+        }
+    });
+</script>

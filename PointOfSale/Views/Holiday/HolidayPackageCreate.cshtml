@@ -1,0 +1,102 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin-bottom:4%;margin-top:2%;">
+    <div id="divHolidayPackForm"></div>
+    <div class="k-edit-buttons k-state-default" style="margin-left:30px;">
+        @if (ViewBag.HolidayPackId > 0)
+         {
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnHolidayPackCreate"><span class="k-icon k-update"></span>Update</button>
+         }
+        else
+        {
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnHolidayPackCreate"><span class="k-icon k-update"></span>Create</button>
+        }
+        <button type="reset" class="k-button k-button-icontext k-grid-update" id="btnHolidayPackRefresh"><span class="k-icon k-i-refresh"></span>Refresh</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnHolidayPackCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+     $(document).ready(function () {
+         $("#divHolidayPackForm").append('<div class="tiny_loading"></div>');
+         $("#divHolidayPackForm").load('@Url.Action("_HolidayPackageCreate", "Holiday")?holidayId=' + '@ViewBag.HolidayPackId');
+     });
+    $("#btnHolidayPackRefresh").click(function () {
+        $("#divHolidayPackForm").empty();
+        $("#divHolidayPackForm").append('<div class="tiny_loading"></div>');
+        $("#divHolidayPackForm").load('@Url.Action("_HolidayPackageCreate", "Holiday")?holidayId=' + '@ViewBag.HolidayPackId');
+    });
+    $("#btnHolidayPackCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+    var validation = $("#divHolidayPackForm").kendoValidator({
+        rules: {
+            remote: function (input) {
+                var errormessage;
+                var remoteAttr = input.attr("data-val-remote-url");
+                if (typeof remoteAttr === typeof undefined || remoteAttr === false) {
+                    return true;
+                }
+                var isInvalid;
+                var data = {};
+
+                var HolidayPackId = $("#HolidayPackId").val();
+                var HolidayPackName = $.trim($("#HolidayPackName").val());
+
+                data = { HolidayPackId: HolidayPackId, HolidayPackName: HolidayPackName };
+                $.ajax({
+                    url: remoteAttr,
+                    mode: "abort",
+                    port: "validate" + input.attr('name'),
+                    dataType: "json",
+                    type: input.attr("data-val-remote-type"),
+                    data: data,
+                    async: false,
+                    success: function (response) {
+                        isInvalid = response;
+                        if (isInvalid === true) {
+                            isInvalid = true;
+                        }
+                        else {
+                            isInvalid = false;
+                        }
+                    }
+                });
+
+                return isInvalid;
+            }
+        },
+        messages: {
+            remote: function (input) { return input.data('val-remote'); },
+        }
+    }).data("kendoValidator");
+    $("#btnHolidayPackCreate").click(function () {
+        if (validation.validate()) {
+            var senddata = {
+                HolidayPackId: $("#HolidayPackId").val(),
+                HolidayPackName: $("#HolidayPackName").val(),
+                NoOfPaidLeave: $("#NoOfPaidLeave").val(),
+                CreatedBy: userId
+            };
+            $.ajax({
+                url: '@Url.Action("HolidayPackSave", "Holiday")',
+                type: 'Post',
+                data: senddata,
+                success: function (data) {
+                    $("#divHolidayPackageWin").data("kendoWindow").close();
+                    if (data == "success")
+                    {
+                        alert("Save successfull.");
+                        $("#divHolidayPackageList").empty();
+                        $("#divHolidayPackageList").append('<div class="loading_partial"></div>');
+                        $("#divHolidayPackageList").load('@Url.Action("HolidayPackageList", "Holiday")');
+                    }
+                    else
+                    {
+                        alert("Save error...");
+                    }
+                },
+                error: function (error) {
+                    alert("Save error...");
+                }
+            });
+        }
+    });
+</script>

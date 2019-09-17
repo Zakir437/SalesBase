@@ -1,0 +1,125 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin-bottom:4%;margin-top:2%;">
+    <div id="divTagForm"></div>
+    <div class="k-edit-buttons k-state-default" style="margin-left:30px;">
+        @if (ViewBag.Id > 0)
+         {
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnTagCreate"><span class="k-icon k-update"></span>Update</button>
+         }
+        else
+        {
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnTagCreate"><span class="k-icon k-update"></span>Create</button>
+        }
+        <button type="reset" class="k-button k-button-icontext k-grid-update" id="btnRefresh"><span class="k-icon k-i-refresh"></span>Refresh</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#divTagForm").append('<div class="tiny_loading"></div>');
+        $("#divTagForm").load('@Url.Action("TagCreatePartial", "Configuration")?id=' + '@ViewBag.Id');
+    });
+    $("#btnRefresh").click(function () {
+        $("#divTagForm").empty();
+        $("#divTagForm").append('<div class="tiny_loading"></div>');
+        $("#divTagForm").load('@Url.Action("TagCreatePartial", "Configuration")?id=' + '@ViewBag.Id');
+    });
+
+    $("#btnCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+
+    var validation = $("#divTagForm").kendoValidator({
+        rules: {
+            remoteTagName: function (input) {
+                var remoteAttr = input.attr("data-val-remote-url");
+                if (typeof remoteAttr === typeof undefined || remoteAttr === false) {
+                    return true;
+                }
+                var isInvalid;
+                var data = {};
+                var Id = $("#Id").val();
+                var TagName = $.trim($("#TagName").val());
+                data = { Id: Id, TagName: TagName };
+                $.ajax({
+                    url: remoteAttr,
+                    mode: "abort",
+                    port: "validate" + input.attr('name'),
+                    dataType: "json",
+                    type: input.attr("data-val-remote-type"),
+                    data: data,
+                    async: false,
+                    success: function (response) {
+                        isInvalid = response;
+                        if (isInvalid === true) {
+                            isInvalid = true;
+                        }
+                        else {
+                            isInvalid = false;
+                        }
+                    }
+                });
+                return isInvalid;
+            }
+        },
+        messages: {
+            remoteTagName: function (input) {
+                return input.data('val-remote');
+            }
+        }
+    }).data("kendoValidator");
+
+    $("#btnTagCreate").click(function () {
+
+        if (validation.validate())
+        {
+            var sendData = {
+                Id: $("#Id").val(),
+                TagName: $.trim($("#TagName").val()),
+                CreatedBy : userId
+            }
+            $.ajax({
+                url: '@Url.Action("TagSave", "Configuration")',
+                type: "POST",
+                data: sendData,
+                success: function (result) {
+                    $("#divTagCreateWin").data("kendoWindow").close();
+                    if (result == "success") {
+                        if (tab == 1)
+                        {
+                            $("#div_All").empty();
+                            $("#div_All").append('<div class="loading_partial"></div>');
+                            $("#div_All").load('@Url.Action("TagList", "Configuration")');
+                        }
+                        else if (tab == 2)
+                        {
+                            status = 1;
+                            passdata = { status: status };
+                            $("#div_Active").append('<div class="loading_partial"></div>');
+                            $("#div_Active").load('@Url.Action("TagList", "Configuration")', passdata);
+                        }
+                        else if (tab == 3)
+                        {
+                            status = 0;
+                            passdata = { status: status};
+                            $("#div_Inactive").append('<div class="loading_partial"></div>');
+                            $("#div_Inactive").load('@Url.Action("TagList", "Configuration")', passdata);
+                        }
+                        else if (tab == 4)
+                        {
+                            status = 2;
+                            passdata = { status: status };
+                            $("#div_Deleted").append('<div class="loading_partial"></div>');
+                            $("#div_Deleted").load('@Url.Action("TagList", "Configuration")', passdata);
+                        }
+                    }
+                    else {
+                        alert("Save Error");
+                    }
+                }
+            });
+        }
+    });
+</script>
+
+
+

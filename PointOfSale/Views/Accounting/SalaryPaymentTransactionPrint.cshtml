@@ -1,0 +1,97 @@
+﻿@model PointOfSale.Models.ViewAccount
+@{
+    ViewBag.Title = "SalaryPaymentTransactionPrint";
+    Layout = "~/Views/Shared/_LayoutPrintPage.cshtml";
+    PointOfSale.Models.PointOfSale_DBEntities db = new PointOfSale.Models.PointOfSale_DBEntities();
+}
+<section class="content-header" style="text-align:center;">
+    <div class="row">
+        <div class="col-xs-2"></div>
+        <div class="col-xs-8">
+            <h3>Salary Payment Transaction</h3>
+            <p>Cost-POS</p>
+        </div>
+        <div class="col-xs-2">
+            <button class="btn btn-default pull-right" id="btnPrint" style="margin-top:10px;"><i class="fa fa-print"></i>Print</button>
+        </div>
+    </div>
+    <hr />
+</section>
+<div class="row">
+    <div class="col-xs-offset-6 col-xs-6 text-left">
+        <p>
+            Generate By : @HttpContext.Current.Request.Cookies["CookieUserInfo"].Values["UserName"]<br>
+            Generate Date : @DateTime.Now.ToString("MMM dd yyyy hh:mm:ss tt") <br>
+            @if (ViewBag.Days == 1)
+            {
+                <span>Generate parameter : Today</span>
+            }
+            else if (ViewBag.Days == 7)
+            {
+                <span>Generate parameter : Last 7 Days</span>
+            }
+            else if (ViewBag.Days == 30)
+            {
+                <span>Generate parameter : Last 30 Days</span>
+            }
+            else if (ViewBag.From != null)
+            {
+                <span>From : @Convert.ToDateTime(ViewBag.From).ToString("MMM dd yyyy")</span><br />
+                <span>To : @Convert.ToDateTime(ViewBag.To).ToString("MMM dd yyyy")</span>
+            }
+            else
+            {
+                <span>Generate parameter : All</span>
+            }
+            <br />
+            Total : <span id="divTotalAmount"></span>
+        </p>
+    </div>
+    <div class="col-xs-offset-6 col-xs-6 text-right">
+        @if (Model.PaymentBodyId > 0)
+         {
+            <p>
+                Account Name : @Model.PaymentBodyName <br />
+                Payment Type : @Model.PaymentTypeName <br />
+                Balance : @Model.Balance <br />
+                Account Type :
+                @if (Model.InOut == 1)
+                {
+                    <span>Receive</span>
+                }
+                else if (Model.InOut == 2)
+                {
+                    <span>Release</span>
+                }
+                else
+                {
+                    <span>Receive & Release</span>
+                }
+                <br />
+                @if (Model.SerialNumber != null)
+                {
+                    <span>Serial Number : @Model.SerialNumber <br /></span>
+                }
+            </p>
+         }
+    </div>
+</div>
+<div class="row">
+    <div class="col-xs-12">
+        <div id="divPaymentList"></div>
+    </div>
+</div>
+<script>
+    var passdata = '';
+    $(document).ready(function () {
+        passdata = { from: "@ViewBag.From", to: "@ViewBag.To", accId: '@ViewBag.AccId', days: '@ViewBag.Days', isInactive: '@ViewBag.IsInactive', isPrint : true };
+        $("#divPaymentList").empty();
+        $("#divPaymentList").append('<div class="loading_partial"></div>');
+        $("#divPaymentList").load('@Url.Action("SalaryPaymentTransaction", "Accounting")', passdata);
+    });
+    $("#btnPrint").click(function () {
+        $("#btnPrint").hide();
+        window.print();
+        $("#btnPrint").show();
+    });
+</script>

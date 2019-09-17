@@ -1,0 +1,90 @@
+﻿@model PointOfSale.ModelViews.POS.EventModelView
+@Html.HiddenFor(a => a.Id)
+@Html.HiddenFor(a => a.IsDateValidity)
+<div class="editor-label"><label for="OfferName">Name</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.EventName, new { htmlattributes = new { @class = "k-textbox", @style = "width:100%; max-width:100%" } })
+    @Html.ValidationMessageFor(model => model.EventName, "", new { @class = "text-Danger" })
+</div>
+<div class="editor-label"><label for="OfferName">Validity</label></div>
+<div class="editor-field">
+    <label>
+        <input type="radio" checked name="validity" id="dateValidity" /> Date
+    </label>
+    <label>
+        <input type="radio" name="validity" id="daysValidity" /> Days
+    </label>
+    <div id="divDateValidity">
+        @(Html.Kendo().DateTimePickerFor(m => m.ValidityDate)
+              .Format("MMMM dd yyyy hh:mm tt")
+              .Min(DateTime.Now)
+              .HtmlAttributes(new { style = "width: 100%; max-width:100%", required = "required", @validationMessage = "Please enter validity date" })
+        )
+        @Html.ValidationMessageFor(model => model.ValidityDate, "", new { @class = "text-Danger" })
+    </div>
+    <div id="divDayValidity">
+        <div style="width:49%" class="pull-left">
+            @Html.EditorFor(model => model.ValidityDays, new { htmlattributes = new { @class = "k-textbox", @style = "width:100%; max-width:100%", @min = 1, required = "required", @validationMessage = "Please enter validity days" } })
+            @Html.ValidationMessageFor(model => model.ValidityDays, "", new { @class = "text-Danger" })
+        </div>
+        <div style="width:49%" class="pull-right">
+            @(Html.Kendo().TimePickerFor(m => m.ValidityTime)
+                        .HtmlAttributes(new { style = "width: 100%; max-width:100%", required = "required", @validationMessage = "Please enter validity time" })
+            )
+            @Html.ValidationMessageFor(model => model.ValidityTime, "", new { @class = "text-Danger" })
+        </div>
+    </div>
+</div>
+<div class="editor-label"><label for="Schedule">Time Schedule</label></div>
+<div class="editor-field">
+    @(Html.Kendo().DropDownListFor(a => a.ScheduleId)
+                         .DataTextField("Name")
+                         .DataValueField("Id")
+                         .DataSource(source =>
+                         {
+                            source.Read(read =>
+                            {
+                                read.Action("GetSchedule", "Configuration");
+                            });
+                         })
+                         .OptionLabel("--Select time schedule--")
+                         .HtmlAttributes(new { style = "width:82%" })
+    )
+    <button class="btn btn-default" id="btnAddSchedule" style="margin-left:3px;" data-toggle="tooltip" title="Add time schedule"><i class="fa fa-plus-circle"></i> Add</button>
+</div>
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+        if ($("#IsEditable").attr('checked')) {
+            $("#IsEditable").val(true);
+        }
+        else {
+            $("#IsEditable").val(false);
+        }
+        $("#divDayValidity").hide();
+        $("#IsDateValidity").val(true);
+        $('#ValidityDays').prop('required', false);
+        $('#ValidityTime').prop('required', false);
+    });
+    $("#dateValidity").click(function () {
+        $("#IsDateValidity").val(true);
+        $("#divDateValidity").show();
+        $("#divDayValidity").hide();
+        $('#ValidityDays').prop('required', false);
+        $('#ValidityTime').prop('required', false);
+        $('#ValidityDate').prop('required', true);
+    });
+    $("#daysValidity").click(function () {
+        $("#IsDateValidity").val(false);
+        $("#divDateValidity").hide();
+        $("#divDayValidity").show();
+        $('#ValidityDays').prop('required', true);
+        $('#ValidityTime').prop('required', true);
+        $('#ValidityDate').prop('required', false);
+    });
+</script>
+
+
+
+
+

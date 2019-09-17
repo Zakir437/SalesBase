@@ -1,0 +1,36 @@
+﻿@model PointOfSale.ModelViews.HR.UserInformationModelView
+@Html.HiddenFor(m => m.UserId)
+<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" style="margin-bottom:1%;margin-top:2%;" id="image_div">
+    <div class="editor-label"><label for="Picture">User Picture</label></div>
+    <div class="editor-field">
+        <div class="col-md-5 col-sm-5 col-xs-8 divForPic" id="divForPic-0">
+            <span id="UserImgClose-0">
+                <img src="/Content/Icon/modal_close.png" class="previewImgClose" id="UserImgClose-0" data-count="0" />
+            </span>
+            <div id="imgPreview-0" class="imgPreview">
+                @if (Model.Picture != null && Model.Picture != "")
+                {
+                    <img src="~/Images/UserPicture/Original/@Model.Picture" />
+                }
+            </div>
+            <div id="imgUpload-0" class="image-uploader" style="display:none;">
+                <input type="file" name="files" id="file-0" class="inputfile inputfile-4" data-count="0" style="display:none;" />
+                <label for="file-0" id="lbl-0" class="lblForPics">
+                    <span style="font-size: 26px;padding-top:2em;display:block;" class="lbl_Span_plus">+</span>
+                    <span style="font-size: 15px;font-weight:bold;">Add Photos</span>
+                </label>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+
+     $(document).ready(function () {
+        if ('@Model.Picture' === null || '@Model.Picture' === '') {
+            $("#imgPreview-0").hide();
+            $("#UserImgClose-0").hide();
+            $("#imgUpload-0").show();
+        }
+    });
+</script>
+

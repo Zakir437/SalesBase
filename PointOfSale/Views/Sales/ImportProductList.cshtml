@@ -1,0 +1,36 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewImportTransaction>
+@using System.Globalization;
+@{ 
+    var count = 0;
+}
+@if (Model.Any())
+{
+    <table class="table table-bordered">
+        <tr>
+            <th>SL.</th>
+            <th>Supplier</th>
+            <th>Voucher No</th>
+            <th>Quantity</th>
+            <th>Peritem Cost</th>
+            <th>Cost</th>
+            <th>Date</th>
+        </tr>
+        @foreach (var list in Model)
+         {
+            count++;
+            <tr>
+                <td>@count.</td>
+                <td>@list.SupplierName</td>
+                <td>@list.RefferenceNo</td>
+                <td>@list.Quantity</td>
+                <td>@list.PeritemCost.ToString("C", new CultureInfo("bn-BD"))</td>
+                <td>@list.Cost.ToString("C", new CultureInfo("bn-BD"))</td>
+                <td>@Convert.ToDateTime(list.Date).ToString("MMM dd yyyy")</td>
+            </tr>
+         }
+    </table>
+ }
+else
+{
+    <h4>There is no record to display</h4>
+}

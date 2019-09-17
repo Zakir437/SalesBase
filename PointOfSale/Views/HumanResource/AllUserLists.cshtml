@@ -1,0 +1,334 @@
+﻿@{
+    ViewBag.Title = "AllUserLists";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+}
+@*<section class="content-header">
+    <h1>
+        User
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-user"></i> HR</a></li>
+        <li class="active">User</li>
+    </ol>
+</section>*@
+<section class="content">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4 class="uppercase">Employee</h4>
+            </div>
+            <div class="pull-right">
+                @*<a class="btn btn-default" href="/Configuration/Product"><i class="fa fa-arrow-left"></i> Back</a>*@
+            </div>
+        </div>
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-md-12">
+                    <a class="btn btn-success" href="@Url.Action("AddEmployee","HumanResource")" data-toggle="tooltip" title="Add new employee" style="margin-top:10px;"><i class="fa fa-plus-circle" aria-hidden="true"></i> Add</a>
+                </div>
+            </div>
+            <div class="row" style="padding-top:5px;">
+                <div class="col-md-12">
+                    <div class="panel with-nav-tabs panel-default">
+                        <div class="panel-heading">
+                            <ul class="nav nav-tabs">
+                                <li class="active" id="liForAll"><a href="#tab1liForAll" data-toggle="tab">All</a></li>
+                                <li id="liForActive"><a href="#tab2liForActive" data-toggle="tab">Active</a></li>
+                                <li id="liForInactive"><a href="#tab3InactiveList" data-toggle="tab">Inactive</a></li>
+                                <li id="liForDelete"><a href="#tab4DeleteList" data-toggle="tab">Deleted</a></li>
+                            </ul>
+                        </div>
+                        <div class="panel-body" style="border:none!important;" id="div_for_panel_body">
+                            <div class="row" style="margin-bottom:10px" id="div_filter_Options">
+                                <div class="col-sm-9" style="">
+                                    @*<span class="autocomplete-wrapper">
+                                    <input class="text-field" id="textForSearch" name="country" placeholder="Type employee name or designation" type="text" autocomplete="off">
+                                    <span class="k-icon k-i-search" style="margin-top:-25px;margin-right:10px;float:right;">&nbsp;</span>
+                                </span>*@
+                                    @*@(Html.Kendo().MultiSelect()
+                                              .AutoClose(false)
+                                              .Name("UserLists")
+                                              .DataTextField("UserName")
+                                              .DataValueField("UserId")
+                                              .Placeholder("Type user name")
+                                              .AutoBind(false)
+                                              .Events(e => e.Change("onUserChange"))
+                                              .DataSource(source =>
+                                              {
+                                                  source.Read(read =>
+                                                  {
+                                                      read.Action("GetAllUsersList", "HumanResource");
+                                                  })
+                                                  .ServerFiltering(false);
+                                              })
+                                )*@
+                                </div>
+                                <div class="col-sm-3">
+                                    @*@(Html.Kendo().DropDownList().Name("SiteId")
+                                .OptionLabel("All")
+                                .BindTo(ViewBag.AllSiteList as SelectList)
+                                .Events(e => e.Change("onSitenameChange"))
+                                .HtmlAttributes(new { style = "width:100%" })
+                                )*@
+                                </div>
+                            </div>
+                            <div class="tab-content">
+                                <div class="tab-pane fade in active" id="tab1liForAll">
+                                    <div id="Div_All_Usr"></div>
+                                </div>
+                                <div id="tab2liForActive" class="tab-pane fade">
+                                    <div id="div_Active_User"></div>
+                                </div>
+                                <div id="tab3InactiveList">
+                                    <div id="div_Inactive_User"></div>
+                                </div>
+                                <div id="tab4DeleteList">
+                                    <div id="div_Deleted_User"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+   
+    
+</section>
+<div id="divLoginEditWin"></div>
+<script id="temp_win_delete_entry" type="text/x-kendo-template">
+    <div style="padding:1em;">
+        <p style="font-size: 14px; padding: 10px"> #=msg# </p>
+        <div style="text-align: right;">
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btn_delete_Entry_noty_ok"><span class="k-icon k-update"></span>OK</button>
+            <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btn_delete_Entry_noty_cancel"><span class="k-icon k-cancel"></span>Cancel</button>
+        </div>
+    </div>
+</script>
+<script>
+    var showCount = 0, tab = 1, id = 0;
+    var passdata = '';
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+        $("#liForAll").click();
+        $("#liForHr").addClass('active');
+        $("#liForUser").addClass('active');
+    });
+
+    function clearBeforeClick()
+    {
+        $("#Div_All_Usr").empty();
+        $("#div_Active_User").empty();
+        $("#div_Inactive_User").empty();
+        $("#div_Deleted_User").empty();
+    }
+    $("#liForAll").click(function () {
+        tab = 1;
+        clearBeforeClick();
+        $("#Div_All_Usr").append('<div class="loading_partial"></div>');
+        $("#Div_All_Usr").load('@Url.Action("_AllUserLists", "HumanResource")');
+    });
+
+    $("#liForActive").click(function () {
+        clearBeforeClick();
+        tab = 2; status = 1;
+        passdata = { status: status };
+        $("#div_Active_User").append('<div class="loading_partial"></div>');
+        $("#div_Active_User").load('@Url.Action("_AllUserLists", "HumanResource")', passdata);
+    });
+
+    $("#liForInactive").click(function () {
+        clearBeforeClick();
+        tab = 3; status = 0;
+        passdata = { status: status};
+        $("#div_Inactive_User").append('<div class="loading_partial"></div>');
+        $("#div_Inactive_User").load('@Url.Action("_AllUserLists", "HumanResource")', passdata);
+    });
+    $("#liForDelete").click(function () {
+        clearBeforeClick();
+        tab = 4; status = 2;
+        passdata = { status: status };
+        $("#div_Deleted_User").append('<div class="loading_partial"></div>');
+        $("#div_Deleted_User").load('@Url.Action("_AllUserLists", "HumanResource")', passdata);
+    });
+
+    $("#Div_All_Usr, #div_Active_User, #div_Inactive_User, #div_Deleted_User").on('click', ".btnUserDelete", function () {
+        id = $(this).data("id");
+        var kendoWindow = $("<div />").kendoWindow({
+            actions: ["Close"],
+            title: "Alert",
+            resizable: false,
+            width: "30%",
+            modal: true
+        });
+
+        msg = "Are you sure want to delete this User?";
+        var template = kendo.template($("#temp_win_delete_entry").html());
+        kendoWindow.data("kendoWindow").content(template).center().open();
+
+        kendoWindow.find("#btn_delete_Entry_noty_cancel").click(function () {
+            kendoWindow.data("kendoWindow").close();
+            document.documentElement.style.overflow = "auto";
+        }).end();
+        kendoWindow.find("#btn_delete_Entry_noty_ok").click(function () {
+            kendoWindow.data("kendoWindow").close();
+            document.documentElement.style.overflow = "auto";
+            deleteUser(id);
+        }).end();
+        document.documentElement.style.overflow = "hidden";
+    });
+
+    function deleteUser(id) {
+        $.ajax({
+            url: '@Url.Action("DeleteUser", "HumanResource")',
+            type: 'Post',
+            data: { id: id },
+            success: function (data) {
+                if (data === "success") {
+
+                    if (tab == 1)
+                    {
+                         $("#Div_All_Usr").empty();
+                         $("#Div_All_Usr").append('<div class="loading_partial"></div>');
+                         $("#Div_All_Usr").load('@Url.Action("_AllUserLists", "HumanResource")');
+                    }
+                    else if (tab == 2)
+                    {
+                        passdata = { status: status };
+                        $("#div_Active_User").append('<div class="loading_partial"></div>');
+                        $("#div_Active_User").load('@Url.Action("_AllUserLists", "HumanResource")', passdata);
+                    }
+                    else if (tab == 3)
+                    {
+                        passdata = { status: status};
+                        $("#div_Inactive_User").append('<div class="loading_partial"></div>');
+                        $("#div_Inactive_User").load('@Url.Action("_AllUserLists", "HumanResource")', passdata);
+                    }
+                    else if (tab == 4)
+                    {
+                        passdata = { status: status };
+                        $("#div_Deleted_User").append('<div class="loading_partial"></div>');
+                        $("#div_Deleted_User").load('@Url.Action("_AllUserLists", "HumanResource")', passdata);
+                    }
+
+                } else {
+                    alert("User Delete Error...");
+                }
+            }
+        });
+    }
+
+    $("#Div_All_Usr, #div_Active_User, #div_Inactive_User, #div_Deleted_User").on("click", ".activateUser,.inactivateUser", function () {
+        id = $(this).data("id");
+        status = $(this).data("isactive");
+        var sendData = {
+            id: id,
+            status: status
+        };
+        $.ajax({
+            url: '@Url.Action("ChangeUserStatus", "HumanResource")',
+            method: 'POST',
+            data: sendData,
+            success: function (res) {
+                if (res == "success") {
+                    if (tab == 1)
+                    {
+                         $("#Div_All_Usr").empty();
+                         $("#Div_All_Usr").append('<div class="loading_partial"></div>');
+                         $("#Div_All_Usr").load('@Url.Action("_AllUserLists", "HumanResource")');
+                    }
+                    else if (tab == 2)
+                    {
+                        status = 1;
+                        passdata = { status: status };
+                        $("#div_Active_User").append('<div class="loading_partial"></div>');
+                        $("#div_Active_User").load('@Url.Action("_AllUserLists", "HumanResource")', passdata);
+                    }
+                    else if (tab == 3)
+                    {
+                        status = 0;
+                        passdata = { status: status};
+                        $("#div_Inactive_User").append('<div class="loading_partial"></div>');
+                        $("#div_Inactive_User").load('@Url.Action("_AllUserLists", "HumanResource")', passdata);
+                    }
+                    else if (tab == 4)
+                    {
+                        status = 2;
+                        passdata = { status: status };
+                        $("#div_Deleted_User").append('<div class="loading_partial"></div>');
+                        $("#div_Deleted_User").load('@Url.Action("_AllUserLists", "HumanResource")', passdata);
+                    }
+                }
+                else {
+                    alert("Error Status Update");
+                }
+            }
+        });
+    });
+
+    //*************************Set username and password*******************************
+    $("#Div_All_Usr, #div_Active_User").on('click', '.btnSetLoginInfo', function () {
+        id = $(this).data("id");
+        $.ajax({
+            url: '@Url.Action("SetLoginInfo", "HumanResource")',
+            type: 'POST',
+            data: { userId: id, createdBy: userId },
+            success: function (data)
+            {
+                if (data == "error")
+                {
+                    alert("Username and password set error.");
+                }
+                else
+                {
+                    $(data).each(function (index, item) {
+                        alert("Your username = " + item.Username + " and password = " + item.Password);
+                    });
+                    if (tab == 1)
+                    {
+                         $("#Div_All_Usr").empty();
+                         $("#Div_All_Usr").append('<div class="loading_partial"></div>');
+                         $("#Div_All_Usr").load('@Url.Action("_AllUserLists", "HumanResource")');
+                    }
+                    else if (tab == 2)
+                    {
+                        status = 1;
+                        passdata = { status: status };
+                        $("#div_Active_User").append('<div class="loading_partial"></div>');
+                        $("#div_Active_User").load('@Url.Action("_AllUserLists", "HumanResource")', passdata);
+                    }
+                }
+            }
+
+        });
+    });
+
+
+
+    //******************Edit username and password ************************************
+    $("#Div_All_Usr, #div_Active_User").on('click', '.btnEditLoginInfo', function () {
+        id = $(this).data("id");
+        $("#divLoginEditWin").empty();
+        $("#divLoginEditWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 875,
+            height: 258,
+            title: ' Edit User Login Info',
+            close: onWindowClose
+        });
+        $("#divLoginEditWin").html('<div class="tiny_loading"></div>');
+        var userLoginEdit = $("#divLoginEditWin").data("kendoWindow");
+        userLoginEdit.refresh({ url: "/HumanResource/EditUserLoginInfo?userId=" + id });
+        userLoginEdit.center().open();
+        document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+        document.body.scroll = "no";
+    });
+
+
+
+
+</script>
+

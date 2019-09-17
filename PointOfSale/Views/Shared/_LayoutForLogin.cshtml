@@ -1,0 +1,46 @@
+﻿<!DOCTYPE html>
+
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- Tell the browser to be responsive to screen width -->
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <title>CostPOS | Log in</title>
+    @Styles.Render("~/Content/kendo")
+    @*@Styles.Render("~/Content/css")*@
+    @Scripts.Render("~/bundles/modernizr")
+    <script src="~/Scripts/jquery-2.2.4.min.js"></script>
+    <link href="~/Content/font-awesome.min.css" rel="stylesheet" />
+
+    <!--Template component-->
+    <link href="~/Content/bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/Content/bower_components/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="~/Content/bower_components/Ionicons/css/ionicons.min.css" rel="stylesheet" />
+    <link href="~/Content/dist/css/AdminLTE.css" rel="stylesheet" />
+    <link href="~/Content/plugins/iCheck/square/blue.css" rel="stylesheet" />
+    <!-- Google Font -->
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
+    <style>
+        html,body{
+            height:0px;
+        }
+    </style>
+</head>
+<body class="hold-transition login-page">
+    <div>
+        @RenderBody()
+    </div>
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/kendo")
+    @Scripts.Render("~/bundles/bootstrap")
+    @RenderSection("scripts", required: false)
+
+    <script src="~/Content/plugins/iCheck/icheck.min.js"></script>
+
+    <!--Template component-->
+
+</body>
+</html>

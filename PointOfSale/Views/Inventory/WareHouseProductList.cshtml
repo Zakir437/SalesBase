@@ -1,0 +1,54 @@
+﻿@model IEnumerable<PointOfSale.Models.StockWarehouse>
+@{
+    var count = 0;
+    var productList = Model.GroupBy(g => new { g.ProductId, g.DistributeId })
+                      .Select(s => new
+                      {
+                          s.FirstOrDefault().Id,
+                          s.FirstOrDefault().ProductName,
+                          Quantity = s.Sum(a => a.Quantity),
+                      });
+
+}
+@if (Model.Any() == true)
+ {
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Product Name</th>
+            <th>Quantity</th>
+        </tr>
+        @foreach (var list in productList)
+         {
+            count++;
+            <tr>
+                <td>@count.</td>
+                <td>@list.ProductName</td>
+                <td>
+                    @list.Quantity 
+                    <button type="button" class="btn btn-primary btnWOQty pull-right" data-id="@list.Id" data-toggle="tooltip" title="View quantity info"><i class="fa fa-info"></i></button>
+                </td>
+            </tr>
+         } 
+    </table>
+ }
+else
+{
+    <h3>There is no record to display</h3>
+}
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    })
+</script>
+
+
+
+
+
+
+
+
+
+
+

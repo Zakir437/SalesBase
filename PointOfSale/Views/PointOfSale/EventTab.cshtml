@@ -1,0 +1,69 @@
+﻿<div class="panel-body">
+    <div class="row" style="margin:0; padding:0">
+        <div class="col-md-12" style="padding:0">
+            <div class="col-md-3" style="padding:0 5px 5px 0px">
+                @(Html.Kendo().DropDownList()
+                        .Name("ProductDropdown")
+                        .BindTo(ViewBag.ProductList as SelectList)
+                        .DataTextField("Text")
+                        .DataValueField("Value")
+                        .Filter("contains")
+                        .OptionLabel("Filter by Product")
+                        .HtmlAttributes(new { style = "width:100%" })
+                    .Events(e =>
+                    {
+                        e.Change("onChangeProduct");
+                    })
+                )
+            </div>
+            <div class="col-md-3" style="padding:0 5px 5px 0px">
+                @(Html.Kendo().DropDownList()
+                        .Name("OfferDropdown")
+                        .BindTo(ViewBag.OfferList as SelectList)
+                        .DataTextField("Text")
+                        .DataValueField("Value")
+                        .Filter("contains")
+                        .OptionLabel("Filter by Offer")
+                        .HtmlAttributes(new { style = "width:100%" })
+                    .Events(e =>
+                    {
+                        e.Change("onChangeOffer");
+                    })
+                )
+            </div>
+            <div class="col-md-3" style="padding:0 5px 5px 0px">
+                @(Html.Kendo().DropDownList()
+                        .Name("EventDropdown")
+                        .BindTo(ViewBag.EventList as SelectList)
+                        .DataTextField("Text")
+                        .DataValueField("Value")
+                        .OptionLabel("Filter by Event")
+                        .Filter("contains")
+                        .HtmlAttributes(new { style = "width:100%" })
+                    .Events(e =>
+                    {
+                        e.Change("onChangeEvent");
+                    })
+                )
+            </div>
+            <div class="col-md-3" style="padding:0 5px 5px 0px">
+                @(Html.Kendo().DatePicker()
+                    .Name("specificDate")
+                    .Format("MMM dd, yyyy")
+                    .Min(DateTime.Now)
+                    .HtmlAttributes(new { onkeydown = "javascript:return false;", style = "width: 100%", title = "datepicker" })
+                    .Events(e => { e.Change("onChangeDate"); })
+                )
+            </div>
+        </div>
+    </div>
+    <div class="row" style="margin:0; padding:0 5px 5px 0px;">
+        <div id="divEventList"></div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#divEventList").append('<div class="loading_partial"></div>');
+        $("#divEventList").load('@Url.Action("EventList", "PointOfSale")');
+    });
+</script>

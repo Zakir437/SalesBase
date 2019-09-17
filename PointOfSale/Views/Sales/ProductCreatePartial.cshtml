@@ -1,0 +1,1421 @@
+﻿@model PointOfSale.ModelViews.Sales.ProductModelView
+@Html.HiddenFor(a=>a.Image)
+@Html.HiddenFor(a=>a.ProductId)
+@{ 
+    int distCount = 0;
+}
+<style>
+    .btnCancelItem {
+        margin-right: 3px;
+    }
+    #divProDistTable input {
+        width: 100%;
+        max-width: 100%;
+    }
+    #divProDistTable .k-dropdown {
+        width: 100%;
+    }
+
+    input[type="text"] {
+        width: 100%;
+        max-width:100%;
+        box-sizing: border-box;
+        -webkit-box-sizing: border-box;
+        -moz-box-sizing: border-box;
+    }
+
+</style>
+<div class="editor-label"><label for="SubMasterId">Master Product</label></div>
+<div class="editor-field">
+    @(Html.Kendo().DropDownListFor(a => a.SubMasterId)
+                     .BindTo(ViewBag.SubProduct as SelectList)
+                     .DataTextField("Text")
+                     .DataValueField("Value")
+                     .Events(e => e.Change("onChangeMaster"))
+                     .OptionLabel("--Select One Type--")
+                     .HtmlAttributes(new { style = "width:100%" })
+    )
+</div>
+<div id="divMaster">
+    <div class="editor-label"><label for="ProductName">Quantity/Name</label></div>
+    <div class="editor-field">
+        @Html.EditorFor(model => model.QuantityOrName, new { htmlattributes = new { @class = "k-textbox", required = "required", validationMessage="Please enter quantity/Name" } })
+        @Html.ValidationMessageFor(model => model.QuantityOrName, "", new { @class = "text-Danger" })
+    </div>
+    <div class="editor-label"><label for="MasterUnit">Master Unit</label></div>
+    <div class="editor-field">
+      @(Html.Kendo().DropDownListFor(a => a.MasterUnit)
+                     .BindTo(ViewBag.UnitList as SelectList)
+                     .DataTextField("Text")
+                     .DataValueField("Value")
+                     .OptionLabel("--Select One Unit--")
+                     .HtmlAttributes(new { style = "width:100%", required = "required", validationMessage = "Please select a master unit" })
+      )
+      @Html.ValidationMessageFor(model => model.MasterUnit, "", new { @class = "text-Danger" })
+    </div>
+</div>
+@if (Model != null && Model.SubMasterId > 0)
+ {
+    <script>
+        $('#QuantityOrName').prop('required', true);
+        $('#MasterUnit').prop('required', true);
+    </script>
+ }
+else
+{
+    <script>
+        $("#divMaster").hide();
+        $('#QuantityOrName').prop('required', false);
+        $('#MasterUnit').prop('required', false);
+    </script>
+}
+<div class="editor-label"><label for="ProductName">Name</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.ProductName, new { htmlattributes = new { @class = "k-textbox" } })
+    @Html.ValidationMessageFor(model => model.ProductName, "", new { @class = "text-Danger" })
+</div>
+<div class="editor-label"><label for="Code">Code</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.Code, new { htmlattributes = new { @class = "k-textbox" } })
+    @Html.ValidationMessageFor(model => model.Code, "", new { @class = "text-Danger" })
+</div>
+<div class="editor-label"><label for="BarCode">Barcode</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.BarCode, new { htmlattributes = new { @class = "k-textbox" } })
+    @Html.ValidationMessageFor(model => model.BarCode, "", new { @class = "text-Danger" })
+</div>
+<div class="editor-label"><label for="PLU">PLU</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.PLU, new { htmlattributes = new { @class = "k-textbox" } })
+    @Html.ValidationMessageFor(model => model.PLU, "", new { @class = "text-Danger" })
+</div>
+<div id="divCategoryMultiSelect">
+    <div class="editor-label"><label for="">Category</label></div>
+    <div class="editor-field">
+        @(Html.Kendo().MultiSelect()
+                        .Name("CategoryMultiSelect")
+                        .Placeholder("Select category...")
+                        .DataTextField("Text")
+                        .DataValueField("Value")
+                        .BindTo(ViewBag.CategoryList as SelectList)
+                        .Filter("contains")
+                        .HtmlAttributes(new { style = "width: 100%;", required = "required", validationMessage = "Please select category" })
+                        .Events(e =>
+                        {
+                            e.DataBound("onDataBoundCategory").Change("onChangeCategoryMulti");
+                        })
+        )
+        <span class="field-validation-valid text-danger" data-valmsg-for="CategoryMultiSelect" data-valmsg-replace="true"></span>
+    </div>
+    <div class="editor-label"><label for="">Sub Category</label></div>
+    <div class="editor-field">
+        @(Html.Kendo().MultiSelect()
+                        .Name("SubCategoryMultiSelect")
+                        .Placeholder("Select sub category...")
+                        .DataTextField("Text")
+                        .DataValueField("Value")
+                        .Filter("contains")
+                        .AutoBind(false)
+                        .HtmlAttributes(new { style = "width: 100%;", required = "required", validationMessage = "Please select sub category" })
+                        .DataSource(source =>
+                        {
+                            source.Read(read =>
+                            {
+                                read.Action("GetSubCategories", "Sales")
+                                    .Data("dataSubMulti");
+                            })
+                            .ServerFiltering(false);
+                        })
+                        .Events(e =>
+                        {
+                            e.DataBound("onDataBoundSubCategory");
+                        })
+        )
+        <span class="field-validation-valid text-danger" data-valmsg-for="SubCategoryMultiSelect" data-valmsg-replace="true"></span>
+    </div>
+</div>
+@*<div class="editor-label"><label for="CategoryId">Category</label></div>
+<div class="editor-field">
+    @(Html.Kendo().DropDownListFor(a => a.ProductCategoryId)
+                     .BindTo(ViewBag.CategoryList as SelectList)
+                     .DataTextField("Text")
+                     .DataValueField("Value")
+                     .OptionLabel("--Select One Category--")
+                     .HtmlAttributes(new { style = "width:68%" })
+    )
+    @Html.ValidationMessageFor(model => model.ProductCategoryId, "", new { @class = "text-Danger" })
+</div>
+<div class="editor-label"><label for="SubCategoryId">Sub Category</label></div>
+<div class="editor-field">
+   @(Html.Kendo().DropDownListFor(a => a.SubCategoryId)
+                        .HtmlAttributes(new { style = "width:68%" })
+                        .OptionLabel("--Select Sub Category--")
+                        .DataTextField("Text")
+                        .DataValueField("Value")
+                        .DataSource(source =>
+                        {
+                            source.Read(read =>
+                            {
+                                read.Action("GetSubCategories", "Sales")
+                                    .Data("filterCategory");
+                            })
+                            .ServerFiltering(true);
+                        })
+                        .Enable(false)
+                        .AutoBind(false)
+                        .CascadeFrom("ProductCategoryId")
+    )
+    @Html.ValidationMessageFor(model => model.SubCategoryId, "", new { @class = "text-Danger" })
+</div>*@
+<div class="editor-label"><label for="Unit">Unit</label></div>
+<div class="editor-field">
+    @(Html.Kendo().DropDownListFor(a => a.Unit)
+                     .BindTo(ViewBag.UnitList as SelectList)
+                     .DataTextField("Text")
+                     .DataValueField("Value")
+                     .OptionLabel("--Select One Unit--")
+                     .HtmlAttributes(new { style = "width:100%" })
+    )
+    @Html.ValidationMessageFor(model => model.Unit, "", new { @class = "text-Danger" })
+</div>
+<div class="editor-label"><label for="Cost">Cost</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.Cost, new { htmlattributes = new { @min=0, @class = "k-textbox" } })
+    @Html.ValidationMessageFor(model => model.Cost, "", new { @class = "text-Danger" })
+</div>
+<div id="divProPrice">
+    <div class="editor-label"><label for="Price">Price</label></div>
+    <div class="editor-field">
+        @Html.EditorFor(model => model.Price, new { htmlattributes = new { @min = 0, @class = "k-textbox" } })
+        @Html.ValidationMessageFor(model => model.Price, "", new { @class = "text-Danger" })
+    </div>
+</div>
+<div class="editor-label"><label for="MinimalQuantity">Minimal Quantity</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.MinimalQuantity, new { htmlattributes = new { @class = "k-textbox" } })
+    @Html.ValidationMessageFor(model => model.MinimalQuantity, "", new { @class = "text-Danger" })
+</div>
+@if (Model != null)
+ {
+    <div class="editor-label"><label for="Color">Color</label></div>
+    <div class="editor-field">
+        @(Html.Kendo().ColorPickerFor(m => m.Color)
+                .HtmlAttributes(new { style = "width:100%" })
+        )
+        @Html.ValidationMessageFor(model => model.Color, "", new { @class = "text-Danger" })
+    </div>
+ }
+else
+{
+    <div class="editor-label"><label for="Color">Color</label></div>
+    <div class="editor-field">
+        @(Html.Kendo().ColorPickerFor(m => m.Color)
+            .Value("#ffffff")
+            .HtmlAttributes(new { style = "width:100%" })
+        )
+        @Html.ValidationMessageFor(model => model.Color, "", new { @class = "text-Danger" })
+    </div>
+}
+@*<div class="editor-label"><label for="VatRateId">Vat Rate</label></div>
+<div class="editor-field">
+    @(Html.Kendo().DropDownListFor(a => a.VatRateId)
+                     .BindTo(ViewBag.VateRateList as SelectList)
+                     .DataTextField("Text")
+                     .DataValueField("Value")
+                     .OptionLabel("--Select One Type--")
+                     .HtmlAttributes(new { style = "width:68%" })
+    )
+    @Html.ValidationMessageFor(model => model.VatRateId, "", new { @class = "text-Danger" })
+</div>*@
+@*<div class="editor-field">
+    @Html.CheckBoxFor(model => model.IsVatIncluded) <label for="IsVatIncluded">Is Vat Included</label>
+    @Html.ValidationMessageFor(model => model.IsVatIncluded, "", new { @class = "text-Danger" })
+</div>*@
+<div class="editor-field">
+    @Html.CheckBoxFor(model => model.IsPriceChangeAllow)<label for="IsPriceChangeAllow">Is Price Change Allow</label>
+</div>
+<div class="editor-field">
+    @Html.CheckBoxFor(model => model.IsDiscountAllow)<label for="IsDiscountAllow">Is Discount Allow</label>
+</div>
+<div class="editor-field">
+    @Html.CheckBoxFor(model => model.IsRefundAllow)<label for="IsRefundAllow">Is Refund Allow</label>
+</div>
+<div class="editor-field">
+    @Html.CheckBoxFor(model => model.IsUnitWise)<label for="IsUnitWise">Is Unit Wise</label>
+</div>
+<div class="editor-field">
+    @Html.CheckBoxFor(model => model.IsUniqueItem)<label for="IsUniqueItem">Is Unique item</label>
+</div>
+<div class="editor-field">
+    @Html.CheckBoxFor(model => model.Isperishable)<label for="Isperishable">Is Perishable</label>
+</div>
+<div id="divPerishable">
+    <div class="editor-label"><label for="ExpireDays">Expire Days</label></div>
+    <div class="editor-field">
+        <div style="width: 50%" class="pull-left">
+            @Html.EditorFor(model => model.ExpireDays, new { htmlattributes = new { @min = 1, @class = "k-textbox", @style = "width:100%; max-width:100%", required = "required", validationMessage = "Please enter days" } })
+            @Html.ValidationMessageFor(model => model.ExpireDays, "", new { @class = "text-Danger" })
+        </div>
+        <div style="width: 40%" class="pull-right">
+            @Html.CheckBoxFor(model => model.IsFixed)<label for="IsFixed">Is Fixed</label>
+        </div>
+    </div>
+</div>
+<div class="editor-field">
+    @Html.CheckBoxFor(model => model.IsAfterSaleService) <label for="IsAfterSaleService">Is after sale service</label>
+</div>
+<div id="divService">
+    <div class="editor-label"><label for="ServiceTypeId">Service Type</label></div>
+    <div class="editor-field">
+        @(Html.Kendo().DropDownListFor(a => a.ServiceTypeId)
+                     .BindTo(ViewBag.ServiceTypeList as SelectList)
+                     .DataTextField("Text")
+                     .DataValueField("Value")
+                     .OptionLabel("--Select one service--")
+                     .HtmlAttributes(new { style = "width:100%", required = "required", validationMessage = "Please select one service" })
+        )
+        @Html.ValidationMessageFor(model => model.ServiceTypeId, "", new { @class = "text-Danger" })
+    </div>
+    <div class="editor-label"><label for="ServiceDays"> Days</label></div>
+    <div class="editor-field">
+      @Html.EditorFor(model => model.ServiceDays, new { htmlattributes = new { @min = 1, @class = "k-textbox", required = "required", validationMessage = "Please enter days" } })
+      @Html.ValidationMessageFor(model => model.ServiceDays, "", new { @class = "text-Danger" })
+    </div>
+</div>
+<div class="editor-field">
+    @Html.CheckBoxFor(model => model.IsUsingDefaultQuantity)<label for="IsUsingDefaultQuantity">Is Using Default Quantity</label>
+</div>
+<div class="editor-field">
+    @Html.CheckBoxFor(model => model.IsPointBased)<label for="IsPointBased">Is Point Based</label>
+</div>
+<div id="divPointsInput">
+    <div class="editor-label"><label for="Points">Points</label></div>
+    <div class="editor-field">
+        @Html.EditorFor(model => model.Points, new { htmlattributes = new { @min = 1, @class = "k-textbox", required="required", validationMessage = "Please enter points" } })
+        @Html.ValidationMessageFor(model => model.Points, "", new { @class = "text-Danger" })
+    </div>
+</div>
+<div class="editor-field">
+    @Html.CheckBoxFor(model => model.IsDynamic)<label for="IsDynamic">Is Dynamic</label>
+</div>
+<div id="divDynamicForm">
+    <div class="editor-field">
+        <div style="max-width:100%; border:1px solid #aeaeae; padding:5px;">
+            <div id="divDistType">
+                <div class="row">
+                    <div class="col-md-3">
+                        @Html.CheckBoxFor(model => model.SizeCheckBox, new { htmlattributes = new { @class = "k-textbox" } }) <label for="SizeCheckBox"> Size</label><br />
+                        <div id="divSizetype">
+                            @if (Model != null)
+                             {
+
+                                if (Model.SizeType == 1 || Model.SizeType == null)
+                                {
+                                    <label>
+                                        <input type="radio" checked name="SizeType" id="chkSizeLetter" /> Letter
+                                    </label>
+                                    <label>
+                                        <input type="radio" name="SizeType" id="chkSizeNumber" /> Number
+                                    </label>
+                                    <label>
+                                        <input type="radio" name="SizeType" id="chkUnit" /> Number
+                                    </label>
+                                }
+                                else if (Model.SizeType == 2)
+                                {
+                                    <label>
+                                        <input type="radio" name="SizeType" id="chkSizeLetter" /> Letter
+                                    </label>
+                                    <label>
+                                        <input type="radio" checked name="SizeType" id="chkSizeNumber" /> Number
+                                    </label>
+                                    <label>
+                                        <input type="radio" name="SizeType" id="chkUnit" /> Number
+                                    </label>
+                                }
+                                else if (Model.SizeType == 3)
+                                {
+                                    <label>
+                                        <input type="radio" name="SizeType" id="chkSizeLetter" /> Letter
+                                    </label>
+                                    <label>
+                                        <input type="radio" name="SizeType" id="chkSizeNumber" /> Number
+                                    </label>
+                                    <label>
+                                        <input type="radio" checked name="SizeType" id="chkUnit" /> Number
+                                    </label>
+                                }
+                             }
+                            else
+                            {
+                                <label>
+                                    <input type="radio" checked name="SizeType" id="chkSizeLetter" /> Letter
+                                </label>
+                                <label>
+                                    <input type="radio" name="SizeType" id="chkSizeNumber" /> Number
+                                </label>
+                                <label>
+                                    <input type="radio" name="SizeType" id="chkUnit" /> Unit
+                                </label>
+                            }
+                        </div>
+                    </div>
+                    <div class="col-md-1">
+                        @Html.CheckBoxFor(model => model.ColorCheckbox) <label for="ColorCheckbox"> Color</label>
+                    </div>
+                    <div class="col-md-1">
+                        @Html.CheckBoxFor(model => model.PriceCheckBox) <label for="PriceCheckBox"> Price</label><br />
+                        @Html.CheckBoxFor(model => model.CostCheckBox) <label for="CostCheckBox"> Cost</label>
+                    </div>
+                    <div class="col-md-1">
+                        @Html.CheckBoxFor(model => model.CodeCheckbox) <label for="CodeCheckbox"> Code</label>
+                    </div>
+                    <div class="col-md-1">
+                        @Html.CheckBoxFor(model => model.PluCheckbox) <label for="PluCheckbox"> Plu</label>
+                    </div>
+                    <div class="col-md-2">
+                        @Html.CheckBoxFor(model => model.MinimumQuantityCheckbox) <label for="MinimumQuantityCheckbox"> M.Quantity</label>
+                    </div>
+                </div>
+                <div class="row" style="margin-bottom: 5px;">
+                    <div class="text-center">
+                        <button type="button" class="btn btn-default" id="btnGenerateProDistTbl">Generate</button>
+                        <button type="button" class="btn btn-default" id="btnProDistReset">Reset</button>
+                    </div>
+                </div>
+            </div>
+            <div class="row" style="margin:0;">
+                <div id="divProDistTable" >
+                    @if (Model != null)
+                     {
+                        if(Model.DistributeItems != null)
+                        {
+                            <table class="table table-bordered" id="proDisttbl">
+                                <tr>
+                                    @if(Model.SizeCheckBox == true)
+                                     {
+                                        <th>Size</th>
+                                     }
+                                    @if (Model.ColorCheckbox == true)
+                                     {
+                                        <th>Color</th>
+                                     }
+                                    @if (Model.PriceCheckBox == true)
+                                     {
+                                        <th>Price</th>
+                                     }
+                                    <th>Barcode</th>
+                                    <th style="width:101px;"></th>
+                                </tr>
+                                @foreach(var list in Model.DistributeItems)
+                                 {
+                                    distCount++;
+                                    <tr id="distItem_@distCount" class="distItems" data-id="@distCount" data-transid="@list.Id">
+                                        @if(list.SizeId > 0)
+                                         {
+                                            <td>
+                                                <input id="size_@distCount" name="size_@distCount" required validationMessage="*" />
+                                                 <span class="field-validation-valid text-danger" data-valmsg-for="size_@distCount" data-valmsg-replace="true"></span>
+                                                <script>
+                                                     $("#size_" + @distCount).kendoDropDownList({
+                                                        filter: "contains",
+                                                        optionLabel: "Select size...",
+                                                        // JSON property name to use
+                                                        dataSource: new kendo.data.DataSource({
+                                                            transport: {
+                                                                read: {
+                                                                    url: '@Url.Action("GetSize", "Sales")',
+                                                                data: { sizeType: '@Model.SizeType' },
+                                                                serverPaging: true,
+                                                                pageSize: 20,
+                                                                contentType: 'application/json; charset=utf-8',
+                                                                type: 'GET',
+                                                                dataType: 'json'
+                                                            },
+                                                            serverSorting: true,
+                                                            serverFiltering: true
+                                                            }
+                                                        }),
+                                                        dataValueField: 'Value',
+                                                        dataTextField: "Text",
+                                                        value:"@list.SizeId"
+                                                     });
+                                                </script>
+                                            </td>
+                                         }
+                                        @if (list.ColorId > 0)
+                                         {
+                                            <td>
+                                                <input id="color_@distCount" name="color_@distCount" required validationMessage="*" />
+                                                <span class="field-validation-valid text-danger" data-valmsg-for="color_@distCount" data-valmsg-replace="true"></span>
+                                                <script>
+                                                     $("#color_" + @distCount).kendoDropDownList({
+                                                         filter: "contains",
+                                                         optionLabel: "Select color...",
+                                                         // JSON property name to use
+                                                         dataSource: new kendo.data.DataSource({
+                                                             transport: {
+                                                                 read: {
+                                                                     url: '@Url.Action("GetColor", "Sales")',
+                                                                    serverPaging: true,
+                                                                    pageSize: 20,
+                                                                    contentType: 'application/json; charset=utf-8',
+                                                                    type: 'GET',
+                                                                    dataType: 'json'
+                                                                },
+                                                                serverSorting: true,
+                                                                serverFiltering: true
+                                                             }
+                                                         }),
+                                                        dataValueField: 'Value',
+                                                        dataTextField: "Text",
+                                                        value:"@list.ColorId"
+                                                    });
+                                                </script>
+                                            </td>
+                                         }
+                                        @if(list.Price > 0)
+                                         {
+                                            <td>
+                                                <input type="number" class="k-textbox" min="1" id="price_@distCount" name="price_@distCount" value="@list.Price" required validationMessage="*" />
+                                                <span class="field-validation-valid text-danger" data-valmsg-for="price_@distCount" data-valmsg-replace="true"></span>
+                                            </td>
+                                         }
+                                        <td>
+                                            <input type="text" class="k-textbox" id="barcode_@distCount" name="barcode_@distCount" value="@list.BarCode" required validationMessage="*" />
+                                            <span class="field-validation-valid text-danger" data-valmsg-for="barcode_@distCount" data-valmsg-replace="true"></span>
+                                        </td>
+                                        <td>
+                                            <span class="btn btn-default btnCancelItem" data-toggle="tooltip" title="Cancel item" data-id="@distCount" data-transid="@list.Id"><i class="fa fa-times-circle" aria-hidden="true" style="font-size:24px;cursor:pointer"></i></span>
+                                            <span class="btn btn-default btnAddItem" data-toggle="tooltip" title="Add item" data-id="@distCount"><i class="fa fa-plus-circle" aria-hidden="true" style="font-size:24px;cursor:pointer"></i></span>
+                                        </td>
+                                    </tr>
+                                 }
+                            </table>
+                        }
+                     }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="editor-label"><label for="RestrictionId">Restriction</label></div>
+<div class="editor-field">
+    @(Html.Kendo().DropDownListFor(a => a.RestrictionId)
+                     .BindTo(ViewBag.RestrictionList as SelectList)
+                     .DataTextField("Text")
+                     .DataValueField("Value")
+                     .OptionLabel("--Select one restriction--")
+                     .HtmlAttributes(new { style = "width:100%" })
+    )
+</div>
+<div class="editor-label"><label for="">Tag</label></div>
+<div class="editor-field">
+    @(Html.Kendo().MultiSelect()
+                        .Name("tagMultiSelect")
+                        .Placeholder("Select tag...")
+                        .DataTextField("Text")
+                        .DataValueField("Value")
+                        .Filter("contains")
+                        //.AutoBind(false)
+                        .HtmlAttributes(new { style = "width: 100%;" })
+                        .DataSource(source =>
+                        {
+                            source.Read(read =>
+                            {
+                                read.Action("GetTag", "Sales");
+                            })
+                            .ServerFiltering(false);
+                        })
+                        .Events(e =>
+                        {
+                            e.DataBound("onDataBound");
+                        })
+     )
+</div>
+<div class="editor-label"><label for="Description">Description</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.Description, new { htmlattributes = new { @class = "k-textbox", @style = "width:100%; max-width:100%", @rows = 3 } })
+    @Html.ValidationMessageFor(model => model.Description, "", new { @class = "text-Danger" })
+</div>
+
+<div class="editor-label"><label for="PictureName">Image</label></div>
+@if (Model != null)
+{
+    <div class="editor-field">
+        <div id="divPic-0">
+            <span id="ProductImgClose">
+                <img src="/Content/Icon/modal_close.png" class="previewImgClose" id="ImgEvtCvrClose" />
+            </span>
+            <div id="DivForProductImgHold" class="imgPreview" style="display:block;">
+                <img src="~/Images/ProductImage/@Model.Image" class="previewImgClose" id="ImgEvtCvrClose" />
+            </div>
+            <div id="DivForProductImgUp" class="image-uploader" style="display:none">
+                <input type="file" name="files" id="file1" class="inputfile inputfile-4" style="display:none" />
+                <label for="file1" id="lblfile1" class="lblForPics">
+                    <span style="font-size: 23px;padding-top:2em;display:block;">+</span>
+                    <span style="font-size: 15px;font-weight:bold;">Add Photos</span>
+                </label>
+            </div>
+        </div>
+        @Html.ValidationMessageFor(model => model.Image, "", new { @class = "text-danger" })
+    </div>
+}
+else
+{
+    <div class="editor-field">
+        <div id="divPic-0">
+            <span id="ProductImgClose" style="display:none;">
+                <img src="/Content/Icon/modal_close.png" class="previewImgClose" id="ImgEvtCvrClose" />
+            </span>
+            <div id="DivForProductImgHold" class="imgPreview"></div>
+            <div id="DivForProductImgUp" class="image-uploader">
+                <input type="file" name="files" id="file1" class="inputfile inputfile-4" style="display:none" />
+                <label for="file1" id="lblfile1" class="lblForPics">
+                    <span style="font-size: 23px;padding-top:2em;display:block;">+</span>
+                    <span style="font-size: 15px;font-weight:bold;">Add Photos</span>
+                </label>
+            </div>
+        </div>
+        @Html.ValidationMessageFor(model => model.Image, "", new { @class = "text-danger" })
+    </div>
+}
+<script>
+        $(document).ready(function () {
+
+            distributeCount = @distCount;
+            $("#PriceCheckBox").prop('disabled', true);
+            $("#CostCheckBox").prop('disabled', true);
+
+            if (distributeCount > 0)
+            {
+                $(".btnCancelItem").each(function () {
+                    if (distributeCount == 1) {
+                        $(this).hide();
+                    }
+                });
+                $(".btnAddItem").each(function () {
+                    if ($(this).data("id") != distributeCount) {
+                        $(this).hide();
+                    }
+                });
+            }
+
+            if ($("#chkSizeLetter").attr('checked') == true)
+            {
+                sizeType = 1;
+            }
+            else if ($("#chkSizeNumber").attr('checked') == true)
+            {
+                sizeType = 2;
+            }
+            else if ($("#chkUnit").attr('checked') == true)
+            {
+                sizeType = 3;
+                $("#Unit").data("kendoDropDownList").value("");
+                $("#Unit").removeAttr("data-val-required");
+                var dropdownlist = $("#Unit").data("kendoDropDownList");
+                dropdownlist.enable(false);
+            }
+
+            if ($("#IsVatIncluded").attr('checked')) {
+                $("#IsVatIncluded").val(true);
+            }
+            else {
+                $("#IsVatIncluded").val(false);
+            }
+
+            if ($("#SizeCheckBox").attr('checked')) {
+                $("#SizeCheckBox").val(true);
+            }
+            else {
+                $("#SizeCheckBox").val(false);
+                $("#divSizetype").hide();
+            }
+
+            if ($("#ColorCheckbox").attr('checked')) {
+                $("#ColorCheckbox").val(true);
+            }
+            else {
+                $("#ColorCheckbox").val(false);
+            }
+
+            if ($("#PriceCheckBox").attr('checked')) {
+                $("#PriceCheckBox").val(true);
+                $("#Price").val(0);
+                $("#Price").prop('disabled', true);
+            }
+            else
+            {
+                $("#PriceCheckBox").val(false);
+            }
+
+            if ($("#CostCheckBox").attr('checked')) {
+                $("#Cost").val(0);
+                $("#Cost").prop('disabled', true);
+                $("#CostCheckBox").val(true);
+            }
+            else {
+                $("#CostCheckBox").val(false);
+            }
+
+            if ($("#CodeCheckbox").attr('checked')) {
+                $("#CodeCheckbox").val(true);
+            }
+            else {
+                $("#CodeCheckbox").val(false);
+            }
+
+            if ($("#PluCheckbox").attr('checked')) {
+                $("#PluCheckbox").val(true);
+            }
+            else {
+                $("#PluCheckbox").val(false);
+            }
+
+            if ($("#MinimumQuantityCheckbox").attr('checked')) {
+                $("#MinimumQuantityCheckbox").val(true);
+            }
+            else {
+                $("#MinimumQuantityCheckbox").val(false);
+            }
+
+            if ($("#IsUniqueItem").attr('checked')) {
+                $("#IsUniqueItem").val(true);
+            }
+            else {
+                $("#IsUniqueItem").val(false);
+            }
+
+            if ($("#IsPointBased").attr('checked')) {
+                $("#IsPointBased").val(true);
+            }
+            else {
+                $("#IsPointBased").val(false);
+                $("#divPointsInput").hide();
+                $('#Points').prop('required', false);
+            }
+
+            if ($("#IsDynamic").attr('checked')) {
+                $("#IsDynamic").val(true);
+                $('#divDistType :input').attr('disabled', true);
+                $("#btnProDistReset").prop('disabled', false);
+                $("#BarCode").removeAttr("data-val-required");
+                $("#BarCode").prop('disabled', true);
+                $("#Code").prop('disabled', true);
+                $("#PLU").prop('disabled', true);
+                $("#MinimalQuantity").prop('disabled', true);
+            }
+            else {
+                $("#IsDynamic").val(false);
+                $("#divDynamicForm").hide();
+                $("#btnGenerateProDistTbl").prop('disabled', true);
+                $("#btnProDistReset").prop('disabled', true);
+            }
+
+            if ($("#IsUnitWise").attr('checked')) {
+                $("#IsUnitWise").val(true);
+            }
+            else {
+                $("#IsUnitWise").val(false);
+            }
+
+            if ($("#IsPriceChangeAllow").attr('checked')) {
+                $("#IsPriceChangeAllow").val(true);
+            }
+            else {
+                $("#IsPriceChangeAllow").val(false);
+            }
+
+            if ($("#IsRefundAllow").attr('checked')) {
+                $("#IsRefundAllow").val(true);
+            }
+            else {
+                $("#IsRefundAllow").val(false);
+            }
+
+            if ($("#IsDiscountAllow").attr('checked')) {
+                $("#IsDiscountAllow").val(true);
+            }
+            else {
+                $("#IsDiscountAllow").val(false);
+            }
+
+            if ($("#IsAfterSaleService").attr('checked')) {
+                $("#IsAfterSaleService").val(true);
+            }
+            else {
+                $("#IsAfterSaleService").val(false);
+                $("#divService").hide();
+                $('#ServiceDays').prop('required', false);
+                $('#ServiceTypeId').prop('required', false);
+            }
+
+            if ($("#Isperishable").attr('checked')) {
+                $("#Isperishable").val(true);
+            }
+            else {
+                $("#Isperishable").val(false);
+                $("#divPerishable").hide();
+                $('#ExpireDays').prop('required', false);
+            }
+
+            if ($("#IsFixed").attr('checked')) {
+                $("#IsFixed").val(true);
+            }
+            else {
+                $("#IsFixed").val(false);
+            }
+            if ($("#IsUsingDefaultQuantity").attr('checked')) {
+                $("#IsUsingDefaultQuantity").val(true);
+            }
+            else {
+                $("#IsUsingDefaultQuantity").val(false);
+            }
+        });
+
+        $('#IsPointBased').change(function () {
+            if ($(this).is(":checked")) {
+                $('#IsPointBased').val(true);
+                $("#divPointsInput").show();
+                $('#Points').prop('required', true);
+            }
+            else
+            {
+                $('#IsPointBased').val(false);
+                $("#divPointsInput").hide();
+                $('#Points').val("");
+                $('#Points').prop('required', false);
+            }
+        });
+
+        $('#IsDynamic').change(function () {
+            if ($(this).is(":checked")) {
+                $('#IsDynamic').val(true);
+                $("#divDynamicForm").show();
+                $("#BarCode").removeAttr("data-val-required");
+                $("#BarCode").val("");
+                $("#BarCode").prop('disabled', true);
+                $("#BarCode_validationMessage").css("display", "none");
+                $("#Cost_validationMessage").css("display", "none");
+                $("#Price_validationMessage").css("display", "none");
+
+                $("#Code").val("");
+                $("#PLU").val("");
+                $("#MinimalQuantity").val("");
+
+                $("#Code").prop('disabled', true);
+                $("#PLU").prop('disabled', true);
+                $("#MinimalQuantity").prop('disabled', true);
+            }
+            else {
+                $('#IsDynamic').val(false);
+                $("#divDynamicForm").hide();
+                $("#BarCode").attr("data-val-required", "Please enter barcode");
+                $("#BarCode").prop('disabled', false);
+                $("#Code").prop('disabled', false);
+                $("#PLU").prop('disabled', false);
+                $("#MinimalQuantity").prop('disabled', false);
+
+                $("#SizeCheckBox").prop('checked', false);
+                $("#ColorCheckbox").prop('checked', false);
+                $("#PriceCheckBox").prop('checked', false);
+                $("#CostCheckBox").prop('checked', false);
+                $("#CodeCheckbox").prop('checked', false);
+                $("#PluCheckbox").prop('checked', false);
+                $("#MinimumQuantityCheckbox").prop('checked', false);
+                $("#chkSizeLetter").prop('checked', true);
+
+                $("#SizeCheckBox").val(false);
+                $("#ColorCheckbox").val(false);
+                $("#PriceCheckBox").val(false);
+                $("#CostCheckBox").val(false);
+                $("#CodeCheckbox").val(false);
+                $("#PluCheckbox").val(false);
+                $("#MinimumQuantityCheckbox").val(false);
+
+                $("#divSizetype").hide();
+                $("#divProDistTable").empty();
+                $('#divDistType :input').attr('disabled', false);
+                $("#btnProDistReset").prop('disabled', true);
+                $("#btnGenerateProDistTbl").prop('disabled', true);
+
+                $("#PriceCheckBox").prop('disabled', true);
+                $("#Price").val("");
+                $("#Price").prop('disabled', false);
+
+                $("#CostCheckBox").prop('disabled', true);
+                $("#Cost").val("");
+                $("#Cost").prop('disabled', false);
+
+                sizeType = 0;
+            }
+        });
+
+        $('#IsUniqueItem').change(function () {
+            if ($(this).is(":checked")) {
+                $('#IsUniqueItem').val(true);
+            }
+            else {
+                $('#IsUniqueItem').val(false);
+            }
+        });
+
+        $('#IsDiscountAllow').change(function () {
+            if ($(this).is(":checked")) {
+                $('#IsDiscountAllow').val(true);
+            }
+            else {
+                $('#IsDiscountAllow').val(false);
+            }
+        });
+
+        $('#IsFixed').change(function () {
+            if ($(this).is(":checked")) {
+                $('#IsFixed').val(true);
+            } else {
+                $('#IsFixed').val(false);
+            }
+        });
+
+
+        $('#IsUnitWise').change(function () {
+            if ($(this).is(":checked")) {
+                $('#IsUnitWise').val(true);
+            } else {
+                $('#IsUnitWise').val(false);
+            }
+        });
+
+        $('#IsRefundAllow').change(function () {
+            if ($(this).is(":checked")) {
+                $('#IsRefundAllow').val(true);
+            } else {
+                $('#IsRefundAllow').val(false);
+            }
+        });
+
+        $('#IsVatIncluded').change(function () {
+            if ($(this).is(":checked")) {
+                $('#IsVatIncluded').val(true);
+            } else {
+                $('#IsVatIncluded').val(false);
+            }
+        });
+
+        $('#SizeCheckBox').change(function () {
+            if ($(this).is(":checked")) {
+                $('#SizeCheckBox').val(true);
+                $("#btnGenerateProDistTbl").prop('disabled', false);
+                $("#PriceCheckBox").prop('disabled', false);
+                $("#divSizetype").show();
+            }
+            else {
+                $('#SizeCheckBox').val(false);
+                $("#divSizetype").hide();
+                sizeType = 0;
+                if ($("#ColorCheckbox").is(":checked") == false) {
+                    $("#btnGenerateProDistTbl").prop('disabled', true);
+
+                    $("#PriceCheckBox").prop('disabled', true);
+                    $("#PriceCheckBox").prop('checked', false);
+                    $('#PriceCheckBox').val(false);
+                    $("#Price").val("");
+                    $("#Price").prop('disabled', false);
+
+                    $("#CostCheckBox").prop('checked', false);
+                    $("#CostCheckBox").val(false);
+                    $("#Cost").val("");
+                    $("#Cost").prop('disabled', false);
+                }
+            }
+        });
+
+        $("#chkSizeLetter,#chkSizeNumber").click(function () {
+            $("#Unit").attr("data-val-required", "Please select unit");
+            var dropdownlist = $("#Unit").data("kendoDropDownList");
+            dropdownlist.enable(true);
+        });
+
+        $("#chkUnit").click(function () {
+            $("#Unit").data("kendoDropDownList").value("");
+            $("#Unit").removeAttr("data-val-required");
+            var dropdownlist = $("#Unit").data("kendoDropDownList");
+            dropdownlist.enable(false);
+            //dropdownlist.enable(true);
+            $("#Unit_validationMessage").css("display", "none");
+        });
+
+        $('#ColorCheckbox').change(function () {
+            if ($(this).is(":checked")) {
+                $('#ColorCheckbox').val(true);
+                $("#btnGenerateProDistTbl").prop('disabled', false);
+                $("#PriceCheckBox").prop('disabled', false);
+            }
+            else {
+                $('#ColorCheckbox').val(false);
+                if ($("#SizeCheckBox").is(":checked") == false) {
+                    $("#btnGenerateProDistTbl").prop('disabled', true);
+
+                    $("#PriceCheckBox").prop('disabled', true);
+                    $("#PriceCheckBox").prop('checked', false);
+                    $('#PriceCheckBox').val(false);
+                    $("#Price").val("");
+                    $("#Price").prop('disabled', false);
+
+                    $("#CostCheckBox").prop('checked', false);
+                    $("#CostCheckBox").val(false);
+                    $("#Cost").val("");
+                    $("#Cost").prop('disabled', false);
+                }
+            }
+        });
+
+        $('#PriceCheckBox').change(function () {
+            if ($(this).is(":checked")) {
+                $('#PriceCheckBox').val(true);
+                $("#Price").val(0);
+                $("#Price").prop('disabled', true);
+
+                $("#CostCheckBox").prop('checked', true);
+                $("#CostCheckBox").val(true);
+                $("#Cost").val(0);
+                $("#Cost").prop('disabled', true);
+
+                $("#Cost_validationMessage").css("display", "none");
+                $("#Price_validationMessage").css("display", "none");
+
+            }
+            else
+            {
+                $('#PriceCheckBox').val(false);
+                $("#Price").val("");
+                $("#Price").prop('disabled', false);
+
+                $("#CostCheckBox").prop('checked', false);
+                $("#CostCheckBox").val(false);
+                $("#Cost").val("");
+                $("#Cost").prop('disabled', false);
+            }
+        });
+        
+        $('#CodeCheckbox').change(function () {
+            if($(this).is(":checked"))
+            {
+                $('#CodeCheckbox').val(true);
+            }
+            else
+            {
+                $('#CodeCheckbox').val(false);
+            }
+        });
+
+        $('#PluCheckbox').change(function () {
+            if ($(this).is(":checked")) {
+                $('#PluCheckbox').val(true);
+            }
+            else {
+                $('#PluCheckbox').val(false);
+            }
+        });
+
+        $('#MinimumQuantityCheckbox').change(function () {
+            if ($(this).is(":checked")) {
+                $('#MinimumQuantityCheckbox').val(true);
+            }
+            else {
+                $('#MinimumQuantityCheckbox').val(false);
+            }
+        });
+
+        $('#IsPriceChangeAllow').change(function () {
+            if ($(this).is(":checked")) {
+                $('#IsPriceChangeAllow').val(true);
+            } else {
+                $('#IsPriceChangeAllow').val(false);
+            }
+        });
+        $('#IsAfterSaleService').change(function () {
+            if ($(this).is(":checked")) {
+                $('#IsAfterSaleService').val(true);
+                $("#divService").show();
+                $('#ServiceDays').prop('required', true);
+                $('#ServiceTypeId').prop('required', true);
+            }
+            else {
+                $('#IsAfterSaleService').val(false);
+                $("#divService").hide();
+                $('#ServiceDays').val("");
+                $('#ServiceDays').prop('required', false);
+                $('#ServiceTypeId').prop('required', false);
+            }
+        });
+
+        $('#Isperishable').change(function () {
+            if ($(this).is(":checked")) {
+                $('#Isperishable').val(true);
+                $("#divPerishable").show();
+                $('#ExpireDays').prop('required', true);
+            }
+            else {
+                $('#Isperishable').val(false);
+                $("#divPerishable").hide();
+                $('#ExpireDays').val("");
+                $('#ExpireDays').prop('required', false);
+                $('#IsFixed').val(false);
+                $('#IsFixed').prop('checked', false);
+            }
+        });
+
+        $('#IsUsingDefaultQuantity').change(function () {
+            if ($(this).is(":checked")) {
+                $('#IsUsingDefaultQuantity').val(true);
+            } else {
+                $('#IsUsingDefaultQuantity').val(false);
+            }
+        });
+        $("#file1").on('change', function (e) {
+            var imgPath = $(this)[0].value;
+            var imgName = imgPath.substring(imgPath.lastIndexOf('\\') + 1).toLowerCase();
+            var extn = imgPath.substring(imgPath.lastIndexOf('.') + 1).toLowerCase();
+            $("#DivForProductImgHold").empty();
+            $("#Image").val(imgName);
+            if (extn == "gif" || extn == "png" || extn == "jpg" || extn == "jpeg") {
+                if (typeof (FileReader) != "undefined") {
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+
+                        $("#DivForProductImgHold").append('<img src="' + e.target.result + '" />');
+                    }
+                    $("#DivForProductImgUp").hide();
+                    $("#DivForProductImgHold").show();
+                    $("#ProductImgClose").show();
+                    reader.readAsDataURL($(this)[0].files[0]);
+                } else {
+                    alert("This browser does not support FileReader.");
+                }
+            } else {
+                alert("Pls select only images");
+            }
+        });
+
+        $("#ProductImgClose").click(function () {
+            $("#PictureName").val("");
+            $("#DivForProductImgHold").hide();
+            $("#ProductImgClose").hide();
+            $("#DivForProductImgUp").show();
+        });
+
+        $("#btnGenerateProDistTbl").click(function () {
+            size = false;
+            color = false;
+            price = false;
+            code = false;
+            plu = false;
+            mQuantity = false;
+            if ($("#SizeCheckBox").is(":checked") == true) {
+                size = true;
+                if ($("#chkSizeLetter").is(":checked") == true) {
+                    sizeType = 1;
+                }
+                else
+                if ($("#chkSizeNumber").is(":checked") == true)
+                {
+                    sizeType = 2;
+                }
+                else
+                {
+                    sizeType = 3;
+                }
+            }
+            if ($("#ColorCheckbox").is(":checked") == true) {
+                color = true;
+            }
+            if ($("#PriceCheckBox").is(":checked") == true) {
+                price = true;
+            }
+            if ($("#CodeCheckbox").is(":checked") == true) {
+                code = true;
+            }
+            if ($("#PluCheckbox").is(":checked") == true) {
+                plu = true;
+            }
+            if ($("#MinimumQuantityCheckbox").is(":checked") == true) {
+                mQuantity = true;
+            }
+            distributeCount++;
+            $("#divProDistTable").append('<table class="table table-bordered" id="proDisttbl">' +
+                '<tr>' +
+                (size == true ? '<th>Size</th>' : '') +
+                (size == true && sizeType == 3 ? '<th>Size Name</th>' : '') +
+                (color == true ? '<th>Color</th>' : '') +
+                (price == true ? '<th>Price</th>' : '') +
+                (price == true ? '<th>Cost</th>' : '') +
+                (code == true ? '<th>Code</th>' : '') +
+                (plu == true ? '<th>PLU</th>' : '') +
+                (mQuantity == true ? '<th>M.Quantity</th>' : '') +
+                '<th>Barcode</th>'+
+                '<th style="width:98px;"></th>' +
+                '</tr>' +
+                '<tr id="distItem_' + distributeCount + '" class="distItems" data-id="' + distributeCount + '" data-transid="0" >' +
+                (size == true ? '<td>' +
+                    '<input id= "size_' + distributeCount + '" name= "size_' + distributeCount + '" required validationMessage= "*" />' +
+                    '<span class="field-validation-valid text-danger" data-valmsg-for="size_' + distributeCount + '" data-valmsg-replace="true"></span>' +
+                    '</td>' : '') +
+                (size == true && sizeType == 3 ? '<td>' +
+                    '<input type="text" class="k-textbox" id= "sizeName_' + distributeCount + '" name= "sizeName_' + distributeCount + '" required validationMessage= "*" />' +
+                    '<span class="field-validation-valid text-danger" data-valmsg-for="sizeName_' + distributeCount + '" data-valmsg-replace="true"></span>' +
+                    '</td>' : '') +
+                (color == true ? '<td>' +
+                    '<input id= "color_' + distributeCount + '" name= "color_' + distributeCount + '" required validationMessage= "*" />' +
+                    '<span class="field-validation-valid text-danger" data-valmsg-for="color_' + distributeCount + '" data-valmsg-replace="true"></span>' +
+                    '</td>' : '') +
+                (price == true ? '<td>' +
+                    '<input type="number" class="k-textbox" min="1" id= "price_' + distributeCount + '" name= "price_' + distributeCount + '" required validationMessage= "*" />' +
+                    '<span class="field-validation-valid text-danger" data-valmsg-for="price_' + distributeCount + '" data-valmsg-replace="true"></span>' +
+                    '</td>' : '') +
+                (price == true ? '<td>' +
+                    '<input type="number" class="k-textbox" min="1" id= "cost_' + distributeCount + '" name= "cost_' + distributeCount + '" required validationMessage= "*" />' +
+                    '<span class="field-validation-valid text-danger" data-valmsg-for="cost_' + distributeCount + '" data-valmsg-replace="true"></span>' +
+                    '</td>' : '') +
+                (code == true ? '<td>' +
+                    '<input type="text" class="k-textbox" id= "code_' + distributeCount + '" name= "code_' + distributeCount + '" />' +
+                    '</td>' : '') +
+                (plu == true ? '<td>' +
+                    '<input type="text" class="k-textbox" id= "plu_' + distributeCount + '" name= "plu_' + distributeCount + '" />' +
+                    '</td>' : '') +
+                (mQuantity == true ? '<td>' +
+                    '<input type="number" min="0" class="k-textbox" id= "mQuantity_' + distributeCount + '" name= "mQuantity_' + distributeCount + '" />' +
+                    '</td>' : '') +
+                '<td>' +
+                //'<input class="k-textbox text-box single-line k-invalid" data-val="true" data-val-length="Please enter barcode" data-val-length-max="50" data-val-length-min="1" data-val-remote="This Number already exists..!!!" data-val-remote-additionalfields="*.BarCode" data-val-remote-type="Post" data-val-remote-url="/RemoteValidaton/BarcodeNumberExists" data-val-required="Please enter barcode" id= "barcode_' + distributeCount + '" name= "barcode_' + distributeCount + '" style="width:68%" type="text" value="" aria-invalid="true">' +
+                '<input type="text" class="k-textbox" id= "barcode_' + distributeCount + '" name= "barcode_' + distributeCount + '" required validationMessage= "*" />' +
+                '<span class="field-validation-valid text-danger" data-valmsg-for="barcode_' + distributeCount + '" data-valmsg-replace="true"></span>' +
+                '</td>'+
+                '<td>' +
+                '<span class="btn btn-default btnCancelItem" data-toggle="tooltip"  title="Cancel item" data-id="' + distributeCount + '" data-transid="0"><i class="fa fa-times-circle" aria-hidden="true" style="font-size:24px;cursor:pointer"></i></span>' +
+                '<span class="btn btn-default btnAddItem" data-toggle="tooltip" title="Add item" data-id="' + distributeCount + '"><i class="fa fa-plus-circle" aria-hidden="true" style="font-size:24px;cursor:pointer"></i></span>' +
+                '</td >' +
+                '</tr>' +
+                '</table>');
+
+            $(".btnCancelItem").hide();
+
+            if (size == true) {
+                $("#size_" + distributeCount).kendoDropDownList({
+                    //filter: "contains",
+                    optionLabel: "Select size...",
+                    // JSON property name to use
+                    dataSource: new kendo.data.DataSource({
+                        transport: {
+                            read: {
+                            url: '@Url.Action("GetSize", "Sales")',
+                            data: { sizeType: sizeType },
+                            serverPaging: true,
+                            pageSize: 20,
+                            contentType: 'application/json; charset=utf-8',
+                            type: 'GET',
+                            dataType: 'json'
+                        },
+                        serverSorting: true,
+                        serverFiltering: true
+                        }
+                    }),
+                    dataValueField: 'Value',
+                    dataTextField: "Text",
+                });
+            }
+            if (color == true)
+            {
+                $("#color_" + distributeCount).kendoDropDownList({
+                    //filter: "contains",
+                    optionLabel:"Select color...",
+                    // JSON property name to use
+                    dataSource: new kendo.data.DataSource({
+                        transport: {
+                            read: {
+                                url: '@Url.Action("GetColor", "Sales")',
+                                serverPaging: true,
+                                pageSize: 20,
+                                contentType: 'application/json; charset=utf-8',
+                                type: 'GET',
+                                dataType: 'json'
+                            },
+                            serverSorting: true,
+                            serverFiltering: true
+                        }
+                    }),
+                    dataValueField: 'Value',
+                    dataTextField: "Text",
+                });
+            }
+            $('#divDistType :input').attr('disabled', true);
+            $("#btnProDistReset").prop('disabled', false);
+        });
+
+        $("#btnProDistReset").click(function () {
+
+            $(".distItems").each(function () {
+                id = parseInt($(this).data("transid"));
+                if (id > 0) {
+                    deletedIds.push(id);
+                }
+            });
+
+            $("#divProDistTable").empty();
+            $('#divDistType :input').attr('disabled', false);
+            $("#btnProDistReset").prop('disabled', true);
+            $("#CostCheckBox").prop('disabled', true);
+
+        });
+
+        var distTableValidation = $("#divProDistTable").kendoValidator({
+
+        }).data("kendoValidator");
+
+    $("#divProDistTable").on('click', '.btnAddItem', function () {
+        if (distTableValidation.validate()) {
+            $(this).hide();
+            $(this).parents().parent().find('.btnCancelItem').show();
+            distributeCount++;
+            $("#proDisttbl").append('<tr id="distItem_' + distributeCount + '" class="distItems" data-id="' + distributeCount + '" data-transid="0">' +
+                (size == true ? '<td>' +
+                    '<input id= "size_' + distributeCount + '" name= "size_' + distributeCount + '" required validationMessage= "*" />' +
+                    '<span class="field-validation-valid text-danger" data-valmsg-for="size_' + distributeCount + '" data-valmsg-replace="true"></span>' +
+                    '</td>' : '') +
+                (size == true && sizeType == 3 ? '<td>' +
+                    '<input type="text" class="k-textbox" id= "sizeName_' + distributeCount + '" name= "sizeName_' + distributeCount + '" required validationMessage= "*" />' +
+                    '<span class="field-validation-valid text-danger" data-valmsg-for="sizeName_' + distributeCount + '" data-valmsg-replace="true"></span>' +
+                    '</td>' : '') +
+                (color == true ? '<td>' +
+                    '<input id= "color_' + distributeCount + '" name= "color_' + distributeCount + '" required validationMessage= "*" />' +
+                    '<span class="field-validation-valid text-danger" data-valmsg-for="color_' + distributeCount + '" data-valmsg-replace="true"></span>' +
+                    '</td>' : '') +
+                (price == true ? '<td>' +
+                    '<input type="number" class="k-textbox" min="1" id= "price_' + distributeCount + '" name= "price_' + distributeCount + '" required validationMessage= "*" />' +
+                    '<span class="field-validation-valid text-danger" data-valmsg-for="price_' + distributeCount + '" data-valmsg-replace="true"></span>' +
+                    '</td>' : '') +
+                (price == true ? '<td>' +
+                    '<input type="number" class="k-textbox" min="1" id= "cost_' + distributeCount + '" name= "cost_' + distributeCount + '" required validationMessage= "*" />' +
+                    '<span class="field-validation-valid text-danger" data-valmsg-for="cost_' + distributeCount + '" data-valmsg-replace="true"></span>' +
+                    '</td>' : '') +
+                (code == true ? '<td>' +
+                    '<input type="text" class="k-textbox" id= "code_' + distributeCount + '" name= "code_' + distributeCount + '" />' +
+                    '</td>' : '') +
+                (plu == true ? '<td>' +
+                    '<input type="text" class="k-textbox" id= "plu_' + distributeCount + '" name= "plu_' + distributeCount + '" />' +
+                    '</td>' : '') +
+                (mQuantity == true ? '<td>' +
+                    '<input type="number" min="0" class="k-textbox" id= "mQuantity_' + distributeCount + '" name= "mQuantity_' + distributeCount + '" />' +
+                    '</td>' : '') +
+                '<td>' +
+                //'<input class="k-textbox text-box single-line k-invalid" data-val="true" data-val-length="Please enter barcode" data-val-length-max="50" data-val-length-min="1" data-val-remote="This Number already exists..!!!" data-val-remote-additionalfields="*.BarCode" data-val-remote-type="Post" data-val-remote-url="/RemoteValidaton/BarcodeNumberExists" data-val-required="Please enter barcode" id= "barcode_' + distributeCount + '" name= "barcode_' + distributeCount + '" style="width:68%" type="text" value="" aria-invalid="true">'+
+                '<input type="text" class="k-textbox" id= "barcode_' + distributeCount + '" name= "barcode_' + distributeCount + '" required validationMessage= "*" />' +
+                '<span class="field-validation-valid text-danger" data-valmsg-for="barcode_' + distributeCount + '" data-valmsg-replace="true"></span>' +
+                '</td>' +
+                '<td>' +
+                '<span class="btn btn-default btnCancelItem" data-toggle="tooltip"  title="Cancel item" data-id="' + distributeCount + '" data-transid="0"><i class="fa fa-times-circle" aria-hidden="true" style="font-size:24px;cursor:pointer"></i></span>' +
+                '<span class="btn btn-default btnAddItem" data-toggle="tooltip" title="Add item" data-id="' + distributeCount + '"><i class="fa fa-plus-circle" aria-hidden="true" style="font-size:24px;cursor:pointer"></i></span>' +
+                '</td >' +
+                '</tr>');
+
+            if (size == true) {
+                $("#size_" + distributeCount).kendoDropDownList({
+                    filter: "contains",
+                    optionLabel: "Select size...",
+                    // JSON property name to use
+                    dataSource: new kendo.data.DataSource({
+                        transport: {
+                            read: {
+                                url: '@Url.Action("GetSize", "Sales")',
+                            data: { sizeType: sizeType },
+                            serverPaging: true,
+                            pageSize: 20,
+                            contentType: 'application/json; charset=utf-8',
+                            type: 'GET',
+                            dataType: 'json'
+                        },
+                        serverSorting: true,
+                        serverFiltering: true
+                        }
+                    }),
+                    dataValueField: 'Value',
+                    dataTextField: "Text",
+                });
+            }
+            if (color == true)
+            {
+                $("#color_" + distributeCount).kendoDropDownList({
+                    filter: "contains",
+                    optionLabel:"Select color...",
+                    // JSON property name to use
+                    dataSource: new kendo.data.DataSource({
+                        transport: {
+                            read: {
+                                url: '@Url.Action("GetColor", "Sales")',
+                                serverPaging: true,
+                                pageSize: 20,
+                                contentType: 'application/json; charset=utf-8',
+                                type: 'GET',
+                                dataType: 'json'
+                            },
+                            serverSorting: true,
+                            serverFiltering: true
+                        }
+                    }),
+                    dataValueField: 'Value',
+                    dataTextField: "Text",
+                });
+            }
+        }
+    });
+
+    $("#divProDistTable").on("click", ".btnCancelItem", function () {
+        id = parseInt($(this).data("transid"));
+        if (id > 0) {
+            deletedIds.push(id);
+        }
+        var alltr = $("#proDisttbl").find('tr');
+        if (alltr.length == 3) {
+            $(this).parent().parent().prev().find(".btnAddItem").show();
+            $(this).parent().parent().remove();
+            $(".btnCancelItem").each(function () {
+                $(this).hide();
+            });
+        }
+        else if (alltr[alltr.length - 1] != $(this).parent().parent()[0]) {
+            $(this).parent().parent()[0].remove();
+        }
+        else if (alltr.length > 3) {
+            $(this).parents().parent().prev().find('.btnAddItem').show();
+            $(this).parents().parent().prev().find('.btnCancelItem').show();
+            $(this).parent().parent().remove();
+        }
+    });
+
+
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,44 @@
+﻿@{
+    ViewBag.Title = "TopReturnPrint";
+    Layout = "~/Views/Shared/_LayoutPrintPage.cshtml";
+}
+<section class="content-header" style="text-align:center;">
+    <div class="row">
+        <div class="col-xs-3"></div>
+        <div class="col-xs-6">
+            <h3>Stock Daily Top Return</h3>
+            <p>Cost-POS</p>
+        </div>
+        <div class="col-xs-3">
+            <button class="btn btn-default pull-right" id="btnPrint" style="margin-top:10px;"><i class="fa fa-print"></i>Print</button>
+        </div>
+    </div>
+    <hr />
+</section>
+<div class="row">
+    <div class="col-xs-offset-6 col-xs-6 text-left">
+        <p>
+            Generate By : @HttpContext.Current.Request.Cookies["CookieUserInfo"].Values["UserName"]<br>
+            Generate Date : @DateTime.Now.ToString("MMM dd yyyy hh:mm:ss tt") <br>
+            Date : @Convert.ToDateTime(ViewBag.Date).ToString("MMM dd,yyyy")
+        </p>
+    </div>
+</div>
+<div class="row">
+    <div class="col-xs-12">
+        <div id="divDailyTopReturnList"></div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#divDailyTopReturnList").append('<div class="loading_partial"></div>');
+        $("#divDailyTopReturnList").load('/Inventory/StockDailyTopReturnList?date=' + new Date("@ViewBag.Date").toISOString());
+    });
+    $("#btnPrint").click(function () {
+        $("#btnPrint").hide();
+        window.print();
+        $("#btnPrint").show();
+    });
+</script>
+
+

@@ -1,0 +1,77 @@
+﻿@model IEnumerable<PointOfSale.ModelViews.Ledger>
+@using System.Globalization;
+@using PointOfSale.Helpers
+@{
+    var count = 0;
+}
+@if (Model.Count() > 0)
+{
+    <div class="panel panel-default" style="margin-bottom:0px;border-radius:0px;">
+        <div class="panel-body">
+            <a href="@Html.EncodedParam("CreditLedgerPrint","Accounting", new { FromDate = @ViewBag.FromDate, ToDate = @ViewBag.ToDate },null)" target="_blank" style="float:right;margin-right:5%;font-size:14px">
+                <i class="fa fa-print"></i> Print
+            </a>
+            <dl class="dl-horizontal">
+                <dt>Report Generate</dt>
+                <dd>Credit Ledger</dd>
+                <dt>From Date</dt>
+                <dd>@Convert.ToDateTime(ViewBag.FromDate).ToString("MMM dd yyyy hh:mm:ss tt")</dd>
+                <dt>To Date</dt>
+                <dd>@Convert.ToDateTime(ViewBag.ToDate).ToString("MMM dd yyyy hh:mm:ss tt")</dd>
+                <dt>Generate By</dt>
+                <dd>@HttpContext.Current.Request.Cookies["CookieUserInfo"].Values["UserName"]</dd>
+                <dt>Total</dt>
+                <dd>@Model.Count()</dd>
+            </dl>
+        </div>
+    </div>
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Name</th>
+            <th>Credit</th>
+            <th>Debit</th>
+            <th>Date</th>
+        </tr>
+        @{
+            decimal? creditTotal = 0, debitTotal = 0;
+        }
+        @foreach (var list in Model)
+        {
+            count++;
+            <tr>
+                <td>@count . </td>
+                @if (list.ImportId > 0)
+                {
+                    creditTotal = creditTotal + list.Due;
+                    <td>@list.Name (Purchase) <button class="btn pull-right btnImportInfo" style="background-color:#1c488e; color:white;" data-id="@list.ImportId" data-toggle="tooltip" title="View Transaction"><i class="fa fa-list" aria-hidden="true"></i></button></td>
+                    <td></td>
+                    <td>@list.Due</td>
+                }
+                else
+                {
+                    debitTotal = debitTotal + list.Due;
+                    <td>@list.Name (Sale) <button class="btn pull-right btnSaleInfo" style="background-color:#1c488e; color:white;" data-id="@list.OrderId" data-toggle="tooltip" title="View Transaction"><i class="fa fa-list" aria-hidden="true"></i></button></td>
+                    <td>@list.Due</td>
+                    <td></td>
+                }
+                <td>@Convert.ToDateTime(list.Date).ToString("MMM dd yyyy hh:mm:ss tt")</td>
+            </tr>
+        }
+        <tr style="font-weight:bold">
+            <td></td>
+            <td>Total</td>
+            <td>@debitTotal</td>
+            <td>@creditTotal</td>
+            <td></td>
+        </tr>
+    </table>
+}
+else
+{
+    <h4>There is no record to display</h4>
+}
+<script>
+    $('[data-toggle="tooltip"]').tooltip();
+</script>
+

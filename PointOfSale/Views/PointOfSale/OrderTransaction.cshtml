@@ -1,0 +1,15 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" style="margin-left:19px;">
+    <div id="divOrderTransaction"></div>
+    <div class="k-edit-buttons k-state-default">
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnOrderTranCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+     $(document).ready(function () {
+         $("#divOrderTransaction").empty();
+         $("#divOrderTransaction").load('@Url.Action("OrderTranPartial", "PointOfSale")?orderId=' + '@ViewBag.OrderId');
+    });
+    $("#btnOrderTranCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+</script>

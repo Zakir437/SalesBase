@@ -1,0 +1,81 @@
+﻿@{
+    ViewBag.Title = "BorrowProductsPrint";
+    Layout = "~/Views/Shared/_LayoutPrintPage.cshtml";
+}
+<section class="content-header" style="text-align:center;">
+    <div class="row">
+        <div class="col-xs-2"></div>
+        <div class="col-xs-8">
+            <h3>Borrow Products</h3>
+            <p>Cost-POS</p>
+        </div>
+        <div class="col-xs-2">
+            <button class="btn btn-default pull-right" id="btnPrint" style="margin-top:10px;"><i class="fa fa-print"></i>Print</button>
+        </div>
+    </div>
+    <hr />
+</section>
+<div class="row">
+    <div class="col-xs-offset-6 col-xs-6 text-left">
+        <p>
+            Generate By : @HttpContext.Current.Request.Cookies["CookieUserInfo"].Values["UserName"]<br>
+            Generate Date : @DateTime.Now.ToString("MMM dd yyyy hh:mm:ss tt") <br>
+            @if (ViewBag.Status == 1)
+             {
+                <span>Generate parameter : All</span>
+             }
+            else if (ViewBag.Status == 2)
+            {
+                <span>Generate parameter : Paid</span>
+            }
+            else if (ViewBag.Status == 3)
+            {
+                <span>Generate parameter : Unpaid</span>
+            }
+        </p>
+    </div>
+    <div class="col-xs-offset-6 col-xs-6 text-right">
+        @*@if (Model.PaymentBodyId > 0)
+        {
+            <p>
+                Account Name : @Model.PaymentBodyName <br />
+                Payment Type : @Model.PaymentTypeName <br />
+                Balance : @Model.Balance <br />
+                Account Type :
+                @if (Model.InOut == 1)
+                {
+                    <span>Receive</span>
+                }
+                else if (Model.InOut == 2)
+                {
+                    <span>Release</span>
+                }
+                else
+                {
+                    <span>Receive & Release</span>
+                }
+                <br />
+                @if (Model.SerialNumber != null)
+                {
+                    <span>Serial Number : @Model.SerialNumber <br /></span>
+                }
+            </p>
+        }*@
+    </div>
+</div>
+<div class="row">
+    <div class="col-xs-12">
+        <div id="divBorrowProductList"></div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#divBorrowProductList").append('<div class="loading_partial"></div>');
+        $("#divBorrowProductList").load('@Url.Action("BorrowProductList", "Stock")?status=' + '@ViewBag.Status' + '&associateIds=' + '@ViewBag.AssociateIds' + '&isPrint=true');
+    });
+    $("#btnPrint").click(function () {
+        $("#btnPrint").hide();
+        window.print();
+        $("#btnPrint").show();
+    });
+</script>

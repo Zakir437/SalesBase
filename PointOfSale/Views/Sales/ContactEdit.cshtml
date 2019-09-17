@@ -1,0 +1,63 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin-bottom:4%;margin-top:2%;">
+    <div id="divContactForm"></div>
+    <div class="k-edit-buttons k-state-default" style="margin-left:30px;">
+        <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnContactUpdate"><span class="k-icon k-update"></span>Save</button>
+        <button type="reset" class="k-button k-button-icontext k-grid-update" id="btnContactRefresh"><span class="k-icon k-i-refresh"></span>Refresh</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnContactCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#divContactForm").append('<div class="tiny_loading"></div>');
+        $("#divContactForm").load('@Url.Action("ContactEditPartial", "Sales")?assId=' + '@ViewBag.Id');
+    });
+    $("#btnContactRefresh").click(function () {
+        $("#divContactForm").empty();
+        $("#divContactForm").append('<div class="tiny_loading"></div>');
+        $("#divContactForm").load('@Url.Action("ContactEditPartial", "Sales")?assId=' + '@ViewBag.Id');
+    });
+
+    $("#btnContactCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+
+    var validation = $("#divContactForm").kendoValidator({
+    }).data("kendoValidator");
+
+    $("#btnContactUpdate").click(function () {
+        if (validation.validate())
+        {
+            var sendData = {
+                Id: $("#CustomerId").val(),
+                FirstName: $("#FirstName").val(),
+                LastName: $("#LastName").val(),
+                Email: $("#Email").val(),
+                Mobile: $("#Mobile").val(),
+                AlternateMobile: $("#AlternateMobile").val(),
+                AddressLine1: $("#AddressLine1").val(),
+                AddressLine2: $("#AddressLine2").val(),
+                UpdatedBy: userId
+            }
+            $.ajax({
+                url: '/Sales/ServicesCustomerSave',
+                type: "POST",
+                data: sendData,
+                success: function (result) {
+                    $("#divContactWin").data("kendoWindow").close();
+                    if (result == "success") {
+
+                    }
+                    else
+                    {
+                        alert("Save Error");
+                    }
+                }
+            });
+        }
+    });
+</script>
+
+
+
+
+

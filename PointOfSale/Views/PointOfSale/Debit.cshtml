@@ -1,0 +1,20 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin-bottom:4%;margin-top:2%;">
+    <div id="divDebitForm"></div>
+    <div class="k-edit-buttons k-state-default" style="margin-left:30px;">
+        <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnDebitConfirm"><span class="k-icon k-update"></span>Confirm</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnDebitCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#divDebitForm").empty();
+        $("#divDebitForm").load('@Url.Action("DebitPartial", "PointOfSale")?totalPrice=' + '@ViewBag.TotalPrice' + '&debitAmount=' + '@ViewBag.DebitAmount' + '&availableDebitAmount=' + '@ViewBag.AvailableDebitAmount');
+    });
+
+    $("#btnDebitCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+    var debitValidation = $("#divDebitForm").kendoValidator().data("kendoValidator");
+
+</script>
+

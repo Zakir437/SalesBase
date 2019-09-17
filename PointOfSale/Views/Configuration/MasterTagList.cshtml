@@ -1,0 +1,83 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewTagItem>
+@{
+    var count = 0;
+}
+@if (ViewBag.IsView == false)
+ {
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped" id="tblTagItems">
+        <tr>
+            <th>Name</th>
+            <th></th>
+        </tr>
+        <tr id="emptyRow">
+            <td colspan="3">
+                <h4>There is no record to display</h4>
+                <script>
+                    $("#btnTagItemSave").prop('disabled', true);
+                </script>
+            </td>
+        </tr>
+        @if (Model.Any())
+        {
+            foreach (var list in Model)
+            {
+                count++;
+                <tr id="tagItem_@count" class="tagItem" data-id="@count" data-tagid="@list.TagId" data-transid="@list.Id">
+                    <td>@list.TagName</td>
+                    <td>
+                        <span class="btnCancelItem" data-toggle="tooltip" title="Cancel item" data-transid="@list.Id" data-id="@count"><i class="fa fa-times" aria-hidden="true" style="font-size:24px;cursor:pointer"></i></span>
+                    </td>
+                </tr>
+            }
+         }
+    </table>
+ }
+else
+{
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Name</th>
+        </tr>
+        @if (Model.Any())
+         {
+            foreach (var list in Model)
+            {
+                count++;
+                <tr>
+                    <td>@count.</td>
+                    <td>@list.TagName</td>
+                </tr>
+            }
+         }
+        else
+        {
+            <tr>
+                <td colspan="2">
+                    <h4>There is no record to display</h4>
+                </td>
+            </tr>
+        }
+    </table>
+}
+
+<script>
+    $(document).ready(function () {
+        if ('@ViewBag.IsView' != 'True')
+        {
+            count = @count;
+            if (count > 0)
+            {
+                $("#emptyRow").hide();
+                $("#btnTagItemSave").prop('disabled', false);
+            }
+        }
+        $('[data-toggle="tooltip"]').tooltip();
+    })
+</script>
+
+
+
+
+
+

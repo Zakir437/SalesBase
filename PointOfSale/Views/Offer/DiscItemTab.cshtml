@@ -1,0 +1,426 @@
+﻿<div class="panel-body" style="padding:0px 15px;">
+    @*<a class="btn btn-success" data-toggle="tooltip" title="Add new discount item" href="/Offer/DiscountOfferCreate"><i class="fa fa-plus-circle"></i> ADD DISCOUNT</a>*@
+    <button type="button" style="margin-top:-50px;" class="btn btn-primary pull-right" id="btnPrint" data-toggle="tooltip" title="Print"><i class="fa fa-print"></i></button>
+    <div class="col-md-3 padding">
+        @(Html.Kendo().MultiSelect()
+                .Name("ProductMultiselect")
+                .DataTextField("Text")
+                .DataValueField("Value")
+                .Placeholder("Type product name...")
+                .AutoBind(false)
+                //.MinLength(3)
+                .Events(e => e.Change("onChangeProduct"))
+                .HtmlAttributes(new { style = "width: 100%;" })
+                .DataSource(source =>
+                {
+                    source.Read(read =>
+                    {
+                        read.Action("GetDiscountProduct", "Offer").Data("additionInfo");
+                    })
+                    .ServerFiltering(true);
+                }))
+        <span class="k-icon k-i-search" style="margin-top:-25px;float:right;margin-right:10px; position:relative">&nbsp;</span>
+    </div>
+    <div class="col-md-3 padding">
+        @(Html.Kendo().DropDownList()
+                .Name("Category")
+                .BindTo(ViewBag.CategoryList as SelectList)
+                .DataTextField("Text")
+                .DataValueField("Value")
+                .OptionLabel("--Select One Category--")
+                .HtmlAttributes(new { style = "width:100%" })
+                .Events(e =>
+                {
+                    e.Change("onChangeCategory");
+                })
+        )
+    </div>
+    <div class="col-md-3 padding">
+        @(Html.Kendo().DropDownList()
+                    .Name("SubCategory")
+                    .HtmlAttributes(new { style = "width:100%" })
+                    .OptionLabel("--Select Sub Category--")
+                    .DataTextField("Text")
+                    .DataValueField("Value")
+                    .DataSource(source =>
+                    {
+                        source.Read(read =>
+                        {
+                            read.Action("GetSubCategories", "Offer")
+                                .Data("filterCategory");
+                        })
+                        .ServerFiltering(true);
+                    })
+                    .Enable(false)
+                    .AutoBind(false)
+                    .CascadeFrom("Category")
+                    .Events(e =>
+                    {
+                        e.Change("onChangeSubCategory");
+                    })
+        )
+    </div>
+    <div class="col-md-3 padding noPadding-Right">
+        <div style="width:48% !important" class="pull-left">
+            @(Html.Kendo().DropDownList()
+            .Name("SortTypeDropdown")
+            .DataTextField("Text")
+            .DataValueField("Value")
+            .Events(e => e.Change("onChangeSortType"))
+            .BindTo(new List<SelectListItem>() {
+                new SelectListItem() {
+                    Text = "Active",
+                    Value = "1"
+                },
+                new SelectListItem() {
+                    Text = "Inactive",
+                    Value = "2"
+                },
+                new SelectListItem() {
+                    Text = "Delete",
+                    Value = "3"
+                }
+            })
+            .Value("1")
+            .HtmlAttributes(new { style = "width: 100%" })
+            )
+        </div>
+        <div style="width:48% !important" class="pull-right">
+            @(Html.Kendo().DropDownList()
+                .Name("SortByDropdown")
+                .DataTextField("Text")
+                .DataValueField("Value")
+                .OptionLabel("--Sort By--")
+                .Events(e => e.Change("onChangeSortBy"))
+                .BindTo(new List<SelectListItem>() {
+                    new SelectListItem() {
+                        Text = "Date Created Recent",
+                        Value = "1"
+                    },
+                    new SelectListItem() {
+                        Text = "Date Created Oldest",
+                        Value = "2"
+                    },
+                    new SelectListItem() {
+                        Text = "Date Expire Recent",
+                        Value = "3"
+                    },
+                    new SelectListItem() {
+                        Text = "Date Expire Oldest",
+                        Value = "4"
+                    },
+                    new SelectListItem() {
+                        Text = "Alphabetic",
+                        Value = "5"
+                    }
+                })
+                .HtmlAttributes(new { style = "width: 100%" })
+            )
+        </div>
+    </div>
+</div>
+<div class="panel-body" style="padding:0px 15px;">
+    <div class="row">
+        <div id="divSelectedActionButton">
+            <div class="pull-right">
+                <button type="button" class="btn btn-primary" id="btnValidityEdit">Validity Edit</button>
+                <button type="button" class="btn btn-primary" id="btnActiveSelected">Active</button>
+                <button type="button" class="btn btn-primary" id="btnInactiveSelected">Inactive</button>
+                <button type="button" class="btn btn-primary" id="btnDeleteSelected">Delete</button>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div id="divDiscItemList" style="overflow-x:auto"></div>
+        <div class="text-center" style="margin-bottom:10px">
+            <button class="btn btn-primary" id="btnSeeMore"><i class="fa fa-arrow-down"></i> See more</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    id = 0, status = 0, selectedIds = [], sortTypeId = 1, selectedOne = "", sortById = 0, count = 10, multiSelectIds = "";
+    subCategoryId = 0, categoryId = 0;
+    $(document).ready(function () {
+        loadProductList();
+    });
+
+    //*******************************Discount Item Edit*****************************************
+    $("#divDiscItemList").on('click', ".btnDiscountEdit", function () {
+        id = parseInt($(this).data("id"));
+        $("#divValidityEditWin").empty();
+
+        $("#divDiscItemEditWin").empty();
+        $("#divDiscItemEditWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 767,
+            height: 183,
+            title: 'Discount Item',
+            resizable: false,
+            close: onWindowClose
+        });
+        var discItemWin = $("#divDiscItemEditWin").data("kendoWindow");
+        discItemWin.refresh('/Offer/DiscItemEdit?id=' + id);
+        discItemWin.center().open().maximize();
+        document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+        document.body.scroll = "no";
+    });
+
+    //**************************Active/Inactive status*****************************************
+    $("#divDiscItemList").on("click", ".inactivateDiscItem,.activateDiscItem", function () {
+        id = parseInt($(this).data("id"));
+        status = $(this).data("isactive");
+        var sendData = {
+            id: id,
+            status: status,
+            createdBy : userId
+        };
+        $.ajax({
+            url: '/Offer/DiscItemStatusChange',
+            type: 'POST',
+            data: sendData,
+            success: function (res) {
+                if (res == "success") {
+                    multiSelectIds = "";
+                    loadProductList();
+                }
+                else {
+                    alert("Error Status Update");
+                }
+            }
+        });
+    });
+
+    //************************************Delete*****************************************
+    $("#divDiscItemList").on('click', ".btnDiscItemDelete", function () {
+        id = parseInt($(this).data("id"));
+        var kendoWindow = $("<div />").kendoWindow({
+            actions: ["Close"],
+            title: "Alert",
+            resizable: false,
+            width: "30%",
+            modal: true
+        });
+        msg = "Are you sure want to delete this Item?";
+        var template = kendo.template($("#temp_win_delete_entry").html());
+        kendoWindow.data("kendoWindow").content(template).center().open();
+
+        kendoWindow.find("#btn_delete_Entry_noty_cancel").click(function () {
+            kendoWindow.data("kendoWindow").close();
+            document.documentElement.style.overflow = "auto";
+        }).end();
+        kendoWindow.find("#btn_delete_Entry_noty_ok").click(function () {
+            kendoWindow.data("kendoWindow").close();
+            document.documentElement.style.overflow = "auto";
+            deleteItem(id);
+        }).end();
+        document.documentElement.style.overflow = "hidden";
+    });
+    function deleteItem(id) {
+        var sendData = {
+            id: id,
+            status: 2,
+            createdBy: userId
+        };
+        $.ajax({
+            url: '/Offer/DiscItemStatusChange',
+            type: 'POST',
+            data: sendData,
+            success: function (res) {
+                if (res == "success") {
+                    multiSelectIds = "";
+                    loadProductList();
+                }
+                else {
+                    alert("Error Status Update");
+                }
+            }
+        });
+    }
+
+    //Check/uncheck all
+    $("#divDiscItemList").on('click', '#checkAll', function () {
+        if ($(this).is(":checked")) {
+            $(".check").each(function () {
+                id = parseInt($(this).data("id"));
+                $("#check_" + id).prop('checked', true);
+            });
+        }
+        else {
+            $(".check").each(function () {
+                id = parseInt($(this).data("id"));
+                $("#check_" + id).prop('checked', false);
+            });
+        }
+        actionButton();
+    });
+
+    //check/uncheck single
+    $("#divDiscItemList").on('click', '.check', function () {
+        var checkAll = true;
+        $('.check').each(function () {
+            id = parseInt($(this).data("id"));
+            if ($("#check_" + id).is(":checked") == false) {
+                checkAll = false;
+            }
+        });
+        if (checkAll) {
+            $("#checkAll").prop('checked', true);
+        }
+        else {
+            $("#checkAll").prop('checked', false);
+        }
+        actionButton();
+    });
+
+    //*****************************Validity date edit***************************
+    $("#btnValidityEdit").click(function () {
+        selectedIds = [];
+
+        $('.check').each(function () {
+            id = parseInt($(this).data("id"));
+            if ($("#check_" + id).is(":checked") == true) {
+                selectedIds.push(id);
+            }
+        });
+
+        $("#divDiscItemEditWin").empty();
+
+        $("#divValidityEditWin").empty();
+        $("#divValidityEditWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 767,
+            height: 276,
+            title: 'Discount Validity',
+            resizable: false,
+            close: onWindowClose
+        });
+        var discValidity = $("#divValidityEditWin").data("kendoWindow");
+        discValidity.refresh('/Offer/DiscValidityEdit?selectedIds=' + selectedIds);
+        discValidity.center().open();
+        document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+        document.body.scroll = "no";
+    })
+   
+    //********************active selected Item **************************************
+    $("#btnActiveSelected").click(function () {
+        var kendoWindow = $("<div />").kendoWindow({
+            actions: ["Close"],
+            title: "Alert",
+            resizable: false,
+            width: "30%",
+            modal: true
+        });
+        msg = "Are you sure want to active selected Items?";
+        var template = kendo.template($("#temp_win_Active_All").html());
+        kendoWindow.data("kendoWindow").content(template).center().open();
+
+        kendoWindow.find("#btn_Active_All_cancel").click(function () {
+            kendoWindow.data("kendoWindow").close();
+            document.documentElement.style.overflow = "auto";
+        }).end();
+        kendoWindow.find("#btn_Active_All_ok").click(function () {
+            kendoWindow.data("kendoWindow").close();
+            document.documentElement.style.overflow = "auto";
+            discItemStatusChange(1);
+        }).end();
+        document.documentElement.style.overflow = "hidden";
+    });
+
+    //********************************Inactive selected item***********************************
+    $("#btnInactiveSelected").click(function () {
+        var kendoWindow = $("<div />").kendoWindow({
+            actions: ["Close"],
+            title: "Alert",
+            resizable: false,
+            width: "30%",
+            modal: true
+        });
+        msg = "Are you sure want to inactive selected Items?";
+        var template = kendo.template($("#temp_win_inactive_All").html());
+        kendoWindow.data("kendoWindow").content(template).center().open();
+
+        kendoWindow.find("#btn_inactive_All_cancel").click(function () {
+            kendoWindow.data("kendoWindow").close();
+            document.documentElement.style.overflow = "auto";
+        }).end();
+        kendoWindow.find("#btn_inactive_All_ok").click(function () {
+            kendoWindow.data("kendoWindow").close();
+            document.documentElement.style.overflow = "auto";
+            discItemStatusChange(0);
+        }).end();
+        document.documentElement.style.overflow = "hidden";
+    });
+
+    //********************************delete selected item***********************************
+    $("#btnDeleteSelected").click(function () {
+        var kendoWindow = $("<div />").kendoWindow({
+            actions: ["Close"],
+            title: "Alert",
+            resizable: false,
+            width: "30%",
+            modal: true
+        });
+        msg = "Are you sure want to delete selected Items?";
+        var template = kendo.template($("#temp_win_delete_All").html());
+        kendoWindow.data("kendoWindow").content(template).center().open();
+
+        kendoWindow.find("#btn_delete_All_cancel").click(function () {
+            kendoWindow.data("kendoWindow").close();
+            document.documentElement.style.overflow = "auto";
+        }).end();
+        kendoWindow.find("#btn_delete_All_ok").click(function () {
+            kendoWindow.data("kendoWindow").close();
+            document.documentElement.style.overflow = "auto";
+            discItemStatusChange(2);
+        }).end();
+        document.documentElement.style.overflow = "hidden";
+    });
+
+    //*************************************Status update****************************
+    function discItemStatusChange(status) {
+        selectedIds = [];
+
+        $('.check').each(function () {
+            id = parseInt($(this).data("id"));
+            if ($("#check_" + id).is(":checked") == true) {
+                selectedIds.push(id);
+            }
+        });
+
+        $.ajax({
+            url: '/Offer/DiscItemStatusChange',
+            type: 'POST',
+            data: { selectedIds: selectedIds.join(","), status: status, createdBy: userId },
+            success: function (res) {
+                if (res == "success") {
+                    multiSelectIds = "";
+                    loadProductList();
+                }
+                else {
+                    alert("Error Status Update");
+                }
+            }
+        });
+    }
+
+    //****************************Print function*******************************
+    $("#btnPrint").click(function () {
+        var data = "sortTypeId=" + sortTypeId + "?categoryId=" + categoryId + "?subCategoryId=" + subCategoryId + "?selectedIds=" + multiSelectIds + '?sortBy=' + sortById + '?count=' + count;
+        window.open('/Offer/DiscountItemPrint?q=' + getDataEncrypted(data), '_blank');
+    });
+
+    //See more data
+    $("#btnSeeMore").click(function () {
+        count = count + 10;
+        multiSelectIds = "";
+        loadProductList();
+    });
+
+</script>

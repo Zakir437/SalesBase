@@ -1,0 +1,56 @@
+﻿@using PointOfSale.Helpers
+@{
+    ViewBag.Title = "CurrentMonthSalaryLog";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="panel panel-default" style="margin-top:20px;">
+    <div class="panel-heading" style="padding-bottom:46px;">
+        <div class="pull-left">
+            <h4>@DateTime.Now.AddMonths(-1).ToString("MMMM yyyy")</h4>
+        </div>
+        <div class="pull-right">
+            <button class="btn btn-primary" id="btnPrint"><i class="fa fa-print"></i> Print</button>
+            <button class="btn btn-primary" id="btnPrintWithAssign"><i class="fa fa-print"></i> Print With Assign</button>
+            <a class="btn btn-success" href="@Html.EncodedParam("XmlFile", "Accounting", new {  }, null)">Pay Sheet Log</a>
+            <a class="btn btn-default" href="/Accounting/PaySalary"><i class="fa fa-arrow-left"></i> Back</a>
+        </div>
+    </div>
+    <div class="panel-body" style="padding:0px 15px;">
+        <div id="divSalaryList" style="padding-top:5px; overflow-x:auto;"></div>
+    </div>
+</div>
+<div id="divAssignUserWin"></div>
+<script>
+    var selectedUserId = 0;
+    $(document).ready(function () {
+        $("#divSalaryList").append('<div class="loading_partial"></div>');
+        $("#divSalaryList").load('@Url.Action("CurrentMonthSalaryList", "Accounting")');
+    });
+    $("#btnPrint").click(function () {
+        window.open('@Url.Action("SalaryLogPrint", "Accounting")');
+    });
+    $("#btnPrintWithAssign").click(function () {
+        $("#divAssignUserWin").empty();
+        $("#divAssignUserWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: '50%',
+            height: 204,
+            title: 'Assign User',
+            close: onWindowClose
+        });
+        $("#divAssignUserWin").html('<div class="win_loading_half"></div>');
+        var assignUser = $("#divAssignUserWin").data("kendoWindow");
+        assignUser.refresh('@Url.Action("AssignUser","Accounting")');
+        assignUser.center().open();
+        document.documentElement.style.overflow = 'hidden';
+        document.body.scroll = "no";
+    });
+    function onChangeUser()
+    {
+        selectedUserId = parseInt(this.value());
+    }
+</script>
+

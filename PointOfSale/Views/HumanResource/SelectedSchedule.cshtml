@@ -1,0 +1,27 @@
+﻿@model PointOfSale.ModelViews.HR.WorkingScheduleModelView
+<div class="row">
+    <div class="col-md-12">
+        <dl class="dl-horizontal">
+            <dt class="control-label">Schedule Name</dt>
+            <dd class="dis_info">@Model.ScheduleName</dd>
+            <dt class="control-label">Working Days</dt>
+            <dd class="dis_info">
+                @foreach (var day in Model.WorkingDays)
+                 {
+                    if (day == Model.WorkingDays.Last())
+                    {
+                        <span class="dis_info">
+                            @day.Day
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="dis_info">
+                            @day.Day ,
+                        </span>
+                    }
+                 }
+            </dd>
+        </dl>
+    </div>
+</div>

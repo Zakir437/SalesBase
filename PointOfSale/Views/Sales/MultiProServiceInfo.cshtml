@@ -1,0 +1,185 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewOrderTransaction>
+@{
+    var count = 0;
+}
+<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin:2%;">
+    @if (Model.Any())
+    {
+        <table class="table table-bordered table-responsive table-striped">
+            <tr>
+                <th>SL.</th>
+                <th>Product</th>
+                <th>S/N</th>
+                <th>Service days</th>
+                <th></th>
+            </tr>
+            @foreach (var item in Model)
+            {
+                count++;
+                <tr>
+                    <td>@count.</td>
+                    <td>@item.ProductName</td>
+                    <td>@item.SerialNumber</td>
+                    <td>@item.ServiceDays</td>
+                    <td>
+                        <input type="checkbox" class="serviceCheck" name="check" id="check_@item.OrderTransactionId" data-id="@item.OrderTransactionId" />
+                    </td>
+                </tr>
+            }
+        </table>
+    }
+    else
+    {
+        <h4>There is no record to display</h4>
+    }
+    <div class="k-edit-buttons k-state-default">
+        <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnSelectedProductOk"><span class="k-icon k-update"></span>OK</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnMultipleServiceCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+    var transId = 0;
+    $(document).ready(function () {
+        $("#btnSelectedProductOk").prop('disabled', true);
+    });
+
+    $("#btnMultipleServiceCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+
+    $(".serviceCheck").click(function () {
+        transId = parseInt($(this).data("id"));
+        $("input[name=check]").prop('checked', false);
+        $(this).prop('checked', true);
+        $("#btnSelectedProductOk").prop('disabled', false);
+    });
+
+    $("#btnSelectedProductOk").click(function () {
+        $.ajax({
+            url: '@Url.Action("GetOrderTransactionList", "Sales")',
+            type: "Get",
+            data: { orderTransId: transId },
+            success: function (data) {
+                $("#divMultipleProductServiceWin").data("kendoWindow").close();
+                $("#divExistingOrderInfo").empty();
+                $("#divProductInfo").empty();
+                $("#divProductCondition").hide();
+                $("#divActionButton1").hide();
+                if (data == "notFound")
+                {
+                    alert("Not Found...");
+                }
+                else
+                if (data.IsExist == true) {
+                    $("#divProductInfo").append('<h4>Product Info</h4><hr/>' +
+                        '<div class="dl-horizontal">' +
+                        '<dl>' +
+                        '<dt>Product Name</dt>' +
+                        '<dd>' + data.ProductName + '</dd>' +
+                        '<dt>Order Number</dt>' +
+                        '<dd>' + data.OrderNumber + '</dd>' +
+                        '<dt>Serial Number</dt>' +
+                        '<dd>' + data.SerialNumber + '</dd>' +
+                        '<dt>Order date</dt>' +
+                        '<dd>' + moment(data.OrderDate).format('MMMM Do YYYY') + '</dd>' +
+                        '<dt>Service Expire date</dt>' +
+                        '<dd>' + moment(data.ExpireDate).format('MMMM Do YYYY') + '</dd>' +
+                        '</dl>' +
+                        '</div>');
+
+                    if (data.Status == 1) {
+                        $("#divExistingOrderInfo").append('<h4>Order Incomplete</h4><hr/>' +
+                            '<div class="text-center">' +
+                            '<h5>Please complete this order</h5>' +
+                            '</div>' +
+                            '<div class="dl-horizontal">' +
+                            '<dl>' +
+                            '<dt>Temporary Order No</dt>' +
+                            '<dd>' + data.TemporaryWorkOrderNo + '</dd>' +
+                            '</dl>' +
+                            '</div>');
+                    }
+                    else {
+                        $("#divExistingOrderInfo").append('<h4>Work Order Info</h4><hr/>' +
+                            '<div class="dl-horizontal">' +
+                            '<dl>' +
+                            '<dt>Order No</dt>' +
+                            '<dd>' + data.WorkOrderNo + '</dd>' +
+                            '<dt>Order By</dt>' +
+                            '<dd>' + data.serviceCreatedBy + '</dd>' +
+                            '<dt>Order Date</dt>' +
+                            '<dd>' + moment(data.ServiceOrderDate).format('MMMM Do YYYY') + '</dd>' +
+                            '<dt>Delivery date</dt>' +
+                            '<dd>' + moment(data.DeliveryDate).format('MMMM Do YYYY') + '</dd>' +
+                            '</dl>' +
+                            '</div>');
+                    }
+                }
+                else
+                {
+                    $(data).each(function (index, item) {
+                        if (item.IsExpire == true)
+                        {
+                            $("#divExpireAlertWin").empty();
+                            $("#divExpireAlertWin").kendoWindow({
+                                actions: ["Close"],
+                                draggable: false,
+                                modal: true,
+                                visible: false,
+                                width: 744,
+                                height:259,
+                                title: 'Service Expired',
+                                resizable: false,
+                                close: onWindowClose
+                            });
+                            var expWin = $("#divExpireAlertWin").data("kendoWindow");
+                            expWin.refresh('@Url.Action("ServiceExpireInfo", "Sales")?orderTransId=' + transId);
+                            expWin.center().open();
+                            document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+                            document.body.scroll = "no";
+                        }
+                        else
+                        {
+                            $("#divProductInfo").append('<h4>Product Info</h4><hr/>' +
+                                '<div class="dl-horizontal">' +
+                                '<dl>' +
+                                '<dt>Product Name</dt>' +
+                                '<dd>' + item.ProductName + '</dd>' +
+                                '<dt>Order Number</dt>' +
+                                '<dd>' + item.OrderNumber + '</dd>' +
+                                '<dt>Serial Number</dt>' +
+                                '<dd>' + item.SerialNumber + '</dd>' +
+                                '<dt>Order date</dt>' +
+                                '<dd>' + moment(item.OrderDate).format('MMMM Do YYYY') + '</dd>' +
+                                '<dt>Service Expire date</dt>' +
+                                '<dd>' + moment(item.ExpireDate).format('MMMM Do YYYY') + '</dd>' +
+                                '</dl>' +
+                                '</div>');
+                            $("#divActionButton1").show();
+                            $("#divProductCondition").show();
+                            customerId = item.CustomerId;
+                            if(customerId > 0)
+                            {
+                                $("#divCustomerInfo").empty();
+                                $("#divCustomerInfo").load('@Url.Action("ServicesCustomerCreatePartial", "Sales")?customerId=' + customerId);
+                            }
+                            else
+                            {
+                                $("#divCustomerInfo").empty();
+                                $("#divCustomerInfo").load('@Url.Action("ServicesCustomerCreatePartial", "Sales")');
+                            }
+                            productId = item.ProductId;
+                            orderTransId = item.TransId;
+                        }
+                    });
+                }
+                $("#searchStringForSerialNumber").data("kendoAutoComplete").value("");
+            },
+            error: function () {
+                alert("Not Found...");
+                $("#searchStringForSerialNumber").data("kendoAutoComplete").value("");
+            }
+        });
+    });
+</script>
+

@@ -1,0 +1,96 @@
+﻿@{
+    ViewBag.Title = "Warehouse";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+}
+<style>
+    .k-input {
+        height: 26px !important;
+    }
+    p {
+        margin: 10px;
+    }
+
+    hr {
+        margin: 0px;
+    }
+</style>
+@*<section class="content-header">
+        <ol class="breadcrumb">
+            <li><a><i class="fa fa-shopping-cart"></i> Inventory</a></li>
+            <li class="active"><a href="/Inventory/Procurement"><i class="fa fa-list-ul"></i> Procurement</a></li>
+        </ol>
+    </section>*@
+<section class="content">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4 class="uppercase">Warehouse</h4>
+            </div>
+        </div>
+        <p>
+            <a class="btn btn-info" href="/Inventory/WorkOrder"><i class="fa fa-list-ul"></i> Work-Order</a>
+            <a class="btn btn-info" href="/Inventory/WorkOrderImport"><i class="fa fa-list-ul"></i> Work-Order Import</a>
+            <a class="btn btn-info" href="/Inventory/WImportHistory"><i class="fa fa-list-ul"></i>Import Info</a>
+            <a class="btn btn-info" href="/Inventory/WorkOrderToIndent"><i class="fa fa-list-ul"></i> Work-Order To Indent MRR</a>
+            <a class="btn btn-info" href="/Inventory/WHWaste"><i class="fa fa-list-ul"></i> Waste</a>
+        </p>
+        <hr />
+        <div class="panel-body">
+            @*<div class="row" style="margin:0px 0px 5px 0px;">
+                <div class="pull-left" style="max-width: 48%!important; width:100%;">
+                    @(Html.Kendo().MultiSelect()
+                    .Name("IndentMultiselect")
+                    .DataTextField("Text")
+                    .DataValueField("Value")
+                    .Placeholder("Type voucher name...")
+                    .AutoBind(false)
+                    .Events(e => e.Change("onChangeVoucher"))
+                    .HtmlAttributes(new { style = "width: 100%;" })
+                    .DataSource(source =>
+                    {
+                        source.Read(read =>
+                        {
+                            read.Action("GetIndentVoucherList", "Inventory").Data("additionalInfo"); ;
+                        })
+                        .ServerFiltering(false);
+                    })
+                    )
+                    <span class="k-icon k-i-search" style="margin-top:-25px;float:right;margin-right:10px; position:relative">&nbsp;</span>
+                </div>
+            </div>*@
+            <div id="divWarseHouseProductList"></div>
+        </div>
+    </div>
+</section>
+<div id="divWOQtyWin"></div>
+<script>
+    var id = 0;
+    $(document).ready(function () {
+        $("#liForInventory").addClass('active');
+        $("#liForWarehouse").addClass('active');
+
+        $("#divWarseHouseProductList").append('<div class="loading_partial"></div>');
+        $("#divWarseHouseProductList").load('/Inventory/WareHouseProductList');
+    });
+
+    $("#divWarseHouseProductList").on('click', '.btnWOQty', function () {
+        id = parseInt($(this).data("id"));
+        $("#divWOQtyWin").empty();
+        $("#divWOQtyWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 767,
+            height: 422,
+            title: 'Quantity info',
+            resizable: false,
+            close: onWindowClose
+        });
+        var woQty = $("#divWOQtyWin").data("kendoWindow");
+        woQty.refresh('/Inventory/WarehouseQtyInfo?id=' + id);
+        woQty.center().open();
+        document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+        document.body.scroll = "no";
+    });
+</script>

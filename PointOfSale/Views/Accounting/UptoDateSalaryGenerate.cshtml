@@ -1,0 +1,79 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin-bottom:4%;margin-top:2%;">
+    <div id="divUptoDateSalaryGenerateForm"></div>
+    <div class="k-edit-buttons k-state-default" style="margin-left:30px;">
+        <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnUpToDateGenerateOk"><span class="k-icon k-update"></span>Ok</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnUpToDateGenerateCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+    var selectedMonth = new Date();
+    $(document).ready(function ()
+    {
+        $("#divUptoDateSalaryGenerateForm").empty();
+        $("#divUptoDateSalaryGenerateForm").load('@Url.Action("_UptoDateSalaryGenerate", "Accounting")?userId=' + '@ViewBag.UserId');
+    });
+    $("#btnUpToDateGenerateCancel").click(function ()
+    {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+    function onChangeMonth() {
+        var month = this.value();
+        if (month == "")
+        {
+            $("#divDateSelect").css("display", "none");
+        }
+        else
+        {
+            selectedMonth = new Date(month);
+            var maxDate = new Date(selectedMonth);
+            var minDate = new Date(selectedMonth.setDate(1));
+            var datePicker = $('#SelectedDate').data("kendoDatePicker");
+            datePicker.value("");
+            datePicker.min(minDate);
+            datePicker.max(maxDate);
+            $("#divDateSelect").css("display", "block");
+        }
+    }
+    var upToDateValidation = $("#divUptoDateSalaryGenerateForm").kendoValidator().data("kendoValidator");
+    $("#btnUpToDateGenerateOk").click(function () {
+        if (upToDateValidation.validate())
+        {
+            var sendData = {
+                UserId: $("#UserId").val(),
+                MonthDate: $("#MonthDate").val(),
+                SelectedDate: $("#SelectedDate").val(),
+                CreatedBy: userId,
+            }
+            $.ajax({
+                url: '@Url.Action("UpToDateSalaryGenerateSave", "Accounting")',
+                type: 'Post',
+                data: sendData,
+                success: function (data) {
+                    $("#divUptoDateSalaryGenerateWin").data("kendoWindow").close();
+                    if (data === "success")
+                    {
+                        alert("Save successfully...");
+                        $("#divUserList").empty();
+                        $("#divUserList").append('<div class="loading_partial"></div>');
+                        $("#divUserList").load('@Url.Action("UserListForSalary", "Accounting")');
+                    }
+                    else
+                    {
+                        alert('error');
+                    }
+                },
+                error: function (error)
+                {
+                    alert('error');
+                }
+
+            });
+
+
+
+        }
+    });
+
+
+
+</script>

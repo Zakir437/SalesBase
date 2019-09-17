@@ -1,0 +1,314 @@
+﻿@model PointOfSale.ModelViews.OrderModel
+<style>
+    .invInfoItem {
+        padding: 18px 10px;
+        margin: 0;
+        border-top: 1px solid #DDD;
+        cursor: pointer;
+    }
+    .invInfoItem:first-child {
+        border: 0;
+    }
+
+    .divCrossLine{
+        text-decoration :line-through;
+    }
+</style>
+<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" style="margin:2%;">
+    <div class="box box-success">
+        <div id="OrderContainer">
+            <div id="orderTitleHolder" class="clearfix">
+                <h2 id="orderTitle">
+                    Your Order
+                </h2>
+                @*@if (Model.TotalPoints > 0)
+                {
+                    <h5 class="pull-right">Total Points : @Model.TotalPoints</h5>
+                }*@
+            </div>
+            <ul id="cartListContainer" class="orderLines" style="max-height:300px; overflow-y:scroll">
+                @foreach (var item in Model.OrderProducts)
+                {
+                    if (item.TransactionType == 1)
+                    {
+                        <li class="invInfoItem">
+                            @item.ProductName @if(item.IsUniqueItem == false)
+                            { <span>| </span><span class="decrease"><span class="fa fa-minus"></span></span> @item.Quantity <span class="increase"><span class="fa fa-plus"></span></span><span> | @item.PerItemPrice<span>Tk</span></span>  }  @if (item.PerItemTotalPrice > 0) { <span>| @item.PerItemTotalPrice</span><span>Tk</span> } | @item.Price<span>Tk</span>
+                            <span class="pull-right">
+                                @if (item.IsBorrow == true)
+                                {
+                                    <input type="checkbox" onclick="return false" checked />
+                                }
+                                else
+                                {
+                                    <input type="checkbox" onclick="return false" />
+                                }
+                                @*<span class="fa fa-times-circle"></span>*@
+                            </span>
+                            <br />
+                            @if (item.CouponDiscAmount > item.DiscountAmount)
+                             {
+                                if (item.DiscountAmount > 0)
+                                {
+                                    <span class="divCrossLine">
+                                        Discount(
+                                        @if (item.DiscType == 1)
+                                        {
+                                            <span>@item.Discount</span><span>Tk</span>
+                                        }
+                                        else
+                                        {
+                                            <span>@item.Discount</span><span>%</span>
+                                        }
+                                        ) | -<span>@item.DiscountAmount</span>Tk
+                                    </span>
+                                    if(item.CouponDiscAmount > 0)
+                                    {
+                                        <br />
+                                    }
+                                }
+                                if (item.CouponDiscAmount > 0)
+                                {
+                                    if (item.SubOfferId == 1) //B1G1
+                                    {
+                                        <span>Coupon(B1G1 <i class="fa fa-times"></i> @item.CouponDiscount) | -<span>@item.CouponDiscAmount</span>Tk</span>
+                                    }
+                                    else if (item.SubOfferId == 2) //B2G1
+                                    {
+                                        <span>Coupon(B2G1 <i class="fa fa-times"></i> @item.CouponDiscount) | -<span>@item.CouponDiscAmount</span>Tk</span>
+                                    }
+                                    else
+                                    {
+                                        <span>
+                                            Coupon(
+                                            @if (item.CouponDiscType == 1)
+                                            {
+                                                <span>@item.CouponDiscount</span><span>Tk</span>
+                                            }
+                                            else
+                                            {
+                                                <span>@item.CouponDiscount</span><span>%</span>
+                                            }
+                                            ) | -<span>@item.CouponDiscAmount</span>Tk
+                                        </span>
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                if (item.DiscountAmount > 0)
+                                {
+                                    <span>
+                                        Discount(
+                                        @if (item.DiscType == 1)
+                                        {
+                                            <span>@item.Discount</span><span>Tk</span>
+                                        }
+                                        else
+                                        {
+                                            <span>@item.Discount</span><span>%</span>
+                                        }
+                                        ) | -<span>@item.DiscountAmount</span>Tk
+                                    </span>
+                                    if (item.CouponDiscAmount > 0)
+                                    {
+                                        <br />
+                                    }
+                                }
+                                if (item.CouponDiscAmount > 0)
+                                {
+
+                                    if (item.SubOfferId == 1) //B1G1
+                                    {
+                                        <span class="divCrossLine">Coupon(B1G1 <i class="fa fa-times"></i> @item.CouponDiscount) | -<span>@item.CouponDiscAmount</span>Tk</span>
+                                    }
+                                    else if (item.SubOfferId == 2) //B2G1
+                                    {
+                                        <span class="divCrossLine">Coupon(B2G1 <i class="fa fa-times"></i> @item.CouponDiscount) | -<span>@item.CouponDiscAmount</span>Tk</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="divCrossLine">
+                                            Coupon(
+                                            @if (item.CouponDiscType == 1)
+                                            {
+                                                <span>@item.CouponDiscount</span><span>Tk</span>
+                                            }
+                                            else
+                                            {
+                                                <span>@item.CouponDiscount</span><span>%</span>
+                                            }
+                                            ) | -<span>@item.CouponDiscAmount</span>Tk
+                                        </span>
+                                    }
+                                }
+                            }
+                            @if (item.IsAfterSaleService == true)
+                            {
+                                @item.ServiceName<span>(@item.ServiceDays)</span>
+                            }
+                            @if (item.IsPointBased == true)
+                            {
+                                <span class="pull-right">Points(@item.Points)</span>
+                            }
+                            @if (item.IsUniqueItem == true)
+                            {
+                                <br />
+                                    <span>Serial Number : @item.SerialNumber</span>
+                            }
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="cartItem">
+                            @item.ProductName | @item.Price <span class="fa fa-times-circle pull-right"></span>
+                        </li>
+                    }
+
+                }
+            </ul>
+            <div id="pricesWrap-sticky-wrapper" class="stricky-wrapper">
+                <div id="priceWrap">
+                    <div id="billSummaryContainer">
+                        <table class="summaryTbl checkOut" style="border-bottom: 1px solid #ccc;">
+                            <tr>
+                                <td>Order Amount </td>
+                                <td><span>@Model.OrderAmount</span>Tk</td>
+                            </tr>
+                            <tr>
+                                <td>Discount Item</td>
+                                <td>-<span>@Model.DiscountItem</span>Tk</td>
+                            </tr>
+                            <tr class="border-top">
+                                <td>
+                                    Sub Total @if (Model.SubTotalBeforeDiscount > 0) { <span>(@Model.SubTotalBeforeDiscount)</span> }
+                                    @if (Model.CouponDiscountAmount > Model.DiscountAmount)
+                                    {
+                                        if (Model.DiscountAmount > 0)
+                                        {
+                                            <br />
+                                            <span class="discountInfo divCrossLine">
+                                                <span>Discount Amount (@if (Model.DiscType == 1)
+                                                { <span>@Model.Discount<span>Tk</span></span> }
+                                                else
+                                                { <span>@Model.DiscountPercent%</span> }) | @Model.DiscountAmount Tk | -@Model.DiscountWorkAmount Tk </span>
+                                            </span>
+                                        }
+                                        if (Model.CouponDiscountAmount > 0)
+                                        {
+                                            <br />
+                                            <span class="discountInfo">
+                                                <span>
+                                                    Coupon (@if (Model.CouponDiscType == 1)
+                                                    { <span>@Model.CouponDiscount Tk</span> }
+                                                    else
+                                                    { <span>@Model.CouponDiscPercent %</span> }) | @Model.CouponDiscountAmount Tk | -@Model.CouponDiscWorkAmount Tk
+                                                </span>
+                                            </span>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (Model.DiscountAmount > 0)
+                                        {
+                                            <br />
+                                            <span class="discountInfo">
+                                                <span>
+                                                    Discount Amount (@if (Model.DiscType == 1)
+                                                    { <span>@Model.Discount<span>Tk</span></span> }
+                                                    else
+                                                    { <span>@Model.DiscountPercent%</span> }) | @Model.DiscountAmount Tk | -@Model.DiscountWorkAmount Tk
+                                                </span>
+                                            </span>
+                                        }
+                                        if (Model.CouponDiscountAmount > 0)
+                                        {
+                                            <br />
+                                            <span class="discountInfo divCrossLine">
+                                                <span>
+                                                    Coupon (@if (Model.CouponDiscType == 1)
+                                                    { <span>@Model.CouponDiscount Tk</span> }
+                                                    else
+                                                    { <span>@Model.CouponDiscPercent %</span> }) | @Model.CouponDiscountAmount Tk | -@Model.CouponDiscWorkAmount Tk
+                                                </span>
+                                            </span>
+                                        }
+                                    }
+                                </td>
+                                <td><span>@Model.SubTotalPrice</span>Tk</td>
+                            </tr>
+                            <tr>
+                                <td>Tax(<span>@Model.TaxPercent</span>%)</td>
+                                <td><span>@Model.Tax</span>Tk</td>
+                            </tr>
+                            <tr class="border-top">
+                                <td>Total Amount</td>
+                                <td><span>@Model.TotalPrice</span>Tk</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Delivery Charge(<span>@if (Model.DelChargeType == 1) { <span>@Model.DeliveryChargeAmount<span>TK</span></span> } else { <span>@Model.DeliveryChargePercent%</span> } @if (Model.DelChargeBeforeDisc > 0) { <span> | @Model.DelChargeBeforeDisc<span>Tk</span></span> }</span>)
+                                    @if (Model.CouponDelChargeDiscount > Model.DeliveryChargeDiscount)
+                                    {
+                                        if (Model.DeliveryChargeDiscount > 0)
+                                        {
+                                            <br />
+                                            <span class="discountInfo divCrossLine">
+                                                <span>Discount(@Model.DelChargeDiscPercent%) | -@Model.DeliveryChargeDiscount<span>Tk</span></span>
+                                            </span>
+                                            
+                                        }
+                                        if(Model.CouponDelChargeDiscount > 0)
+                                        {
+                                            <br />
+                                            <span class="discountInfo">
+                                                <span>Coupon(@Model.CouponDelChargeDiscPercent%) | -@Model.CouponDelChargeDiscount<span>Tk</span></span>
+                                            </span>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (Model.DeliveryChargeDiscount > 0)
+                                        {
+                                            <br />
+                                            <span class="discountInfo">
+                                                <span>Discount(@Model.DelChargeDiscPercent%) | -@Model.DeliveryChargeDiscount<span>Tk</span></span>
+                                            </span>
+                                        }
+                                        if (Model.CouponDelChargeDiscount > 0)
+                                        {
+                                            <br />
+                                            <span class="discountInfo divCrossLine">
+                                                <span>Coupon(@Model.CouponDelChargeDiscPercent%) | -@Model.CouponDelChargeDiscount<span>Tk</span></span>
+                                            </span>
+                                        }
+                                    }
+                                </td>
+                                <td><span>@Model.DeliveryCharge</span>Tk</td>
+                            </tr>
+                            <tr class="border-top">
+                                <td>Invoice Amount</td>
+                                <td><span>@Model.InvoiceAmount</span>Tk</td>
+                            </tr>
+                            @if(Model.OfferId > 0)
+                            {
+                                <tr>
+                                    <td>@Model.OfferName (@Model.Coupon)</td>
+                                    <td><span><span class="fa fa-times-circle" style="cursor:pointer"></span></span></td>
+                                </tr>
+                            }
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="k-edit-buttons k-state-default">
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnInvInfoCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+    $("#btnInvInfoCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+</script>

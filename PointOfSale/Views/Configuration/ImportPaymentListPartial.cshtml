@@ -1,0 +1,22 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" style="margin:28px;">
+    <div id="divPaymentHistoryList"></div>
+    <div class="k-edit-buttons k-state-default">
+        <button type="reset" class="k-button k-button-icontext k-grid-update" id="btnPaymentHistoryRefresh"><span class="k-icon k-i-refresh"></span>Refresh</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnPaymentHistoryCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#divPaymentHistoryList").empty();
+        $("#divPaymentHistoryList").append('<div class="tiny_loading"></div>');
+        $("#divPaymentHistoryList").load('@Url.Action("ImportPaymentList", "Configuration")?importId=' + '@ViewBag.ImportId');
+    });
+    $("#btnPaymentHistoryRefresh").click(function () {
+        $("#divPaymentHistoryList").empty();
+        $("#divPaymentHistoryList").append('<div class="tiny_loading"></div>');
+        $("#divPaymentHistoryList").load('@Url.Action("ImportPaymentList", "Configuration")?importId=' + '@ViewBag.ImportId');
+    });
+    $("#btnPaymentHistoryCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+</script>

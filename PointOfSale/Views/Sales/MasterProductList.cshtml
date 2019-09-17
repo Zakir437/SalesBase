@@ -1,0 +1,83 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewMasterProduct>
+@using PointOfSale.Helpers
+@{
+    var count = 0;
+}
+@if (Model.Any() == true)
+{
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Name</th>
+            <th>Brand Name</th>
+            <th>CreatedBy</th>
+            <th>Created Date</th>
+            <th>UpdatedBy</th>
+            <th>Updated Date</th>
+            <th></th>
+        </tr>
+        @foreach (var list in Model)
+        {
+            count++;
+            <tr>
+                <td>@count. </td>
+                <td>
+                    @list.Name
+                </td>
+                <td>@list.BrandName</td>
+                <td>@list.CreatedBy</td>
+                <td>@Convert.ToDateTime(list.CreatedDate).ToString("MMM dd,yyyy")</td>
+                <td>@list.UpdatedBy</td>
+                <td>
+                    @if (list.UpdatedDate != null)
+                    {
+                        @Convert.ToDateTime(list.UpdatedDate).ToString("MMM dd,yyyy")
+                    }
+                    else
+                    {
+                        <span>Not yet updated</span>
+                    }
+                </td>
+                <td>
+                    <button class="btn btn-primary masterProductEdit" data-id="@list.Id" data-toggle="tooltip" title="Edit master product Information"><i class="fa fa-pencil-square-o"></i></button>
+                    @if (list.Status == true)
+                    {
+                        <button type="button" data-id="@list.Id" data-isactive="0" class="btn btn-danger inactivateMasterProduct" data-toggle="tooltip" title="Inactivate master product">
+                            <i class="fa fa-stop" aria-hidden="true"></i>
+                        </button>
+                    }
+                    else
+                    {
+                        <button type="button" data-id="@list.Id" data-isactive="1" class="btn btn-success activateMasterProduct" data-toggle="tooltip" title="Activate master product">
+                            <i class="fa fa-play" aria-hidden="true"></i>
+                        </button>
+                    }
+                    @if (@list.Status == false)
+                    {
+                        <span data-id="@list.Id" style="cursor:pointer;" data-toggle="tooltip" title="Delete Master Product" class="btn btn-danger btnMasterProductDelete">
+                            <i class="fa fa-trash"></i>
+                        </span>
+                    }
+                    <button class="btn btn-info btnSubProduct" data-id="@list.Id" data-toggle="tooltip" title="View sub Products"><i class="fa fa-list"></i></button>
+                    <a class="btn btn-primary" href="@Html.EncodedParam("MasterProductTag","Sales/Configuration/MasterProduct", new { id = list.Id }, null)" data-toggle="tooltip" title="Edit tag"><i class="fa fa-pencil-square-o"></i></a>
+                    <button class="btn btn-info btnViewTag" data-id="@list.Id" data-toggle="tooltip" title="View Tag"><i class="fa fa-list"></i></button>
+                    <a class="btn btn-primary" href="@Html.EncodedParam("MasterProductCategory", "Sales/Configuration/MasterProduct", new { id = list.Id }, null)" data-toggle="tooltip" title="Edit Category"><i class="fa fa-pencil-square-o"></i></a>
+                    <button class="btn btn-info btnViewCategory" data-id="@list.Id" data-toggle="tooltip" title="View Category"><i class="fa fa-list"></i></button>
+                </td>
+            </tr>
+        }
+    </table>
+}
+else
+{
+    <h4>There is no record to display</h4>
+}
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    })
+</script>
+
+
+
+

@@ -1,0 +1,65 @@
+﻿@model PointOfSale.ModelViews.Holiday.HolidayModelView
+@Html.HiddenFor(a => a.Id)
+@Html.HiddenFor(a => a.HolidayPackId)
+<style>
+    input{
+        max-width:100%;
+    }
+</style>
+<input id="DateValidate" name="DateValidate" type="hidden" class="k-valid">
+<div class="editor-label"><label for="HolidayName">Name</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.HolidayName, new { htmlAttributes = new { @class = "form-control k-textbox" } })
+    @Html.ValidationMessageFor(model => model.HolidayName, "", new { @class = "text-danger" })
+</div>
+<div class="editor-label"><label></label></div>
+<div class="editor-field">
+    @Html.CheckBox("ChForMultiple", new { @onchange = "chkMultipleDays(this);" }) Multiple Days
+</div>
+<div id="DivForSingleDate">
+    <div class="editor-label"><label for="Date">Date</label></div>
+    <div class="editor-field">
+        @(Html.Kendo().DatePicker().Name("Date").HtmlAttributes(new { style = "width: 100%" }))
+        @Html.ValidationMessageFor(model => model.Date, "", new { @class = "text-danger" })
+    </div>
+</div>
+<div id="DivForMultipleDate" style="display:none;">
+    <div class="editor-label"><label for="DeptAcronym">Date</label></div>
+    <div class="editor-field">
+        <div class="col-sm-6" style="margin-right:0px!important;padding:0px!important;">
+            <div style="width:80%;float:left;margin-right:15px;">
+                @(Html.Kendo().DatePicker()
+                    .Name("StartDate")
+                    .HtmlAttributes(new { style = "width: 100%" }))
+                <span class="field-validation-valid text-danger" data-valmsg-for="StartDate" data-valmsg-replace="true"></span>
+            </div>
+            <span style="width:10%;float:left;">To</span>
+        </div>
+        <div class="col-sm-5">
+            @(Html.Kendo().DatePicker().Name("EndDate").HtmlAttributes(new { style = "width: 100%" }))
+            <span class="field-validation-valid text-danger" data-valmsg-for="EndDate" data-valmsg-replace="true"></span>
+        </div>
+        <span class="field-validation-valid text-danger" data-valmsg-for="DateValidate" data-valmsg-replace="true"></span>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+         if ('@(Model.IsMultipleDay)' === 'True')
+         {
+            $("#ChForMultiple").prop("checked", true);
+            $("#DivForSingleDate").hide();
+            $("#DivForMultipleDate").show();
+            $("#btn_Holiday_Create").val("Update");
+         }
+    });
+    function chkMultipleDays(cb)
+    {
+        if (cb.checked === false) {
+            $("#DivForMultipleDate").hide();
+            $("#DivForSingleDate").show();
+        } else {
+            $("#DivForSingleDate").hide();
+            $("#DivForMultipleDate").show();
+        }
+    }
+</script>

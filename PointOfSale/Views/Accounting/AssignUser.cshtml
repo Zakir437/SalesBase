@@ -1,0 +1,38 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin-bottom:4%;margin-top:2%;">
+    <div id="divAssignUserForm">
+        <div class="editor-label"><label>Select User</label></div>
+        <div class="editor-field">
+            @(Html.Kendo().MultiSelect()
+                .Name("User")
+                .DataTextField("Text")
+                .DataValueField("Value")
+                .Placeholder("Type User name...")
+                .MaxSelectedItems(1)
+                .Events(e => e.Change("onChangeUser"))
+                .HtmlAttributes(new { style = "width: 100%;", required = "required" })
+                .BindTo(ViewBag.UserList as SelectList)
+            )
+            <span class="k-icon k-i-search" style="margin-top:-25px;float:right;margin-right:10px; position:relative">&nbsp;</span>
+            <span class="field-validation-valid text-danger" data-valmsg-for="User" data-valmsg-replace="true"></span>
+            @*@Html.ValidationMessageFor(model => model.Phone, "", new { @class = "text-Danger" })*@
+        </div>
+      
+    </div>
+    <div class="k-edit-buttons k-state-default" style="margin-left:30px;">
+        <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnAssignUserOk"><span class="k-icon k-update"></span>Ok</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnAssignUserCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+    $("#btnAssignUserCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+    var validation = $("#divAssignUserForm").kendoValidator().data("kendoValidator");
+    $("#btnAssignUserOk").click(function () {
+        if (validation.validate())
+        {
+            var data = "selectedUserId=" + selectedUserId + "?createdBy=" + userId;
+            window.open('@Url.Action("SalaryLogPrint", "Accounting")?q=' + getDataEncrypted(data), '_blank');
+        }
+    });
+</script>

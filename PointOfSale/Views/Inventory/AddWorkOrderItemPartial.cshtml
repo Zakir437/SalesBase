@@ -1,0 +1,136 @@
+﻿@model PointOfSale.Models.WorkOrderItem
+<style>
+    .k-textbox {
+        width: 100%;
+        max-width: 100%;
+    }
+</style>
+@if(Model != null)
+ {
+    <div class="editor-label"><label for="ProductName">Product Name</label></div>
+    <div class="editor-field">
+        @Html.DisplayFor(model => model.ProductName, new { htmlattributes = new { } })
+    </div>
+}
+else
+{
+    <div class="editor-label"><label for="ProductDropdown">Product Name</label></div>
+    <div class="editor-field">
+        @(Html.Kendo().DropDownList()
+                        .Name("ProductDropdown")
+                        .BindTo(ViewBag.ProductList as SelectList)
+                        .DataTextField("Text")
+                        .DataValueField("Value")
+                        .Filter("contains")
+                        .OptionLabel("--Select product--")
+                        .HtmlAttributes(new { style = "width:100%", required = "required", validationMessage = "Please select a product" })
+                        .Events(e =>
+                        {
+                            e.Change("onChangeProduct");
+                        })
+        )
+        @Html.ValidationMessage("ProductDropdown", "", new { @class = "text-Danger" })
+    </div>
+    <div class="editor-label"><label for="IndentDropdownList">Indent</label></div>
+    <div class="editor-field">
+        @(Html.Kendo().DropDownList()
+                    .Name("IndentDropdownList")
+                    .HtmlAttributes(new { style = "width:100%" })
+                    .OptionLabel("--Select Indent--")
+                    .DataTextField("Text")
+                    .DataValueField("Value")
+                    .DataSource(source =>
+                    {
+                        source.Read(read =>
+                        {
+                            read.Action("GetIndentVoucherList", "Inventory")
+                                .Data("filterCategory");
+                        })
+                        .ServerFiltering(true);
+                    })
+                    .Enable(false)
+                    .AutoBind(false)
+                    .CascadeFrom("ProductDropdown")
+                    .Events(e =>
+                    {
+                        e.Change("onChangeIndent");
+                    })
+                    .HtmlAttributes(new { style = "width:100%", required = "required", validationMessage = "Please select a indent" })
+
+        )
+        @Html.ValidationMessage("IndentDropdownList", "", new { @class = "text-Danger" })
+    </div>
+}
+@if (ViewBag.IsQuantityEdit == false)
+{
+    <div id="divItemInfo">
+        <div class="editor-label"><label for="RequestQuantity">Quantity</label></div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.RequestQty, new { htmlattributes = new { @class = "k-textbox", min = "1", required = "required", validationMessage = "Please enter valid quantity", onclick = "setSubtotalCost()", onkeyup = "setSubtotalCost()" } })
+            @Html.ValidationMessageFor(model => model.RequestQty, "", new { @class = "text-Danger" })
+        </div>
+        <div class="editor-label"><label for="PerItemPrice">Price</label></div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.PerItemPrice, new { htmlattributes = new { @class = "k-textbox", type = "number", min = "0", validationMessage = "Please enter price", onclick = "setSubtotalCost()", onkeyup = "setSubtotalCost()" } })
+            @Html.ValidationMessageFor(model => model.PerItemPrice, "", new { @class = "text-Danger" })
+        </div>
+        <div class="editor-label"><label for="Price">Total</label></div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.Price, new { htmlattributes = new { @class = "k-textbox", type = "number", min = "0", validationMessage = "Please enter total price", onclick = "totalCostFunc()", onkeyup = "totalCostFunc()" } })
+            @Html.ValidationMessageFor(model => model.Price, "", new { @class = "text-Danger" })
+        </div>
+    </div>
+    <div class="editor-field">
+        <h4 id="qtyRemMsg" class="text-danger"></h4>
+    </div>
+    <div id=""></div>
+    if(Model == null)
+    {
+        <script>
+            $("#divItemInfo").hide();
+        </script>
+    }
+    else
+    {
+        <script>
+            $("#RequestQty").prop('max', '@ViewBag.Max');
+            $("#RequestQty").attr("placeholder", "Max " + '@ViewBag.Max');
+        </script>
+    }
+}
+else
+{
+    <div class="editor-field">
+        <span class="text-info">Current Quantity : @Model.RequestQty Piece/s</span>
+    </div>
+    <div class="editor-label"><label for="ChangeQty">Quantity</label></div>
+    <div class="editor-field">
+        <input type="number" data-qty="@Model.RequestQty" min="@ViewBag.RemainingQty" max="@ViewBag.Max" id="Quantity" name="Quantity" class="k-textbox" />
+        @Html.ValidationMessage("Quantity", new { @class = "text-Danger" })
+    </div>
+    <script>
+            $("#Quantity").prop('max', '@ViewBag.Max');
+            $("#Quantity").attr("placeholder", "Max " + '@ViewBag.Max');
+    </script>
+
+}
+
+<script>
+    var totalCost = 0, quantity = 0, perItemCost = 0;
+    //set sub total cost by input per item cost or input quantity
+    function setSubtotalCost() {
+        totalCost = 0;
+        quantity = 0;
+        quantity = $("#RequestQty").val();
+        totalCost = quantity * $("#PerItemPrice").val();
+        $("#Price").val(totalCost.toFixed(2));
+    }
+    //***********calculate total cost*****************
+    function totalCostFunc() {
+        totalCost = 0;
+        quantity = 0;
+        quantity = $("#RequestQty").val();
+        perItemCost = $("#Price").val() / quantity;
+        $("#PerItemPrice").val(perItemCost.toFixed(2));
+    }
+</script>

@@ -1,0 +1,1914 @@
+﻿@model PointOfSale.ModelViews.POS.OfferModelView
+@using PointOfSale.Helpers
+@Html.HiddenFor(a => a.IsDateValidity)
+@{
+    ViewBag.Title = "SaleOfferCreate";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+}
+<style>
+    input[type=number] {
+        width: 100%;
+        max-width: 100%;
+        padding-left: 8px;
+    }
+    .radio {
+        display: inline;
+    }
+    .checkbox {
+        margin-top: 5px;
+        margin-bottom: 5px;
+    }
+</style>
+<section class="content">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4>
+                    @if (ViewBag.SubOfferId == 1)
+                    {
+                        <span class="uppercase">Buy 1 Get 1</span>
+                    }
+                    else if (ViewBag.SubOfferId == 2)
+                    {
+                        <span class="uppercase">Buy 2 Get 1</span>
+                    }
+                    else if (ViewBag.SubOfferId == 3)
+                    {
+                        <span class="uppercase">Discount Multiple</span>
+                    }
+                    else if (ViewBag.SubOfferId == 4)
+                    {
+                        <span class="uppercase">Discount Single</span>
+                    }
+                    else if (ViewBag.SubOfferId == 5)
+                    {
+                        <span class="uppercase">Discount Category</span>
+                    }
+                    else if (ViewBag.SubOfferId == 6)
+                    {
+                        <span class="uppercase">Discount Tag</span>
+                    }
+
+                    @if (ViewBag.IsCoupon == true)
+                    {
+                        <span class="uppercase">(With Coupon)</span>
+                    }
+                </h4>
+            </div>
+            <div class="pull-right">
+                <a class="btn btn-default btnBox" href="@Html.EncodedParam("SaleOffer","PointOfSale", new { isCoupon = ViewBag.IsCoupon }, null)" data-toggle="tooltip" title="Create Offer with coupon">
+                    <i class="fa fa-arrow-left"></i> Back
+                </a>
+            </div>
+        </div>
+        <div class="panel-body" id="divOfferCreateForm">
+            <div class="col-sm-12 row">
+                <div class="form-horizontal form-widgets col-sm-8">
+                    @if (ViewBag.SubOfferId != 4)
+                     {
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.OfferName, "Name", htmlAttributes: new { @class = "control-label col-md-3 col-sm-5 col-xs-12" })
+                            <div class="col-md-6 col-sm-7 col-xs-8">
+                                @Html.EditorFor(model => model.OfferName, new { htmlAttributes = new { @class = "k-textbox form-control", style = "width: 100%; max-width:100%" } })
+                                @Html.ValidationMessageFor(model => model.OfferName, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                     }
+                    <div class="form-group">
+                        @Html.Label("Validity", htmlAttributes: new { @class = "control-label col-md-3 col-sm-5 col-xs-12" })
+                        <div class="col-md-6 col-sm-7 col-xs-8"  style="margin-top:7px;">
+                            <div class="radio" style="margin-right: 10px;">
+                                <label><input type="radio" name="optradio" id="dateValidity" checked>Date</label>
+                            </div>
+                            <div class="radio">
+                                <label><input type="radio" name="optradio" id="daysValidity">Days</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="divDateValidity">
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.StartDate, "Star Date", htmlAttributes: new { @class = "control-label col-md-3 col-sm-5 col-xs-12" })
+                            <div class="col-md-6 col-sm-7 col-xs-8">
+                                @(Html.Kendo().DateTimePickerFor(m => m.StartDate)
+                                        .Format("MMMM dd yyyy hh:mm tt")
+                                        .Min(DateTime.Now)
+                                        .Events(e => { e.Change("onEndChange"); })
+                                        .Events(e => { e.Change("onStartChange"); })
+                                        .HtmlAttributes(new { style = "width: 100%; max-width:100%", required = "required", @validationMessage = "Please enter valid date!" })
+                                )
+                                @Html.ValidationMessageFor(model => model.StartDate, "", new { @class = "text-Danger" })
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.EndDate, "End Date", htmlAttributes: new { @class = "control-label col-md-3 col-sm-5 col-xs-12" })
+                            <div class="col-md-6 col-sm-7 col-xs-8">
+                                @(Html.Kendo().DateTimePickerFor(m => m.EndDate)
+                                        .Format("MMMM dd yyyy hh:mm tt")
+                                        .Min(DateTime.Now)
+                                        .HtmlAttributes(new { style = "width: 100%; max-width:100%", required = "required", @validationMessage = "Please enter valid date!" })
+                                )
+                                @Html.ValidationMessageFor(model => model.EndDate, "", new { @class = "text-Danger" })
+                            </div>
+                        </div>
+                    </div>
+                    <div id="divDayValidity">
+                        <div class="form-group">
+                            @Html.Label("Days", htmlAttributes: new { @class = "control-label col-md-3 col-sm-5 col-xs-12" })
+                            <div class="col-md-6 col-sm-7 col-xs-8">
+                                <div style="width:49%" class="pull-left">
+                                    @Html.EditorFor(model => model.ValidityDays, new { htmlattributes = new { @class = "k-textbox", @style = "width:100%; max-width:100%", @min = 1, required = "required", @validationMessage = "Please enter validity days" } })
+                                    @Html.ValidationMessageFor(model => model.ValidityDays, "", new { @class = "text-Danger" })
+                                </div>
+                                <div style="width:49%" class="pull-right">
+                                    @(Html.Kendo().TimePickerFor(m => m.ValidityTime)
+                                        .HtmlAttributes(new { style = "width: 100%; max-width:100%", required = "required", @validationMessage = "Please enter validity time" })
+                                    )
+                                    @Html.ValidationMessageFor(model => model.ValidityTime, "", new { @class = "text-Danger" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @if (ViewBag.IsCoupon == true)
+                    {
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.Coupon, htmlAttributes: new { @class = "control-label col-md-3 col-sm-5 col-xs-12" })
+                            <div class="col-md-6 col-sm-7 col-xs-8">
+                                @Html.EditorFor(model => model.Coupon, new { htmlAttributes = new { @class = "k-textbox form-control", style = "width: 100%; max-width:100%", required = "required" } })
+                                @Html.ValidationMessageFor(model => model.Coupon, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    }
+                    @if (ViewBag.SubOfferId != 4)
+                    {
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.ScheduleId, "Time Schedule", htmlAttributes: new { @class = "control-label col-md-3 col-sm-5 col-xs-12" })
+                            <div class="col-md-6 col-sm-7 col-xs-8">
+                                @(Html.Kendo().DropDownListFor(a => a.ScheduleId)
+                                 .DataTextField("Name")
+                                 .DataValueField("Id")
+                                 .DataSource(source =>
+                                 {
+                                     source.Read(read =>
+                                     {
+                                         read.Action("GetSchedule", "Configuration");
+                                     });
+                                 })
+                                 .OptionLabel("--Select time schedule--")
+                                 .HtmlAttributes(new { style = "width:100%" })
+                                )
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3 col-sm-5 col-xs-12"></div>
+                            <div class="col-md-6 col-sm-7 col-xs-8">
+                                <div class="checkbox">
+                                    <label>@Html.CheckBoxFor(model => model.IsEditable) Is-Editable</label>
+                                </div>
+
+                                @*@Html.CheckBoxFor(model => model.IsEditable, new { htmlattributes = new { @class = "k-textbox" } }) <label for="IsEditable">Is-Editable</label>*@
+                            </div>
+                        </div>
+                    }
+                </div>
+                <div class="col-sm-4" id="divOfferInfo">
+                    <dl class="dl-horizontal">
+                        @if (ViewBag.SubOfferId == 3)
+                        {
+                            <dt>Discount Percentage</dt>
+                            <dd>
+                                <span id="discPercentage">0.00</span>%
+                            </dd>
+                        }
+                        else if (ViewBag.SubOfferId == 4)
+                        {
+
+                        }
+                        else if (ViewBag.SubOfferId == 5 || ViewBag.SubOfferId == 6)
+                        {
+                            <dt>Discount Percentage</dt>
+                            <dd>
+                                <span id="discPercentage">0.00</span>%
+                            </dd>
+                            <dt>Discount Amount</dt>
+                            <dd>
+                                <span id="discAmount">0.00</span>Tk
+                            </dd>
+                        }
+                        else
+                        {
+                            <dt>Actual Price</dt>
+                            <dd>
+                                <span id="actualPrice">0.00</span>
+                            </dd>
+                            <dt>Offer Price</dt>
+                            <dd>
+                                <span id="offerPrice">0.00</span>
+                            </dd>
+                            <dt>Discount Percentage</dt>
+                            <dd>
+                                <span id="discPercentage">0.00</span>%
+                            </dd>
+                            <dt>Discount Amount</dt>
+                            <dd>
+                                <span id="discAmount">0.00</span>Tk
+                            </dd>
+                        }
+                    </dl>
+                </div>
+            </div>
+        </div>
+        <hr style="margin:0;" />
+        <div class="panel-body">
+            <div class="row" style="margin: 0;">
+                <div class="col-md-6">
+                    @if (ViewBag.SubOfferId == 5)
+                    {
+                        <div class="col-md-6" style="padding:0px;">
+                            @(Html.Kendo().DropDownList()
+                         .Name("Category")
+                         .BindTo(ViewBag.CategoryList as SelectList)
+                         .DataTextField("Text")
+                         .DataValueField("Value")
+                         .OptionLabel("--Select One Category--")
+                         .HtmlAttributes(new { style = "width:100%" })
+                        .Events(e =>
+                        {
+                            e.Change("onChangeCategory");
+                        })
+                            )
+                        </div>
+                        <div class="col-md-6">
+                            @(Html.Kendo().DropDownList()
+                            .Name("SubCategory")
+                            .HtmlAttributes(new { style = "width:100%" })
+                            .OptionLabel("--Select Sub Category--")
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("GetSubCategories", "Configuration")
+                                        .Data("filterCategory");
+                                })
+                                .ServerFiltering(true);
+                            })
+                            .Enable(false)
+                            .AutoBind(false)
+                            .CascadeFrom("Category")
+                            .Events(e =>
+                            {
+                                e.Change("onChangeSubCategory");
+                            })
+                            )
+                            <script>
+                                //filter sub category by category
+                                function filterCategory() {
+                                    return {
+                                        categoryId: $("#Category").val()
+                                    };
+                                }
+                            </script>
+                        </div>
+                    }
+                    else if (ViewBag.SubOfferId == 6)
+                    {
+                        @(Html.Kendo().DropDownList()
+                            .Name("TagDropdown")
+                            .OptionLabel("--Select One Tag--")
+                            .HtmlAttributes(new { style = "width:100%; max-width:100%" })
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .Filter("contains")
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("GetTag", "Configuration");
+                                })
+                               .ServerFiltering(false);
+                            })
+                            .Events(e =>
+                            {
+                                e.Change("onChangeTag");
+                            })
+                        )
+                    }
+                    else
+                    {
+                        @(Html.Kendo().AutoComplete()
+                            .Name("productsAutoComplete")
+                            .Placeholder("Type product name...")
+                            .HtmlAttributes(new { style = "width:100%; max-width:100%" })
+                            .MinLength(3)
+                            .DataTextField("Text")
+                            .Filter("contains")
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("GetProductListForText", "PointOfSale").Data("additionInfo");
+                                })
+                               .ServerFiltering(true);
+                            })
+                            .Events(e =>
+                            {
+                                e.Change("onChangeProduct").Select("onSelect");
+                            })
+                        )
+                        <span class="k-icon k-i-search" style="margin-top:-25px;float:right;margin-right:10px; position:relative">&nbsp;</span>
+                    }
+                </div>
+                <div class="col-md-6">
+                    @if (ViewBag.SubOfferId == 3)
+                    {
+                        <div class="col-md-3 col-md-offset-3">
+                            <div class="pull-right">
+                                @Html.CheckBox("chkAverage", new { htmlattributes = new { @class = "k-textbox" } }) <label for="chkAverage">Multiple</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6" style="padding:0px;">
+                            <div id="divPercentBox">
+                                <input type="number" min="0" max="100" style="max-width:90%" id="percentTextBox" name="percentTextBox" onchange="changeHandler(this)" onclick="calculateDiscount()" onkeyup="calculateDiscount()" value="0" /> <label>%</label>
+                            </div>
+                        </div>
+                    }
+                    @if (ViewBag.SubOfferId == 5 || ViewBag.SubOfferId == 6)
+                    {
+                        <div id="divCategoryDiscount">
+                            <div class="col-md-6" style="padding:0px;">
+                                <div id="divPriceRange">
+                                    <label>Price</label>
+                                    <input type="number" min="0" style="max-width:30%" id="fromPrice" onchange="priceChangeHandler(this)" value="0" /> <label>To</label>
+                                    <input type="number" min="0" style="max-width:30%" id="toPrice" onchange="priceChangeHandler(this)" value="0" />
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="pull-right">
+                                    <label class="radio-inline">
+                                        <input type="radio" checked name="type" id="checkPercent" /> %
+                                    </label>
+                                    <label class="radio-inline">
+                                        <input type="radio" name="type" id="checkAmount" /> Tk
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-3" style="padding:0px;">
+                                <div id="divPercentBox">
+                                    <input type="number" min="0" max="100" style="max-width:84%" id="percentTextBox" name="percentTextBox" onchange="changeHandler(this)" onclick="calculateDiscount()" onkeyup="calculateDiscount()" value="0" /> <label>%</label>
+                                </div>
+                                <div id="divAmountBox">
+                                    <input type="number" min="0" max="0" style="max-width:84%" onchange="priceChangeHandler(this)" id="amountTextBox" name="amountTextBox" onclick="calculateDiscount()" onkeyup="calculateDiscount()" value="0" required validationMessage="*" /> <label>Tk</label>
+                                </div>
+                            </div>
+                        </div>
+                        <script>
+                            $("#divAmountBox").hide();
+                        </script>
+                    }
+                </div>
+            </div>
+            <div class="row" style="margin:0; margin-top:5px;">
+                <div class="col-md-12">
+                    <div id="divOfferItemList">
+                        <table class="table table-bordered table-hover table-responsive table-condensed table-striped" id="tblOfferItems">
+                            <thead>
+                                <tr>
+                                    @if (ViewBag.SubOfferId == 5 || ViewBag.SubOfferId == 6)
+                                    {
+                                        <th>@Html.CheckBox("checkAll", new { htmlattributes = new { @class = "k-textbox" } })</th>
+                                    }
+                                    <th width="20%">Name</th>
+                                    @if (ViewBag.SubOfferId != 5 && ViewBag.SubOfferId != 6)
+                                    {
+                                        <th width="15%">Category</th>
+                                    }
+                                    <th width="10%">Price</th>
+                                    @if (ViewBag.SubOfferId != 5 && ViewBag.SubOfferId != 6)
+                                    {
+                                        <th>Quantity</th>
+                                        <th width="62px">Free</th>
+                                    }
+                                    <th>Off(%)</th>
+                                    <th>Off(Tk)</th>
+                                    <th>Discount price</th>
+                                    @if (ViewBag.SubOfferId == 3 || ViewBag.SubOfferId == 4)
+                                    {
+                                        <th></th>
+                                    }
+                                </tr>
+                                <tr id="emptyRow">
+                                    @if (ViewBag.SubOfferId == 3 || ViewBag.SubOfferId == 4)
+                                    {
+                                        <td colspan="9">
+                                            <h4>There is no record to display</h4>
+                                        </td>
+                                    }
+                                    else if (ViewBag.SubOfferId == 5 || ViewBag.SubOfferId == 6)
+                                    {
+                                        <td colspan="6">
+                                            <h4>There is no record to display</h4>
+                                        </td>
+                                    }
+                                    else
+                                    {
+                                        <td colspan="8">
+                                            <h4>There is no record to display</h4>
+                                        </td>
+                                    }
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="text-right">
+                        <button class="btn btn-default" id="btnOfferItemSave"><span class="k-icon k-update"></span> Save</button>
+                        <button class="btn btn-default" id="btnOfferItemRefresh"><span class="k-icon k-i-refresh"></span> Refresh</button>
+                        <a class="btn btn-default btnBox" href="@Html.EncodedParam("SaleOffer","PointOfSale", new { isCoupon = ViewBag.IsCoupon }, null)" data-toggle="tooltip" title="Create Offer with coupon">
+                            <span class="k-icon k-cancel"></span> Cancel
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<script>
+    var productId = 0,rowId = 0, categoryId = 0,subCategoryId = 0, tagId = 0, selectedOne, productPrice = 0, count = 0, id = 0;
+    var actualPrice = 0, offerPrice = 0, discAmount = 0, discPercent = 0, discPrice = 0;
+    var quantity = 0, discOff = 0, amountOff = 0, isSingleOffer = false;
+    var validation;
+    var subOfferId = 0;
+    subOfferId = parseInt(@ViewBag.SubOfferId);
+    var fromPrice = 0, toPrice = 0;
+
+    var start, end;
+
+    $(document).ready(function () {
+        $("#btnOfferItemSave").prop('disabled', true);
+
+        $("#liForSalesMenu").addClass('active');
+        $("#liForOffer").addClass('active');
+
+        if ($("#IsEditable").attr('checked')) {
+            $("#IsEditable").val(true);
+        }
+        else {
+            $("#IsEditable").val(false);
+        }
+        $("#divDayValidity").hide();
+        $("#IsDateValidity").val(true);
+        $('#ValidityDays').prop('required', false);
+        $('#ValidityTime').prop('required', false);
+
+        validation = $("#divOfferCreateForm,#tblOfferItems").kendoValidator({
+            rules:
+            {
+                remoteCouponCode: function (input) {
+                    var remoteAttr = input.attr("data-val-remote-url");
+                    if (typeof remoteAttr === typeof undefined || remoteAttr === false) {
+                        return true;
+                    }
+                    var isInvalid;
+                    var data = {};
+                    var coupon = $.trim($("#Coupon").val());
+                    data = { coupon: coupon };
+                    $.ajax({
+                        url: remoteAttr,
+                        mode: "abort",
+                        port: "validate" + input.attr('name'),
+                        dataType: "json",
+                        type: input.attr("data-val-remote-type"),
+                        data: data,
+                        async: false,
+                        success: function (response) {
+                            isInvalid = response;
+                            if (isInvalid === true) {
+                                isInvalid = true;
+                            }
+                            else {
+                                isInvalid = false;
+                            }
+                        }
+                    });
+                    return isInvalid;
+                },
+                dateTimepicker: function (input) {
+                    if (input.is("[data-role=datetimepicker]")) {
+                        return input.data("kendoDateTimePicker").value();
+                    } else {
+                        return true;
+                    }
+                }
+            },
+            messages: {
+                remoteCouponCode: function (input) {
+                    return input.data('val-remote');
+                },
+                dateTimepicker: "Please enter valid date!",
+            }
+        }).data("kendoValidator");
+        if (subOfferId == 3)
+        {
+            $("#chkAverage").attr('checked', true);
+        }
+
+        start = $("#StartDate").data("kendoDateTimePicker");
+        end = $("#EndDate").data("kendoDateTimePicker");
+        start.max(end.value());
+        end.min(start.value());
+    });
+
+    $("#btnOfferItemRefresh").click(function () {
+        location.reload();
+    });
+
+    //***************************Date validation ******************************
+    function onStartChange() {
+        var startDate = start.value(),
+            endDate = end.value();
+
+        if (startDate) {
+            startDate = new Date(startDate);
+            startDate.setDate(startDate.getDate());
+            end.min(startDate);
+        } else if (endDate) {
+            start.max(new Date(endDate));
+        } else {
+            endDate = new Date();
+            start.max(endDate);
+            end.min(endDate);
+        }
+    }
+
+    function onEndChange() {
+        var endDate = end.value(),
+            startDate = start.value();
+
+        if (endDate) {
+            endDate = new Date(endDate);
+            endDate.setDate(endDate.getDate());
+            start.max(endDate);
+        } else if (startDate) {
+            end.min(new Date(startDate));
+        } else {
+            endDate = new Date();
+            start.max(endDate);
+            end.min(endDate);
+        }
+    }
+
+
+    $("#dateValidity").click(function () {
+        $("#IsDateValidity").val(true);
+        $("#divDateValidity").show();
+        $("#divDayValidity").hide();
+
+        $("#StartDate").prop("disabled", false);
+        $("#EndDate").prop("disabled", false);
+
+        $("#ValidityDays").prop("disabled", true);
+        $("#ValidityTime").prop("disabled", true);
+
+        $("#ValidityDays").val("");
+        $("#ValidityTime").val("");
+    });
+    $("#daysValidity").click(function () {
+        $("#IsDateValidity").val(false);
+        $("#divDateValidity").hide();
+        $("#divDayValidity").show();
+
+        $("#StartDate").prop("disabled", true);
+        $("#EndDate").prop("disabled", true);
+
+        $("#StartDate").val("");
+        $("#EndDate").val("");
+
+        $("#ValidityDays").prop("disabled", false);
+        $("#ValidityTime").prop("disabled", false);
+
+        $('#ValidityDays').prop('required', true);
+        $('#ValidityTime').prop('required', true);
+
+    });
+    $('#IsEditable').change(function () {
+        if ($(this).is(":checked")) {
+            $('#IsEditable').val(true);
+        } else {
+            $('#IsEditable').val(false);
+        }
+    });
+    //percentage checkbox
+    $("#chkAverage").click(function () {
+
+        $("#discPercentage").empty();
+        $("#discPercentage").append(0.00);
+        $("#divOfferInfo").hide();
+
+        if ($(this).is(":checked"))
+        {
+            $('#chkAverage').val(true);
+            $("#divPercentBox").show();
+            $("#percentTextBox").val(0);
+            $("#divOfferInfo").show();
+
+            $(".offerItem").each(function () {
+                id = parseInt($(this).data("id"));
+                $("#divPercent_" + id).empty();
+                $("#divPercent_" + id).append('<span id="percentOff_' + id + '" class="percentOff" data-id="' + id + '">0</span>');
+            });
+        }
+        else
+        {
+            $('#chkAverage').val(false);
+            $("#divPercentBox").hide();
+            $(".offerItem").each(function () {
+                id = parseInt($(this).data("id"));
+                discOff = parseFloat($("#percentOff_" + id).text());
+                $("#divPercent_" + id).empty();
+                $("#divPercent_" + id).append('<input type="number" min="0" max="100" id="percentOff_' + id + '" name="percentOff_' + id + '" class="percentOff" data-id="' + id + '" onchange="changeHandler(this)" onclick="calculateDiscount(' + id + ',0)"  onkeyup="calculateDiscount(' + id + ',0)" value="' + discOff.toFixed(2) + '" required validationMessage="*"/>' +
+                    '<span class="field-validation-valid text-danger" data-valmsg-for="percentOff_' + id + '" data-valmsg-replace="true"></span>');
+            });
+        }
+    });
+
+    //cancel item
+    $("#divOfferItemList").on('click', '.btnCancelItem', function () {
+        id = parseInt($(this).data("id"));
+        $("#offerItem_" + id).remove();
+        calculateOffer();
+
+        var row_count = $('#tblOfferItems').find('tr').length;
+        if (row_count == 2) {
+            $("#emptyRow").show();
+            $("#btnOfferItemSave").prop('disabled', true);
+        }
+    });
+
+    //number input handler
+    function changeHandler(val) {
+        if (Number(val.value) > 100) {
+            val.value = 100;
+        }
+        else if (Number(val.value) <= 0)
+        {
+            val.value = 0;
+        }
+    }
+    //price input handler
+    function priceChangeHandler(val) {
+
+        if (Number(val.value) <= val.min) {
+            val.value = val.min;
+        }
+        else if (Number(val.value) >= val.max)
+        {
+            val.value = val.max;
+        }
+    }
+    //*******************Tag Multiselect***********************************
+    function onChangeTag()
+    {
+        selectedOne = "";
+        selectedOne = this.value();
+        tagId = 0;
+        fromPrice = 0;
+        toPrice = 0;
+        if (selectedOne.length > 0) {
+            tagId = parseInt(selectedOne);
+            $.ajax({
+                url: '/PointOfSale/GetProduct',
+                type: "GET",
+                data: { tagId: tagId },
+                success: function (data) {
+                    $("#fromPrice").val(fromPrice);
+                    $("#toPrice").val(toPrice);
+                    $("#amountTextBox").val(0);
+                    $("#fromPrice").attr({
+                        "max": toPrice,
+                        "min": fromPrice
+                    });
+                    $("#toPrice").attr({
+                        "max": toPrice,
+                        "min": fromPrice
+                    });
+                    $("#tblOfferItems tbody tr").remove();
+                    $("#checkAll").prop('checked', false);
+                    if (data == "") {
+                        $("#emptyRow").show();
+                        $("#btnOfferItemSave").prop('disabled', true);
+                    }
+                    else
+                        if (data === "error") {
+                            $("#emptyRow").show();
+                            $("#btnOfferItemSave").prop('disabled', true);
+                            return 0;
+                        }
+                        else {
+                            if ($("#emptyRow").length == 1) {
+                                $("#emptyRow").hide();
+                                $("#btnOfferItemSave").prop('disabled', true);
+                            }
+                            $(data).each(function (index, item) {
+                                if (index == 0) {
+                                    fromPrice = item.Price;
+                                }
+                                count++;
+                                $("#tblOfferItems").append('<tr id="offerItem_' + count + '" class="offerItem" data-id="' + count + '" data-productid="' + item.ProductId + '" data-distributeid="' + item.DistributeId + '"  data-productname="' + item.ProductName +'" data-transid="0">' +
+                                    '<td>' +
+                                    '<input type="checkbox" data-id="' + count + '" class="check" id="check_' + count + '"/>' +
+                                    '</td>' +
+                                    '<td>' + item.ProductName + '</td>' +
+                                    '<td>' +
+                                    '<span id="productPrice_' + count + '">' + item.Price + '</span>' +
+                                    '</td>' +
+                                    '<td>' +
+                                    '<span id="divPercent_' + count + '">' +
+                                    '<span id="percentOff_' + count + '" class="percentOff" data-id="' + count + '">0</span>' +
+                                    '</span>' +
+                                    '</td>' +
+                                    '<td>' +
+                                    '<span id="amountOff_' + count + '" class="amountOff" data-id="' + count + '">0</span>' +
+                                    '</td>' +
+                                    '<td>' +
+                                    '<span id="discPrice_' + count + '" data-id="' + count + '">' + item.Price + '</span>' +
+                                    '</td>' +
+                                    '</tr > ');
+                            });
+                            toPrice = parseFloat($("#productPrice_" + count).text());
+
+                            //set max and min value to fromprice, toprice, discount amount
+                            $("#fromPrice").val(fromPrice);
+                            $("#toPrice").val(toPrice);
+
+                            $("#fromPrice").attr({
+                                "max": toPrice,
+                                "min": fromPrice
+                            });
+                            $("#toPrice").attr({
+                                "max": toPrice,
+                                "min": fromPrice
+                            });
+                            $("#amountTextBox").attr({
+                                "max": fromPrice,
+                            });
+                        }
+                    calculateOffer();
+                }
+            });
+        }
+        else {
+            $("#tblOfferItems tbody tr").remove();
+            $("#emptyRow").show();
+            $("#btnOfferItemSave").prop('disabled', true);
+            tagId = 0;
+            $("#fromPrice").val(fromPrice);
+            $("#toPrice").val(toPrice);
+            $("#amountTextBox").val(0);
+            calculateOffer();
+        }
+    }
+
+    //*******************Product Autocomplete**************
+    function onChangeProduct() {
+        $("#productsAutoComplete").data("kendoAutoComplete").value("");
+    }
+    function onSelect(e) {
+        selectedOne = this.dataItem(e.item.index());
+        rowId = selectedOne.Value;
+        $.ajax({
+            url: '/PointOfSale/GetProduct',
+            type: "GET",
+            data: { rowId: rowId },
+            success: function (data) {
+                if (data === "error") {
+                    alert("Product not found");
+                    return 0;
+                }
+                else {
+                    $(data).each(function (index, item) {
+                        if ($("#emptyRow").length == 1) {
+                            $("#emptyRow").hide();
+                            $("#btnOfferItemSave").prop('disabled', false);
+                        }
+                        if (subOfferId == 1 || subOfferId == 2) // subOfferId 1 for buy 1 get 1 offer     // subOfferId 2 for buy 2 get 1 offer
+                        {
+                            $("#tblOfferItems tbody tr").remove();
+                            for (var i = 0; i <= subOfferId; i++)
+                            {
+                                count++;
+                                if (i == subOfferId)
+                                {
+                                    $("#tblOfferItems tbody").append('<tr id="offerItem_' + count + '" class="offerItem" data-id="' + count + '" data-productid="' + item.ProductId + '" data-distributeid="' + item.DistributeId + '"  data-productname="' + item.ProductName +'" data-transid="0">' +
+                                        '<td>' + item.ProductName + '</td>' +
+                                        '<td>' + item.Categorys + '</td>' +
+                                        '<td>' +
+                                        '<span id="productPrice_' + count + '">' + item.Price + '</span>' +
+                                        '</td>' +
+                                        '<td>' +
+                                        '<span id="quantity_' + count + '" class="quantity" data-id="' + count + '">1</span>' +
+                                        '</td>' +
+                                        '<td>' +
+                                        '<label><input type="checkbox" checked onclick="return false;" data-id="' + count + '" class="chkFree" id="chkFree_' + count + '"/> Free</label>' +
+                                        '</td>' +
+                                        '<td>' +
+                                        '<span id="percentOff_' + count + '" class="percentOff" data-id="' + count + '">100</span>' +
+                                        '</td>' +
+                                        '<td>' +
+                                        '<span id="amountOff_' + count + '" class="amountOff" data-id="' + count + '">' + item.Price + '</span>' +
+                                        '</td>' +
+                                        '<td>' +
+                                        '<span id="discPrice_' + count + '" data-id="' + count + '">0</span>' +
+                                        '</td>' +
+                                        '</tr>');
+                                }
+                                else
+                                {
+                                    $("#tblOfferItems").append('<tr id="offerItem_' + count + '" class="offerItem" data-id="' + count + '" data-productid="' + productId + '"  data-distributeid="' + item.DistributeId + '"  data-productname="' + item.ProductName +'" data-transid="0">' +
+                                        '<td>' + item.ProductName + '</td>' +
+                                        '<td>' + item.Categorys + '</td>' +
+                                        '<td>' +
+                                        '<span id="productPrice_' + count + '">' + item.Price + '</span>' +
+                                        '</td>' +
+                                        '<td>' +
+                                        '<span id="quantity_' + count + '" class="quantity" data-id="' + count + '">1</span>' +
+                                        '</td>' +
+                                        '<td>' +
+                                        '<label><input type="checkbox" onclick="return false;" data-id="' + count + '" class="chkFree" id="chkFree_' + count + '"/> Free</label>' +
+                                        '</td>' +
+                                        '<td>' +
+                                        '<span id="percentOff_' + count + '" class="percentOff" data-id="' + count + '">0</span>' +
+                                        '</td>' +
+                                        '<td>' +
+                                        '<span id="amountOff_' + count + '" class="amountOff" data-id="' + count + '">0</span>' +
+                                        '</td>' +
+                                        '<td>' +
+                                        '<span id="discPrice_' + count + '" data-id="' + count + '">' +  item.Price + '</span>' +
+                                        '</td>' +
+                                        '</tr > ');
+                                }
+                            }
+                        }
+                        else if (subOfferId == 3) // subOfferId 3 for Discount multi offer
+                        {
+                            count++;
+                            if ($("#chkAverage").is(":checked"))
+                            {
+                                if ($("#percentTextBox").val() > 0) {
+                                    discOff = parseFloat($("#percentTextBox").val());
+                                }
+                                else {
+                                    discOff = 0;
+                                }
+                                if (discOff > 100) {
+                                    discOff = 100;
+                                }
+                                amountOff = 0;
+                                productPrice = item.Price;
+                                amountOff = productPrice * (discOff / 100);
+                                discPrice = productPrice - amountOff;
+
+                                $("#tblOfferItems").append('<tr id="offerItem_' + count + '" class="offerItem" data-id="' + count + '" data-productid="' + productId + '"  data-distributeid="' + item.DistributeId + '"  data-productname="' + item.ProductName +'" data-transid="0">' +
+                                    '<td>' + item.ProductName + '</td>' +
+                                    '<td>' + item.Categorys + '</td>' +
+                                    '<td>' +
+                                    '<span id="productPrice_' + count + '">' + item.Price + '</span>' +
+                                    '</td>' +
+                                    '<td>' +
+                                    '<span id="quantity_' + count + '" class="quantity" data-id="' + count + '">1</span>' +
+                                    '</td>' +
+                                    '<td>' +
+                                    '<label><input type="checkbox" onclick="return false;" data-id="' + count + '" class="chkFree" id="chkFree_' + count + '"/> Free</label>' +
+                                    '</td>' +
+                                    '<td>' +
+                                    '<span id="divPercent_' + count + '">' +
+                                    '<span id="percentOff_' + count + '" class="percentOff" data-id="' + count + '">' + discOff.toFixed(2) + '</span>' +
+                                    '</span>' +
+                                    '</td>' +
+                                    '<td>' +
+                                    '<span id="amountOff_' + count + '" class="amountOff" data-id="' + count + '">' + amountOff.toFixed(2) + '</span>' +
+                                    '</td>' +
+                                    '<td>' +
+                                    '<span id="discPrice_' + count + '" data-id="' + count + '">' + discPrice.toFixed(2) + '</span>' +
+                                    '</td>' +
+                                    '<td>' +
+                                    '<span class="btnCancelItem" data-id="' + count + '" data-toggle="tooltip" title="Cancel item"><i class="fa fa-times" aria-hidden="true" style="font-size:24px;cursor:pointer"></i></span>' +
+                                    '</td>' +
+                                    '</tr > ');
+                                if (discOff == 100) {
+                                    $("#chkFree_" + count).prop('checked', true);
+                                }
+                                else {
+                                    $("#chkFree_" + count).prop('checked', false);
+                                }
+                            }
+                            else {
+                                $("#tblOfferItems").append('<tr id="offerItem_' + count + '" class="offerItem" data-id="' + count + '" data-productid="' + productId + '"  data-distributeid="' + item.DistributeId + '"  data-productname="' + item.ProductName +'" data-transid="0">' +
+                                    '<td>' + item.ProductName + '</td>' +
+                                    '<td>' + item.Categorys + '</td>' +
+                                    '<td>' +
+                                    '<span id="productPrice_' + count + '">' + item.Price + '</span>' +
+                                    '</td>' +
+                                    '<td>' +
+                                    '<span id="quantity_' + count + '" class="quantity" data-id="' + count + '">1</span>' +
+                                    '</td>' +
+                                    '<td>' +
+                                    '<label><input type="checkbox" onclick="return false;" data-id="' + count + '" class="chkFree" id="chkFree_' + count + '"/> Free</label>' +
+                                    '</td>' +
+                                    '<td>' +
+                                    '<span id="divPercent_' + count + '">' +
+                                    '<input type="number" min="0" max="100" id="percentOff_' + count + '" name="percentOff_' + count + '" class="percentOff" data-id="' + count + '" onchange="changeHandler(this)" onclick="calculateDiscount(' + count + ',1)"  onkeyup="calculateDiscount(' + count + ',1)" value="0" required validationMessage="*"/>' +
+                                    '<span class="field-validation-valid text-danger" data-valmsg-for="percentOff_' + count + '" data-valmsg-replace="true"></span>' +
+                                    '</span>' +
+                                    '</td>' +
+                                    '<td>' +
+                                    '<span id="amountOff_' + count + '" class="amountOff" data-id="' + count + '">0</span>' +
+                                    '</td>' +
+                                    '<td>' +
+                                    '<span id="discPrice_' + count + '" data-id="' + count + '">' + item.Price + '</span>' +
+                                    '</td>' +
+                                    '<td>' +
+                                    '<span class="btnCancelItem" data-id="' + count + '" data-toggle="tooltip" title="Cancel item"><i class="fa fa-times" aria-hidden="true" style="font-size:24px;cursor:pointer"></i></span>' +
+                                    '</td>' +
+                                    '</tr > ');
+                            }
+                        }
+                        else if (subOfferId == 4) // subOfferId 3 for discount single offer
+                        {
+                            count++;
+                            $("#tblOfferItems").append('<tr id="offerItem_' + count + '" class="offerItem" data-id="' + count + '" data-productid="' + productId + '"  data-distributeid="' + item.DistributeId + '"  data-productname="' + item.ProductName +'" data-transid="0">' +
+                                '<td>' + item.ProductName + '</td>' +
+                                '<td>' + item.Categorys + '</td>' +
+                                '<td>' +
+                                '<span id="productPrice_' + count + '">' + item.Price + '</span>' +
+                                '</td>' +
+                                '<td>' +
+                                '<input type="number" min="1" value="1" id="quantity_' + count + '" name="quantity_' + count + '" onclick="calculateDiscount(' + count + ',1)"  onkeyup="calculateDiscount(' + count + ',1)" class="quantity" data-id="' + count + '" required validationMessage="*"/>' +
+                                '<span class="field-validation-valid text-danger" data-valmsg-for="quantity_' + count + '" data-valmsg-replace="true"></span>' +
+                                '</td>' +
+                                '<td>' +
+                                '<label><input type="checkbox" data-id="' + count + '" class="chkFree" id="chkFree_' + count + '"  onclick="calculateDiscount(' + count + ',2)"/> Free</label>' +
+                                '</td>' +
+                                '<td>' +
+                                '<input type="number" min="0" max="100" id="percentOff_' + count + '" name="percentOff_' + count + '" class="percentOff" data-id="' + count + '" onchange="changeHandler(this)"  onclick="calculateDiscount(' + count + ',3)"  onkeyup="calculateDiscount(' + count + ',3)" value="0" required validationMessage="*"/>' +
+                                '<span class="field-validation-valid text-danger" data-valmsg-for="percentOff_' + count + '" data-valmsg-replace="true"></span>' +
+                                '</td>' +
+                                '<td>' +
+                                '<input type="number" min="0" max="' + item.Price + '" id="amountOff_' + count + '" class="amountOff" data-id="' + count + '" name="amountOff_' + count + '" onclick="calculateDiscount(' + count + ',4)"  onkeyup="calculateDiscount(' + count + ',4)" value="0" required validationMessage="*"/>' +
+                                '<span class="field-validation-valid text-danger" data-valmsg-for="amountOff_' + count + '" data-valmsg-replace="true"></span>' +
+                                '</td>' +
+                                '<td>' +
+                                '<span id="discPrice_' + count + '" data-id="' + count + '">' + item.Price + '</span>' +
+                                '</td>' +
+                                '<td>' +
+                                '<span class="btnCancelItem" data-id="' + count + '" data-toggle="tooltip" title="Cancel item"><i class="fa fa-times" aria-hidden="true" style="font-size:24px;cursor:pointer"></i></span>' +
+                                '</td>' +
+                                '</tr>');
+                        }
+                        calculateOffer();
+                    });
+                }
+            }
+        });
+    }
+    //product autocomplete additonal info
+    function additionInfo() {
+        var ids = [];
+        $(".offerItem").each(function () {
+            ids.push($(this).data("productid"));
+        });
+        return {
+            ids: ids.join(","),
+            text: $("#productsAutoComplete").val()
+        }
+    }
+    //add product by category
+    function onChangeCategory()
+    {
+        selectedOne = "";
+        selectedOne = this.value();
+        subCategoryId = 0;
+        fromPrice = 0;
+        toPrice = 0;
+        if (selectedOne.length > 0)
+        {
+            categoryId = parseInt(selectedOne);
+            $.ajax({
+                url: '/PointOfSale/GetProduct',
+                type: "GET",
+                data: { categoryId: categoryId },
+                success: function (data) {
+                    $("#fromPrice").val(fromPrice);
+                    $("#toPrice").val(toPrice);
+                    $("#amountTextBox").val(0);
+                    $("#fromPrice").attr({
+                        "max": toPrice,
+                        "min": fromPrice
+                    });
+                    $("#toPrice").attr({
+                        "max": toPrice,
+                        "min": fromPrice
+                    });
+                    $("#tblOfferItems tbody tr").remove();
+                    $("#checkAll").prop('checked', false);
+                    if (data == "")
+                    {
+                        $("#emptyRow").show();
+                        $("#btnOfferItemSave").prop('disabled', true);
+                    }
+                    else
+                    if (data === "error")
+                    {
+                        alert("Error...");
+                        $("#emptyRow").show();
+                        $("#btnOfferItemSave").prop('disabled', true);
+                        return 0;
+                    }
+                    else
+                    {
+                        if ($("#emptyRow").length == 1)
+                        {
+                            $("#emptyRow").hide();
+                            $("#btnOfferItemSave").prop('disabled', true);
+                        }
+                        $(data).each(function (index, item)
+                        {
+                            if (index == 0)
+                            {
+                                fromPrice = item.Price;
+                            }
+                            count++;
+                            $("#tblOfferItems").append('<tr id="offerItem_' + count + '" class="offerItem" data-id="' + count + '" data-productid="' + item.ProductId + '"  data-distributeid="' + item.DistributeId + '"  data-productname="' + item.ProductName +'" data-transid="0">' +
+                                '<td>' +
+                                '<input type="checkbox" data-id="' + count + '" class="check" id="check_' + count + '"/>' +
+                                '</td>' +
+                                '<td>' + item.ProductName + '</td>' +
+                                '<td>' +
+                                '<span id="productPrice_' + count + '">' + item.Price + '</span>' +
+                                '</td>' +
+                                '<td>' +
+                                '<span id="divPercent_' + count + '">' +
+                                '<span id="percentOff_' + count + '" class="percentOff" data-id="' + count + '">0</span>' +
+                                '</span>' +
+                                '</td>' +
+                                '<td>' +
+                                '<span id="amountOff_' + count + '" class="amountOff" data-id="' + count + '">0</span>' +
+                                '</td>' +
+                                '<td>' +
+                                '<span id="discPrice_' + count + '" data-id="' + count + '">' + item.Price +'</span>' +
+                                '</td>' +
+                                '</tr > ');
+
+                        });
+                        toPrice = parseFloat($("#productPrice_" + count).text());
+
+                        //set max and min value to fromprice, toprice, discount amount
+                        $("#fromPrice").val(fromPrice);
+                        $("#toPrice").val(toPrice);
+
+                        $("#fromPrice").attr({
+                            "max": toPrice,
+                            "min": fromPrice
+                        });
+                        $("#toPrice").attr({
+                            "max": toPrice,
+                            "min": fromPrice
+                        });
+                        $("#amountTextBox").attr({
+                            "max": fromPrice,
+                        });
+                        }
+                    calculateOffer();
+                }
+            });
+        }
+        else {
+            $("#tblOfferItems tbody tr").remove();
+            $("#emptyRow").show();
+            $("#btnOfferItemSave").prop('disabled', true);
+            categoryId = 0;
+            $("#fromPrice").val(fromPrice);
+            $("#toPrice").val(toPrice);
+            $("#amountTextBox").val(0);
+            calculateOffer();
+        }
+    }
+    //add product by subcategory
+    function onChangeSubCategory()
+    {
+        fromPrice = 0;
+        toPrice = 0;
+        selectedOne = "";
+        selectedOne = this.value();
+        if (selectedOne.length > 0)
+        {
+            subCategoryId = parseInt(selectedOne);
+            $.ajax({
+                url: '/PointOfSale/GetProduct',
+                type: "GET",
+                data: { categoryId: categoryId, subCategoryId: subCategoryId, fromPrice: fromPrice, toPrice: toPrice},
+                success: function (data) {
+                    $("#tblOfferItems tbody tr").remove();
+                    $("#fromPrice").val(fromPrice);
+                    $("#toPrice").val(toPrice);
+                    $("#amountTextBox").val(0);
+
+                    $("#checkAll").prop('checked', false);
+                    if (data == "") {
+                        $("#emptyRow").show();
+                        $("#btnOfferItemSave").prop('disabled', true);
+                        //$("#divCategoryDiscount").hide();
+
+                    }
+                    else if (data === "error") {
+                        alert("Error...");
+                        $("#emptyRow").show();
+                        $("#btnOfferItemSave").prop('disabled', true);
+                        //$("#divCategoryDiscount").hide();
+                        return 0;
+                    }
+                    else {
+                        if ($("#emptyRow").length == 1) {
+                            $("#emptyRow").hide();
+                            $("#btnOfferItemSave").prop('disabled', true);
+                            //$("#divCategoryDiscount").show();
+                        }
+                        $(data).each(function (index, item) {
+                            if (index == 0) {
+                                fromPrice = item.Price;
+                            }
+                            count++;
+                            $("#tblOfferItems").append('<tr id="offerItem_' + count + '" class="offerItem" data-id="' + count + '" data-productid="' + item.ProductId + '"  data-distributeid="' + item.DistributeId + '"  data-productname="' + item.ProductName +'" data-transid="0">' +
+                                '<td>' +
+                                '<input type="checkbox" data-id="' + count + '" class="check" id="check_' + count + '"/>' +
+                                '</td>' +
+                                '<td>' + item.ProductName + '</td>' +
+                                '<td>' +
+                                '<span id="productPrice_' + count + '">' + item.Price + '</span>' +
+                                '</td>' +
+                                '<td>' +
+                                '<span id="divPercent_' + count + '">' +
+                                '<span id="percentOff_' + count + '" class="percentOff" data-id="' + count + '">0</span>' +
+                                '</span>' +
+                                '</td>' +
+                                '<td>' +
+                                '<span id="amountOff_' + count + '" class="amountOff" data-id="' + count + '">0</span>' +
+                                '</td>' +
+                                '<td>' +
+                                '<span id="discPrice_' + count + '" data-id="' + count + '">' + item.Price + '</span>' +
+                                '</td>' +
+                                '</tr > ');
+                        });
+
+                        toPrice = parseFloat($("#productPrice_" + count).text());
+                        //set max and min value to fromprice, toprice, discount amount
+                        $("#fromPrice").val(fromPrice);
+                        $("#toPrice").val(toPrice);
+                        $("#amountTextBox").val(0);
+
+                        $("#fromPrice").attr({
+                            "max": toPrice,
+                            "min": fromPrice
+                        });
+                        $("#toPrice").attr({
+                            "max": toPrice,
+                            "min": fromPrice
+                        });
+                        $("#amountTextBox").attr({
+                            "max": fromPrice,
+                        });
+                    }
+                    calculateOffer();
+                }
+            });
+        }
+        else
+        {
+            subCategoryId = 0;
+            $.ajax({
+                url: '/PointOfSale/GetProduct',
+                type: "GET",
+                data: { categoryId: categoryId, fromPrice: fromPrice, toPrice: toPrice },
+                success: function (data) {
+                    $("#tblOfferItems tbody tr").remove();
+                    $("#fromPrice").val(fromPrice);
+                    $("#toPrice").val(toPrice);
+                    $("#amountTextBox").val(0);
+                    $("#checkAll").prop('checked', false);
+                    if (data == "")
+                    {
+                        $("#emptyRow").show();
+                        $("#btnOfferItemSave").prop('disabled', true);
+                        //$("#divCategoryDiscount").hide();
+                    }
+                    else
+                    if (data === "error")
+                    {
+                        alert("Error...");
+                        $("#emptyRow").show();
+                        $("#btnOfferItemSave").prop('disabled', true);
+                        //$("#divCategoryDiscount").hide();
+                        return 0;
+                    }
+                    else
+                    {
+                        if ($("#emptyRow").length == 1) {
+                            $("#emptyRow").hide();
+                            $("#btnOfferItemSave").prop('disabled', true);
+                            //$("#divCategoryDiscount").show();
+                        }
+                        $(data).each(function (index, item) {
+                            if (index == 0) {
+                                fromPrice = item.Price;
+                            }
+                            count++;
+                            $("#tblOfferItems").append('<tr id="offerItem_' + count + '" class="offerItem" data-id="' + count + '" data-productid="' + item.ProductId + '" data-distributeid="' + item.DistributeId + '"  data-productname="' + item.ProductName +'" data-transid="0">' +
+                                '<td>' +
+                                '<input type="checkbox" data-id="' + count + '" class="check" id="check_' + count + '"/>' +
+                                '</td>' +
+                                '<td>' + item.ProductName + '</td>' +
+                                '<td>' +
+                                '<span id="productPrice_' + count + '">' + item.Price + '</span>' +
+                                '</td>' +
+                                '<td>' +
+                                '<span id="divPercent_' + count + '">' +
+                                '<span id="percentOff_' + count + '" class="percentOff" data-id="' + count + '">0</span>' +
+                                '</span>' +
+                                '</td>' +
+                                '<td>' +
+                                '<span id="amountOff_' + count + '" class="amountOff" data-id="' + count + '">0</span>' +
+                                '</td>' +
+                                '<td>' +
+                                '<span id="discPrice_' + count + '" data-id="' + count + '">' + item.Price + '</span>' +
+                                '</td>' +
+                                '</tr > ');
+                        });
+                        toPrice = parseFloat($("#productPrice_" + count).text());
+                        //set max and min value to fromprice, toprice, discount amount
+                        $("#fromPrice").val(fromPrice);
+                        $("#toPrice").val(toPrice);
+                        $("#fromPrice").attr({
+                            "max": toPrice,
+                            "min": fromPrice
+                        });
+                        $("#toPrice").attr({
+                            "max": toPrice,
+                            "min": fromPrice
+                        });
+                        $("#amountTextBox").attr({
+                            "max": fromPrice,
+                        });
+                    }
+                    calculateOffer();
+                }
+            });
+        }
+    }
+    //Price filter
+    $("#toPrice,#fromPrice").focusout(function () {
+        fromPrice = parseInt($("#fromPrice").val());
+        toPrice = parseInt($("#toPrice").val());
+        $("#amountTextBox").attr({
+            "max": fromPrice,
+        });
+        $("#amountTextBox").val(0);
+        if (subOfferId == 5)
+        {
+            $.ajax({
+                url: '/PointOfSale/GetProduct',
+                type: "GET",
+                data: { categoryId: categoryId, subCategoryId: subCategoryId, fromPrice: fromPrice, toPrice: toPrice },
+                success: function (data) {
+                    $("#tblOfferItems tbody tr").remove();
+                    $("#checkAll").prop('checked', false);
+                    if (data == "") {
+                        $("#emptyRow").show();
+                        $("#btnOfferItemSave").prop('disabled', true);
+                    }
+                    else
+                        if (data === "error") {
+                            $("#emptyRow").show();
+                            $("#btnOfferItemSave").prop('disabled', true);
+                            return 0;
+                        }
+                        else {
+                            if ($("#emptyRow").length == 1) {
+                                $("#emptyRow").hide();
+                                $("#btnOfferItemSave").prop('disabled', true);
+                            }
+                            $(data).each(function (index, item) {
+                                count++;
+                                $("#tblOfferItems").append('<tr id="offerItem_' + count + '" class="offerItem" data-id="' + count + '" data-productid="' + item.ProductId + '" data-distributeid="' + item.DistributeId + '"  data-productname="' + item.ProductName +'" data-transid="0">' +
+                                    '<td>' +
+                                    '<input type="checkbox" data-id="' + count + '" class="check" id="check_' + count + '"/>' +
+                                    '</td>' +
+                                    '<td>' + item.ProductName + '</td>' +
+                                    '<td>' +
+                                    '<span id="productPrice_' + count + '">' + item.Price + '</span>' +
+                                    '</td>' +
+                                    '<td>' +
+                                    '<span id="divPercent_' + count + '">' +
+                                    '<span id="percentOff_' + count + '" class="percentOff" data-id="' + count + '">0</span>' +
+                                    '</span>' +
+                                    '</td>' +
+                                    '<td>' +
+                                    '<span id="amountOff_' + count + '" class="amountOff" data-id="' + count + '">0</span>' +
+                                    '</td>' +
+                                    '<td>' +
+                                    '<span id="discPrice_' + count + '" data-id="' + count + '">' + item.Price + '</span>' +
+                                    '</td>' +
+                                    '</tr > ');
+                            });
+                        }
+                }
+            });
+        }
+        else if (subOfferId == 6)
+        {
+            $.ajax({
+                url: '/PointOfSale/GetProduct',
+                type: "GET",
+                data: { tagId: tagId, fromPrice: fromPrice, toPrice: toPrice },
+                success: function (data) {
+                    $("#tblOfferItems tbody tr").remove();
+                    $("#checkAll").prop('checked', false);
+                    if (data == "") {
+                        $("#emptyRow").show();
+                        $("#btnOfferItemSave").prop('disabled', true);
+                        //$("#divCategoryDiscount").hide();
+
+                    }
+                    else
+                        if (data === "error") {
+                            $("#emptyRow").show();
+                            $("#btnOfferItemSave").prop('disabled', true);
+                            //$("#divCategoryDiscount").hide();
+                            return 0;
+                        }
+                        else {
+                            if ($("#emptyRow").length == 1) {
+                                $("#emptyRow").hide();
+                                $("#btnOfferItemSave").prop('disabled', true);
+                                //$("#divCategoryDiscount").show();
+                            }
+                            $(data).each(function (index, item) {
+                                count++;
+                                $("#tblOfferItems").append('<tr id="offerItem_' + count + '" class="offerItem" data-id="' + count + '" data-productid="' + item.ProductId + '" data-distributeid="' + item.DistributeId + '"  data-productname="' + item.ProductName +'" data-transid="0">' +
+                                    '<td>' +
+                                    '<input type="checkbox" data-id="' + count + '" class="check" id="check_' + count + '"/>' +
+                                    '</td>' +
+                                    '<td>' + item.ProductName + '</td>' +
+                                    '<td>' +
+                                    '<span id="productPrice_' + count + '">' + item.Price + '</span>' +
+                                    '</td>' +
+                                    '<td>' +
+                                    '<span id="divPercent_' + count + '">' +
+                                    '<span id="percentOff_' + count + '" class="percentOff" data-id="' + count + '">0</span>' +
+                                    '</span>' +
+                                    '</td>' +
+                                    '<td>' +
+                                    '<span id="amountOff_' + count + '" class="amountOff" data-id="' + count + '">0</span>' +
+                                    '</td>' +
+                                    '<td>' +
+                                    '<span id="discPrice_' + count + '" data-id="' + count + '">' + item.Price + '</span>' +
+                                    '</td>' +
+                                    '</tr > ');
+                            });
+                        }
+                }
+            });
+        }
+    });
+
+    $("#checkAll").click(function () {
+        if ($(this).is(":checked")) {
+            $(".offerItem").each(function () {
+                id = parseInt($(this).data("id"));
+                $("#check_" + id).prop('checked', true);
+            });
+
+            if ($(".offerItem").length > 0)
+            {
+                $("#btnOfferItemSave").prop('disabled', false);
+            }
+            calculateDiscount();
+        }
+        else {
+            $(".offerItem").each(function () {
+                id = parseInt($(this).data("id"));
+                $("#check_" + id).prop('checked', false);
+            });
+            $("#btnOfferItemSave").prop('disabled', true);
+            calculateDiscount();
+        }
+    });
+
+    $("#divOfferItemList").on('click', '.check', function () {
+        var checkAll = true;
+        $('.check').each(function () {
+            id = parseInt($(this).data("id"));
+            if ($("#check_" + id).is(":checked") == false) {
+                checkAll = false;
+            }
+        });
+        if (checkAll) {
+            $("#checkAll").prop('checked', true);
+        }
+        else {
+            $("#checkAll").prop('checked', false);
+        }
+        if ($("#divOfferItemList .check:checked").length > 0)
+        {
+            $("#btnOfferItemSave").prop('disabled', false);
+        }
+        else {
+            $("#btnOfferItemSave").prop('disabled', true);
+        }
+        calculateDiscount();
+    });
+
+    $("#checkPercent").click(function () {
+        $("#divPercentBox").show();
+        $("#divAmountBox").hide();
+        $("#amountTextBox").val(0);
+        calculateDiscount();
+    });
+
+    $("#checkAmount").click(function () {
+        $("#divAmountBox").show();
+        $("#divPercentBox").hide();
+        $("#percentTextBox").val(0);
+        calculateDiscount();
+    });
+
+    //calculate discount offer
+    function calculateDiscount(id, type) {
+        if (type > 0)
+        {
+            if ($("#quantity_" + id).val() > 0) {
+                quantity = parseFloat($("#quantity_" + id).val());;
+            }
+            else {
+                quantity = 1;
+            }
+            if ($("#percentOff_" + id).val() > 0) {
+                discOff = parseFloat($("#percentOff_" + id).val());
+            }
+            else {
+                discOff = 0;
+            }
+            if (discOff > 100) {
+                discOff = 100;
+            }
+            if ($("#amountOff_" + id).val() > 0) {
+                amountOff = parseFloat($("#amountOff_" + id).val());
+            }
+            else {
+                amountOff = 0;
+            }
+            productPrice = parseFloat($("#productPrice_" + id).text()) * quantity;
+            if (type == 1 || type == 3) // calculate if quantity change or percentage off change
+            {
+                amountOff = productPrice * (discOff / 100);
+                discPrice = productPrice - amountOff;
+                $("#discPrice_" + id).empty();
+                $("#discPrice_" + id).append(discPrice.toFixed(2));
+                $("#amountOff_" + id).val(amountOff.toFixed(2));
+
+                if (discOff == 100) {
+                    $("#chkFree_" + id).prop('checked', true);
+                }
+                else {
+                    $("#chkFree_" + id).prop('checked', false);
+                }
+            }
+            else if (type == 2) // calculate if check free change
+            {
+                if ($("#chkFree_" + id).is(':checked')) {
+                    $("#discPrice_" + id).empty();
+                    $("#discPrice_" + id).append(0.00);
+                    $("#amountOff_" + id).val(productPrice.toFixed(2));
+                    $("#percentOff_" + id).val(100);
+                }
+                else {
+                    $("#discPrice_" + id).empty();
+                    $("#discPrice_" + id).append(productPrice.toFixed(2));
+                    $("#amountOff_" + id).val(0);
+                    $("#percentOff_" + id).val(0);
+                }
+            }
+            else if (type == 4) // calculate if amount off change
+            {
+                discOff = (amountOff / productPrice) * 100;
+                discPrice = productPrice - amountOff;
+                $("#discPrice_" + id).empty();
+                $("#discPrice_" + id).append(discPrice.toFixed(2));
+                $("#percentOff_" + id).val(discOff.toFixed(2));
+                if (discOff == 100) {
+                    $("#chkFree_" + id).prop('checked', true);
+                }
+                else {
+                    $("#chkFree_" + id).prop('checked', false);
+                }
+            }
+        }
+        else {
+            if (id > 0)
+            {
+                if ($("#percentOff_" + id).val() > 0) {
+                    discOff = parseFloat($("#percentOff_" + id).val());
+                }
+                else {
+                    discOff = 0;
+                }
+                if (discOff > 100) {
+                    discOff = 100;
+                }
+                productPrice = parseFloat($("#productPrice_" + id).text());
+                amountOff = productPrice * (discOff / 100);
+                discPrice = productPrice - amountOff;
+                $("#discPrice_" + id).empty();
+                $("#discPrice_" + id).append(discPrice.toFixed(2));
+                $("#amountOff_" + id).empty();
+                $("#amountOff_" + id).append(amountOff.toFixed(2));
+                if (discOff == 100) {
+                    $("#chkFree_" + id).prop('checked', true);
+                }
+                else {
+                    $("#chkFree_" + id).prop('checked', false);
+                }
+            }
+            else
+            {
+                amountOff = 0;
+                discOff = 0;
+                if ($("#checkAmount").is(":checked"))
+                {
+                    if ($("#amountTextBox").val() > 0)
+                    {
+                        amountOff = parseFloat($("#amountTextBox").val());
+                    }
+                    else {
+                        amountOff = 0;
+                    }
+                    if (amountOff > parseFloat($('#amountTextBox').attr('max')))
+                    {
+                        amountOff = parseFloat($('#amountTextBox').attr('max'));
+                    }
+                }
+                else
+                {
+                    if ($("#percentTextBox").val() > 0) {
+                        discOff = parseFloat($("#percentTextBox").val());
+                    }
+                    else {
+                        discOff = 0;
+                    }
+                    if (discOff > 100) {
+                        discOff = 100;
+                    }
+                }
+                $("#discPercentage").empty();
+                $("#discPercentage").append(discOff.toFixed(2));
+
+                $("#discAmount").empty();
+                $("#discAmount").append(amountOff.toFixed(2));
+
+                $(".offerItem").each(function () {
+                    id = parseInt($(this).data("id"));
+                    if ((subOfferId == 5 || subOfferId == 6) && $("#check_" + id).is(":checked") == false)
+                    {
+                        productPrice = parseFloat($("#productPrice_" + id).text());
+                        $("#percentOff_" + id).empty();
+                        $("#percentOff_" + id).append(0.00);
+                        $("#discPrice_" + id).empty();
+                        $("#discPrice_" + id).append(productPrice.toFixed(2));
+                        $("#amountOff_" + id).empty();
+                        $("#amountOff_" + id).append(0.00);
+                        return 0;
+                    }
+                    productPrice = parseFloat($("#productPrice_" + id).text());
+                    if ($("#checkAmount").is(":checked")) {
+                        discPrice = productPrice - amountOff;
+                        discOff = (amountOff / productPrice) * 100;
+                    }
+                    else
+                    {
+                        amountOff = 0;
+                        amountOff = productPrice * (discOff / 100);
+                        discPrice = productPrice - amountOff;
+                        if (discOff == 100) {
+                            $("#chkFree_" + id).prop('checked', true);
+                        }
+                        else {
+                            $("#chkFree_" + id).prop('checked', false);
+                        }
+                    }
+                    $("#percentOff_" + id).empty();
+                    $("#percentOff_" + id).append(discOff.toFixed(2));
+                    $("#discPrice_" + id).empty();
+                    $("#discPrice_" + id).append(discPrice.toFixed(2));
+                    $("#amountOff_" + id).empty();
+                    $("#amountOff_" + id).append(amountOff.toFixed(2));
+                });
+            }
+        }
+        if (subOfferId != 5 && subOfferId != 6)
+        {
+            calculateOffer();
+        }
+    }
+
+    function calculateOffer() {
+        actualPrice = 0;
+        offerPrice = 0;
+        discPrice = 0;
+        $(".offerItem").each(function () {
+            id = $(this).data("id");
+            if ((subOfferId == 5 || subCategoryId == 6) && $("#check_" + id).is(":checked") == false)
+             {
+                return 0;
+             }
+            if (subOfferId == 4)
+            {
+                if ($("#quantity_" + id).val() > 0) {
+                    quantity = parseFloat($("#quantity_" + id).val());
+                }
+                else {
+                    quantity = 1;
+                }
+                productPrice = parseFloat($("#productPrice_" + id).text()) * quantity;
+            }
+            else
+            {
+                productPrice = parseFloat($("#productPrice_" + id).text());
+            }
+            actualPrice = actualPrice + productPrice;
+            discPrice = parseFloat($("#discPrice_" + id).text());
+            offerPrice = offerPrice + discPrice;
+        });
+
+        $("#actualPrice").empty();
+        $("#actualPrice").append(actualPrice.toFixed(2));
+
+        $("#offerPrice").empty();
+        $("#offerPrice").append(offerPrice.toFixed(2));
+
+        discAmount = actualPrice - offerPrice;
+        if (discAmount == 0) {
+            discPercent = 0
+        }
+        else {
+            discPercent = (discAmount / actualPrice) * 100;
+        }
+        $("#discPercentage").empty();
+        $("#discPercentage").append(discPercent.toFixed(2));
+
+        $("#discAmount").empty();
+        $("#discAmount").append(discAmount.toFixed(2));
+    }
+
+     // offeritem Save
+    $("#btnOfferItemSave").click(function () {
+        if (validation.validate())
+        {
+            $(this).prop('disabled', true);
+
+            //if offer with coupon
+            var isCoupon = false;
+            var coupon = "";
+            if ('@ViewBag.IsCoupon' == 'True')
+            {
+                isCoupon = true;
+                coupon = $.trim($("#Coupon").val());
+            }
+
+            var offerItem = [];
+            var isFree = false;
+            $('.offerItem').each(function () {
+                id = parseInt($(this).data("id"));
+                if ($("#chkFree_" + id).is(':checked'))
+                {
+                    isFree = true;
+                }
+                else {
+                    isFree = false;
+                }
+                if (subOfferId == 3 && $("#chkAverage").is(':checked') == false) // 3 discount multi
+                {
+                    offerItem.push({
+                        SubOfferId: subOfferId,
+                        ProductId: parseInt($(this).data("productid")),
+                        DistributeId: parseInt($(this).data("distributeid")),
+                        ProductName: parseInt($(this).data("productname")),
+                        Type: 2, // type 2 for sale
+                        IsFree: isFree,
+                        IsDependency: false,
+                        IsCouponApplicable: isCoupon,
+                        Coupon: coupon,
+                        PercentageOff: parseFloat($("#percentOff_" + id).val()),
+                        AmountOff: parseFloat($("#amountOff_" + id).text()),
+                        Quantity: parseFloat($("#quantity_" + id).text()),
+                        Price: parseFloat($("#discPrice_" + id).text()),
+                    });
+                }
+                else
+                if (subOfferId == 4) // 4 discount single
+                {
+                        isSingleOffer = true;
+                        offerItem.push({
+                            SubOfferId: subOfferId,
+                            ProductId: parseInt($(this).data("productid")),
+                            DistributeId: parseInt($(this).data("distributeid")),
+                            ProductName: parseInt($(this).data("productname")),
+                            Type: 2, // type 2 for sale
+                            IsFree: isFree,
+                            IsDependency: false,
+                            IsCouponApplicable: isCoupon,
+                            Coupon: coupon,
+                            PercentageOff: parseFloat($("#percentOff_" + id).val()),
+                            AmountOff: parseFloat($("#amountOff_" + id).val()),
+                            Quantity: parseFloat($("#quantity_" + id).val()),
+                            Price: parseFloat($("#discPrice_" + id).text()),
+                        });
+                }
+                else
+                if (subOfferId == 5 || subOfferId == 6) // 5 discount category // 6 discount tag
+                {
+                    if ($("#check_" + id).is(':checked'))
+                    {
+                        offerItem.push({
+                            SubOfferId: subOfferId,
+                            ProductId: parseInt($(this).data("productid")),
+                            DistributeId: parseInt($(this).data("distributeid")),
+                            ProductName: parseInt($(this).data("productname")),
+                            Type: 2, // type 2 for sale
+                            IsFree: false,
+                            IsDependency: false,
+                            IsCouponApplicable: isCoupon,
+                            Coupon: coupon,
+                            PercentageOff: parseFloat($("#percentOff_" + id).text()),
+                            AmountOff: parseFloat($("#amountOff_" + id).text()),
+                            Quantity: 1,
+                            Price: parseFloat($("#discPrice_" + id).text()),
+                        });
+                    }
+                }
+                else
+                if (subOfferId == 1 || subOfferId == 2) // 1 b1g1 ..... 2 b2g1
+                {
+                    offerItem.push({
+                        SubOfferId: subOfferId,
+                        ProductId: parseInt($(this).data("productid")),
+                        DistributeId: parseInt($(this).data("distributeid")),
+                        ProductName: parseInt($(this).data("productname")),
+                        Type: 2, // type 2 for sale
+                        IsFree: isFree,
+                        IsDependency: true, // true for b1g1 and b2g1
+                        IsCouponApplicable: isCoupon,
+                        Coupon: coupon,
+                        PercentageOff: parseFloat($("#percentOff_" + id).text()),
+                        AmountOff: parseFloat($("#amountOff_" + id).text()),
+                        Quantity: parseFloat($("#quantity_" + id).text()),
+                        Price: parseFloat($("#discPrice_" + id).text()),
+                    });
+                }
+                else
+                {
+                        offerItem.push({
+                            SubOfferId: subOfferId,
+                            ProductId: parseInt($(this).data("productid")),
+                            DistributeId: parseInt($(this).data("distributeid")),
+                            ProductName: parseInt($(this).data("productname")),
+                            Type: 2, // type 2 for sale
+                            IsFree: isFree,
+                            IsDependency: false,
+                            IsCouponApplicable: isCoupon,
+                            Coupon: coupon,
+                            PercentageOff: parseFloat($("#percentOff_" + id).text()),
+                            AmountOff: parseFloat($("#amountOff_" + id).text()),
+                            Quantity: parseFloat($("#quantity_" + id).text()),
+                            Price: parseFloat($("#discPrice_" + id).text()),
+                        });
+                }
+            });
+            var offer;
+            if (subOfferId == 3) // 3 discount multi
+            {
+
+                if ($("#chkAverage").is(":checked"))
+                {
+                    discPercent = parseFloat($("#discPercentage").text());
+                }
+                else {
+                    discPercent = 0;
+                }
+                 offer = {
+                    SubOfferId: subOfferId,
+                    Type: 2, // type 2 for sale
+                    IsCouponApplicable: isCoupon,
+                    Coupon: coupon,
+                    OfferName: $.trim($("#OfferName").val()),
+                    StartDate: $("#StartDate").val(),
+                    EndDate: $("#EndDate").val(),
+                    ValidityDays: $("#ValidityDays").val(),
+                    ValidityTime: $("#ValidityTime").val(),
+                    IsDateValidity: $("#IsDateValidity").val(),
+                    IsEditable: $("#IsEditable").val(),
+                    ScheduleId: $("#ScheduleId").val(),
+                    ActualPrice: 0,
+                    OfferPrice: 0,
+                    DiscPercentage: discPercent,
+                    DiscAmount: 0,
+                    Items: offerItem,
+                    IsSingleOffer: isSingleOffer,
+                    CreatedBy: userId
+                 }
+            }
+            else
+            if (subOfferId == 4) // 4 discount single
+            {
+                offer = {
+                    StartDate: $("#StartDate").val(),
+                    EndDate: $("#EndDate").val(),
+                    ValidityDays: $("#ValidityDays").val(),
+                    ValidityTime: $("#ValidityTime").val(),
+                    IsDateValidity: $("#IsDateValidity").val(),
+                    Items: offerItem,
+                    IsSingleOffer: isSingleOffer,
+                    CreatedBy: userId
+                }
+            }
+            else
+            if (subOfferId == 5 || subOfferId == 6) // 5 discount category // 6 discount tag
+            {
+                 offer = {
+                    SubOfferId: subOfferId,
+                    Type: 2, // type 2 for sale
+                    OfferName: $.trim($("#OfferName").val()),
+                    StartDate: $("#StartDate").val(),
+                    EndDate: $("#EndDate").val(),
+                    ValidityDays: $("#ValidityDays").val(),
+                    ValidityTime: $("#ValidityTime").val(),
+                    IsDateValidity: $("#IsDateValidity").val(),
+                    IsEditable: $("#IsEditable").val(),
+                    ScheduleId: $("#ScheduleId").val(),
+                    IsCouponApplicable: isCoupon,
+                    Coupon: coupon,
+                    ActualPrice: 0,
+                    OfferPrice: 0,
+                    DiscPercentage: parseFloat($("#discPercentage").text()),
+                    DiscAmount: parseFloat($("#discAmount").text()),
+                    Items: offerItem,
+                    IsSingleOffer: isSingleOffer,
+                    CreatedBy: userId
+                 }
+            }
+            else {
+                offer = {
+                    SubOfferId: subOfferId,
+                    Type: 2, // type 2 for sale
+                    IsCouponApplicable: isCoupon,
+                    Coupon: coupon,
+                    OfferName: $.trim($("#OfferName").val()),
+                    StartDate: $("#StartDate").val(),
+                    EndDate: $("#EndDate").val(),
+                    ValidityDays: $("#ValidityDays").val(),
+                    ValidityTime: $("#ValidityTime").val(),
+                    IsDateValidity: $("#IsDateValidity").val(),
+                    IsEditable: $("#IsEditable").val(),
+                    ScheduleId: $("#ScheduleId").val(),
+                    ActualPrice: parseFloat($("#actualPrice").text()),
+                    OfferPrice: parseFloat($("#offerPrice").text()),
+                    DiscPercentage: parseFloat($("#discPercentage").text()),
+                    DiscAmount: parseFloat($("#discAmount").text()),
+                    Items: offerItem,
+                    IsSingleOffer: isSingleOffer,
+                    CreatedBy: userId
+                }
+            }
+            $.ajax({
+                url: '/PointOfSale/SaleOfferSave',
+                type: "POST",
+                data: JSON.stringify({ model: offer }),
+                contentType: 'application/json',
+                success: function (data)
+                {
+                    if (data == "success")
+                    {
+                        var paramData = "isCoupon=" + '@ViewBag.IsCoupon';
+                        location.href = '/PointOfSale/SaleOffer?q=' + getDataEncrypted(paramData);
+                    }
+                    else {
+                        alert("Save error...");
+                    }
+                }
+            });
+        }
+    });
+</script>
+
+
+
+
+

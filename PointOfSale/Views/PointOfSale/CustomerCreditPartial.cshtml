@@ -1,0 +1,83 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewCreditCustomer>
+<style>
+    table {
+        overflow: auto;
+    }
+</style>
+@using System.Globalization
+@{
+    decimal? totalDue = 0;
+    var count = 0;
+    if(Model.Any())
+    {
+        totalDue = Model.Sum(a => a.DueAmount);
+    }
+}
+<style>
+    a{
+        cursor:pointer;
+    }
+</style>
+@if (Model.Any())
+{
+    <div class="panel-body">
+        <div class="col-md-6 pull-left">
+            <dl class="dl-horizontal">
+                <dt>Name</dt>
+                <dd>@Model.FirstOrDefault().Name</dd>
+                <dt>Phone</dt>
+                <dd>@Model.FirstOrDefault().Phone</dd>
+                <dt>E-mail</dt>
+                <dd>@Model.FirstOrDefault().Email</dd>
+            </dl>
+        </div>
+        <div class="col-md-4 pull-right">
+            <dl class="dl-horizontal">
+                <dt>Total Due</dt>
+                <dd>@totalDue.Value.ToString("C", new CultureInfo("bn-BD"))</dd>
+                <dt>Total DueOrder</dt>
+                <dd>@Model.Count()</dd>
+            </dl>
+        </div>
+    </div>
+    <hr />
+    <div class="panel-body" style="overflow-x:auto">
+        <table class="table table-bordered">
+            <tr>
+                <th>SL.</th>
+                <th>VoucherNo</th>
+                <th>Price</th>
+                <th>Due</th>
+                <th>Order Date</th>
+                <th><button class="btn btn-default" id="btnTotalPay" style="width:100%">Total Pay</button></th>
+            </tr>
+            @foreach (var list in Model)
+            {
+                count++;
+                <tr>
+                    <td>@count.</td>
+                    <td><a class="btnShowOrderDetails" data-toggle="tooltip" title="View Order Details" data-id="@list.OrderId">@list.OrderNumber @if (list.PurchaseOrderId > 0) { <span>(@list.POVoucher)</span> }  </a> <button class="btn btn-primary pull-right btnShowPaymentHistory" data-id="@list.OrderId" data-toggle="tooltip" title="View Payment Details"><i class="fa fa-align-justify"></i></button></td>
+                    <td>@list.InvoiceAmount.ToString("C", new CultureInfo("bn-BD"))</td>
+                    <td>@list.DueAmount.Value.ToString("C", new CultureInfo("bn-BD"))</td>
+                    <td>@Convert.ToDateTime(list.OrderDate).ToString("MMM dd yyyy hh:mm:ss tt")</td>
+                    <td>
+                        <button class="btn btn-default btnPay" data-id="@list.OrderId" data-due="@list.DueAmount" style="width:100%">Pay</button>
+                    </td>
+                </tr>
+            }
+        </table>
+    </div>
+    <script>
+            var totalInvoiceDue = @totalDue, customerId = @Model.FirstOrDefault().CustomerId;
+    </script>
+ }
+else
+{
+    <div class="panel-body">
+        <h4>There is no record to display</h4>
+    </div>
+}
+
+<script>
+    $('[data-toggle="tooltip"]').tooltip();
+</script>

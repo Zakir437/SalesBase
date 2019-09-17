@@ -1,0 +1,20 @@
+﻿<div class="editor-label"><label for="ConditionDropdown">Type</label></div>
+<div class="editor-field">
+    @(Html.Kendo().DropDownList()
+        .Name("ConditionDropdown")
+        .BindTo(ViewBag.ConditionList as SelectList)
+        .DataTextField("Text")
+        .DataValueField("Value")
+        .OptionLabel("Select condition...")
+        .HtmlAttributes(new { style = "width:100%;", required="required", validationMessage="Please select a condition" })
+    )
+    @Html.ValidationMessage("ConditionDropdown", "", new { @class = "text-Danger" })
+</div>
+<div class="editor-label"><label for="conditionObservation">Observation</label></div>
+<div class="editor-field">
+    <textarea name="conditionObservation" id="conditionObservation" style="max-width:100%; width:100%" rows="5" class="k-textbox form-control" required validationMessage="Please enter condition observation"></textarea>
+    @Html.ValidationMessage("conditionObservation", "", new { @class = "text-Danger" })
+</div>
+<script>
+    
+</script>

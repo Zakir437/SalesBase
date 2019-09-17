@@ -1,0 +1,167 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewPosOrder>
+@using System.Globalization
+@{
+    var count = 0;
+    PointOfSale.Models.PointOfSale_DBEntities db = new PointOfSale.Models.PointOfSale_DBEntities();
+}
+<style>
+    hr {
+        margin: 0px;
+    }
+</style>
+@if (Model.Any())
+{
+    foreach (var list in Model)
+    {
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <h4>Order Number : @list.OrderNumber</h4>
+                <dl class="dl-horizontal">
+                    <dt>Customer Name</dt>
+                    <dd>@list.CustomerName</dd>
+                    <dt>Created By</dt>
+                    <dd>@list.CreatedBy</dd>
+                    <dt>Created Date</dt>
+                    <dd>@Convert.ToDateTime(list.OrderDate).ToString("MMMM dd,yyyy hh:mm:ss tt")</dd>
+                    <dt>Total Points</dt>
+                    <dd>@list.TotalPoints</dd>
+                    <dt>PO Voucher</dt>
+                    <dd>@list.POVoucher</dd>
+                    <dt>Refund By</dt>
+                    <dd>@list.RefundBy</dd>
+                    @if (list.RefundDateTime != null)
+                     {
+                        <dt>Refund Date</dt>
+                        <dd>@Convert.ToDateTime(list.RefundDateTime).ToString("MMMM dd,yyyy hh:mm:ss tt")</dd>
+                     }
+                </dl>
+            </div>
+            <hr />
+            <div class="panel-body">
+                @{
+                    var productlist = db.PosOrderTransactions.Where(a => a.OrderId == list.OrderId && a.TransactionType == 1 && a.Quantity > 0);
+                }
+                <table class="table table-bordered">
+                    <tr>
+                        <th>SL.</th>
+                        <th>Product Name</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Points</th>
+                        <th>Refund Status</th>
+                        <th>Total Price</th>
+                    </tr>
+                    @foreach (var item in productlist)
+                    {
+                        count++;
+                        <tr>
+                            <td>@count. </td>
+                            <td>
+                                @item.ProductName
+                                @if (item.TransactionType == 1) // product
+                                {
+                                    if (item.Discount > 0)
+                                    {
+                                        <img src="~/Images/DiscountImage/272498.png" />
+                                    }
+                                }
+                            </td>
+                            @if (item.TransactionType == 1)
+                            {
+                                <td>@item.PerItemPrice.ToString("C", new CultureInfo("bn-BD"))</td>
+                                <td>@item.Quantity</td>
+                            }
+                            else
+                            {
+                                <td>N/A</td>
+                                <td>N/A</td>
+                            }
+                            <td>@item.Points</td>
+                            <td>
+                                @if (item.Quantity > 0 && item.IsRefundAllow == true)
+                                {
+                                    <span>Allow</span>
+                                }
+                                else
+                                {
+                                    <span>Not Allow</span>
+                                }
+                            </td>
+                            @if (item.Discount > 0)
+                            {
+                                if (item.DiscountType == true)
+                                {
+                                    <td>@item.Price.ToString("C", new CultureInfo("bn-BD")) Discount(Fixed) <span>@item.Discount</span>Tk(<span>@item.DiscountPercent</span>%)</td>
+                                }
+                                else
+                                {
+                                    <td>@item.Price.ToString("C", new CultureInfo("bn-BD")) Discount(Percent) @item.DiscountPercent%(<span>@item.Discount</span>Tk)</td>
+                                }
+                            }
+                            else
+                            {
+                                <td>@item.Price.ToString("C", new CultureInfo("bn-BD"))</td>
+                            }
+                        </tr>
+                    }
+                    <tr>
+                        <td colspan="6" class="text-right">Sub Total</td>
+                        <td>@list.SubTotalPrice</td>
+                    </tr>
+                    @if (list.Discount > 0)
+                    {
+                        if (list.DiscountType == true)
+                        {
+                            <tr>
+                                <td colspan="6" class="text-right">Discount</td>
+                                <td>@list.Discount.ToString("C", new CultureInfo("bn-BD"))<span>(@list.DiscPercent%)</span></td>
+                            </tr>
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="6" class="text-right">Discount</td>
+                                <td>@list.DiscPercent%<span>(@list.Discount.ToString("C", new CultureInfo("bn-BD")))</span></td>
+                            </tr>
+                        }
+                    }
+                    @if (list.Tax > 0)
+                    {
+
+                        <tr>
+                            <td colspan="6" class="text-right">
+                                Tax
+                                @if (list.TaxFunc == true)
+                                { <span>(A)</span> }
+                                else
+                                { <span>(D)</span> }
+                            </td>
+                            <td>@list.TaxPercent%<span>(@list.Tax.ToString("C", new CultureInfo("bn-BD")))</span></td>
+                        </tr>
+                    }
+                    <tr>
+                        <td colspan="6" class="text-right">Total</td>
+                        <td>@list.TotalPrice.ToString("C", new CultureInfo("bn-BD"))</td>
+                    </tr>
+                    @if (list.DueAmount > 0)
+                     {
+                        <tr>
+                            <td colspan="6" class="text-right">Due</td>
+                            <td>@list.DueAmount.Value.ToString("C", new CultureInfo("bn-BD"))</td>
+                        </tr>
+                     }
+                </table>
+            </div>
+        </div>
+    }
+}
+else
+{
+    <h4>There is no record to display</h4>
+}
+<script>
+    $('[data-toggle="tooltip"]').tooltip();
+</script>
+
+
+

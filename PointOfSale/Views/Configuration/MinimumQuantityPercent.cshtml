@@ -1,0 +1,49 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin-bottom:4%;margin-top:2%;">
+    <div id="divMiniQuantityForm"></div>
+    <div class="k-edit-buttons k-state-default" style="margin-left:30px;">
+        <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnMiniQuantityUpdate"><span class="k-icon k-update"></span>Update</button>
+        <button type="reset" class="k-button k-button-icontext k-grid-update" id="btnMiniQuantityRefresh"><span class="k-icon k-i-refresh"></span>Refresh</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnMiniQuantityCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#divMiniQuantityForm").empty();
+        $("#divMiniQuantityForm").load('@Url.Action("MinimumQuantityPercentPartial", "Configuration")?miscId=' + '@ViewBag.MiscId');
+    });
+    $("#btnMiniQuantityRefresh").click(function () {
+        $("#divMiniQuantityForm").empty();
+        $("#divMiniQuantityForm").load('@Url.Action("MinimumQuantityPercentPartial", "Configuration")?miscId=' + '@ViewBag.MiscId');
+    });
+    $("#btnMiniQuantityCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+    var validation = $("#divMiniQuantityForm").kendoValidator().data("kendoValidator");
+    $("#btnMiniQuantityUpdate").click(function () {
+        if (validation.validate())
+        {
+            var sendData = {
+                MiscId: $("#MiscId").val(),
+                MinimumQuantity: $("#MinimumQuantity").val()
+            }
+            $.ajax({
+                url: '@Url.Action("MinimumQuantityUpdate","Configuration")',
+                type: 'POST',
+                data: sendData,
+                success: function (data)
+                {
+                    if (data == "success")
+                    {
+                        $("#divMinimumQuantityWin").data("kendoWindow").close();
+                        $("#divMiscFuncList").empty();
+                        $("#divMiscFuncList").append('<div class="loading_partial"></div>');
+                        $("#divMiscFuncList").load('@Url.Action("MiscFuncList","Configuration")');
+                    }
+                    else {
+                        alert("Update error...");
+                    }
+                }
+            })
+        }
+    });
+</script>

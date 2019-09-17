@@ -1,0 +1,87 @@
+﻿@{
+    ViewBag.Title = "FullFillMentPrint";
+    Layout = "~/Views/Shared/_LayoutPrintPage.cshtml";
+}
+<style>
+    hr {
+        margin: 0px;
+    }
+
+    .dl-horizontal dt {
+        float: left;
+        width: 160px;
+        overflow: hidden;
+        clear: left;
+        text-align: right;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .dl-horizontal dd {
+        margin-left: 180px;
+    }
+
+        .dl-horizontal dd:before,
+        .dl-horizontal dd:after {
+            display: table;
+            content: " ";
+        }
+
+        .dl-horizontal dd:after {
+            clear: both;
+        }
+
+        .dl-horizontal dd:before,
+        .dl-horizontal dd:after {
+            display: table;
+            content: " ";
+        }
+
+        .dl-horizontal dd:after {
+            clear: both;
+        }
+
+    a:link:after,
+    a:visited:after {
+        content: "";
+        font-size: 90%;
+    }
+</style>
+<section class="content-header" style="text-align:center;">
+    <div class="row">
+        <div class="col-xs-3"></div>
+        <div class="col-xs-6">
+            <h3>Fullfillment Report</h3>
+            <p>Sales Base</p>
+        </div>
+        <div class="col-xs-3">
+            <button class="btn btn-default pull-right" id="btnPrint" style="margin-top:10px;"><i class="fa fa-print"></i>Print</button>
+        </div>
+    </div>
+    <hr />
+</section>
+<div class="row">
+    <div class="col-xs-offset-6 col-xs-6 text-left">
+        <p>
+            Generate By : @HttpContext.Current.Request.Cookies["CookieUserInfo"].Values["UserName"]<br>
+            Generate Date : @DateTime.Now.ToString("MMM dd yyyy hh:mm:ss tt") <br>
+        </p>
+    </div>
+    <div class="col-xs-offset-6 col-xs-6 text-right">
+
+    </div>
+</div>
+<hr />
+<div id="divList"></div>
+<script>
+    $(document).ready(function ()
+    {
+        $("#divList").append('<div class="loading_partial"></div>');
+        $("#divList").load('/Stock/MinimumQuantityInfoList?tab=' + '@ViewBag.Tab' + '&selectedIds=' + '@ViewBag.SelectedIds' + '&categoryId=' + '@ViewBag.CategoryId' + '&subCategoryId=' + '@ViewBag.SubCategory');
+    });
+    $("#btnPrint").click(function () {
+        $("#btnPrint").hide();
+        window.print();
+        $("#btnPrint").show();
+    });
+</script>

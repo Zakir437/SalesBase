@@ -1,0 +1,74 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewAccountName>
+@using PointOfSale.Helpers
+@{
+    var count = 0;
+}
+<style>
+    a {
+        cursor: pointer;
+        text-decoration: none!important;
+    }
+</style>
+@if (Model.Any())
+ {
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Balance</th>
+            <th>Created By</th>
+            <th>Created Date</th>
+            <th>Last Updated By</th>
+            <th>Last Updated Date</th>
+            <th></th>
+        </tr>
+        @foreach (var list in Model)
+        {
+            count++;
+            <tr>
+                <td>@count . </td>
+                <td>
+                    <a data-id="@list.AccId" data-name="@list.Name" class="btn_acc_grp_info">@list.Name</a>
+                </td>
+                <td>
+                    @if(list.CashType == 2)
+                     {
+                        <span>Receivable</span>
+                     }
+                    else
+                    {
+                        <span>Payable</span>
+                    }
+                </td>
+                <td>Tk. @list.Balance</td>
+                <td>@list.CreatedBy</td>
+                <td>@Convert.ToDateTime(list.CreatedDate).ToString("MMM dd yyyy")</td>
+                <td>@list.UpdatedBy</td>
+                <td>
+                    @if (list.UpdatedById > 0)
+                     {
+                        @Convert.ToDateTime(list.UpdatedDate).ToString("MMM dd yyyy")
+                    }
+                    else
+                    {
+                        <span>Not yet updated</span>
+                    }
+                </td>
+                <td>
+                    <span class="btn btn-primary btn_acc_grp_details" data-id="@list.AccId" data-name="@list.Name" data-toggle="tooltip" data-original-title="Account Details"><i class="fa fa-info-circle"></i></span>
+                    <span data-id="@list.AccId" data-name="@list.Name" class="btn btn-danger btn_acc_grp_delete" data-toggle="tooltip" data-original-title="Delete Account"><i class="fa fa-trash"></i></span>
+                </td>
+            </tr>
+        }
+    </table>
+}
+else
+{
+    <h4>There is no record to display</h4>
+}
+
+<script>
+    $('[data-toggle="tooltip"]').tooltip();
+</script>
+

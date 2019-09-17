@@ -1,0 +1,148 @@
+﻿@model PointOfSale.Models.ViewPosOrder
+@using System.Globalization;
+@using PointOfSale.Helpers;
+@{
+    ViewBag.Title = "OrderCurrentVoucher";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    PointOfSale.Models.PointOfSale_DBEntities db = new PointOfSale.Models.PointOfSale_DBEntities();
+    var orderTransactionList = db.ViewOrderTransactions.Where(a => a.OrderId == Model.OrderId && a.Quantity > 0).ToList();
+    var count = 0;
+}
+<style>
+    dt {
+        font-size: 18px;
+    }
+
+    dd {
+        font-size: 15px;
+    }
+</style>
+<div class="panel panel-default" style="margin-top:20px;">
+    <div class="panel-body">
+        <div class="row">
+            <a href="@Html.EncodedParam("OrderTransactionPrint","PointOfSale", new { orderId = Model.OrderId },null)" target="_blank" style="float:right;margin-right:5%;font-size:14px">
+                <i class="fa fa-print"></i> Print
+            </a>
+        </div>
+        <div class="col-md-6 pull-left">
+            <dl>
+                <dt>Order Number : <span style="font-weight:100">@Model.OrderNumber</span></dt>
+            </dl>
+            <button class="btn btn-default" id="btnRefundInfo" data-id="@Model.OrderId">Refund Info</button>
+            @*@if (Model.IsItemRefund == true)
+             {
+                <button class="btn btn-default" id="btnRefundInfo" data-id="@Model.OrderId">Refund Info</button>
+                <a class="btn btn-default" href="@Html.EncodedParam("OriginalVoucher","PointOfSale", new { orderId = Model.OrderId },null)" target="_blank">
+                    Original Voucher
+                </a>
+                <a class="btn btn-default" href="@Html.EncodedParam("RefundArchive","PointOfSale", new { orderId = Model.OrderId },null)" target="_blank">
+                    Refund Archive
+                </a>
+             }*@
+        </div>
+        <div class="col-md-4 pull-right text-right">
+            <dl>
+                <dt>@Model.FirstName @Model.LastName</dt>
+                <dd>@Convert.ToDateTime(@Model.OrderDate).ToString("MMM dd yyyy hh:mm:ss tt")</dd>
+                <dd>Sub Total : @Model.SubTotalPrice.ToString("C", new CultureInfo("bn-BD"))</dd>
+                @if (Model.Discount > 0)
+                {
+                    if (Model.DiscountType == true)
+                    {
+                        <dd>Discount : <span>@Model.Discount.ToString("C", new CultureInfo("bn-BD"))</span>(@Model.DiscPercent%)</dd>
+                    }
+                    else
+                    {
+                        <dd>Discount : @Model.DiscPercent%(<span>@Model.Discount.ToString("C", new CultureInfo("bn-BD"))</span>)</dd>
+                    }
+                }
+                @if (Model.Tax > 0)
+                {
+                    <dd>Tax @if (Model.TaxFunc == true)
+                    { <span>(A)</span> }
+                    else
+                    { <span>(D)</span> }  : @Model.TaxPercent%(@Model.Tax.ToString("C", new CultureInfo("bn-BD")))</dd>
+                }
+                <dd style="border-top:1px solid;">Total : @Model.TotalPrice.ToString("C", new CultureInfo("bn-BD"))</dd>
+                @if (Model.DueAmount > 0)
+                {
+                    <dd>Due : @Model.DueAmount.Value.ToString("C", new CultureInfo("bn-BD"))</dd>
+                }
+            </dl>
+        </div>
+    </div>
+    <hr />
+    <div class="panel-body">
+        @if (orderTransactionList.Any())
+        {
+            <table class="table table-bordered">
+                <tr>
+                    <th>SL.</th>
+                    <th>Product Name</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Total Price</th>
+                </tr>
+                @foreach (var list in orderTransactionList)
+                {
+                    count++;
+                    <tr>
+                        <td>@count.</td>
+                        <td>
+                            @list.ProductName
+                            @if (list.Discount > 0)
+                            {
+                                <img src="~/Images/DiscountImage/272498.png" />
+                            }
+                            @if (list.RefundStatus == 1)
+                            {
+                                <i class="fa fa-reply" aria-hidden="true"></i>
+                            }
+                        </td>
+                        <td>@list.PerItemPrice.ToString("C", new CultureInfo("bn-BD"))</td>
+                        <td>@list.Quantity</td>
+                        <td>
+                            @list.Price.ToString("C", new CultureInfo("bn-BD"))
+                            @if (list.Discount > 0)
+                            {
+                                if (list.DiscountType == true)
+                                {
+                                    <span>(Discount <span>@list.Discount</span>Tk(@list.DiscountPercent%))</span>
+                                }
+                                else
+                                {
+                                    <span>(Discount <span>@list.DiscountPercent</span>%(<span>@list.Discount</span>Tk))</span>
+                                }
+                            }
+                        </td>
+                    </tr>
+                }
+            </table>
+        }
+        else
+        {
+            <h4>There is no record to display</h4>
+        }
+    </div>
+</div>
+<div id="divRefundInfoWin"></div>
+<script>
+     //Show Refund Info
+    $("#btnRefundInfo").click(function () {
+        var orderId = $(this).data("id");
+        $("#divRefundInfoWin").empty();
+        $("#divRefundInfoWin").kendoWindow({
+                actions: ["Close"],
+                draggable: false,
+                modal: true,
+                visible: false,
+                width: 1037,
+                height: 405,
+                resizable: false,
+                title: 'Refund Info'
+            });
+        var refundInfoWin = $("#divRefundInfoWin").data("kendoWindow");
+        refundInfoWin.refresh('@Url.Action("RefundInfo", "PointOfSale")?orderId=' + orderId);
+        refundInfoWin.center().open();
+    });
+</script>

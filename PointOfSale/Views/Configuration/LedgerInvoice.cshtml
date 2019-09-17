@@ -1,0 +1,35 @@
+﻿@model PointOfSale.Models.Supplier
+@{
+    ViewBag.Title = "LedgerInvoice";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<h2>Ledger Invoice</h2>
+<div class="panel panel-default" style="margin-top:20px;">
+    <div class="panel-body">
+        <div class="col-md-6 pull-left">
+            <dl class="dl-horizontal">
+                <dt>Name</dt>
+                <dd>@Model.Name</dd>
+                <dt>Phone</dt>
+                <dd>@Model.Phone</dd>
+                <dt>E-mail</dt>
+                <dd>@Model.Email</dd>
+                <dt>Supplier Since</dt>
+                <dd>@Convert.ToDateTime(Model.SupplierSince).ToString("yyyy MMMM")</dd>
+            </dl>
+        </div>
+    </div>
+    <hr />
+    <div class="panel-body">
+        <div id="divLedgerInvoiceList"></div>
+    </div>
+</div>
+
+<script>
+     $(document).ready(function () {
+         $("#divLedgerInvoiceList").empty();
+         $("#divLedgerInvoiceList").append('<div class="loading_partial"></div>');
+         $("#divLedgerInvoiceList").load('@Url.Action("LedgerInvoiceList", "Configuration")?supplierId=' + @Model.SupplierId);
+    });
+
+</script>

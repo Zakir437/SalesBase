@@ -1,0 +1,74 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin-bottom:4%;margin-top:2%;">
+    <div id="divInDefaultForm"></div>
+    <div class="k-edit-buttons k-state-default" style="margin-left:27px;">
+        <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnInDefaultSet"><span class="k-icon k-update"></span>Set</button>
+        <button type="reset" class="k-button k-button-icontext k-grid-update" id="btnInDefaultRefresh"><span class="k-icon k-i-refresh"></span>Refresh</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnInDefaultCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+     $(document).ready(function () {
+         $("#divInDefaultForm").empty();
+         $("#divInDefaultForm").load('@Url.Action("SetInDefaultPartial", "Configuration")?id=' + '@ViewBag.Id' + '&type=' + '@ViewBag.Type');
+    });
+
+    $("#btnInDefaultRefresh").click(function () {
+        $("#divInDefaultForm").empty();
+        $("#divInDefaultForm").load('@Url.Action("SetInDefaultPartial", "Configuration")?id=' + '@ViewBag.Id' + '&type=' + '@ViewBag.Type');
+    });
+
+    $("#btnInDefaultCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+
+    var validator = $("#divInDefaultForm").kendoValidator({
+        rules: {
+            radio: function (input) {
+                if (input.filter("[type=radio]") && input.attr("required")) {
+                    return $("#divInDefaultForm").find("[type=radio]").is(":checked");
+                }
+                return true;
+            }
+        },
+        messages: {
+            radio: "Must check one in cash option!"
+        }
+    }).getKendoValidator();
+
+    $("#post").click(function () {
+
+        validator.validate();
+    });
+
+    $("#btnInDefaultSet").click(function () {
+        if (validator.validate())
+        {
+            var ids = [];
+            $(".default").each(function () {
+                ids.push({
+                    MethodId: parseInt($(this).data("methodid")),
+                    AccountId: parseInt($(this).data("accountid")),
+                    PaymentTypeId: parseInt($(this).data("paymenttypeid"))
+                });
+            });
+            $.ajax({
+                url: '@Url.Action("DefaultAccountSave", "Configuration")',
+                type: 'POST',
+                data: JSON.stringify({ model: ids, UserId: userId, type: type, methodId : '@ViewBag.Id' }),
+                contentType: 'application/json',
+                success: function (data)
+                {
+                    if (data == "success")
+                    {
+                        $("#divInDefaultSetWin").data("kendoWindow").close();
+                    }
+                    else {
+                        alert("Save error...");
+                    }
+                }
+            });
+        }
+
+    });
+</script>
+

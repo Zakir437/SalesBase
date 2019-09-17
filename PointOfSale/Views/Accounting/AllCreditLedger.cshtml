@@ -1,0 +1,65 @@
+﻿@{
+    ViewBag.Title = "AllCreditLedger";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="panel panel-default" style="margin-top:20px;">
+    <div class="panel-heading" style="padding-bottom:46px;">
+        <div class="pull-left">
+            <h4 class="uppercase">Credit ledger</h4>
+        </div>
+        <div class="pull-right">
+
+        </div>
+    </div>
+    <div class="panel-body">
+        <div id="ledgerList"></div>
+    </div>
+</div>
+<div id="divImportTranWin"></div>
+<div id="divSaleTranWin"></div>
+<script>
+    $(document).ready(function () {
+        $("#ledgerList").empty();
+        $("#ledgerList").append('<div class="loading_partial"></div>');
+        $("#ledgerList").load('@Url.Action("CreditLedgerList", "Accounting")?FromDate=' + new Date('@ViewBag.FromDate').toISOString() + '&ToDate=' + new Date('@ViewBag.ToDate').toISOString());
+    });
+
+     //View Import transaction details
+    $("#ledgerList").on('click', ".btnImportInfo", function () {
+        var importId = $(this).data("id");
+        $("#divImportTranWin").empty();
+        $("#divImportTranWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 892,
+            height: 582,
+            title: 'Import Transaction',
+            resizable: false
+        });
+        var impTranWin = $("#divImportTranWin").data("kendoWindow");
+        impTranWin.refresh('@Url.Action("ImportTransaction", "PointOfSale")?importId=' + importId);
+        impTranWin.center().open();
+    });
+    //View Sale Transaction details
+    $("#ledgerList").on('click', ".btnSaleInfo", function () {
+        var orderId = $(this).data("id");
+        $("#divSaleTranWin").empty();
+        $("#divSaleTranWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 892,
+            height: 582,
+            title: 'Sale Transaction',
+            resizable: false
+        });
+        var saleTranWin = $("#divSaleTranWin").data("kendoWindow");
+        saleTranWin.refresh('@Url.Action("OrderTransaction", "PointOfSale")?orderId=' + orderId);
+        saleTranWin.center().open();
+    });
+
+</script>
+

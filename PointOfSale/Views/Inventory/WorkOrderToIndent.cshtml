@@ -1,0 +1,533 @@
+﻿@{
+    ViewBag.Title = "WorkOrderToIndent";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+}
+<style>
+    .k-input {
+        height: 26px !important;
+    }
+
+    p {
+        margin: 10px;
+    }
+
+    hr {
+        margin: 0px;
+    }
+
+    .u_1 {
+        background-color: #578ebe !important;
+    }
+
+    .u_2 {
+        background-color: #67809F !important;
+    }
+
+    .u_3 {
+        background-color: #217ebd !important;
+    }
+
+    .u_4 {
+        background-color: #428bca !important;
+    }
+
+    #showItem {
+        color: #217ebd !important;
+        font-weight: 700;
+        font-size: 16px;
+    }
+
+    .s_1 {
+        background-color: #578ebe !important;
+    }
+
+    .s_2 {
+        background-color: #67809F !important;
+    }
+
+    .s_3 {
+        background-color: #217ebd !important;
+    }
+
+    .s_4 {
+        background-color: #428bca !important;
+    }
+
+    .padding_30px {
+        padding-right: 30px !important;
+    }
+
+
+    #ClearSearchBar:disabled {
+        opacity: 0.5 !important;
+        cursor: not-allowed;
+    }
+
+    #GoSearchBar:disabled {
+        opacity: 0.5 !important;
+        cursor: not-allowed;
+    }
+</style>
+<link href="~/Content/Inventory/InventoryList.css" rel="stylesheet" />
+<script src="~/Scripts/jquery.nailthumb.1.1.js"></script>
+<div id="Div_without_Cart">
+    <section class="content">
+        <div class="panel panel-info">
+            <div class="panel-heading" style="padding-bottom:46px;">
+                <div class="pull-left">
+                    <h4 class="uppercase">Work Order to Indent MRR</h4>
+                </div>
+                <div class="pull-right">
+                    <button class="btn btn-default" id="btnBack"><i class="fa fa-arrow-left"></i> Back</button>
+                </div>
+            </div>
+            <div class="panel-body" style="border:none!important;">
+                <div class="row" style="margin : 0px; margin-bottom:5px;">
+                        <div class="pull-left" style="max-width: 48%!important; width:100%;">
+                           @(Html.Kendo().DropDownList()
+                            .Name("IndentMultiselect")
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .AutoBind(false)
+                            .Filter("contains")
+                            .OptionLabel("Select Indent...")
+                            .Events(e => e.Change("onChangeVoucher"))
+                            .HtmlAttributes(new { style = "width: 100%;" })
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("GetIndentVoucherList", "Inventory").Data("additionalInfo");
+                                })
+                                .ServerFiltering(false);
+                            })
+                         )
+                        </div>
+                    </div>
+                <div id="divList">
+                    <h4>Please select indent</h4>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+<div id="showCart">Show Cart</div>
+<div id="divForAddtoCart">
+    <div class="header" id="CartDivHeader">
+        <div class="row">
+            <div class="col-xs-2">
+                <span style="float:left;margin-left:15px"><img src="~/Content/Icon/cart-icon.png" alt="Add to cart" style="height:25px;width:25px;"></span>
+            </div>
+            <div class="col-xs-5">
+                @*<span><span id="itemCount">0</span> ITEM</span>*@
+            </div>
+            <div class="col-xs-5">
+                <span style="float:right;margin-top:-2px" class="btn btn-default">
+                    Close
+                </span>
+            </div>
+        </div>
+    </div>
+    <div id="DivForCartList" style="max-height:700px; overflow-y:auto">
+        <table class="table table-bordered table-striped table-responsive table-hover" id="tbl_Cart_Item"></table>
+    </div>
+    <div class="row" id="OrderForPurchase" style="position:fixed;bottom:60px!important;">
+        <div style="text-align:center!important;left:250%!important;position:relative!important;padding-bottom:2px!important;">
+            <button class="btn btn-primary text-center" id="btnPurchaseOrder">Order</button>
+        </div>
+    </div>
+</div>
+<!--Alert Modal Start-->
+<div class="modal modal-danger fade" id="modal-danger">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">Alert</h4>
+            </div>
+            <div class="modal-body">
+                <p id="alertQty"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline pull-left" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<!--Alert Modal End-->
+
+<script>
+    var id = 0, listid = 0, indentId = 0, woId = 0, isCartShow = false, windowHeight = 0;
+    var name = "", quantity = 0, productId = 0, distributeId = 0, woQty = 0, woVoucherName = "";
+    var remainingQty = 0, maxQty = 0, totalQty = 0;
+
+    $(document).ready(function () {
+        $("#liForInventory").addClass('active');
+        $("#liForWarehouse").addClass('active');
+
+        $("#divList").append('<div class="loading_partial"></div>');
+        $("#divList").load('@Url.Action("WorkOrderProducts", "Inventory")');
+
+        var available_height = Metronic.getViewPort().height - $('.main-footer').outerHeight() - $('.main-header').outerHeight();
+        windowHeight = $(window).height() - $(".navbar-static-top").height();
+        $("#divForAddtoCart").css('min-height', available_height);
+    });
+
+    //******************************** show CART ******************************************************************
+    $("#showCart").click(function () {
+        isCartShow = true;
+        $("#showing_count_div").removeClass("col-xs-6").addClass("col-xs-4");
+        //$("#search_bar").removeClass("col-sm-12").addClass("col-sm-11");
+        //$("#Div_without_Cart").removeClass('form-horizontal col-lg-12 col-md-12 col-sm-12 col-xs-12');
+        $("#Div_without_Cart").addClass('col-lg-10 col-md-10 col-sm-9 col-xs-12 padding_30px');
+        $("#divForAddtoCart").addClass('col-md-2 col-sm-3 col-xs-12 noPadding');
+        $('#DivForCartList').css('min-height', windowHeight - $("#CartDivHeader").innerHeight() - 112);
+        $("#divForAddtoCart").show();
+        $("#DivForCartList").show();
+        //if (alllocId.length > 0) {
+        //    $("#OrderForPurchase").show();
+        //}
+        $("#showCart").hide();
+
+        $(window).resize(function () {
+            $('#DivForCartList').css('min-height', windowHeight - $("#CartDivHeader").innerHeight() - 112);
+        });
+    });
+
+    //******************************** HIDE CART ******************************************************************
+    $("#CartDivHeader").click(function () {
+        //$("#search_bar").removeClass("col-sm-11").addClass("col-sm-12");
+        $("#showing_count_div").removeClass("col-xs-4").addClass("col-xs-6");
+        $("#Div_without_Cart").removeClass('col-lg-10 col-md-10 col-sm-9 col-xs-12 padding_30px');
+        //$("#Div_without_Cart").addClass('col-lg-12 col-md-12 col-sm-12 col-xs-12 noPadding');
+        $("#divForAddtoCart").hide();
+        $("#DivForCartList").hide();
+        $("#divForAddtoCart").removeClass('col-md-2 col-sm-3 col-xs-12 noPadding');
+        isCartShow = false;
+        $("#showCart").show();
+    });
+
+    //Indent Multiselect
+    function onChangeVoucher()
+    {
+        if (isCartShow == true) {
+            $("#CartDivHeader").click();
+        }
+        $("#btnPurchaseOrder").prop('disabled', true);
+        $("#tbl_Cart_Item").empty();
+        $("#showCart").show();
+
+        if (this.value() > 0)
+        {
+            indentId = this.value();
+            $("#divList").empty();
+            $("#divList").append('<div class="loading_partial"></div>');
+            $("#divList").load('/Inventory/WorkOrderIndentProducts?indentId=' + indentId);
+        }
+        else
+        {
+            indentId = 0;
+            $("#divList").empty();
+            $("#divList").append('<div class="loading_partial"></div>');
+            $("#divList").load('/Inventory/WorkOrderProducts');
+        }
+
+    }
+    function additionalInfo()
+    {
+        return {
+            procureStatus : 2
+        }
+    }
+
+    //*****************************  ITEM ADD INTO CART **********************************************************
+    $("#divList").on("click", ".btnAddItem", function () {
+        id = $(this).data("id");
+        listid = $(this).data("listid");
+        remainingQty = parseInt($(this).data("qty"));
+        totalQty = 0;
+        $('.listQty').each(function () {
+            if ($(this).data("listid") == listid) {
+                totalQty = totalQty + parseInt($(this).text());
+            }
+        });
+        totalQty++;
+
+        if (totalQty > remainingQty) {
+            $("#alertQty").empty();
+            $("#alertQty").append("Total Quantity can not be greater than " + remainingQty);
+            $('#modal-danger').modal('toggle');
+
+            return false;
+        }
+        woId = $(this).data("woid");
+        name = $(this).data("name");
+        woVoucherName = $(this).data("wovoucher");
+        quantity = $(this).data("qty");
+        woQty = $(this).data("woqty");
+        productId = $(this).data("productid");
+        distributeId = $(this).data("distributeid");
+
+
+        if (!isCartShow)
+        {
+            $("#showing_count_div").removeClass("col-xs-6").addClass("col-xs-4");
+            //$("#search_bar").removeClass("col-sm-12").addClass("col-sm-11");
+            $("#Div_without_Cart").removeClass('form-horizontal col-lg-12 col-md-12 col-sm-12 col-xs-12');
+            $("#Div_without_Cart").addClass('col-lg-10 col-md-10 col-sm-9 col-xs-12 padding_30px');
+            $("#divForAddtoCart").addClass('col-md-2 col-sm-3 col-xs-12 noPadding');
+            $('#DivForCartList').css('min-height', windowHeight - $("#CartDivHeader").innerHeight() - 112);
+            $("#divForAddtoCart").show();
+            $("#DivForCartList").show();
+
+            isCartShow = true;
+            $("#showCart").hide();
+            $('#DivForCartList').css('min-height', windowHeight - $("#CartDivHeader").innerHeight() - 112);
+        }
+        $("#tbl_Cart_Item").append('<tr id="cartItem_' + id + '" data-woid="' + woId +'" class="cartItems" data-id="' + id + '" data-productid="' + productId + '" data-distributeid="' + distributeId + '" data-productname="' + name + '">' +
+            '<td width="15%" style="padding: 0px!important;">' +
+            '<p class="cartItemUp" ' +
+            'data-qty="' + remainingQty + '" data-woqty="' + woQty + '" data-listid="' + listid +'" data-id="' + id + '" ' +
+            ' data-showplus="true" style="cursor:pointer;text-align:center;margin-bottom:0px!important;">' +
+            '<i class="fa fa-caret-up "></i>' +
+            '</p>' +
+            '<p id="quentityInArrow_' + id + '" class="listQty" data-listid="' + listid +'" data-id="'+ id +'" style="text-align:center;margin-bottom:0px!important;">1</p>' +
+            '<p class="cartItemDown" data-id="' + id + '"' +
+            'style="cursor:pointer;text-align:center;margin-bottom:0px!important;">' +
+            '<i class="fa fa-caret-down"></i>' +
+            '</p>' +
+            '</td>' +
+            '<td width="60%" style="padding: 39px 0px 0px 0px;"><span>' + name + " | " + woVoucherName + '</span>' +
+            '<td width="5%" style="padding: 30px 0px 0px 0px;">' +
+            '<h4> <i class="fa fa-times-circle cartItemRemove" data-id="' + id + '"></i> </h4>' +
+            '</td>' +
+            '</tr>');
+
+        $("#divForAddtoCart").show();
+        $("#DivForCartList").show();
+        $("#OrderForPurchase").show();
+
+        $("#btnPurchaseOrder").prop('disabled', false);
+
+        $(this).hide();
+        $("#qtyInList_" + id).empty();
+        $("#qtyInList_" + id).append(1);
+        $("#txt_quan_" + id).val(1);
+        $("#divForOrder_" + id).show();
+
+        //$("#spn_quan_" + loid).text(parseFloat($("#spn_quan_" + loid).text()) - 1);
+        //if (alllocId.length > 0) {
+        //    $("#btnRouteOrder").show();
+        //    $("#btnPurchaseOrder").show();
+        //}
+    });
+
+    //*************************** REMOVE ITEM FROM CART **********************************************************
+    $("#DivForCartList").on("click", ".cartItemRemove", function () {
+        id = $(this).data("id");
+        $("#cartItem_" + id).remove();
+        $("#btnAddItem_" + id).show();
+        $("#divForOrder_" + id).hide();
+
+        $("#qtyInList_" + id).empty();
+        $("#qtyInList_" + id).append(1);
+
+        if ($(".cartItems").length == 0)
+        {
+            $("#btnPurchaseOrder").prop('disabled', true);
+        }
+    });
+
+    //********************************* INCREASE ITEM QUANTITY ******************************************
+    $("#DivForCartList,#divList").on("click", ".cartItemPlus,.cartItemUp", function () {
+        id = $(this).data("id");
+        listid = $(this).data("listid");
+        quantity = 0;
+        quantity = parseInt($($("#quentityInArrow_" + id)).text());
+        quantity++;
+
+        totalQty = 0;
+        $('.listQty').each(function () {
+            if ($(this).data("listid") == listid)
+            {
+                totalQty = totalQty + parseInt($(this).text());
+            }
+        });
+        totalQty++;
+
+        remainingQty = parseInt($(this).data("qty"));
+        woQty = parseInt($(this).data("woqty"));
+        if (remainingQty > woQty)
+        {
+            maxQty = woQty;
+        }
+        else
+        {
+            maxQty = remainingQty;
+        }
+
+        if (totalQty > remainingQty || quantity > maxQty)
+        {
+            $("#alertQty").empty();
+            if (totalQty > remainingQty)
+            {
+                $("#alertQty").append("Total Quantity can not be greater than " + remainingQty);
+            }
+            else
+            {
+                $("#alertQty").append("Quantity can not be greater than " + maxQty);
+            }
+            $('#modal-danger').modal('toggle');
+
+            return false;
+        }
+
+        $("#quentityInArrow_" + id).empty();
+        $("#quentityInArrow_" + id).append(quantity);
+
+        $("#qtyInList_" + id).empty();
+        $("#qtyInList_" + id).append(quantity);
+        $("#txt_quan_" + id).val(quantity);
+    });
+    //********************************* DECREASE ITEM QUANTITY ******************************************
+    $("#DivForCartList,#divList").on("click", ".cartItemMinus,.cartItemDown", function () {
+        id = $(this).data("id");
+        quantity = parseInt($($("#quentityInArrow_" + id)).text());
+        quantity--;
+        if (quantity == 0)
+        {
+            $("#cartItem_" + id).remove();
+            $("#btnAddItem_" + id).show();
+            $("#divForOrder_" + id).hide();
+        }
+        else
+        {
+            $("#quentityInArrow_" + id).empty();
+            $("#quentityInArrow_" + id).append(quantity);
+
+            $("#qtyInList_" + id).empty();
+            $("#qtyInList_" + id).append(quantity);
+            $("#txt_quan_" + id).val(quantity);
+        }
+        if ($(".cartItems").length == 0) {
+            $("#btnPurchaseOrder").prop('disabled', true);
+        }
+    });
+
+    //********************************* SHOW TEXT QUANTITY ******************************************
+    $("#divList").on("click", ".qtyInList", function () {
+        id = $(this).data("id");
+        quantity = parseInt($($("#quentityInArrow_" + id)).text());
+
+        $(this).hide();
+        $("#txt_quan_" + id).val(quantity);
+        $("#txt_quan_" + id).show();
+    });
+
+    //********************************* DECREASE/INCREASE ON TEXT QUANTITY CHANGE ******************************************
+    $("#divList").on("focusout", ".txt_quantity", function () {
+        id = $(this).data("id");
+        listid = $(this).data("listid");
+        if ($("#txt_quan_" + id).val() > 0)
+        {
+            quantity = parseInt($("#txt_quan_" + id).val());
+
+            totalQty = 0;
+            $('.listQty').each(function () {
+                if ($(this).data("listid") == listid && $(this).data("id") != id) {
+                    totalQty = totalQty + parseInt($(this).text());
+                }
+            });
+
+            console.log(totalQty);
+
+
+            totalQty = totalQty + quantity;
+
+            remainingQty = parseInt($(this).data("qty"));
+            woQty = parseInt($(this).data("woqty"));
+
+            if (remainingQty > woQty) {
+                maxQty = woQty;
+            }
+            else {
+                maxQty = remainingQty;
+            }
+
+            if (totalQty > remainingQty || quantity > maxQty) {
+                $("#alertQty").empty();
+                if (totalQty > remainingQty) {
+                    $("#alertQty").append("Total Quantity can not be greater than " + remainingQty);
+                }
+                else {
+                    $("#alertQty").append("Quantity can not be greater than " + maxQty);
+                }
+                $('#modal-danger').modal('toggle');
+
+                return false;
+            }
+
+            $("#quentityInArrow_" + id).empty();
+            $("#quentityInArrow_" + id).append(quantity);
+            $("#qtyInList_" + id).empty();
+            $("#qtyInList_" + id).append(quantity);
+
+            $(this).hide();
+            $("#qtyInList_" + id).show();
+        }
+        else
+        {
+            $("#cartItem_" + id).remove();
+            $("#btnAddItem_" + id).show();
+            $("#divForOrder_" + id).hide();
+
+            $("#qtyInList_" + id).empty();
+            $("#qtyInList_" + id).append(1);
+        }
+    });
+
+    //********************************* work order save ******************************************
+    $("#btnPurchaseOrder").click(function () {
+        var orderData = [];
+        $(".cartItems").each(function () {
+            id = parseInt($(this).data("id"));
+            orderData.push({
+                WOId: parseInt($(this).data("woid")),
+                ProductId: parseInt($(this).data("productid")),
+                DistributeId: $(this).data("distributeid"),
+                ProductName: $(this).data("productname"),
+                Quantity: parseInt($("#quentityInArrow_" + id).text()),
+            });
+        });
+
+        $.ajax({
+            url: '@Url.Action("WorkOrderToIndentSave","Inventory")',
+            type: 'POST',
+            data: JSON.stringify({ createdBy: userId, orderData: orderData, indentId: indentId  }),
+            contentType: 'application/json',
+            success: function (data) {
+                if (data == "success") {
+                    window.location.href = "/Inventory/IndentHistory";
+                }
+                else {
+                    alert("Save error...");
+                }
+            }
+        });
+    });
+
+
+    $("#btnBack").click(function () {
+        window.history.back();
+    });
+
+</script>
+
+
+
+
+

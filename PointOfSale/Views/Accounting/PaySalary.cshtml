@@ -1,0 +1,376 @@
+﻿@using PointOfSale.Helpers
+@using System.Configuration;
+@{
+    ViewBag.Title = "PaySalary";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+    PointOfSale.Models.PointOfSale_DBEntities db = new PointOfSale.Models.PointOfSale_DBEntities();
+    int offset = Convert.ToInt32(ConfigurationManager.AppSettings["localTime"]);
+    DateTime now = DateTime.UtcNow.AddMinutes(offset);
+}
+@*<section class="content-header">
+    <h1>
+        Payroll
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="/Configuration/PaymentBody"><i class="fa fa-money"></i> Accounts</a></li>
+        <li class="active">Payroll</li>
+    </ol>
+</section>*@
+<section class="content">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4>Showing List of All Salary Pay</h4>
+            </div>
+            <div class="pull-right">
+                <button class="btn btn-default btnGenerateAll" data-toggle="tooltip" data-original-title="Generate all current month salary">Generate</button>
+                <a class="btn btn-success btnCurrentMonthSalaryLog" href="@Html.EncodedParam("CurrentMonthSalaryLog", "Accounting", new {  }, null)">Current Month Salary Log</a>
+                <a class="btn btn-success" href="@Html.EncodedParam("SalaryLog", "Accounting", new {  }, null)">ALL Salary Log</a>
+                <a class="btn btn-success" href="@Html.EncodedParam("XmlFile", "Accounting", new {  }, null)">Pay Sheet Log</a>
+            </div>
+        </div>
+        <div class="panel-body">
+            @Html.ActionLink("Salary Accounts", "SalaryAccounts", "Accounting", routeValues: null, htmlAttributes: new { @class = "btn btn-default" })
+            @Html.ActionLink("All Payment Transaction", "AllSalaryPaymentTransaction", "Accounting", routeValues: null, htmlAttributes: new { @class = "btn btn-default" })
+            @Html.ActionLink("Temporary Transaction", "TemporaryTransaction", "Accounting", routeValues: null, htmlAttributes: new { @class = "btn btn-default" })
+        </div>
+        <div class="panel-body" style="padding:0px 15px;">
+            <div id="divUserList" style="padding-top:5px;"></div>
+        </div>
+    </div>
+</section>
+<div id="divSalaryPackDetails"></div>
+<div id="divSalaryDueWin"></div>
+<div id="divMultipleMonthWin"></div>
+<div id="divUptoDateSalaryGenerateWin"></div>
+<div id="divSpecificDateSalaryGenerateWin"></div>
+<div id="divSalaryPayWin"></div>
+
+<script>
+    var id = 0, salaryId = 0;
+    $(document).ready(function () {
+        $("#liForAccount").addClass('active');
+        $("#liForPayroll").addClass('active');
+
+        $(".btnGenerateAll").hide();
+        $(".btnCurrentMonthSalaryLog").hide();
+        $('[data-toggle="tooltip"]').tooltip();
+        $("#divUserList").empty();
+        $("#divUserList").append('<div class="loading_partial"></div>');
+        $("#divUserList").load('@Url.Action("UserListForSalary", "Accounting")');
+    });
+
+    //**********************Annual************************************
+    $("#divUserList").on("click", ".annualDetails", function (e) {
+        e.preventDefault();
+        salaryId = $(this).data("salaryid");
+        $("#divSalaryPackDetails").empty();
+        $("#divSalaryPackDetails").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: '50%',
+            height: 234,
+            title: 'Assign Salary Package Details',
+            close: onWindowClose
+        });
+        $("#divSalaryPackDetails").html('<div class="win_loading_half"></div>');
+        var Win_Pck_Details_anuual = $("#divSalaryPackDetails").data("kendoWindow");
+        Win_Pck_Details_anuual.refresh({ url: "/Accounting/ShowSalaryPackageDetails?salaryId=" + salaryId + "&detailsType=annual" });
+        Win_Pck_Details_anuual.center().open();
+        document.documentElement.style.overflow = 'hidden';
+        document.body.scroll = "no";
+    });
+    //**********************Current Month************************************
+    $("#divUserList").on("click", ".monthDetails", function (e) {
+        e.preventDefault();
+        salaryId = $(this).data("salaryid");
+        $("#divSalaryPackDetails").empty();
+        $("#divSalaryPackDetails").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: '50%',
+            height: 234,
+            title: 'Assign Salary Package Details',
+            close: onWindowClose
+        });
+        $("#divSalaryPackDetails").html('<div class="win_loading_half"></div>');
+        var divSalaryMonthly = $("#divSalaryPackDetails").data("kendoWindow");
+        divSalaryMonthly.refresh({ url: "/Accounting/ShowSalaryPackageDetails?salaryId=" + salaryId + "&detailsType=monthly" });
+        divSalaryMonthly.center().open();
+        document.documentElement.style.overflow = 'hidden';
+        document.body.scroll = "no";
+    });
+
+    //Salary create
+    $("#divUserList").on("click", ".CreateSalary", function () {
+        id = $(this).data("id");
+        $.ajax({
+            url: '@Url.Action("CreateUserSalary", "Accounting")',
+            type: 'Post',
+            data: { userId: id, CreatedBy: userId },
+            success: function (data) {
+                if (data === "success")
+                {
+                    alert("Save successfully...");
+                    $("#divUserList").empty();
+                    $("#divUserList").append('<div class="loading_partial"></div>');
+                    $("#divUserList").load('@Url.Action("UserListForSalary", "Accounting")');
+                }
+                else
+                {
+                    alert('error');
+                }
+            },
+            error: function (error)
+            {
+                alert('error');
+            }
+
+        });
+    });
+    //************************ All DUE HISTORY *******************************
+    $("#divUserList").on("click", ".OutDetails", function (e) {
+        e.preventDefault();
+        id = $(this).data("id");
+        $("#divSalaryDueWin").empty();
+        $("#divSalaryDueWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: '60%',
+            height: '80%',
+            title: 'All Outstanding Details',
+            close: onWindowClose
+        });
+        $("#divSalaryDueWin").html('<div class="win_loading_half"></div>');
+        var Win_due_list = $("#divSalaryDueWin").data("kendoWindow");
+        Win_due_list.refresh({ url: "/Accounting/ShowUserDueSalary?userId=" + id  });
+        Win_due_list.center().open();
+        document.documentElement.style.overflow = 'hidden';
+        document.body.scroll = "no";
+
+    });
+    //************************Full Month Salary Generate*******************************
+    $("#divUserList").on("click", ".FullMonthSalaryGenerate", function (e) {
+        e.preventDefault();
+        id = $(this).data("id");
+        var date = new Date();
+        $.ajax({
+            url: '@Url.Action("FullMonthSalaryGenerate", "Accounting")',
+            type: 'Post',
+            data: { userId: id, CreatedBy: userId, check: true, currentDate: true },
+            dataType: "json",
+            success: function (data) {
+                if (data === "success")
+                {
+                    alert("Save successfully...");
+                    $("#divUserList").empty();
+                    $("#divUserList").append('<div class="loading_partial"></div>');
+                    $("#divUserList").load('@Url.Action("UserListForSalary", "Accounting")');
+                }
+                else if (data === "MultipleMonth")
+                {
+                    $("#divUptoDateSalaryGenerateWin").empty();
+                    $("#divSpecificDateSalaryGenerateWin").empty();
+
+                    $("#divMultipleMonthWin").empty();
+                    $("#divMultipleMonthWin").kendoWindow({
+                        actions: ["Close"],
+                        draggable: false,
+                        modal: true,
+                        visible: false,
+                        width: '60%',
+                        height: 217,
+                        title: 'Full Month Salary Generate',
+                        close: onWindowClose
+                    });
+                    $("#divMultipleMonthWin").html('<div class="win_loading_half"></div>');
+                    var multipleMonthWin = $("#divMultipleMonthWin").data("kendoWindow");
+                    multipleMonthWin.refresh({ url: "/Accounting/GenerateMonthSelect?userId=" + id });
+                    multipleMonthWin.center().open();
+                    document.documentElement.style.overflow = 'hidden';
+                    document.body.scroll = "no";
+                }
+                else
+                {
+                    alert('error');
+                }
+            },
+            error: function (error)
+            {
+                alert('error');
+            }
+
+        });
+
+    });
+    //************************Up to Date Salary Generate*******************************
+    $("#divUserList").on("click", ".upToDateSalaryGenerate", function (e) {
+        e.preventDefault();
+        id = $(this).data("id");
+        $("#divMultipleMonthWin").empty();
+        $("#divSpecificDateSalaryGenerateWin").empty();
+        $("#divUptoDateSalaryGenerateWin").empty();
+        $("#divUptoDateSalaryGenerateWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: '60%',
+            height: 257,
+            title: 'Up to Date Salary Generate',
+            close: onWindowClose
+        });
+        $("#divUptoDateSalaryGenerateWin").html('<div class="win_loading_half"></div>');
+        var uptoDateWin = $("#divUptoDateSalaryGenerateWin").data("kendoWindow");
+        uptoDateWin.refresh({ url: "/Accounting/UptoDateSalaryGenerate?userId=" + id });
+        uptoDateWin.center().open();
+        document.documentElement.style.overflow = 'hidden';
+        document.body.scroll = "no";
+    });
+
+    //************************Specific Date Salary Generate*******************************
+    $("#divUserList").on("click", ".SpecificDateSalaryGenerate", function (e) {
+        e.preventDefault();
+        id = $(this).data("id");
+        $("#divMultipleMonthWin").empty();
+        $("#divUptoDateSalaryGenerateWin").empty();
+        $("#divSpecificDateSalaryGenerateWin").empty();
+        $("#divSpecificDateSalaryGenerateWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: '60%',
+            height: 257,
+            title: 'Specific Date Salary Generate',
+            close: onWindowClose
+        });
+        $("#divSpecificDateSalaryGenerateWin").html('<div class="win_loading_half"></div>');
+        var specificWin = $("#divSpecificDateSalaryGenerateWin").data("kendoWindow");
+        specificWin.refresh({ url: "/Accounting/SpecificDateSalaryGenerate?userId=" + id });
+        specificWin.center().open();
+        document.documentElement.style.overflow = 'hidden';
+        document.body.scroll = "no";
+    });
+
+    //*****************************Salary Pay***********************************************
+    //single due pay
+    $("#divSalaryDueWin").on('click', '.btnPay', function () {
+        id = $(this).data("id");
+        $("#divSalaryPayWin").empty();
+        $("#divSalaryPayWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            title: 'Pay',
+            close: onWindowClose
+            //resizable: false
+        });
+        var salaryPayWin = $("#divSalaryPayWin").data("kendoWindow");
+        salaryPayWin.refresh('@Url.Action("SalaryPayWin", "Accounting")?transId=' + id);
+        salaryPayWin.center().open().maximize();
+        document.documentElement.style.overflow = 'hidden';
+        document.body.scroll = "no";
+    });
+
+     //all due pay
+    $("#divUserList").on('click', '.dueSalaryPay', function () {
+        id = $(this).data("id");
+        $("#divSalaryPayWin").empty();
+        $("#divSalaryPayWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            title: 'Pay',
+            close: onWindowClose
+            //resizable: false
+        });
+        var salaryPayWin = $("#divSalaryPayWin").data("kendoWindow");
+        salaryPayWin.refresh('@Url.Action("SalaryPayWin", "Accounting")?userId=' + id);
+        salaryPayWin.center().open().maximize();
+        document.documentElement.style.overflow = 'hidden';
+        document.body.scroll = "no";
+    });
+
+    //current month salary pay
+    $("#divUserList").on('click', '.currentMonthSalaryPay', function () {
+        id = $(this).data("id");
+        $("#divSalaryPayWin").empty();
+        $("#divSalaryPayWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            title: 'Pay',
+            close: onWindowClose
+            //resizable: false
+        });
+        var salaryPayWin = $("#divSalaryPayWin").data("kendoWindow");
+        salaryPayWin.refresh('@Url.Action("SalaryPayWin", "Accounting")?transId=' + id);
+        salaryPayWin.center().open().maximize();
+        document.documentElement.style.overflow = 'hidden';
+        document.body.scroll = "no";
+    });
+
+
+    //all salary pay
+    $("#divUserList").on('click', '.payAllSalary', function () {
+        id = $(this).data("id");
+        $("#divSalaryPayWin").empty();
+        $("#divSalaryPayWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            title: 'Pay',
+            close: onWindowClose
+            //resizable: false
+        });
+        var salaryPayWin = $("#divSalaryPayWin").data("kendoWindow");
+        salaryPayWin.refresh('@Url.Action("SalaryPayWin", "Accounting")?userId=' + id + '&isAllSalaryPay=true');
+        salaryPayWin.center().open().maximize();
+        document.documentElement.style.overflow = 'hidden';
+        document.body.scroll = "no";
+    });
+
+
+
+    //generate all current month salary
+    $(".btnGenerateAll").click(function () {
+         $(".btnGenerateAll").prop('disabled', true);
+         $.ajax({
+            url: '@Url.Action("GenerateAllCurrentSalary", "Accounting")',
+            type: 'Post',
+            data: { generateBy: userId },
+            success: function (data) {
+                $(".btnGenerateAll").prop('disabled', false);
+                if (data === "success")
+                {
+                    alert("Save successfully...");
+                    $("#divUserList").empty();
+                    $("#divUserList").append('<div class="loading_partial"></div>');
+                    $("#divUserList").load('@Url.Action("UserListForSalary", "Accounting")');
+                }
+                else
+                {
+                    alert('error');
+                }
+            },
+            error: function (error)
+            {
+                $(".btnGenerateAll").prop('disabled', false);
+                alert('error');
+            }
+
+         });
+    });
+</script>
+

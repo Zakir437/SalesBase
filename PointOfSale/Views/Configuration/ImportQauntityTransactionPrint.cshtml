@@ -1,0 +1,55 @@
+﻿@model PointOfSale.Models.Supplier
+@{
+    ViewBag.Title = "ImportQauntityTransactionPrint";
+    Layout = "~/Views/Shared/_LayoutPrintPage.cshtml";
+}
+<section class="content-header" style="text-align:center;">
+    <div class="row">
+        <div class="col-xs-2"></div>
+        <div class="col-xs-8">
+            <h3>Import Product Transactions</h3>
+            <p>Cost-POS</p>
+        </div>
+        <div class="col-xs-2">
+            <button class="btn btn-default pull-right" id="btnPrint" style="margin-top:10px;"><i class="fa fa-print"></i>Print</button>
+        </div>
+    </div>
+    <hr />
+</section>
+<div class="row">
+    <div class="col-xs-offset-6 col-xs-6 text-left">
+        <p>
+            Generate By : @HttpContext.Current.Request.Cookies["CookieUserInfo"].Values["UserName"]<br>
+            Generate Date : @DateTime.Now.ToString("MMM dd yyyy hh:mm:ss tt") <br>
+        </p>
+    </div>
+    <div class="col-xs-offset-6 col-xs-6 text-right">
+        @if (Model != null)
+        {
+            <p>
+                Name : @Model.Name<br />
+                Phone : @Model.Phone <br />
+                E-mail : @Model.Email <br />
+            </p>
+        }
+    </div>
+</div>
+<div class="row">
+    <div class="col-xs-12">
+        <div id="divImportTransList"></div>
+    </div>
+</div>
+<script>
+    var passdata = '';
+    $(document).ready(function () {
+        passdata = { productId: "@ViewBag.ProductId", supplierId : @Model.SupplierId };
+        $("#divImportTransList").empty();
+        $("#divImportTransList").append('<div class="loading_partial"></div>');
+        $("#divImportTransList").load('@Url.Action("QuantityTransactionList", "Configuration")', passdata);
+    });
+    $("#btnPrint").click(function () {
+        $("#btnPrint").hide();
+        window.print();
+        $("#btnPrint").show();
+    });
+</script>

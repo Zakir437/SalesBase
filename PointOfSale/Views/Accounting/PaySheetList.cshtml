@@ -1,0 +1,54 @@
+﻿@model IEnumerable<PointOfSale.ModelViews.Accounting.EmpSalaryXmlModelView>
+@using PointOfSale.Helpers
+@using System.Globalization
+@{
+    var count = 0;
+}
+@if (Model.Any())
+{
+        <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+            <tr>
+                <th></th>
+                <th>Name</th>
+                <th>Salary</th>
+                <th>Salary To Pay</th>
+                <th>Present</th>
+                <th>Paid Leave</th>
+                <th>Working Days</th>
+                <th>Holiday</th>
+            </tr>
+            @foreach (var list in Model)
+             {
+                count++;
+                <tr>
+                    <td>
+                        <input type="checkbox" value="@list.Id" id="chk_@list.Id" 
+                               class="chkUser" checked data-transid="@list.Id" /></td>
+                    <td>
+                        <span>@list.EmpName</span>
+                    </td>
+                    <td>@list.ActualSalary.ToString("C", new CultureInfo("bn-BD"))</td>
+                    <td>@list.TotalAmount.ToString("C", new CultureInfo("bn-BD"))</td>
+                    <td>@list.TotalPresent</td>
+                    <td>@list.TotalPaidLeave</td>
+                    <td>@list.TotalWorkingDays</td>
+                    <td>@list.TotalHoliday</td>
+                </tr>
+             }
+        </table>
+}
+else
+{
+    <h4>There is no record to display</h4>
+}
+<script>
+    $('[data-toggle="tooltip"]').tooltip();
+</script>
+
+
+
+
+
+
+
+

@@ -1,0 +1,583 @@
+﻿@model PointOfSale.Models.ViewSupplier
+@using System.Globalization
+@using PointOfSale.Helpers
+@{
+    ViewBag.Title = "SupplierInvoiceInfo";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+    PointOfSale.Models.PointOfSale_DBEntities db = new PointOfSale.Models.PointOfSale_DBEntities();
+    var importList = db.ViewStockImports.Where(a => a.SupplierId == Model.SupplierId && a.IsReturn != true).ToList();
+    long paymentCount = 0;
+    paymentCount = db.ViewPayments.Where(a => a.SupplierId == Model.SupplierId).Count();
+    decimal totalPurchase = 0;
+    decimal? totalDue = 0;
+    long totalImport = 0;
+    decimal averageImportValue = 0;
+    if (importList.Any())
+    {
+        totalPurchase = importList.Sum(a => a.TotalCost);
+        if(importList.Any(a => a.DueAmount > 0))
+        {
+            totalDue = importList.Where(a => a.DueAmount > 0).Sum(a => a.DueAmount);
+        }
+        totalImport = importList.Count();
+        averageImportValue = totalPurchase / totalImport;
+    }
+
+    long productListCount = 0;
+    if (db.ViewImportTransactions.Any(a => a.SupplierId == Model.SupplierId && a.Quantity > 0))
+    {
+        productListCount = db.ViewImportTransactions.Where(a => a.SupplierId == Model.SupplierId && a.Quantity > 0).Count();
+    }
+}
+<style>
+    hr{
+        margin: 0px;
+    }
+    h3{
+        margin-top:10px;
+    }
+</style>
+<section class="content">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4 class="uppercase">
+                    @if (Model.Type == true)
+                    {
+                        <span>Supplier Invoice info</span>
+                    }
+                    else
+                    {
+                        <span>Associate Invoice info</span>
+                    }
+                </h4>
+            </div>
+            <div class="pull-right">
+                @if (Model.Type == true)
+                 {
+                    <a class="btn btn-default" href="/Configuration/Supplier"><i class="fa fa-arrow-left"></i> Back</a>
+                 }
+                else
+                {
+                    <a class="btn btn-default" href="/Configuration/Associate"><i class="fa fa-arrow-left"></i> Back</a>
+                }
+            </div>
+        </div>
+        <div class="panel-body" style="padding:0px 0px 0px 15px;">
+            <h3>@Model.Name</h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <dl class="dl-horizontal">
+                        <dt>Phone</dt>
+                        <dd>@Model.Phone</dd>
+                        @if (Model.Email != null)
+                        {
+                            <dt>E-mail</dt>
+                            <dd>@Model.Email</dd>
+                        }
+                        @if (Model.SupplierSince != null)
+                        {
+                            <dt>Supplier Since</dt>
+                            <dd>@Convert.ToDateTime(Model.SupplierSince).ToString("yyyy MMMM")</dd>
+                        }
+                        <dt>CreatedBy</dt>
+                        <dd>@Model.CreatedBy</dd>
+                        <dt>CreatedDate</dt>
+                        <dd>@Convert.ToDateTime(Model.CreatedDate).ToString("MMM dd,yyyy")</dd>
+                        <dt>UpdatedBy</dt>
+                        <dd>@Model.UpdatedBy</dd>
+                        <dt>UpdatedDate</dt>
+                        <dd>
+                            @if (Model.UpdatedDate != null)
+                            {
+                                @Convert.ToDateTime(Model.CreatedDate).ToString("MMM dd,yyyy")
+                            }
+                            else
+                            {
+                                <span>not yet updated</span>
+                            }
+                        </dd>
+                        <dt>Address</dt>
+                        <dd>@Model.Address</dd>
+                    </dl>
+                </div>
+                <div class="col-md-6">
+                    <dl class="dl-horizontal">
+                        <dt>Debit Amount</dt>
+                        <dd>
+                            @if (Model.DebitAmount > 0)
+                            {
+                                @Model.DebitAmount.Value.ToString("C", new CultureInfo("bn-BD"))
+                            }
+                            else
+                            {
+                                <span>0.00</span>
+                            }
+                        </dd>
+                        <dt>Total Purchase</dt>
+                        <dd>@totalPurchase.ToString("C", new CultureInfo("bn-BD"))</dd>
+                        <dt>Total Due</dt>
+                        <dd>@totalDue.Value.ToString("C", new CultureInfo("bn-BD"))</dd>
+                        <dt>Total Import</dt>
+                        <dd>@totalImport</dd>
+                        <dt>Average Import Value</dt>
+                        <dd>@averageImportValue.ToString("C", new CultureInfo("bn-BD"))</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+        <hr />
+        <div class="panel-body" style="padding:10px 15px">
+            <button type="button" class="btn btn-primary selected" id="btnLedgerInvoice"><i class="fa fa-list-ul"></i> Ledger Invoice</button>
+            <button type="button" class="btn btn-primary" id="btnLedgerInvoiceDetails"><i class="fa fa-list-ul"></i> Ledger Invoice Details</button>
+            <button type="button" class="btn btn-primary" id="btnProducts"><i class="fa fa-list-ul"></i> Products</button>
+            <button type="button" class="btn btn-primary" id="btnPaymentHistory"><i class="fa fa-list-ul"></i> Payment History</button>
+            <a class="btn btn-primary" href="@Html.EncodedParam("CreditReport", "Configuration", new { supplierId = Model.SupplierId}, null)"><i class="fa fa-list-ul"></i> Credit Account</a>
+            <a class="btn btn-primary" href="@Html.EncodedParam("SupplierDebitInfo", "Configuration", new { supplierId = Model.SupplierId}, null)"><i class="fa fa-list-ul"></i> Debit Account</a>
+            <div class="pull-right" style="max-width: 48%!important;">
+                <div class="pull-left" style="padding: 5px 10px;padding-right:5px!important;" id="show_Days_Title"></div>
+                <button class="btn btn-primary btnProductDetailsPrint pull-right" style="height:32px; display:none"><i class="fa fa-print"></i></button>
+                <button class="btn btn-primary btnPrint pull-right" style="height:32px; margin-right:5px;"><i class="fa fa-print"></i></button>
+                <div class="btn-group btn-group-devided pull-right" data-toggle="buttons" style="padding-right:5px;">
+                    <div id="reportrange" class="pull-right" style="background: #fff; cursor: pointer; padding: 5px 10px; border: 1px solid #ccc; width: 100%">
+                        <span></span> <b class="caret"></b>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="panel-body" style="padding:0px 15px;">
+            <div id="divSupplierInvoiceList"></div>
+            <div class="text-center" style="margin-bottom:10px">
+                <button class="btn btn-primary" id="btnSeeMore"><i class="fa fa-arrow-down"></i> See more</button>
+            </div>
+        </div>
+    </div>
+</section>
+<div id="divImportDetailsWin"></div>
+<div id="divPaymentTranWin"></div>
+<div id="divProQuantityTranWin"></div>
+<script>
+    var importId = 0, productId = 0, distributeId = 0, count = 20, isPrint = false;
+    var listType = 1;
+    var days = 0, from = null, to = null;
+    var passdata = '';
+    var start = moment();
+    var end = moment().subtract(1, 'days');
+    $(document).ready(function () {
+        $('.ranges li').first().click();
+        $("#liForCRM").addClass('active');
+        if ('@Model.Type' == 'True')
+        {
+            $("#liForSupplier").addClass('active');
+        }
+        else
+        {
+            $("#liForAssociate").addClass('active');
+        }
+    });
+    $("#btnLedgerInvoice").click(function () {
+        listType = 1; // for ledger invoice
+        $('.ranges li').first().click();
+        $("#btnLedgerInvoice").addClass("selected");
+        $("#btnLedgerInvoiceDetails").removeClass("selected");
+        $("#btnProducts").removeClass("selected");
+        $("#btnPaymentHistory").removeClass("selected");
+    });
+
+    $("#btnLedgerInvoiceDetails").click(function () {
+        listType = 2; // for ledger invoice details
+        $('.ranges li').first().click();
+        $("#btnLedgerInvoiceDetails").addClass("selected");
+        $("#btnLedgerInvoice").removeClass("selected");
+        $("#btnProducts").removeClass("selected");
+        $("#btnPaymentHistory").removeClass("selected");
+    });
+
+    $("#btnProducts").click(function () {
+        listType = 3; // for import products
+        $('.ranges li').first().click();
+        $("#btnProducts").addClass("selected");
+        $("#btnLedgerInvoiceDetails").removeClass("selected");
+        $("#btnLedgerInvoice").removeClass("selected");
+        $("#btnPaymentHistory").removeClass("selected");
+    });
+
+    $("#btnPaymentHistory").click(function () {
+        listType = 4; // for paymentHistory
+        $('.ranges li').first().click();
+        $("#btnPaymentHistory").addClass("selected");
+        $("#btnProducts").removeClass("selected");
+        $("#btnLedgerInvoiceDetails").removeClass("selected");
+        $("#btnLedgerInvoice").removeClass("selected");
+    });
+    //View Import transaction details
+    $("#divSupplierInvoiceList").on('click', ".btnImportDetails", function () {
+        importId = $(this).data("id");
+        $("#divImportDetailsWin").empty();
+        $("#divImportDetailsWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 892,
+            height: 582,
+            title: 'Import Transaction',
+            resizable: false
+        });
+        var impTranWin = $("#divImportDetailsWin").data("kendoWindow");
+        impTranWin.refresh('@Url.Action("ImportTransaction", "PointOfSale")?importId=' + importId);
+        impTranWin.center().open();
+    });
+
+     //Show payment history by importId
+    $("#divSupplierInvoiceList").on('click', '.btnShowPaymentHistory', function () {
+        importId = $(this).data("id");
+        $("#divPaymentTranWin").empty();
+        $("#divPaymentTranWin").kendoWindow({
+                actions: ["Close"],
+                draggable: false,
+                modal: true,
+                visible: false,
+                width: 1050,
+                height: 405,
+                resizable: false,
+                title: 'Payment Transaction'
+            });
+        var paymentTranWin = $("#divPaymentTranWin").data("kendoWindow");
+        paymentTranWin.refresh('@Url.Action("ImportPaymentListPartial", "Configuration")?importId=' + importId);
+        paymentTranWin.center().open();
+    });
+
+    //Show product quantity transaction
+    $("#divSupplierInvoiceList").on('click', '.btnProQuantityTran', function () {
+        productId = $(this).data("id");
+        distributeId = $(this).data("distributeid");
+        $("#divProQuantityTranWin").empty();
+        $("#divProQuantityTranWin").kendoWindow({
+                actions: ["Close"],
+                draggable: false,
+                modal: true,
+                visible: false,
+                width: 800,
+                height: 700,
+                resizable: false,
+                title: 'Quantity Transaction'
+            });
+        var quantityTran = $("#divProQuantityTranWin").data("kendoWindow");
+        quantityTran.refresh('@Url.Action("QuantityTransaction", "Configuration")?productId=' + productId + '&distributeId=' + distributeId + '&supplierId=' + @Model.SupplierId);
+        quantityTran.center().open();
+    });
+
+    @***************DateRange Start******************@
+    $('#reportrange').daterangepicker({
+        startDate: start,
+        endDate: end,
+        ranges: {
+            'Select Date': [moment(), moment().subtract(1, 'days')],
+            'Today': [moment(), moment()],
+            'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+            'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+        }
+    }, cb);
+    cb(start, end);
+    start = moment(); end = moment();
+    $(".applyBtn").click(function () {
+        $("#searchstring").val("");
+        from = $("input[name*='daterangepicker_start']").val();
+        to = $("input[name*='daterangepicker_end']").val();
+        btn_CustomDate(from, to);
+    });
+
+    $('.ranges').on("click", "li", function () {
+        var day = $(this).text();
+        if (day == "Select Date") {
+            btn_All();
+        } else {
+            if (day == "Today") {
+                btn_today();
+            } else if (day == "Last 7 Days") {
+                btn_last_seven();
+            } else if (day == "Last 30 Days") {
+                btn_last_thirty();
+            }
+        }
+    });
+    function cb(start, end) {
+        if (start == null && end == null) {
+            $('#reportrange span').html("Select Date");
+            return;
+        }
+        else if ((!start._isValid && !end._isValid)) {
+            $('#reportrange span').html("Select Date");
+            return;
+        } else if (start._d > end._d) {
+            $('#reportrange span').html("Select Date");
+            return;
+        }
+        $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+    }
+    function btn_today() {
+        days = 1;
+        from = null;
+        to = null;
+        $(".btnPrint").prop("disabled", false);
+        $("#btnSeeMore").hide();
+        $('#show_Days_Title').html("Today");
+        passdata = { days: 1, supplierId: @Model.SupplierId, isPrint: isPrint };
+        if (listType == 1)
+        {
+
+            $("#divSupplierInvoiceList").empty();
+            $("#divSupplierInvoiceList").append('<div class="loading_partial"></div>');
+            $("#divSupplierInvoiceList").load('@Url.Action("LedgerInvoiceList", "Configuration")', passdata);
+        }
+        else if (listType == 2)
+        {
+
+             $("#divSupplierInvoiceList").empty();
+             $("#divSupplierInvoiceList").append('<div class="loading_partial"></div>');
+             $("#divSupplierInvoiceList").load('@Url.Action("LedgerInoiceDetailsList", "Configuration")', passdata);
+        }
+        else if (listType == 3)
+        {
+             $("#divSupplierInvoiceList").empty();
+             $("#divSupplierInvoiceList").append('<div class="loading_partial"></div>');
+             $("#divSupplierInvoiceList").load('@Url.Action("ImportProductList", "Configuration")', passdata);
+        }
+        else if (listType == 4)
+        {
+            $("#divSupplierInvoiceList").empty();
+            $("#divSupplierInvoiceList").append('<div class="loading_partial"></div>');
+            $("#divSupplierInvoiceList").load('@Url.Action("ImportPaymentList", "Configuration")', passdata);
+        }
+    }
+    function btn_last_seven() {
+        days = 7;
+        from = null;
+        to = null;
+        $(".btnPrint").prop("disabled", false);
+        $("#btnSeeMore").hide();
+        $('#show_Days_Title').html("Last 7 Days");
+        passdata = { days: 7, supplierId: @Model.SupplierId, isPrint: isPrint };
+        if (listType == 1)
+        {
+            $("#divSupplierInvoiceList").empty();
+            $("#divSupplierInvoiceList").append('<div class="loading_partial"></div>');
+            $("#divSupplierInvoiceList").load('@Url.Action("LedgerInvoiceList", "Configuration")', passdata);
+        }
+        else if (listType == 2)
+        {
+             $("#divSupplierInvoiceList").empty();
+             $("#divSupplierInvoiceList").append('<div class="loading_partial"></div>');
+             $("#divSupplierInvoiceList").load('@Url.Action("LedgerInoiceDetailsList", "Configuration")', passdata);
+        }
+        else if (listType == 3)
+        {
+             $("#divSupplierInvoiceList").empty();
+             $("#divSupplierInvoiceList").append('<div class="loading_partial"></div>');
+             $("#divSupplierInvoiceList").load('@Url.Action("ImportProductList", "Configuration")', passdata);
+        }
+        else if (listType == 4)
+        {
+            $("#divSupplierInvoiceList").empty();
+            $("#divSupplierInvoiceList").append('<div class="loading_partial"></div>');
+            $("#divSupplierInvoiceList").load('@Url.Action("ImportPaymentList", "Configuration")', passdata);
+        }
+    }
+    function btn_last_thirty() {
+        days = 30;
+        from = null;
+        to = null;
+        $(".btnPrint").prop("disabled", false);
+        $("#btnSeeMore").hide();
+        $('#show_Days_Title').html("Last 30 Days");
+        passdata = { days: 30, supplierId: @Model.SupplierId, isPrint: isPrint };
+        if (listType == 1)
+        {
+            $("#divSupplierInvoiceList").empty();
+            $("#divSupplierInvoiceList").append('<div class="loading_partial"></div>');
+            $("#divSupplierInvoiceList").load('@Url.Action("LedgerInvoiceList", "Configuration")', passdata);
+        }
+        else if (listType == 2)
+        {
+             $("#divSupplierInvoiceList").empty();
+             $("#divSupplierInvoiceList").append('<div class="loading_partial"></div>');
+             $("#divSupplierInvoiceList").load('@Url.Action("LedgerInoiceDetailsList", "Configuration")', passdata);
+        }
+        else if (listType == 3)
+        {
+
+             $("#divSupplierInvoiceList").empty();
+             $("#divSupplierInvoiceList").append('<div class="loading_partial"></div>');
+             $("#divSupplierInvoiceList").load('@Url.Action("ImportProductList", "Configuration")', passdata);
+        }
+        else if (listType == 4)
+        {
+            $("#divSupplierInvoiceList").empty();
+            $("#divSupplierInvoiceList").append('<div class="loading_partial"></div>');
+            $("#divSupplierInvoiceList").load('@Url.Action("ImportPaymentList", "Configuration")', passdata);
+        }
+    }
+    function btn_All() {
+        days = 0;
+        from = null;
+        to = null;
+        count = 10;
+        $(".btnPrint").prop("disabled", true);
+        $("#btnSeeMore").hide();
+        $(".btnProductDetailsPrint").hide();
+        $('#show_Days_Title').html("");
+        $('#reportrange span').html("Select Date");
+        passdata = { supplierId: @Model.SupplierId, count: count, isPrint: isPrint };
+        if (listType == 1)
+        {
+            if (@totalImport > count)
+            {
+                $("#btnSeeMore").show();
+            }
+            $("#divSupplierInvoiceList").empty();
+            $("#divSupplierInvoiceList").append('<div class="loading_partial"></div>');
+            $("#divSupplierInvoiceList").load('@Url.Action("LedgerInvoiceList", "Configuration")', passdata);
+        }
+        else if (listType == 2)
+        {
+            if (@totalImport > count)
+             {
+                $("#btnSeeMore").show();
+             }
+             $("#divSupplierInvoiceList").empty();
+             $("#divSupplierInvoiceList").append('<div class="loading_partial"></div>');
+             $("#divSupplierInvoiceList").load('@Url.Action("LedgerInoiceDetailsList", "Configuration")', passdata);
+        }
+        else if (listType == 3)
+        {
+            $(".btnPrint").prop("disabled", false);
+            $(".btnProductDetailsPrint").show();
+
+            if (@productListCount > count)
+            {
+                $("#btnSeeMore").show();
+            }
+             $("#divSupplierInvoiceList").empty();
+             $("#divSupplierInvoiceList").append('<div class="loading_partial"></div>');
+             $("#divSupplierInvoiceList").load('@Url.Action("ImportProductList", "Configuration")', passdata);
+        }
+        else if (listType == 4)
+        {
+            if (@paymentCount > count)
+            {
+                $("#btnSeeMore").show();
+            }
+            $("#divSupplierInvoiceList").empty();
+            $("#divSupplierInvoiceList").append('<div class="loading_partial"></div>');
+            $("#divSupplierInvoiceList").load('@Url.Action("ImportPaymentList", "Configuration")', passdata);
+        }
+    }
+    function btn_CustomDate(from, to) {
+        days = 0;
+        $(".btnPrint").prop("disabled", false);
+        $("#btnSeeMore").hide();
+        passdata = { from: new Date(from).toISOString(), to: new Date(to).toISOString(), supplierId: @Model.SupplierId, isPrint: isPrint };
+        $('#show_Days_Title').html("Custom Range");
+        if (listType == 1)
+        {
+            $("#divSupplierInvoiceList").empty();
+            $("#divSupplierInvoiceList").append('<div class="loading_partial"></div>');
+            $("#divSupplierInvoiceList").load('@Url.Action("LedgerInvoiceList", "Configuration")', passdata);
+        }
+        else if (listType == 2)
+        {
+             $("#divSupplierInvoiceList").empty();
+             $("#divSupplierInvoiceList").append('<div class="loading_partial"></div>');
+             $("#divSupplierInvoiceList").load('@Url.Action("LedgerInoiceDetailsList", "Configuration")', passdata);
+        }
+        else if (listType == 3)
+        {
+             $("#divSupplierInvoiceList").empty();
+             $("#divSupplierInvoiceList").append('<div class="loading_partial"></div>');
+             $("#divSupplierInvoiceList").load('@Url.Action("ImportProductList", "Configuration")', passdata);
+        }
+        else if (listType == 4)
+        {
+            $("#divSupplierInvoiceList").empty();
+            $("#divSupplierInvoiceList").append('<div class="loading_partial"></div>');
+            $("#divSupplierInvoiceList").load('@Url.Action("ImportPaymentList", "Configuration")', passdata);
+        }
+    }
+    @***************DateRange End******************@
+
+    //Supplier Invoice Info Print
+    $(".btnPrint").click(function () {
+        var data = "supplierId=" + @Model.SupplierId + "&days=" + days + "&from=" + from + "&to=" + to + "&listType=" + 1; // listype = 1 for print import products
+        if (listType == 1)
+        {
+            window.open('@Url.Action("LedgerInvPrint", "Configuration")?q=' + btoa(data), '_blank');
+        }
+        else if (listType == 2)
+        {
+            window.open('@Url.Action("LedgerInvDetailsPrint", "Configuration")?q=' + btoa(data), '_blank');
+        }
+        else if (listType == 3)
+        {
+            window.open('@Url.Action("ImportProductsPrint", "Configuration")?q=' + btoa(data), '_blank');
+        }
+        else if (listType == 4)
+        {
+            window.open('@Url.Action("ImportPaymentPrint", "Configuration")?q=' + btoa(data), '_blank');
+        }
+    });
+
+    // Import product print with transaction
+    $(".btnProductDetailsPrint").click(function () {
+        var data = "supplierId=" + @Model.SupplierId + "&days=" + days + "&from=" + from + "&to=" + to + "&listType=" + 2; // listype = 2 for print import products with transaction
+        window.open('@Url.Action("ImportProductsPrint", "Configuration")?q=' + btoa(data), '_blank');
+    });
+
+    //See more data
+    $("#btnSeeMore").click(function () {
+        count = count + 10;
+        passdata = { supplierId: @Model.SupplierId, count: count, isPrint: isPrint };
+        if (listType == 1)
+        {
+            if (count >= @totalImport)
+            {
+                $("#btnSeeMore").hide();
+            }
+            $("#divSupplierInvoiceList").empty();
+            $("#divSupplierInvoiceList").append('<div class="loading_partial"></div>');
+            $("#divSupplierInvoiceList").load('@Url.Action("LedgerInvoiceList", "Configuration")', passdata);
+        }
+        else if (listType == 2)
+        {
+            if (count >= @totalImport)
+            {
+                $("#btnSeeMore").hide();
+            }
+            $("#divSupplierInvoiceList").empty();
+            $("#divSupplierInvoiceList").append('<div class="loading_partial"></div>');
+            $("#divSupplierInvoiceList").load('@Url.Action("LedgerInoiceDetailsList", "Configuration")', passdata);
+        }
+        else if (listType == 3)
+        {
+            if (count >= @productListCount)
+            {
+                $("#btnSeeMore").hide();
+            }
+            $("#divSupplierInvoiceList").empty();
+            $("#divSupplierInvoiceList").append('<div class="loading_partial"></div>');
+            $("#divSupplierInvoiceList").load('@Url.Action("ImportProductList", "Configuration")', passdata);
+        }
+        else if (listType == 4)
+        {
+            if (count >= @paymentCount)
+            {
+                $("#btnSeeMore").hide();
+            }
+            $("#divSupplierInvoiceList").empty();
+            $("#divSupplierInvoiceList").append('<div class="loading_partial"></div>');
+            $("#divSupplierInvoiceList").load('@Url.Action("ImportPaymentList", "Configuration")', passdata);
+        }
+    });
+
+
+</script>

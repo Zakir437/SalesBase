@@ -1,0 +1,40 @@
+﻿@{
+    ViewBag.Title = "Document";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<h2>Document</h2>
+<div class="row">
+    <div class="col-md-12">
+        <button class="btn btn-default" id="btnCreateDocumentWin">Add</button>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div id="divDocumentList"></div>
+    </div>
+</div>
+<div id="divDocumentWin"></div>
+<script>
+    $(document).ready(function () {
+        $("#divDocumentList").empty();
+        $("#divDocumentList").append('<div class="loading_partial"></div>');
+        $("#divDocumentList").load('@Url.Action("DocumentList", "Configuration")?supplierId=' + '@ViewBag.SupplierId');
+    });
+
+    $("#btnCreateDocumentWin").click(function () {
+        $("#divDocumentWin").empty();
+        $("#divDocumentWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 679,
+            height: 271,
+            title: 'Document',
+            //resizable:false
+        });
+        var documentWin = $("#divDocumentWin").data("kendoWindow");
+        documentWin.refresh('@Url.Action("DocumentCreate", "Configuration")');
+        documentWin.center().open();
+    });
+</script>

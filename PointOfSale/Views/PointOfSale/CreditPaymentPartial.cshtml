@@ -1,0 +1,56 @@
+﻿@model PointOfSale.ModelViews.CustomerModelView
+@Html.HiddenFor(a => a.CustomerId)
+@{ 
+    decimal validAmount = 0;
+    validAmount = Model.CreditAmount;
+    if(Model.IsDebitAccounts)
+    {
+        validAmount = (Model.DebitLimit - Model.AvailableDebit) + Model.CreditAmount;
+    }
+}
+<div class="row">
+    <div class="col-md-5">
+        <dl class="dl-horizontal">
+            <dt>Credit Limit</dt>
+            <dd>@Model.CreditLimit</dd>
+            <dt>Total Due</dt>
+            <dd>@Model.CreditAmount</dd>
+        </dl>
+    </div>
+    <div class="col-md-5">
+        @if (Model.IsDebitAccounts == true)
+         {
+            <dl class="dl-horizontal">
+                <dt>Debit Limit</dt>
+                <dd>@Model.DebitLimit</dd>
+                <dt>Available Debit Amount</dt>
+                <dd>@Model.AvailableDebit</dd>
+            </dl>
+         }
+        else
+        {
+            <div class="text-center">
+                <h4>Debit account not found</h4>
+            </div>
+        }
+    </div>
+</div>
+
+@*<div class="editor-label"><label for="CreditLimit">Credit Limit</label></div>
+<div class="editor-field">
+    @Html.DisplayFor(model => model.CreditLimit, new { htmlattributes = new { @style = "width:100%; max-width:100%" } })
+</div>
+<div class="editor-label"><label for="CreditAmount">Total Due</label></div>
+<div class="editor-field">
+    @Html.DisplayFor(model => model.CreditAmount, new { htmlattributes = new { @style = "width:100%; max-width:100%" } })
+</div>*@
+<div class="editor-label"><label for="CreditPay">Pay Amount(Tk)</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.CreditPay, new { htmlattributes = new { @min=1, @max= @validAmount, @class = "k-textbox", @style = "width:100%; max-width:100%", required="required", validationMessage="Please enter valid amount", type="number" } })
+    @Html.ValidationMessageFor(model => model.CreditPay, "", new { @class = "text-Danger" })
+</div>
+<script>
+    $(document).ready(function () {
+        totalDue = parseFloat(@Model.CreditAmount);
+    });
+</script>

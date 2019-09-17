@@ -1,0 +1,12 @@
+﻿<div class="editor-label"><label for="AssociateId">Borrow From</label></div>
+<div class="editor-field">
+    @(Html.Kendo().DropDownList()
+                     .Name("AssociateId")
+                     .BindTo(ViewBag.AssociateList as SelectList)
+                     .DataTextField("Text")
+                     .DataValueField("Value")
+                     .OptionLabel("--Select one associate--")
+                     .HtmlAttributes(new { style = "width:100%", required = "required", validationMessage = "Please select one associate" })
+    )
+    @Html.ValidationMessage("AssociateId", "", new { @class = "text-Danger" })
+</div>

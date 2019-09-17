@@ -1,0 +1,171 @@
+﻿@{
+    ViewBag.Title = "ImportHistory";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+    long countNumber = ViewBag.Count;
+}
+<style>
+    p{
+        margin:10px;
+    }
+    hr {
+        margin: 0px;
+    }
+    .k-input {
+        height: 26px !important;
+    }
+</style>
+<section class="content">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4 class="uppercase">Import History</h4>
+            </div>
+            <div class="pull-right">
+                @*<a class="btn btn-default" href="/Configuration/Product"><i class="fa fa-arrow-left"></i> Back</a>*@
+            </div>
+        </div>
+        <p>
+            <a class="btn btn-info" href="/Stock/Import"><i class="fa fa-list-ul"></i> Import</a>
+            <a class="btn btn-info" href="/Inventory/ImportByIndentMRR"><i class="fa fa-list-ul"></i> Import By Indent MRR</a>
+        </p>
+        <hr />
+        <div class="panel-body">
+            <div style="width:50%!important; margin-bottom:5px;">
+                @(Html.Kendo().MultiSelect()
+                            .Name("importMultiSelect")
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .Placeholder("Type import refference no...")
+                            .AutoBind(false)
+                            .Events(e => e.Change("onChange"))
+                            .HtmlAttributes(new { style = "width: 100%;" })
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("GetImportList", "Stock").Data("additionalData");
+                                })
+                                .ServerFiltering(true);
+                            }))
+                <span class="k-icon k-i-search" style="margin-top:-25px;float:right;margin-right:10px; position:relative">&nbsp;</span>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div id="divHistoryList"></div>
+                    <p class="text-center">
+                        <button class="btn btn-primary" id="btnSeeMore"><i class="fa fa-arrow-down"></i> See more</button>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<div id="divReturnAlertWin"></div>
+<div id="divReturnWin"></div>
+<script>
+    var importId = 0, count = 10;
+    $(document).ready(function () {
+        $("#liForInventory").addClass('active');
+        $("#liForStock").addClass('active');
+
+        $("#btnSeeMore").hide();
+        if (@countNumber > count)
+        {
+            $("#btnSeeMore").show();
+        }
+        $("#divHistoryList").empty();
+        $("#divHistoryList").append('<div class="loading_partial"></div>');
+        $("#divHistoryList").load('/Stock/ImportList?count=' + count);
+    });
+
+
+    //*****************************Import Voucher Multiselect ************************
+    function onChange()
+    {
+        var selectId = "";
+        selectId = this.value();
+        $("#btnSeeMore").hide();
+
+        if (selectId.length > 0)
+        {
+            $("#divHistoryList").empty();
+            $("#divHistoryList").append('<div class="loading_partial"></div>');
+            $("#divHistoryList").load('@Url.Action("ImportList", "Stock")?importIds=' + selectId);
+        }
+        else
+        {
+            count = 10;
+            if (@countNumber > count)
+            {
+                $("#btnSeeMore").show();
+            }
+            $("#divHistoryList").empty();
+            $("#divHistoryList").append('<div class="loading_partial"></div>');
+            $("#divHistoryList").load('/Stock/ImportList?count=' + count);
+        }
+    }
+    function additionalData() {
+        return {
+            text: ($.trim($("#importMultiSelect").data("kendoMultiSelect").input.val()) == "Type import refference no..." ? "" : $.trim($("#importMultiSelect").data("kendoMultiSelect").input.val()))
+        }
+    }
+
+
+    //Full return
+    $("#divHistoryList").on('click', '.btnReturn', function () {
+        importId = $(this).data("id");
+        $("#divReturnAlertWin").empty();
+        $("#divReturnAlertWin").kendoWindow({
+                actions: ["Close"],
+                draggable: false,
+                modal: true,
+                visible: false,
+                width: 647,
+                height: 192,
+                resizable: false,
+                title: 'Alert'
+        });
+        var alertWin = $("#divReturnAlertWin").data("kendoWindow");
+        alertWin.refresh('@Url.Action("ReturnAlert", "Stock")?importId=' + importId);
+        alertWin.center().open();
+    });
+
+    $("#divReturnAlertWin").on('click', '#btnRefundConfirm', function () {
+        var isTotalReturn = true;
+        $("#divReturnAlertWin").data("kendoWindow").close();
+        $("#divReturnAlertWin").empty();
+        $("#divReturnWin").empty();
+        $("#divReturnWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 767,
+            height: 280,
+            title: 'Pay',
+            resizable: false
+        });
+        var returnWin = $("#divReturnWin").data("kendoWindow");
+        returnWin.refresh('@Url.Action("ReturnPay", "Stock")?importId=' + importId);
+        returnWin.center().open().maximize();
+    });
+
+
+      //******************************See more data***********************************
+    $("#btnSeeMore").click(function () {
+        count = count + 10;
+        $(this).hide();
+        if (@countNumber > count)
+        {
+            $(this).show();
+        }
+        $("#divHistoryList").empty();
+        $("#divHistoryList").append('<div class="loading_partial"></div>');
+        $("#divHistoryList").load('/Stock/ImportList?count=' + count);
+    });
+
+
+
+
+
+</script>

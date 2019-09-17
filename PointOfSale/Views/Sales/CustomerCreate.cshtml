@@ -1,0 +1,128 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin-bottom:4%;margin-top:2%;">
+    <div id="div_Customer_Create"></div>
+    <div class="k-edit-buttons k-state-default" style="margin-left:30px;">
+        <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnCustomerCreate"><span class="k-icon k-update"></span>Create</button>
+        <button type="reset" class="k-button k-button-icontext k-grid-update" id="btnRefresh"><span class="k-icon k-i-refresh"></span>Refresh</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#div_Customer_Create").append('<div class="tiny_loading"></div>');
+        $("#div_Customer_Create").load('@Url.Action("CustomerCreatePartial", "Sales")');
+    });
+    $("#btnRefresh").click(function () {
+        $("#div_Customer_Create").empty();
+        $("#div_Customer_Create").append('<div class="tiny_loading"></div>');
+        $("#div_Customer_Create").load('@Url.Action("CustomerCreatePartial", "Sales")');
+    });
+
+    $("#btnCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+    var validation = $("#div_Customer_Create").kendoValidator({
+        rules: {
+            remoteEmail: function (input) {
+                var remoteAttr = input.attr("data-val-remote-url");
+                if (typeof remoteAttr === typeof undefined || remoteAttr === false) {
+                    return true;
+                }
+                var isInvalid;
+                var data = {};
+                var Id = $("#CustomerId").val();
+                var Email = $.trim($("#Email").val());
+                data = { Id: Id, Email: Email };
+                $.ajax({
+                    url: remoteAttr,
+                    mode: "abort",
+                    port: "validate" + input.attr('name'),
+                    dataType: "json",
+                    type: input.attr("data-val-remote-type"),
+                    data: data,
+                    async: false,
+                    success: function (response) {
+                        isInvalid = response;
+                        if (isInvalid === true) {
+                            isInvalid = true;
+                        }
+                        else {
+                            isInvalid = false;
+                        }
+                    }
+                });
+                return isInvalid;
+            },
+            remoteMembershipNumber: function (input) {
+                var remoteAttr = input.attr("data-val-remote-url");
+                if (typeof remoteAttr === typeof undefined || remoteAttr === false) {
+                    return true;
+                }
+                var isInvalid;
+                var data = {};
+                var Id = $("#CustomerId").val();
+                var Number = $.trim($("#MembershipNumber").val());
+                data = { Id: Id, Number: Number };
+                $.ajax({
+                    url: remoteAttr,
+                    mode: "abort",
+                    port: "validate" + input.attr('name'),
+                    dataType: "json",
+                    type: input.attr("data-val-remote-type"),
+                    data: data,
+                    async: false,
+                    success: function (response) {
+                        isInvalid = response;
+                        if (isInvalid === true) {
+                            isInvalid = true;
+                        }
+                        else {
+                            isInvalid = false;
+                        }
+                    }
+                });
+                return isInvalid;
+            }
+        },
+        messages: {
+            remoteEmail: function (input) {
+                return input.data('val-remote');
+            },
+            remoteMembershipNumber: function (input) {
+                return input.data('val-remote');
+            },
+        }
+    }).data("kendoValidator");
+    $("#btnCustomerCreate").click(function () {
+        if (validation.validate()) {
+
+            $(this).prop('disabled', true);
+
+            var sendData = {
+                CustomerId: $("#CustomerId").val(),
+                Name: $.trim($("#Name").val()),
+                Email: $.trim($("#Email").val()),
+                Phone: $.trim($("#Phone").val()),
+                IsCreditAllowed: $("#IsCreditAllowed").val(),
+                CreditLimitId: $("#CreditLimitId").val(),
+                Address: $.trim($("#Address").val()),
+                MembershipNumber: $.trim($("#MembershipNumber").val()),
+                CreatedBy: userId
+            }
+            $.ajax({
+                url: '@Url.Action("CustomerCreateSave", "Sales")',
+                type: "POST",
+                data: sendData,
+                success: function (data) {
+                    if (data == "success") {
+                        $("#divCustomerWindow").data("kendoWindow").close();
+                        $('#Customer').data('kendoDropDownList').dataSource.read();
+                    }
+                    else {
+                        alert("Customer Save Error");
+                    }
+                }
+            });
+        }
+    });
+</script>

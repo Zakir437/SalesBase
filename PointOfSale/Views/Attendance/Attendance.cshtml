@@ -1,0 +1,223 @@
+﻿@using PointOfSale.Helpers
+@{
+    ViewBag.Title = "Attendance";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+}
+@*<section class="content-header">
+    <h1>
+        Attendance
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-user"></i> HR</a></li>
+        <li class="active">Attendance</li>
+    </ol>
+</section>*@
+<section class="content">
+    @*<div class="row">
+        <div class="col-md-12">
+            @Html.ActionLink("User", "AllUserLists", "HumanResource", routeValues: null, htmlAttributes: new { @class = "btn btn-default" })
+            @Html.ActionLink("Attendance", "Attendance", "Attendance", routeValues: null, htmlAttributes: new { @class = "btn btn-default selected" })
+            @Html.ActionLink("Working Schedule", "WorkingSchedule", "HumanResource", routeValues: null, htmlAttributes: new { @class = "btn btn-default" })
+            @Html.ActionLink("Holiday", "Holiday", "Holiday", routeValues: null, htmlAttributes: new { @class = "btn btn-default" })
+            @Html.ActionLink("Leave Type", "LeaveType", "Configuration", routeValues: null, htmlAttributes: new { @class = "btn btn-default" })
+            @Html.ActionLink("System-User", "User", "Configuration", routeValues: null, htmlAttributes: new { @class = "btn btn-default" })
+            <br />
+        </div>
+    </div>*@
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4>ALL USER LISTS</h4>
+            </div>
+            <div class="pull-right">
+                <button class="btn btn-default" id="btnManuallAtt">Manually Attendance</button>
+                <a class="btn btn-success" href="@Html.EncodedParam("AttendanceLog", "Attendance", new {  }, null)">ALL ATTENDANCE LOG</a>
+            </div>
+        </div>
+        <div class="panel-body">
+            <div id="divUserList"></div>
+        </div>
+    </div>
+</section>
+<div id="Win_Leave"></div>
+<div id="Win_Atten_His"></div>
+<div id="divManuallyAttWin"></div>
+<script id="temp_win_For_Alert" type="text/x-kendo-template">
+    <div style="padding:1em;">
+        <p style="font-size: 14px; padding: 10px"> #=message# </p>
+        <div style="text-align: right;">
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="temp_win_Ok"><span class="k-icon k-update"></span>OK</button>
+        </div>
+    </div>
+</script>
+<script>
+    var id = 0, value = 0, attid = 0, atttype = 0;
+    $(document).ready(function () {
+        $("#liForHr").addClass('active');
+        $("#liForAttendance").addClass('active');
+
+        $("#divUserList").empty();
+        $("#divUserList").append('<div class="loading_partial"></div>');
+        $("#divUserList").load('@Url.Action("UserLists", "Attendance")');
+    });
+    //*******************************  On Click Radion Button *****************************************
+    $("#divUserList").on("click", ".atten_radio", function () {
+        id = $(this).data("id");
+        value = $(this).val();
+        attid = $(this).data("attid");
+        atttype = $(this).data("atttype");
+        if (parseInt(atttype) > 0)
+        {
+            var kendoWindow = $("<div />").kendoWindow({
+                actions: ["Close"],
+                title: "Alert",
+                resizable: false,
+                width: "30%",
+                modal: true,
+                close:onWindowClose
+            });
+            message = "Are you sure want to change attendance?";
+            var template = kendo.template($("#temp_win_For_Alert").html());
+            kendoWindow.data("kendoWindow").content(template).center().open();
+            document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+            document.body.scroll = "no"; // ie only
+
+            kendoWindow.find("#temp_win_Ok").click(function ()
+            {
+                kendoWindow.data("kendoWindow").close();
+                if (value == 3)
+                {
+                    $("#Win_Leave").empty();
+                    $("#Win_Leave").kendoWindow({
+                        actions: ["Close"],
+                        draggable: false,
+                        modal: true,
+                        visible: false,
+                        width: '60%',
+                        height: 255,
+                        title: 'Leave Type',
+                        close: onWindowClose
+                    });
+                    $("#Win_Leave").html('<div class="tiny_loading"></div>');
+                    var Win_unit_Add = $("#Win_Leave").data("kendoWindow");
+                    Win_unit_Add.refresh({ url: "/Attendance/_LeaveType?attId=" + attid });
+                    Win_unit_Add.center().open();
+                    document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+                    document.body.scroll = "no"; // ie only
+                }
+                else
+                {
+                    var sendData = { Id: attid, UserId: id, AttType: value, InsertedBy: userId };
+                    $.ajax({
+                        url: '@Url.Action("SaveAttendance", "Attendance")',
+                        type: 'Post',
+                        data: sendData,
+                        success: function (response) {
+                            if (response === "success") {
+
+                                    $("#divUserList").empty();
+                                    $("#divUserList").append('<div class="loading_partial"></div>');
+                                    $("#divUserList").load('@Url.Action("UserLists", "Attendance")');
+                            }
+                            else {
+                                alert("Attendence save was unsuccessful.");
+
+                            }
+                        },
+                        error: function (err) {
+                            alert("Attendence save was unsuccessful.");
+                        }
+                    });
+                }
+            }).end();
+        }
+        else
+        {
+            if (value == 3)
+            {
+                $("#Win_Leave").empty();
+                $("#Win_Leave").kendoWindow({
+                    actions: ["Close"],
+                    draggable: false,
+                    modal: true,
+                    visible: false,
+                    width: '60%',
+                    height: '30%',
+                    title: 'Leave Type',
+                    close: onWindowClose
+                });
+                $("#Win_Leave").html('<div class="tiny_loading"></div>');
+                var Win_unit_Add = $("#Win_Leave").data("kendoWindow");
+                Win_unit_Add.refresh({ url: "/Attendance/_LeaveType?" });
+                Win_unit_Add.center().open();
+                document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+                document.body.scroll = "no"; // ie only
+            }
+            else
+            {
+                var sendData = { UserId: id, AttType: value, InsertedBy: userId };
+                $.ajax({
+                    url: '@Url.Action("SaveAttendance", "Attendance")',
+                    type: 'Post',
+                    data: sendData,
+                    success: function (response) {
+                        if (response === "success") {
+                            $("#divUserList").empty();
+                            $("#divUserList").append('<div class="loading_partial"></div>');
+                            $("#divUserList").load('@Url.Action("UserLists", "Attendance")');
+                        }
+                        else {
+                            alert("Attendence save was unsuccessful.");
+                        }
+                    },
+                    error: function (err) {
+                        alert("Attendence save was unsuccessful.");
+                    }
+                });
+            }
+        }
+    });
+
+
+    //*******************************  SHOW ATT HISTORY *****************************************
+    $("#divUserList").on("click", ".allAttHis", function (e) {
+        e.preventDefault();
+        id = $(this).data("id");
+        $("#Win_Atten_His").empty();
+        $("#Win_Atten_His").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            title: 'All Attendance History',
+            close: onWindowClose
+        });
+        $("#Win_Atten_His").html('<div class="tiny_loading"></div>');
+        var allAttHisWin = $("#Win_Atten_His").data("kendoWindow");
+        allAttHisWin.refresh({ url: "/Attendance/SpecificUserAttHistory?userId=" + id });
+        allAttHisWin.maximize().open();
+        document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+        document.body.scroll = "no"; // ie only
+    });
+
+    //***********************Manually attendance******************************
+    $("#btnManuallAtt").click(function () {
+        $("#divManuallyAttWin").empty();
+        $("#divManuallyAttWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 638,
+            height: 240,
+            title: 'Manually Attendance',
+            resizable: false
+        });
+        var manualAttWin = $("#divManuallyAttWin").data("kendoWindow");
+        manualAttWin.refresh('@Url.Action("ManuallyAtt", "Attendance")');
+        manualAttWin.center().open();
+    });
+
+</script>
+
+

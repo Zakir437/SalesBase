@@ -1,0 +1,15 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin-bottom:4%;margin-top:2%; margin-left:2%">
+    <div id="divMasterCategoryList"></div>
+    <div class="k-edit-buttons k-state-default">
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnMasterCategoryCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#divMasterCategoryList").append('<div class="tiny_loading"></div>');
+        $("#divMasterCategoryList").load('@Url.Action("MasterSubCategoryList", "Configuration")?id=' + '@ViewBag.MasterId' + '&isView=true');
+    });
+    $("#btnMasterCategoryCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+</script>

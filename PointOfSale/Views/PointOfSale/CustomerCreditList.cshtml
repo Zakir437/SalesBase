@@ -1,0 +1,68 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewCreditCustomer>
+@using PointOfSale.Helpers
+@using System.Globalization
+@{
+        var count = 0;
+        var customerList = Model
+            .GroupBy(a => a.CustomerId)
+            .Select(s => new
+            {
+                CustomerId = s.FirstOrDefault().CustomerId,
+                CustomerName = s.FirstOrDefault().Name,
+                Phone = s.FirstOrDefault().Phone,
+                Email = s.FirstOrDefault().Email,
+                CreatedBy = s.FirstOrDefault().FirstName + " " + s.FirstOrDefault().LastName,
+                DueAmount = s.Sum(a => a.DueAmount.Value)
+    });
+}
+@if(Model.Any())
+ {
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Email</th>
+            <th>CreatedBy</th>
+            <th>Due</th>
+        </tr>
+        @foreach (var list in customerList)
+         {
+            count++;
+            <tr>
+                <td>@count. </td>
+                <td>
+                    @if (ViewBag.IsPrint == false)
+                    {
+                        <a href="@Html.EncodedParam("CustomerCredit", "PointOfSale", new { customerId = list.CustomerId }, null)">@list.CustomerName</a>
+                    }
+                    else
+                    {
+                        @list.CustomerName
+                    }
+                </td>
+                <td>@list.Phone</td>
+                <td>@list.Email</td>
+                <td>@list.CreatedBy</td>
+                <td>
+                    @list.DueAmount.ToString("C", new CultureInfo("bn-BD"))
+                </td>
+            </tr>
+         }
+        <tr style="font-weight:bold">
+            <td></td>
+            <td colspan="4" style="text-align:center">Total</td>
+            <td>@customerList.Sum(a => a.DueAmount).ToString("C", new CultureInfo("bn-BD"))</td>
+        </tr>
+     </table>
+ }
+else
+{
+    <h4>There is no record to display</h4>
+}
+
+<script>
+    $('[data-toggle="tooltip"]').tooltip();
+</script>
+
+

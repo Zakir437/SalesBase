@@ -1,0 +1,224 @@
+﻿@{
+    ViewBag.Title = "StockList";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+}
+<style>
+    .k-input {
+        height: 26px !important;
+    }
+    hr{
+        margin:0px;
+    }
+</style>
+<section class="content">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4 class="uppercase">Stock</h4>
+            </div>
+        </div>
+        <div class="panel-body" style="border:none!important;">
+            <a href="/Stock/ImportHistory" class="btn btn-info"><i class="fa fa-list-ul"></i> Import</a>
+            <a href="/Inventory/IndentHistory" class="btn btn-info"><i class="fa fa-list-ul"></i> Indent</a>
+            <a href="/Inventory/StockWasteCreate" class="btn btn-info"><i class="fa fa-list-ul"></i> Waste</a>
+            @*@Html.ActionLink("Indent Create", "IndentCreate", "Inventory", routeValues: null, htmlAttributes: new { @class = "btn btn-info" })*@
+        </div>
+        <hr />
+        <div class="panel-body" >
+            <div style="width:50%!important; padding-right:10px;" id="divProductMultiselect" class="pull-left">
+                @(Html.Kendo().MultiSelect()
+                .Name("productMultiSelect")
+                .DataTextField("Text")
+                .DataValueField("Value")
+                .Placeholder("Type product name...")
+                .AutoBind(false)
+                .Events(e => e.Change("onChange"))
+                .HtmlAttributes(new { style = "width: 100%;" })
+                .DataSource(source =>
+                {
+                    source.Read(read =>
+                    {
+                        read.Action("GetProductListForMultiSelect", "Inventory").Data("additionalItemsGetProducts"); ;
+                    })
+                    .ServerFiltering(false);
+                }))
+                <span class="k-icon k-i-search" style="margin-top:-25px;float:right;margin-right:10px; position:relative">&nbsp;</span>
+            </div>
+            <div class="pull-right">
+                <button class="btn btn-default selected" id="btnAvailable">Available</button>
+                <button class="btn btn-default" id="btnInventory">Inventory</button>
+            </div>
+        </div>
+        <div class="panel-body" style="padding:0px 15px;">
+            <div id="divStockList" style="padding-top:5px;"></div>
+        </div>
+    </div>
+</section>
+<div id="divStockEditWin"></div>
+<div id="divMinimumQuantityWin"></div>
+<div id="divProductInforWin"></div>
+<div id="divPriceChangeWin"></div>
+<script>
+    var productId = 0, distributeId = 0;
+    var selectedId = "";
+    var isAvailable = true;
+    $(document).ready(function () {
+        $("#liForInventory").addClass('active');
+        $("#liForStock").addClass('active');
+
+        $("#divStockList").empty();
+        $("#divStockList").append('<div class="loading_partial"></div>');
+        $("#divStockList").load('@Url.Action("StockListPartial","Inventory")');
+    });
+     //load product list by selected product
+    function onChange()
+    {
+        selectedId = this.value();
+        if (selectedId.length > 0)
+        {
+            if (isAvailable == true)
+            {
+                $("#divStockList").empty();
+                $("#divStockList").append('<div class="loading_partial"></div>');
+                $("#divStockList").load('@Url.Action("StockListPartial", "Inventory")?rowNumbers=' + selectedId);
+            }
+            else {
+                $("#divStockList").empty();
+                $("#divStockList").append('<div class="loading_partial"></div>');
+                $("#divStockList").load('@Url.Action("StockListInventoryPartial", "Inventory")?rowNumbers=' + selectedId);
+            }
+        }
+        else {
+            if (isAvailable == true)
+            {
+                 $("#divStockList").empty();
+                 $("#divStockList").append('<div class="loading_partial"></div>');
+                 $("#divStockList").load('@Url.Action("StockListPartial","Inventory")');
+            }
+            else {
+                 $("#divStockList").empty();
+                 $("#divStockList").append('<div class="loading_partial"></div>');
+                 $("#divStockList").load('@Url.Action("StockListInventoryPartial", "Inventory")');
+            }
+        }
+    }
+    //pass additional data to load product multiselect
+    function additionalItemsGetProducts() {
+        return {
+            IsAvailable: isAvailable,
+        }
+    }
+    //Edit Stock Quantity
+    $("#divStockList").on('click', '.btnStockEdit', function () {
+        var stockId = $(this).data("id");
+        $("#divStockEditWin").empty();
+        $("#divStockEditWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 661,
+            height: 175,
+            resizable: false,
+            title: 'Stock',
+        });
+        var stockEditWin = $("#divStockEditWin").data("kendoWindow");
+        stockEditWin.refresh('@Url.Action("StockEdit", "Inventory")?StockId=' + stockId);
+        stockEditWin.center().open();
+    });
+    //Stock Available
+    $("#btnAvailable").click(function () {
+        isAvailable = true;
+        $("#divProductMultiselect").show();
+        $("#divStockList").empty();
+        $("#divStockList").append('<div class="loading_partial"></div>');
+        $("#divStockList").load('@Url.Action("StockListPartial", "Inventory")');
+        $('#productMultiSelect').data('kendoMultiSelect').value("");
+        $('#productMultiSelect').data('kendoMultiSelect').dataSource.read();
+
+        $(this).addClass("selected");
+        $("#btnInventory").removeClass("selected");
+    });
+    //Stock Inventory
+    $("#btnInventory").click(function () {
+        isAvailable = false;
+        $("#divProductMultiselect").show();
+        $("#divStockList").empty();
+        $("#divStockList").append('<div class="loading_partial"></div>');
+        $("#divStockList").load('@Url.Action("StockListInventoryPartial", "Inventory")');
+        $('#productMultiSelect').data('kendoMultiSelect').value("");
+        $('#productMultiSelect').data('kendoMultiSelect').dataSource.read();
+
+        $(this).addClass("selected");
+        $("#btnAvailable").removeClass("selected");
+
+    });
+
+    //Edit minimul Quantity
+    $("#divStockList").on("click", ".minimalQuantityEdit", function () {
+        productId = $(this).data("id");
+        distributeId = $(this).data("distributeid");
+        $("#divMinimumQuantityWin").empty();
+        $("#divMinimumQuantityWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 670,
+            height:171,
+            title: 'Minimum Quantity',
+            resizable: false
+        });
+        var minimumQuantityWin = $("#divMinimumQuantityWin").data("kendoWindow");
+        minimumQuantityWin.refresh('@Url.Action("MinimumQuantity", "Configuration")?productId=' + productId + '&distributeId=' + distributeId );
+        minimumQuantityWin.center().open();
+    });
+    //Product Info
+    $("#divStockList").on("click", "#productInfo", function () {
+        productId = $(this).data("id");
+        $("#divProductInforWin").empty();
+        $("#divProductInforWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 670,
+            height:312,
+            title: 'Product',
+            resizable: false
+        });
+        var productInfoWin = $("#divProductInforWin").data("kendoWindow");
+        productInfoWin.refresh('@Url.Action("ProductInfo", "Configuration")?productId=' + productId);
+        productInfoWin.center().open();
+    });
+
+    //Negative stock list
+    $("#btnNegativeStock").click(function () {
+        $("#divProductMultiselect").hide();
+        $("#divStockList").empty();
+        $("#divStockList").append('<div class="loading_partial"></div>');
+        $("#divStockList").load('@Url.Action("NegativeStockList", "Stock")');
+    });
+
+    //Edit Product Price
+    $("#divStockList").on('click', ".btnPriceEdit", function () {
+        productId = $(this).data("id");
+        distributeId = $(this).data("distributeid");
+        $("#divPriceChangeWin").empty();
+        $("#divPriceChangeWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 670,
+            height:183,
+            title: 'Price Change',
+            resizable: false
+        });
+        var priceChangeWin = $("#divPriceChangeWin").data("kendoWindow");
+        priceChangeWin.refresh('@Url.Action("ProductPriceChange", "Configuration")?productId=' + productId + '&distributeId=' + distributeId);
+        priceChangeWin.center().open();
+    });
+
+
+</script>

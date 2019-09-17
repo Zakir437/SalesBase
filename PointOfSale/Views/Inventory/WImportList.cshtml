@@ -1,0 +1,60 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewWImport>
+@using PointOfSale.Helpers
+@using System.Globalization
+@{
+    var count = 0;
+}
+@if (Model.Any() == true)
+{
+    <table class="table table-bordered table-responsive">
+        <tr>
+            <th>SL.</th>
+            <th>Reff.</th>
+            <th>WO Voucher</th>
+            <th>Supplier</th>
+            <th>Total</th>
+            <th>Paid</th>
+            <th>Due</th>
+            <th>Import By</th>
+            <th>Date</th>
+        </tr>
+        @foreach (var list in Model)
+         {
+            count++;
+            <tr>
+                <td>@count.</td>
+                <td>
+                    <a href="@Html.EncodedParam("WImportTransaction", "Inventory", new { importId = list.Id}, null)">@list.VoucherNo</a>
+                </td>
+                <td>@list.WOVoucher</td>
+                <td>@list.SupplierName</td>
+                <td>@list.TotalAmount.ToString("C", new CultureInfo("bn-BD"))</td>
+                <td>@list.PaidAmount.ToString("C", new CultureInfo("bn-BD"))</td>
+                <td>@list.DueAmount.ToString("C", new CultureInfo("bn-BD"))</td>
+                <td>@list.ImportBy</td>
+                <td>@Convert.ToDateTime(list.ImportDate).ToString("MMM dd yyyy hh:mm:ss tt")</td>
+            </tr>
+         }
+    </table>
+ }
+else
+{
+    <h3>There is no record to display</h3>
+}
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    })
+</script>
+
+
+
+
+
+
+
+
+
+
+
+

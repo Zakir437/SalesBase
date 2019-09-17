@@ -1,0 +1,367 @@
+﻿<link href="~/Content/numpad.css" rel="stylesheet" />
+<style>
+    .editor-label {
+        display: inline;
+    }
+    .editor-field {
+        display: inline;
+    }
+
+    .cartItem {
+        padding: 18px 10px;
+        margin: 0px;
+        cursor: pointer;
+    }
+    .btnPaymentTypeCancel {
+        cursor: pointer;
+        padding-top: 3px;
+        padding-left: -2px;
+    }
+
+    .paymentTable {
+        border: 1px solid #cccccc;
+        width: 100%;
+        max-width: 100%;
+    }
+    .paymentTable tr th {
+        border: 1px solid #cccccc;
+        padding: 8px;
+    }
+
+    .paymentTable tr td {
+        padding: 8px;
+        border-right: 1px solid #cccccc;
+        line-height: 1.4;
+        vertical-align: top;
+    }
+    .border-top td {
+        border-top: 1px solid #cccccc;
+    }
+</style>
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="col-md-3">
+                <h3>Total Due : @ViewBag.TotalDue Tk</h3>
+            </div>
+            <div class="col-md-2">
+                <button class="btn btn-default" id="btnCash" style="width:175px; margin-bottom:10px;">Cash</button>
+                <button class="btn btn-default" id="btnCard" style="width:175px; margin-bottom:10px;">Card</button>
+                <button class="btn btn-default" id="btnBkash" style="width:175px; margin-bottom:10px;">Bkash</button>
+            </div>
+            <div class="col-md-3" style="font-size:18px;">
+                <table class="paymentTable" id="tblPaymentType" style="width:100%">
+                    <tr>
+                        <th>Payment Type</th>
+                        <th>Amount</th>
+                    </tr>
+                    <tr class="border-top">
+                        <td>Total</td>
+                        <td><span id="totalPay">0.00</span>Tk</td>
+                    </tr>
+                    <tr>
+                        <td>Remaining</td>
+                        <td><span id="remainingAmount">@ViewBag.TotalDue</span>Tk</td>
+                    </tr>
+                    <tr id="returnRow" style="display:none">
+                        <td>Return Amount</td>
+                        <td><span id="returnAmount">0.00</span>Tk</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="col-md-2">
+                <button class="btn btn-default" id="btnPay" style="font-size:20px; height:43px; width:129px;">Pay</button>
+                <button class="btn btn-default" id="btnPayCancel" style="font-size:20px; height:43px; width:129px; margin-top:7px;">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="divCashWin"></div>
+<div id="divCardWin"></div>
+<div id="divBkashWin"></div>
+<div id="divClientWin"></div>
+<div id="divCreditWin"></div>
+<script>
+    var totalPaidAmount = 0, cashAmount = 0, cardAmount = 0; bcashAmount = 0; totalPrice = 0, remainingAmount = 0, totalMain = 0, returnAmount = 0;
+    var bkashBodyId = 0, cardBodyId = 0, cashBodyId = 0;
+    var cardTransactionNo = 0, bkashTransactionNo = 0;
+    var methodId = 1, defaultType = true; // default Type true for in default
+    totalMain = '@ViewBag.TotalDue';
+    totalPrice = '@ViewBag.TotalDue';
+    $(document).ready(function () {
+        $("#btnPay").prop("disabled", true);
+    });
+
+    $("#btnPayCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+
+    $("#btnCash").click(function () {
+        totalPaidAmount = 0;
+        $(".amountInTransaction").each(function () {
+            totalPaidAmount = totalPaidAmount + parseFloat($(this).text());
+        });
+        totalPaidAmount = totalPaidAmount - cashAmount;
+        totalPrice = (totalMain - totalPaidAmount).toFixed(2);
+        $("#divCashWin").empty();
+        $("#divCashWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 600,
+            height: 540,
+            title: 'Cash',
+            resizable: false
+        });
+        var cashWin = $("#divCashWin").data("kendoWindow");
+        cashWin.refresh('@Url.Action("Cash", "PointOfSale")?totalPrice=' + totalPrice + '&cashAmount=' + cashAmount + '&methodId=' + methodId + '&defaultType=' + defaultType);
+        cashWin.center().open();
+    });
+
+    $("#divCashWin").on('click', '#btnConfirm', function () {
+        if (CashValidator.validate())
+        {
+            totalPaidAmount = 0;
+            cashAmount = parseFloat($("#AmountPaid").val()).toFixed(2);
+            cashBodyId = $("#CashBodyId").val();
+            if ($("#cashAmount").length == 1)
+            {
+                $("#cashAmount").empty();
+                $("#cashAmount").append(cashAmount);
+            }
+            else {
+                $("#tblPaymentType tr:last").prev().prev().before('<tr>' +
+                    '<td>Cash</td>' +
+                    '<td><span class="amountInTransaction" data-id="1" data-cashbodyid="' + cashBodyId + '" id="cashAmount">' + cashAmount + '</span>Tk<span data-id="1" class="btnPaymentTypeCancel fa fa-times-circle pull-right"></span></td>' +
+                    '</tr>');
+            }
+            $(".amountInTransaction").each(function () {
+                totalPaidAmount = totalPaidAmount + parseFloat($(this).text());
+            });
+            remainingAmount = totalMain - totalPaidAmount;
+            if (remainingAmount < 0)
+            {
+                returnAmount = totalPaidAmount - totalMain;
+                $("#returnRow").css("display", "");
+                $("#returnAmount").empty();
+                $("#returnAmount").append(returnAmount.toFixed(2));
+
+                $("#remainingAmount").empty();
+                $("#remainingAmount").append('0.00');
+
+                $("#btnPay").prop("disabled", false);
+            }
+            else {
+                if (remainingAmount == 0) {
+                    $("#btnPay").prop("disabled", false);
+                }
+                else {
+                    if (isTotalPay == true)
+                    {
+                        $("#btnPay").prop("disabled", false);
+                    }
+                    else {
+                        $("#btnPay").prop("disabled", true);
+                    }
+                }
+                $("#remainingAmount").empty();
+                $("#remainingAmount").append(remainingAmount.toFixed(2));
+                $("#returnRow").css("display", "none");
+            }
+            $("#totalPay").empty();
+            $("#totalPay").append(totalPaidAmount.toFixed(2));
+            $("#divCashWin").data("kendoWindow").close();
+        }
+    });
+
+    $("#btnCard").click(function () {
+        totalPaidAmount = 0;
+        $(".amountInTransaction").each(function () {
+            totalPaidAmount = totalPaidAmount + parseFloat($(this).text());
+        });
+        totalPrice = (totalMain - totalPaidAmount).toFixed(2);
+        $("#divCardWin").empty();
+        $("#divCardWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 600,
+            height: 606,
+            title: 'Card',
+            resizable: false
+        });
+        var cardWin = $("#divCardWin").data("kendoWindow");
+        cardWin.refresh('@Url.Action("Card", "PointOfSale")?totalPrice=' + totalPrice + '&methodId=' + methodId + '&defaultType=' + defaultType);
+        cardWin.center().open();
+    });
+    $("#divCardWin").on('click', '#btnPaid', function () {
+        if (cardValidator.validate()) {
+            cardAmount = parseFloat($("#CardPaid").val()).toFixed(2);
+            cardBodyId = $("#PaymentBodyId").val();
+            cardTransactionNo = $("#TransactionNo").val();
+            $("#tblPaymentType tr:last").prev().prev().before('<tr>' +
+                '<td>Card</td>' +
+                '<td><span class="amountInTransaction" data-id="2" data-cardamount="' + cardAmount + '" data-cardbodyid="' + cardBodyId + '" data-transactionno="' + cardTransactionNo + '" >' + cardAmount + '</span>Tk<span data-id="0" class="btnPaymentTypeCancel fa fa-times-circle pull-right"></span></td>' +
+                '</tr>');
+            totalPaidAmount = 0;
+            $(".amountInTransaction").each(function () {
+                totalPaidAmount = totalPaidAmount + parseFloat($(this).text());
+            });
+            remainingAmount = totalMain - totalPaidAmount;
+            if (remainingAmount < 0) {
+                returnAmount = totalPaidAmount - totalMain;
+                $("#returnRow").css("display", "");
+                $("#returnAmount").empty();
+                $("#returnAmount").append(returnAmount.toFixed(2));
+
+                $("#remainingAmount").empty();
+                $("#remainingAmount").append('0.00');
+
+                $("#btnPay").prop("disabled", false);
+            }
+            else {
+                if (remainingAmount == 0) {
+                    $("#btnPay").prop("disabled", false);
+                }
+                else {
+                    if (isTotalPay == true) {
+                        $("#btnPay").prop("disabled", false);
+                    }
+                    else {
+                        $("#btnPay").prop("disabled", true);
+                    }
+                }
+                $("#remainingAmount").empty();
+                $("#remainingAmount").append(remainingAmount.toFixed(2));
+
+                $("#returnRow").css("display", "none");
+            }
+            $("#totalPay").empty();
+            $("#totalPay").append(totalPaidAmount.toFixed(2));
+            $("#divCardWin").data("kendoWindow").close();
+        }
+    });
+
+     $("#btnBkash").click(function () {
+         totalPaidAmount = 0;
+         $(".amountInTransaction").each(function () {
+             totalPaidAmount = totalPaidAmount + parseFloat($(this).text());
+         });
+        totalPrice = (totalMain - totalPaidAmount).toFixed(2);
+        $("#divBkashWin").empty();
+        $("#divBkashWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 600,
+            height: 606,
+            title: 'Bkash',
+            resizable: false
+        });
+        var bkashWin = $("#divBkashWin").data("kendoWindow");
+        bkashWin.refresh('@Url.Action("Bcash", "PointOfSale")?totalPrice=' + totalPrice + '&methodId=' + methodId + '&defaultType=' + defaultType);
+        bkashWin.center().open();
+    });
+    $("#divBkashWin").on('click', '#btnBcashPaid', function () {
+        if (bcashValidator.validate()) {
+            bcashAmount = parseFloat($("#BcashPaid").val()).toFixed(2);
+            bkashBodyId = $("#bodyId").val();
+            bkashTransactionNo = $("#BkashTransactionNo").val();
+            $("#tblPaymentType tr:last").prev().prev().before('<tr>' +
+                '<td>Bkash</td>' +
+                '<td><span class="amountInTransaction" data-id="3" data-bkashamount="' + bcashAmount + '" data-bkashbodyid="' + bkashBodyId + '" data-transactionno="' + bkashTransactionNo + '" >' + bcashAmount + '</span>Tk<span data-id="0" class="btnPaymentTypeCancel fa fa-times-circle pull-right"></span></td>' +
+                '</tr>');
+            totalPaidAmount = 0;
+            $(".amountInTransaction").each(function () {
+                totalPaidAmount = totalPaidAmount + parseFloat($(this).text());
+            });
+            remainingAmount = totalMain - totalPaidAmount;
+            if (remainingAmount < 0) {
+                returnAmount = totalPaidAmount - totalMain;
+                $("#returnRow").css("display", "");
+                $("#returnAmount").empty();
+                $("#returnAmount").append(returnAmount.toFixed(2));
+
+                $("#remainingAmount").empty();
+                $("#remainingAmount").append('0.00');
+
+                $("#btnPay").prop("disabled", false);
+            }
+            else {
+                if (remainingAmount == 0) {
+                    $("#btnPay").prop("disabled", false);
+                }
+                else {
+                    if (isTotalPay == true) {
+                        $("#btnPay").prop("disabled", false);
+                    }
+                    else {
+                        $("#btnPay").prop("disabled", true);
+                    }
+                }
+                $("#remainingAmount").empty();
+                $("#remainingAmount").append(remainingAmount.toFixed(2));
+
+                $("#returnRow").css("display", "none");
+            }
+            $("#totalPay").empty();
+            $("#totalPay").append(totalPaidAmount.toFixed(2));
+            $("#divBkashWin").data("kendoWindow").close();
+        }
+     });
+    @**************************Payment type cancel*****************************************@
+    $("#tblPaymentType").on('click', '.btnPaymentTypeCancel', function () {
+        if ($(this).data("id") == 1) {
+            cashAmount = 0;
+        }
+        $(this).parent().parent().remove();
+        totalPaidAmount = 0;
+        $(".amountInTransaction").each(function () {
+            totalPaidAmount = totalPaidAmount + parseFloat($(this).text());
+        });
+        $("#totalPay").empty();
+        $("#totalPay").append(totalPaidAmount.toFixed(2));
+
+        remainingAmount = totalMain - totalPaidAmount;
+        if (remainingAmount < 0) {
+            returnAmount = totalPaidAmount - totalMain;
+            $("#returnRow").css("display", "");
+            $("#returnAmount").empty();
+            $("#returnAmount").append(returnAmount.toFixed(2));
+
+            $("#remainingAmount").empty();
+            $("#remainingAmount").append('0.00');
+
+            $("#btnPay").prop("disabled", false);
+        }
+        else {
+            if (remainingAmount == 0) {
+                $("#btnPay").prop("disabled", false);
+            }
+            else {
+                if (isTotalPay == true) {
+                    if (remainingAmount == totalMain)
+                    {
+                        $("#btnPay").prop("disabled", true);
+                    }
+                    else {
+                        $("#btnPay").prop("disabled", false);
+                    }
+                }
+                else {
+                    $("#btnPay").prop("disabled", true);
+                }
+            }
+            $("#remainingAmount").empty();
+            $("#remainingAmount").append(remainingAmount.toFixed(2));
+
+            $("#returnRow").css("display", "none");
+        }
+    });
+
+
+</script>
+

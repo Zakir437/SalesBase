@@ -1,0 +1,737 @@
+﻿@{
+    ViewBag.Title = "Waste";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+    long allCount = ViewBag.AllCount;
+    long pendingCount = ViewBag.PendingCount;
+    long completeCount = ViewBag.CompleteCount;
+    long invalidCount = ViewBag.InvalidCount;
+    long partialInvalid = ViewBag.PartialInvalidCount;
+
+    //store count
+    long storeAllCount = ViewBag.StoreAllCount;
+    long storePendingCount = ViewBag.StorePendingCount;
+    long storeCompleteCount = ViewBag.StoreCompleteCount;
+    long storeInvalidCount = ViewBag.StoreInvalidCount;
+    long storePartialInvalid = ViewBag.StorePartialInvalidCount;
+
+    //warehouse count
+    long whAllCount = ViewBag.WHAllCount;
+    long whPendingCount = ViewBag.WHPendingCount;
+    long whCompleteCount = ViewBag.WHCompleteCount;
+    long whInvalidCount = ViewBag.WHInvalidCount;
+    long whPartialInvalid = ViewBag.WHPartialInvalidCount;
+
+    //after sale count
+    long asAllCount = ViewBag.ASAllCount;
+    long asPendingCount = ViewBag.ASPendingCount;
+    long asCompleteCount = ViewBag.ASCompleteCount;
+    long asInvalidCount = ViewBag.ASInvalidCount;
+    long asPartialInvalid = ViewBag.ASPartialInvalidCount;
+
+}
+<style>
+    .k-input {
+        height: 26px !important;
+    }
+    p {
+        margin: 10px;
+    }
+</style>
+<section class="content">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4 class="uppercase">Waste Products</h4>
+            </div>
+            <div class="pull-right">
+                <a class="btn btn-default" href="/Inventory/Procurement"><i class="fa fa-arrow-left"></i> Back</a>
+            </div>
+        </div>
+        <div class="panel-heading">
+            <ul class="nav nav-tabs">
+                <li class="active" id="liForAll"><a href="#tab1ForAll" data-toggle="tab">All</a></li>
+                <li id="liForPending"><a href="#tab2ForPending" data-toggle="tab">Pending</a></li>
+                <li id="liForCompleted"><a href="#tab3ForCompleted" data-toggle="tab">Completed</a></li>
+                <li id="liForInvalid"><a href="#tab4ForInvalid" data-toggle="tab">Invalid</a></li>
+                <li id="liForPartialInvalid"><a href="#tab5ForPartialInvalid" data-toggle="tab">Partial Invalid</a></li>
+            </ul>
+        </div>
+        <div class="panel-body" style="border:none!important;">
+            <div class="row" style="margin : 0px; margin-bottom:5px;">
+                <div class="pull-left" style="max-width: 48%!important; width:100%;">
+                    @(Html.Kendo().DropDownList()
+                            .Name("TypeDropDown")
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .OptionLabel("Select type...")
+                            .BindTo(new List<SelectListItem>() {
+                                  new SelectListItem() {
+                                      Text = "Store",
+                                      Value = "1"
+                                  },
+                                  new SelectListItem() {
+                                      Text = "Warehouse",
+                                      Value = "2"
+                                  },
+                                  new SelectListItem() {
+                                      Text = "After Sale",
+                                      Value = "3"
+                                  }
+                              })
+                            .Events(e => e.Change("onChangeType"))
+                            .HtmlAttributes(new { style = "width: 100%;" })
+                    )
+                </div>
+                <div class="pull-right">
+                    <div class="pull-left" style="padding: 5px 10px;padding-right:5px!important;" id="show_Days_Title"></div>
+                    <button class="btn btn-primary btnPrint pull-right" style="height:32px;" data-toggle="tooltip" title="Print"><i class="fa fa-print"></i></button>
+                    <div class="btn-group btn-group-devided pull-right" data-toggle="buttons" style="padding-right:5px;">
+                        <div id="reportrange" class="pull-right" style="background: #fff; cursor: pointer; padding: 5px 10px; border: 1px solid #ccc; width: 100%">
+                            <span></span> <b class="caret"></b>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-content">
+                <div class="tab-pane fade in active" id="tab1ForAll">
+                    <div id="div_All"></div>
+                </div>
+                <div id="tab2ForPending" class="tab-pane fade">
+                    <div id="div_Pending"></div>
+                </div>
+                <div id="tab3ForCompleted" class="tab-pane fade">
+                    <div id="div_Completed"></div>
+                </div>
+                <div id="tab4ForInvalid" class="tab-pane fade">
+                    <div id="div_Invalid"></div>
+                </div>
+                <div id="tab5ForPartialInvalid" class="tab-pane fade">
+                    <div id="div_PartialInvalid"></div>
+                </div>
+            </div>
+            <p class="text-center">
+                <button class="btn btn-primary" id="btnSeeMore"><i class="fa fa-arrow-down"></i> See more</button>
+            </p>
+        </div>
+    </div>
+</section>
+<div id="divInvalidAlertWin"></div>
+<div id="divAfterSaleCompleteAlertWin"></div>
+<script id="temp_win_invalid" type="text/x-kendo-template">
+    <div style="padding:1em;">
+        @*<p style="font-size: 14px; padding: 10px"> #=msg# </p>*@
+        <div style="padding-left:40%;">
+            <div class="radio">
+                <label><input type="radio" name="optradio" id="invFull" checked>Full</label>
+            </div>
+            <div class="radio">
+                <label><input type="radio" name="optradio" id="invPartial">Partial</label>
+            </div>
+            <div id="divPartialQtyInput" style="margin-bottom:5px; display:none">
+                <input type="number" style="width:100%; max-width:100%" id="invQty" name="invQty" min="1" class="k-textbox" validationMessage="*"/>
+                <span class="field-validation-valid text-danger" data-valmsg-for="invQty" data-valmsg-replace="true"></span>
+            </div>
+        </div>
+        <div style="text-align: right;">
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btn_invalid_ok"><span class="k-icon k-update"></span>OK</button>
+            <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btn_invalid_cancel"><span class="k-icon k-cancel"></span>Cancel</button>
+        </div>
+    </div>
+</script>
+<script id="temp_win_complete" type="text/x-kendo-template">
+    <div style="padding:1em;">
+        <p style="font-size: 14px; padding: 10px"> #=msg# </p>
+        <div style="text-align: right;">
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btn_complete_ok"><span class="k-icon k-update"></span>OK</button>
+            <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btn_complete_cancel"><span class="k-icon k-cancel"></span>Cancel</button>
+        </div>
+    </div>
+</script>
+<script>
+    var id = 0, tab = 1, status = 0, type = 0;
+    var days = 0, from = null, to = null;
+    var passdata = '';
+    var start = moment();
+    var end = moment().subtract(1, 'days');
+    $(document).ready(function () {
+        $("#liForInventory").addClass('active');
+        $("#liForProcurement").addClass('active');
+
+        $('.ranges li').first().click();
+    });
+
+    function clearBeforeClick() {
+        $("#div_All").empty();
+        $("#div_Pending").empty();
+        $("#div_Completed").empty();
+        $("#div_Invalid").empty();
+        $("#div_PartialInvalid").empty();
+
+        type = 0;
+        $('#TypeDropDown').data('kendoDropDownList').value("");
+    }
+    $("#liForAll").click(function () {
+        tab = 1;
+        status = 0;
+        clearBeforeClick();
+        $('.ranges li').first().click();
+    });
+    $("#liForPending").click(function () {
+        clearBeforeClick();
+        tab = 2; status = 1;
+        $('.ranges li').first().click();
+    });
+
+    $("#liForCompleted").click(function () {
+        clearBeforeClick();
+        tab = 3; status = 2;
+        $('.ranges li').first().click();
+    });
+
+    $("#liForInvalid").click(function () {
+        clearBeforeClick();
+        tab = 4; status = 3;
+        $('.ranges li').first().click();
+    });
+
+    $("#liForPartialInvalid").click(function () {
+        clearBeforeClick();
+        tab = 5; status = 4;
+        $('.ranges li').first().click();
+    });
+
+    @***************DateRange Start******************@
+    $('#reportrange').daterangepicker({
+        startDate: start,
+        endDate: end,
+        ranges: {
+            'Select Date': [moment(), moment().subtract(1, 'days')],
+            'Today': [moment(), moment()],
+            'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+            'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+        }
+    }, cb);
+    cb(start, end);
+    start = moment(); end = moment();
+    $(".applyBtn").click(function () {
+        from = $("input[name*='daterangepicker_start']").val();
+        to = $("input[name*='daterangepicker_end']").val();
+        btn_CustomDate(from, to);
+    });
+
+    $('.ranges').on("click", "li", function () {
+        var day = $(this).text();
+        if (day == "Select Date") {
+            btn_All();
+        } else {
+            if (day == "Today") {
+                btn_today();
+            } else if (day == "Last 7 Days") {
+                btn_last_seven();
+            } else if (day == "Last 30 Days") {
+                btn_last_thirty();
+            }
+        }
+    });
+    function cb(start, end) {
+        if (start == null && end == null) {
+            $('#reportrange span').html("Select Date");
+            return;
+        }
+        else if ((!start._isValid && !end._isValid)) {
+            $('#reportrange span').html("Select Date");
+            return;
+        } else if (start._d > end._d) {
+            $('#reportrange span').html("Select Date");
+            return;
+        }
+        $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+    }
+
+    function btn_today() {
+        days = 1;
+        from = null;
+        to = null;
+        $("#btnSeeMore").hide();
+        $(".btnPrint").prop("disabled", false);
+        $('#show_Days_Title').html("Today");
+        passdata = { days: 1, status: status, type: type };
+        listUpdate();
+    }
+    function btn_last_seven() {
+        days = 7;
+        from = null;
+        to = null;
+        $("#btnSeeMore").hide();
+        $(".btnPrint").prop("disabled", false);
+        $('#show_Days_Title').html("Last 7 Days");
+        passdata = { days: 7, status: status, type: type };
+        listUpdate();
+    }
+    function btn_last_thirty() {
+        days = 30;
+        from = null;
+        to = null;
+        $("#btnSeeMore").hide();
+        $(".btnPrint").prop("disabled", false);
+        $('#show_Days_Title').html("Last 30 Days");
+        passdata = { days: 30, status: status, type: type };
+        listUpdate();
+    }
+
+    function btn_All() {
+        days = 0;
+        from = null;
+        to = null;
+        count = 10;
+        $("#btnSeeMore").hide();
+        $(".btnPrint").prop("disabled", true);
+        $('#show_Days_Title').html("");
+        $('#reportrange span').html("Select Date");
+        passdata = { count: count, status: status, type: type };
+        if (type == 0)
+        {
+            if (tab == 1)
+            {
+                if(@allCount > count)
+                {
+                    $("#btnSeeMore").show();
+                }
+            }
+            else if (tab == 2)
+            {
+                if (@pendingCount > count)
+                {
+                    $("#btnSeeMore").show();
+                }
+            }
+            else if (tab == 3)
+            {
+                if (@completeCount > count)
+                {
+                    $("#btnSeeMore").show();
+                }
+            }
+            else if (tab == 4)
+            {
+                if (@invalidCount > count)
+                {
+                    $("#btnSeeMore").show();
+                }
+            }
+            else if (tab == 5)
+            {
+                if (@partialInvalid > count)
+                {
+                    $("#btnSeeMore").show();
+                }
+            }
+        }
+        else if (type == 1) // store
+        {
+            if (tab == 1)
+            {
+                if(@storeAllCount > count)
+                {
+                    $("#btnSeeMore").show();
+                }
+            }
+            else if (tab == 2)
+            {
+                if (@storePendingCount > count)
+                {
+                    $("#btnSeeMore").show();
+                }
+            }
+            else if (tab == 3)
+            {
+                if (@storeCompleteCount > count)
+                {
+                    $("#btnSeeMore").show();
+                }
+            }
+            else if (tab == 4)
+            {
+                if (@storeInvalidCount > count)
+                {
+                    $("#btnSeeMore").show();
+                }
+            }
+            else if (tab == 5)
+            {
+                if (@storePartialInvalid > count)
+                {
+                    $("#btnSeeMore").show();
+                }
+            }
+        }
+        else if (type == 2) // warehouse
+        {
+            if (tab == 1)
+            {
+                if(@whAllCount > count)
+                {
+                    $("#btnSeeMore").show();
+                }
+            }
+            else if (tab == 2)
+            {
+                if (@whPendingCount > count)
+                {
+                    $("#btnSeeMore").show();
+                }
+            }
+            else if (tab == 3)
+            {
+                if (@whCompleteCount > count)
+                {
+                    $("#btnSeeMore").show();
+                }
+            }
+            else if (tab == 4)
+            {
+                if (@whInvalidCount > count)
+                {
+                    $("#btnSeeMore").show();
+                }
+            }
+            else if (tab == 5)
+            {
+                if (@whPartialInvalid > count)
+                {
+                    $("#btnSeeMore").show();
+                }
+            }
+        }
+        else if (type == 3) // after sale
+        {
+            if (tab == 1)
+            {
+                if(@asAllCount > count)
+                {
+                    $("#btnSeeMore").show();
+                }
+            }
+            else if (tab == 2)
+            {
+                if (@asPendingCount > count)
+                {
+                    $("#btnSeeMore").show();
+                }
+            }
+            else if (tab == 3)
+            {
+                if (@asCompleteCount > count)
+                {
+                    $("#btnSeeMore").show();
+                }
+            }
+            else if (tab == 4)
+            {
+                if (@asInvalidCount > count)
+                {
+                    $("#btnSeeMore").show();
+                }
+            }
+            else if (tab == 5)
+            {
+                if (@asPartialInvalid > count)
+                {
+                    $("#btnSeeMore").show();
+                }
+            }
+        }
+        listUpdate();
+    }
+    function btn_CustomDate(from, to) {
+        days = 0;
+        $("#btnSeeMore").hide();
+        $(".btnPrint").prop("disabled", false);
+        passdata = { from: new Date(from).toISOString(), to: new Date(to).toISOString(), status: status, type: type};
+        $('#show_Days_Title').html("Custom Range");
+        listUpdate();
+    }
+
+    function listUpdate()
+    {
+        if (tab == 1)
+        {
+            $("#div_All").append('<div class="loading_partial"></div>');
+            $("#div_All").load('/Inventory/WasteList', passdata);
+        }
+        else if (tab == 2)
+        {
+            $("#div_Pending").append('<div class="loading_partial"></div>');
+            $("#div_Pending").load('/Inventory/WasteList', passdata);
+        }
+        else if (tab == 3)
+        {
+            $("#div_Completed").append('<div class="loading_partial"></div>');
+            $("#div_Completed").load('/Inventory/WasteList', passdata);
+        }
+        else if (tab == 4)
+        {
+            $("#div_Invalid").append('<div class="loading_partial"></div>');
+            $("#div_Invalid").load('/Inventory/WasteList', passdata);
+        }
+        else if (tab == 5)
+        {
+            $("#div_PartialInvalid").append('<div class="loading_partial"></div>');
+            $("#div_PartialInvalid").load('/Inventory/WasteList', passdata);
+        }
+    }
+
+    @***************DateRange End******************@
+
+    //**********************Print*************************************
+    $(".btnPrint").click(function () {
+        var data = "days=" + days + "?from=" + new Date(from).toISOString() + "?to=" + new Date(to).toISOString() + "?status=" + status + "?type=" + type;
+        window.open('/Inventory/WastePrint?q=' + getDataEncrypted(data), '_blank');
+    });
+
+    //See more data
+    $("#btnSeeMore").click(function () {
+        $("#btnSeeMore").hide();
+        count = count + 10;
+        passdata = { count: count, status: status, type: type };
+        if (type == 0)
+        {
+            if (tab == 1)
+            {
+                if(@allCount > count)
+                {
+                    $("#btnSeeMore").show();
+                }
+            }
+            else if (tab == 2)
+            {
+                if (@pendingCount > count)
+                {
+                    $("#btnSeeMore").show();
+                }
+            }
+            else if (tab == 3)
+            {
+                if (@completeCount > count)
+                {
+                    $("#btnSeeMore").show();
+                }
+            }
+            else if (tab == 4)
+            {
+                if (@invalidCount > count)
+                {
+                    $("#btnSeeMore").show();
+                }
+            }
+            else if (tab == 5)
+            {
+                if (@partialInvalid > count)
+                {
+                    $("#btnSeeMore").show();
+                }
+            }
+        }
+        else if (type == 1) // store
+        {
+            if (tab == 1)
+            {
+                if(@storeAllCount > count)
+                {
+                    $("#btnSeeMore").show();
+                }
+            }
+            else if (tab == 2)
+            {
+                if (@storePendingCount > count)
+                {
+                    $("#btnSeeMore").show();
+                }
+            }
+            else if (tab == 3)
+            {
+                if (@storeCompleteCount > count)
+                {
+                    $("#btnSeeMore").show();
+                }
+            }
+            else if (tab == 4)
+            {
+                if (@storeInvalidCount > count)
+                {
+                    $("#btnSeeMore").show();
+                }
+            }
+            else if (tab == 5)
+            {
+                if (@storePartialInvalid > count)
+                {
+                    $("#btnSeeMore").show();
+                }
+            }
+        }
+        else if (type == 2) // warehouse
+        {
+            if (tab == 1)
+            {
+                if(@whAllCount > count)
+                {
+                    $("#btnSeeMore").show();
+                }
+            }
+            else if (tab == 2)
+            {
+                if (@whPendingCount > count)
+                {
+                    $("#btnSeeMore").show();
+                }
+            }
+            else if (tab == 3)
+            {
+                if (@whCompleteCount > count)
+                {
+                    $("#btnSeeMore").show();
+                }
+            }
+            else if (tab == 4)
+            {
+                if (@whInvalidCount > count)
+                {
+                    $("#btnSeeMore").show();
+                }
+            }
+            else if (tab == 5)
+            {
+                if (@whPartialInvalid > count)
+                {
+                    $("#btnSeeMore").show();
+                }
+            }
+        }
+        else if (type == 3) // after sale
+        {
+            if (tab == 1)
+            {
+                if(@asAllCount > count)
+                {
+                    $("#btnSeeMore").show();
+                }
+            }
+            else if (tab == 2)
+            {
+                if (@asPendingCount > count)
+                {
+                    $("#btnSeeMore").show();
+                }
+            }
+            else if (tab == 3)
+            {
+                if (@asCompleteCount > count)
+                {
+                    $("#btnSeeMore").show();
+                }
+            }
+            else if (tab == 4)
+            {
+                if (@asInvalidCount > count)
+                {
+                    $("#btnSeeMore").show();
+                }
+            }
+            else if (tab == 5)
+            {
+                if (@asPartialInvalid > count)
+                {
+                    $("#btnSeeMore").show();
+                }
+            }
+        }
+        listUpdate();
+    });
+
+    //****************************invalid*******************
+    $("#div_All, #div_Pending, #div_PartialInvalid").on('click','.btnInvalid', function () {
+        id = parseInt($(this).data('id'));
+        $("#divInvalidAlertWin").empty();
+        $("#divInvalidAlertWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 724,
+            height: 287,
+            title: 'Alert',
+            resizable: false,
+            close: onWindowClose
+        });
+        var invalidWin = $("#divInvalidAlertWin").data("kendoWindow");
+        invalidWin.refresh('/Inventory/WasteInvalid?id=' + id);
+        invalidWin.center().open();
+        document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+        document.body.scroll = "no";
+    });
+
+    //***********************complete*********************************
+    $("#div_All, #div_Pending, #div_PartialInvalid").on('click', '.btnComplete', function () {
+        id = parseInt($(this).data('id'));
+        var kendoWindow = $("<div/>").kendoWindow({
+            actions: ["Close"],
+            title: "Alert",
+            resizable: false,
+            width: "30%",
+            modal: true,
+            close: onWindowClose
+        });
+        msg = "Are you sure want to complete this transaction ?";
+        var template = kendo.template($("#temp_win_complete").html());
+        kendoWindow.data("kendoWindow").content(template).center().open();
+        document.documentElement.style.overflow = 'hidden';
+        document.body.scroll = "no";
+
+        kendoWindow.find("#btn_complete_cancel").click(function () {
+            kendoWindow.data("kendoWindow").close();
+        }).end();
+
+        kendoWindow.find("#btn_complete_ok").click(function () {
+            kendoWindow.data("kendoWindow").close();
+            complete(id);
+        }).end();
+    });
+
+    function complete(id) {
+        $.ajax({
+            url: '/Inventory/WasteStatusChange',
+            type: 'Post',
+            data: { id: id, CreatedBy: userId, status: 2 },
+            success: function (data) {
+                if (data == "success") {
+                    $('.ranges li').first().click();
+                }
+                else {
+                    alert("Save error...");
+                }
+            },
+            error: function (err) {
+                alert("Save error...");
+            }
+        });
+    }
+
+    //*************************** Type dropdown****************************
+    function onChangeType()
+    {
+        type = 0;
+        if (this.value() > 0)
+        {
+            type = this.value();
+        }
+        $('.ranges li').first().click();
+    }
+    //****************************After Sale Complete***********************************
+
+
+</script>
+
+
+
+

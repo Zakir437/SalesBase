@@ -1,0 +1,167 @@
+﻿@{
+    ViewBag.Title = "PaymentType";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+}
+@*<section class="content-header">
+    <h1>
+        Payment Type
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-cog"></i> Configuration</a></li>
+        <li class="active">Payment Type</li>
+    </ol>
+</section>*@
+<section class="content">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4>Payment Type</h4>
+            </div>
+            @*<div class="pull-right">
+                <a class="btn btn-default" href="/Accounting/PaySalary"><i class="fa fa-arrow-left"></i> Back</a>
+            </div>*@
+        </div>
+        <div class="panel-body">
+            <button class="btn btn-default" id="btnPaymentTypeCreateWin" style="margin:15px 0 5px 0"><i class="fa fa-plus-circle" aria-hidden="true"></i> Add</button>
+            <div class="row">
+                <div class="col-md-12">
+                    <div id="divPaymentList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<div id="divPaymentTypeWindow"></div>
+<script id="temp_win_delete_entry" type="text/x-kendo-template">
+    <div style="padding:1em;">
+        <p style="font-size: 14px; padding: 10px"> #=msg# </p>
+        <div style="text-align: right;">
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btn_delete_Entry_noty_ok"><span class="k-icon k-update"></span>OK</button>
+            <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btn_delete_Entry_noty_cancel"><span class="k-icon k-cancel"></span>Cancel</button>
+        </div>
+    </div>
+</script>
+
+<script>
+    var paymentTypeId = 0;
+    $(document).ready(function () {
+
+        $("#liForAccount").addClass('active');
+        $("#liForAccountConfig").addClass('active');
+        $("#liForPaymentType").addClass('active');
+
+        $("#divPaymentList").empty();
+        $("#divPaymentList").append('<div class="loading_partial"></div>');
+        $("#divPaymentList").load('@Url.Action("PaymentTypeList","Configuration")');
+
+
+    });
+
+    $("#btnPaymentTypeCreateWin").click(function () {
+        $("#divPaymentTypeWindow").empty();
+        $("#divPaymentTypeWindow").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 600,
+            height: 235,
+            title: 'Payment Type',
+            resizable: false
+        });
+        var paymentTypeWin = $("#divPaymentTypeWindow").data("kendoWindow");
+        paymentTypeWin.refresh('@Url.Action("PaymentTypeCreate", "Configuration")');
+        paymentTypeWin.center().open();
+    });
+
+    $("#divPaymentList").on('click', '.btnPaymentTypeEdit', function () {
+        paymentTypeId = $(this).data("id");
+        $("#divPaymentTypeWindow").empty();
+        $("#divPaymentTypeWindow").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 600,
+            height: 235,
+            title: 'Payment Type',
+            resizable: false
+        });
+        var paymentTypeWin = $("#divPaymentTypeWindow").data("kendoWindow");
+        paymentTypeWin.refresh('@Url.Action("PaymentTypeCreate", "Configuration")?id=' + paymentTypeId);
+        paymentTypeWin.center().open();
+    });
+
+    $("#divPaymentList").on('click', ".btnPaymentTypeDelete", function () {
+        paymentTypeId = $(this).data("id");
+        var kendoWindow = $("<div />").kendoWindow({
+            actions: ["Close"],
+            title: "Alert",
+            resizable: false,
+            width: "30%",
+            modal: true
+        });
+
+        msg = "Are you sure want to delete this Type?";
+        var template = kendo.template($("#temp_win_delete_entry").html());
+        kendoWindow.data("kendoWindow").content(template).center().open();
+
+        kendoWindow.find("#btn_delete_Entry_noty_cancel").click(function () {
+            kendoWindow.data("kendoWindow").close();
+            document.documentElement.style.overflow = "auto";
+        }).end();
+        kendoWindow.find("#btn_delete_Entry_noty_ok").click(function () {
+            kendoWindow.data("kendoWindow").close();
+            document.documentElement.style.overflow = "auto";
+            deleteType(paymentTypeId);
+        }).end();
+        document.documentElement.style.overflow = "hidden";
+    });
+
+    function deleteType(paymentTypeId) {
+        $.ajax({
+            url: '@Url.Action("DeletePaymentType", "Configuration")',
+            type: 'Post',
+            data: { paymentTypeId: paymentTypeId },
+            success: function (data) {
+                if (data === "success") {
+                    $("#divPaymentList").empty();
+                    $("#divPaymentList").append('<div class="loading_partial"></div>');
+                    $("#divPaymentList").load('@Url.Action("PaymentTypeList", "Configuration")');
+                } else {
+                    alert("Payment Type Delete Error...");
+                }
+            }
+        });
+    }
+
+    $("#divPaymentList").on("click", ".inactivatePaymentType,.activatePaymentType", function () {
+        var id = $(this).data("id");
+        var status = $(this).data("isactive");
+        var sendData = {
+            id: id,
+            status: status,
+            userId : userId
+        };
+        $.ajax({
+            url: '@Url.Action("ChangePaymentTypeStatus", "Configuration")',
+            method: 'POST',
+            data: sendData,
+            success: function (res) {
+                if (res == "success") {
+                    $("#divPaymentList").empty();
+                    $("#divPaymentList").append('<div class="loading_partial"></div>');
+                    $("#divPaymentList").load('@Url.Action("PaymentTypeList", "Configuration")');
+                }
+                else {
+                    alert("Error Status Update");
+                }
+            }
+        });
+    });
+
+</script>
+
+
+
+

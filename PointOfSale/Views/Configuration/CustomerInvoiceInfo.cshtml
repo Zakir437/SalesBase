@@ -1,0 +1,480 @@
+﻿@model PointOfSale.Models.ViewCustomer
+@using System.Globalization
+@using PointOfSale.Helpers
+<style>
+    a{
+        cursor:pointer
+    }
+    .selected {
+        border: 1px solid #483c3c;
+    }
+</style>
+@{
+    ViewBag.Title = "CustomerInvoiceInfo";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+    PointOfSale.Models.PointOfSale_DBEntities db = new PointOfSale.Models.PointOfSale_DBEntities();
+    var paymentList = db.ViewPayments.Where(a => a.CustomerId == Model.CustomerId);
+    long totalPayment = 0;
+    decimal totalSpent = 0;
+    decimal? totalDue = 0;
+    if (paymentList.Any())
+    {
+        totalPayment = paymentList.Count();
+        totalSpent = paymentList.Sum(a => a.Amount);
+    }
+    var DueList = db.ViewCreditCustomers.Where(a => a.CustomerId == Model.CustomerId && a.DueAmount > 0);
+    if(DueList.Any())
+    {
+        totalDue = DueList.Sum(s => s.DueAmount);
+    }
+    long totalOrder = 0;
+    decimal totalOrderPrice = 0;
+    decimal averageOrderValue = 0;
+    var orderList = db.PosOrders.Where(a => a.CustomerId == Model.CustomerId && a.Status == true);
+    if(orderList.Any())
+    {
+        totalOrder = orderList.Count();
+        totalOrderPrice = orderList.Sum(a => a.InvoiceAmount);
+        averageOrderValue = totalOrderPrice / totalOrder;
+    }
+}
+@*<section class="content-header">
+    <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-handshake-o"></i> CRM</a></li>
+        <li><a href="/Configuration/Customer"><i class="fa fa-list-ul"></i> Customer</a></li>
+        <li class="active">Customer Invoice Info</li>
+    </ol>
+</section>*@
+<section class="content">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4>Customer Invoice Info</h4>
+            </div>
+            <div class="pull-right">
+                <a class="btn btn-default" href="/Configuration/Customer"><i class="fa fa-arrow-left"></i> Back</a>
+            </div>
+        </div>
+        <div class="panel-body">
+            <div class="col-md-6 pull-left">
+                <dl class="dl-horizontal">
+                    <dt>Name</dt>
+                    <dd>@Model.Name</dd>
+                    <dt>Phone</dt>
+                    <dd>@Model.Phone</dd>
+                    <dt>E-mail</dt>
+                    <dd>@Model.Email</dd>
+                    <dt>Membership No</dt>
+                    <dd>@Model.MembershipNumber</dd>
+                    <dt>Credit Limit</dt>
+                    <dd>@Model.CreditLimit.Value.ToString("C", new CultureInfo("bn-BD"))</dd>
+                    <dt>Debit Limit</dt>
+                    <dd>@Model.DebitLimit.Value.ToString("C", new CultureInfo("bn-BD")) (@Model.DebitAmount.Value.ToString("C", new CultureInfo("bn-BD")))</dd>
+                    <dt>Address</dt>
+                    <dd>@Model.Address</dd>
+                    <dt>CreatedBy</dt>
+                    <dd>@Model.CreatedBy</dd>
+                    <dt>Created Date</dt>
+                    <dd>@Convert.ToDateTime(Model.CreatedDate).ToString("MMM dd,yyyy")</dd>
+                    @if (Model.UpdatedDate != null)
+                    {
+                        <dt>UpdatedBy</dt>
+                        <dd>@Model.UpdatedBy</dd>
+                        <dt>Updated Date</dt>
+                        <dd>@Convert.ToDateTime(Model.UpdatedDate).ToString("MMM dd,yyyy")</dd>
+                    }
+                </dl>
+            </div>
+            <div class="col-md-4 col-md-offset-2 pull-right">
+                <dl class="dl-horizontal">
+                    <dt>Total Spent</dt>
+                    <dd>@totalSpent.ToString("C", new CultureInfo("bn-BD"))</dd>
+                    <dt>Total Due</dt>
+                    <dd>@totalDue.Value.ToString("C", new CultureInfo("bn-BD"))</dd>
+                    <dt>Total Orders</dt>
+                    <dd>@totalOrder</dd>
+                    <dt>Average Order Value</dt>
+                    <dd>@averageOrderValue.ToString("C", new CultureInfo("bn-BD"))</dd>
+                </dl>
+            </div>
+        </div>
+        <hr />
+        <div class="panel-body">
+            <div class="pull-left" style="max-width: 48%!important;">
+                <button class="btn btn-default selected" id="btnAllOrder">All Orders</button>
+                <button class="btn btn-default" id="btnPaymentHistory">Payment History</button>
+                <a class="btn btn-default" href="@Html.EncodedParam("CustomerCreditInfo", "Configuration", new { customerId = Model.CustomerId }, null)">Credit Account</a>
+                <a class="btn btn-default" href="@Html.EncodedParam("CustomerDebitInfo", "Configuration", new { customerId = Model.CustomerId }, null)">Debit Account</a>
+            </div>
+            <div class="pull-right" style="max-width: 48%!important;">
+                <div class="pull-left" style="padding: 5px 10px;padding-right:5px!important;" id="show_Days_Title"></div>
+                <button class="btn btn-primary btnPrint pull-right" style="height:32px;"><i class="fa fa-print"></i></button>
+                <div class="btn-group btn-group-devided pull-right" data-toggle="buttons" style="padding-right:5px;">
+                    <div id="reportrange" class="pull-right" style="background: #fff; cursor: pointer; padding: 5px 10px; border: 1px solid #ccc; width: 100%">
+                        <span></span> <b class="caret"></b>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="panel-body" style="padding:0px 15px;">
+            <div id="divList" style="padding-top:5px;"></div>
+            <div class="text-center" style="margin-bottom:10px">
+                <button class="btn btn-primary" id="btnSeeMore"><i class="fa fa-arrow-down"></i> See more</button>
+            </div>
+        </div>
+    </div>
+</section>
+<div id="divOrderTranWin"></div>
+<div id="divPaymentTranWin"></div>
+<div id="divOrderArchiveWin"></div>
+<script id="tempWinRefund" type="text/x-kendo-template">
+    <div style="padding:1em;">
+        <p style="font-size: 14px; padding: 10px"> #=msg# </p>
+        <div style="text-align: right;">
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnRefundOk"><span class="k-icon k-update"></span>OK</button>
+            <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnRefundCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+        </div>
+    </div>
+</script>
+<script>
+    var listType = 1, orderId = 0;
+    var days = 0, from = null, to = null, count = 10;
+    var passdata = '';
+    var start = moment();
+    var end = moment().subtract(1, 'days');
+    $(document).ready(function () {
+        $(".btnPrint").prop("disabled", true);
+        $("#liForCRM").addClass('active');
+        $("#liForCustomer").addClass('active');
+
+        $('.ranges li').first().click();
+    });
+
+    $("#btnAllOrder").click(function () {
+        listType = 1; // for all order list
+        $('.ranges li').first().click();
+        $("#btnAllOrder").addClass("selected");
+        $("#btnPaymentHistory").removeClass("selected");
+    });
+
+    $("#btnPaymentHistory").click(function () {
+        listType = 2; // for payment history
+        $('.ranges li').first().click();
+        $("#btnAllOrder").removeClass("selected");
+        $("#btnPaymentHistory").addClass("selected");
+    });
+
+    //Show order Details
+    $("#divList").on('click', '.btnShowOrderDetails', function () {
+        orderId = $(this).data("id");
+        $("#divOrderTranWin").empty();
+        $("#divOrderTranWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 892,
+            height: 582,
+            title: 'Order Transaction',
+            resizable: false
+        });
+        var orderTranWin = $("#divOrderTranWin").data("kendoWindow");
+        orderTranWin.refresh('@Url.Action("OrderTransaction", "PointOfSale")?orderId=' + orderId);
+        orderTranWin.center().open();
+    });
+
+
+    //full refund
+    $("#divList").on('click', '.btnRefundAll', function () {
+        var orderId = $(this).data("id");
+        var kendoWindow = $("<div />").kendoWindow({
+            actions: ["Close"],
+            title: "Alert",
+            resizable: false,
+            width: "30%",
+            modal: true
+        });
+        msg = "Are you sure want to refund this order?";
+        var template = kendo.template($("#tempWinRefund").html());
+        kendoWindow.data("kendoWindow").content(template).center().open();
+
+        kendoWindow.find("#btnRefundCancel").click(function () {
+            kendoWindow.data("kendoWindow").close();
+            document.documentElement.style.overflow = "auto";
+        }).end();
+        kendoWindow.find("#btnRefundOk").click(function () {
+            kendoWindow.data("kendoWindow").close();
+            document.documentElement.style.overflow = "auto";
+            refundOrder(orderId);
+        }).end();
+        document.documentElement.style.overflow = "hidden";
+    });
+    function refundOrder(orderId)
+    {
+        $.ajax({
+            url: '@Url.Action("RefundOrder","PointOfSale")',
+            type: "POST",
+            data: { orderId: orderId, userId: userId },
+            success: function (data)
+            {
+                if (data == "success")
+                {
+                    LinkStyle = 1;
+                    $('.ranges li').first().click();
+                }
+                else {
+                    alert("Refund error...");
+                }
+            }
+        });
+    }
+
+     @***************DateRange Start******************@
+    $('#reportrange').daterangepicker({
+        startDate: start,
+        endDate: end,
+        ranges: {
+            'Select Date': [moment(), moment().subtract(1, 'days')],
+            'Today': [moment(), moment()],
+            'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+            'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+        }
+    }, cb);
+    cb(start, end);
+    start = moment(); end = moment();
+    $(".applyBtn").click(function () {
+        from = $("input[name*='daterangepicker_start']").val();
+        to = $("input[name*='daterangepicker_end']").val();
+        btn_CustomDate(from, to);
+    });
+
+    $('.ranges').on("click", "li", function () {
+        var day = $(this).text();
+        if (day == "Select Date") {
+            btn_All();
+        } else {
+            if (day == "Today") {
+                btn_today();
+            } else if (day == "Last 7 Days") {
+                btn_last_seven();
+            } else if (day == "Last 30 Days") {
+                btn_last_thirty();
+            }
+        }
+    });
+    function cb(start, end) {
+        if (start == null && end == null) {
+            $('#reportrange span').html("Select Date");
+            return;
+        }
+        else if ((!start._isValid && !end._isValid)) {
+            $('#reportrange span').html("Select Date");
+            return;
+        } else if (start._d > end._d) {
+            $('#reportrange span').html("Select Date");
+            return;
+        }
+        $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+    }
+    function btn_today() {
+        days = 1;
+        from = null;
+        to = null;
+        $(".btnPrint").prop("disabled", false);
+        $("#btnSeeMore").hide();
+        $('#show_Days_Title').html("Today");
+        passdata = { days: 1, customerId: @Model.CustomerId };
+        if (listType == 1)
+        {
+            $("#divList").empty();
+            $("#divList").append('<div class="loading_partial"></div>');
+            $("#divList").load('/Sales/OrderList', passdata);
+        }
+        else if (listType == 2)
+        {
+            $("#divList").empty();
+            $("#divList").append('<div class="loading_partial"></div>');
+            $("#divList").load('@Url.Action("PaymentHistoryList", "PointOfSale")', passdata);
+        }
+    }
+    function btn_last_seven() {
+        days = 7;
+        from = null;
+        to = null;
+        $(".btnPrint").prop("disabled", false);
+        $("#btnSeeMore").hide();
+        $('#show_Days_Title').html("Last 7 Days");
+        passdata = { days: 7, customerId: @Model.CustomerId };
+        if (listType == 1)
+        {
+            $("#divList").empty();
+            $("#divList").append('<div class="loading_partial"></div>');
+            $("#divList").load('/Sales/OrderList', passdata);
+        }
+        else if (listType == 2)
+        {
+            $("#divList").empty();
+            $("#divList").append('<div class="loading_partial"></div>');
+            $("#divList").load('@Url.Action("PaymentHistoryList", "PointOfSale")', passdata);
+        }
+    }
+    function btn_last_thirty() {
+        days = 30;
+        from = null;
+        to = null;
+        $(".btnPrint").prop("disabled", false);
+        $("#btnSeeMore").hide();
+        $('#show_Days_Title').html("Last 30 Days");
+        passdata = { days: 30, customerId: @Model.CustomerId };
+        if (listType == 1)
+        {
+            $("#divList").empty();
+            $("#divList").append('<div class="loading_partial"></div>');
+            $("#divList").load('/Sales/OrderList', passdata);
+        }
+        else if (listType == 2)
+        {
+            $("#divList").empty();
+            $("#divList").append('<div class="loading_partial"></div>');
+            $("#divList").load('@Url.Action("PaymentHistoryList", "PointOfSale")', passdata);
+        }
+    }
+    function btn_All() {
+        days = 0;
+        from = null;
+        to = null;
+        count = 10;
+        $(".btnPrint").prop("disabled", true);
+        $("#btnSeeMore").hide();
+        $('#show_Days_Title').html("");
+        $('#reportrange span').html("Select Date");
+        passdata = { customerId: @Model.CustomerId, count: count };
+        if (listType == 1)
+        {
+            if (@totalOrder > count)
+            {
+                $("#btnSeeMore").show();
+            }
+           $("#divList").empty();
+           $("#divList").append('<div class="loading_partial"></div>');
+           $("#divList").load('/Sales/OrderList', passdata);
+        }
+        else if (listType == 2)
+        {
+            if (@totalPayment > count)
+            {
+                $("#btnSeeMore").show();
+            }
+           $("#divList").empty();
+           $("#divList").append('<div class="loading_partial"></div>');
+           $("#divList").load('@Url.Action("PaymentHistoryList", "PointOfSale")', passdata);
+        }
+    }
+    function btn_CustomDate(from, to) {
+        days = 0;
+        $(".btnPrint").prop("disabled", false);
+        $("#btnSeeMore").hide();
+        passdata = { from: new Date(from).toISOString(), to: new Date(to).toISOString(), customerId: @Model.CustomerId };
+        $('#show_Days_Title').html("Custom Range");
+        if (listType == 1)
+        {
+             $("#divList").empty();
+             $("#divList").append('<div class="loading_partial"></div>');
+             $("#divList").load('/Sales/OrderList', passdata);
+        }
+        else if (listType == 2)
+        {
+             $("#divList").empty();
+             $("#divList").append('<div class="loading_partial"></div>');
+             $("#divList").load('@Url.Action("PaymentHistoryList", "PointOfSale")', passdata);
+        }
+    }
+    @***************DateRange End******************@
+
+    //customer Invoice Info Print
+    $(".btnPrint").click(function () {
+        var data = "customerId=" + @Model.CustomerId + "&days=" + days + "&from=" + from + "&to=" + to + "&listType=" + listType;
+        if (listType == 1)
+        {
+            window.open('@Url.Action("OrdersPrint", "PointOfSale")?q=' + btoa(data), '_blank');
+        }
+        else if (listType == 2)
+        {
+            window.open('@Url.Action("PaymentHistoryPrint", "PointOfSale")?q=' + btoa(data), '_blank');
+        }
+    });
+     //See more data
+    $("#btnSeeMore").click(function () {
+        $("#btnSeeMore").hide();
+        count = count + 10;
+        passdata = { customerId: @Model.CustomerId, count: count };
+        if(listType == 1)
+        {
+            if (@totalOrder > count)
+            {
+                $("#btnSeeMore").show();
+            }
+            $("#divList").empty();
+            $("#divList").append('<div class="loading_partial"></div>');
+            $("#divList").load('/Sales/OrderList', passdata);
+        }
+        else if (listType == 2)
+        {
+            if (@totalPayment > count)
+            {
+                $("#btnSeeMore").show();
+            }
+            $("#divList").empty();
+            $("#divList").append('<div class="loading_partial"></div>');
+            $("#divList").load('@Url.Action("PaymentHistoryList", "PointOfSale")', passdata);
+        }
+    });
+
+    //***************show payment transaction****************************
+    $("#divList").on('click', '.btnPaymentTransaction', function () {
+        orderId = parseInt($(this).data("id"));
+        $("#divPaymentTranWin").empty();
+        $("#divPaymentTranWin").kendoWindow({
+                actions: ["Close"],
+                draggable: false,
+                modal: true,
+                visible: false,
+                width: 1200,
+                height: 500,
+               resizable: false,
+               title: 'Payment Transaction',
+               close: onWindowClose
+        });
+        var paymentTranWin = $("#divPaymentTranWin").data("kendoWindow");
+        paymentTranWin.refresh('@Url.Action("PaymentHistoryPartial", "Sales")?orderId=' + orderId);
+        paymentTranWin.center().open();
+        document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+        document.body.scroll = "no";
+    });
+
+    //***************return archive****************************
+    $("#divList").on('click', '.btnOrderArchive', function () {
+        orderId = parseInt($(this).data("id"));
+        $("#divOrderArchiveWin").empty();
+        $("#divOrderArchiveWin").kendoWindow({
+                actions: ["Close"],
+                draggable: false,
+                modal: true,
+                visible: false,
+                width: 1200,
+                height: 500,
+               resizable: false,
+               title: 'Order Archive',
+               close: onWindowClose
+        });
+        var orderArchive = $("#divOrderArchiveWin").data("kendoWindow");
+        orderArchive.refresh('@Url.Action("RefundInfo", "Sales")?orderId=' + orderId);
+        orderArchive.center().open();
+        document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+        document.body.scroll = "no";
+    });
+
+
+
+
+</script>

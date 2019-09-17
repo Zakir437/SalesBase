@@ -1,0 +1,52 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin-bottom:4%;margin-top:2%;">
+    <div id="divStatusChangeForm"></div>
+    <div class="k-edit-buttons k-state-default" style="margin-left:30px;">
+        <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnStatusChange"><span class="k-icon k-update"></span>Save</button>
+        <button type="reset" class="k-button k-button-icontext k-grid-update" id="btnStatusChangeWinRefresh"><span class="k-icon k-i-refresh"></span>Refresh</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnStatusWinCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#divStatusChangeForm").append('<div class="tiny_loading"></div>');
+        $("#divStatusChangeForm").load('@Url.Action("SaleServiceStatusChangePartial", "Sales")?id=' + '@ViewBag.Id');
+    });
+    $("#btnStatusChangeWinRefresh").click(function () {
+        $("#divStatusChangeForm").empty();
+        $("#divStatusChangeForm").append('<div class="tiny_loading"></div>');
+        $("#divStatusChangeForm").load('@Url.Action("SaleServiceStatusChangePartial", "Sales")?id=' + '@ViewBag.Id');
+    });
+    $("#btnStatusWinCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+    var validation = $("#divStatusChangeForm").kendoValidator({
+    }).data("kendoValidator");
+
+    $("#btnStatusChange").click(function () {
+        if (validation.validate())
+        {
+            $.ajax({
+                url: '/Sales/SaleServiceStatusChangeSave',
+                type: "POST",
+                data: { status: $("#ServiceStatus").val(), assId: '@ViewBag.Id', createdBy : userId },
+                success: function (result) {
+                    $("#divStatusChangeWin").data("kendoWindow").close();
+                    if (result == "success")
+                    {
+                         $("#div_Services").append('<div class="loading_partial"></div>');
+                         $("#div_Services").load('@Url.Action("ServicesTab", "Sales")');
+                    }
+                    else
+                    {
+                        alert("Save Error");
+                    }
+                }
+            });
+        }
+    });
+</script>
+
+
+
+
+

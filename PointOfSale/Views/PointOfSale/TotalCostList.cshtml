@@ -1,0 +1,60 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewStockImport>
+@using System.Globalization;
+@using PointOfSale.Helpers;
+@{
+    var count = 0;
+}
+@if (Model.Count() > 0)
+{
+
+    <div class="panel panel-default" style="margin-bottom:0px;border-radius:0px;">
+        <div class="panel-body">
+            <a href="@Html.EncodedParam("PrintImportReport","PointOfSale", new { FromDate = @ViewBag.FromDate, ToDate = @ViewBag.ToDate, TotalCost = @ViewBag.TotalCost },null)" target="_blank" id="imp_his_print" style="float:right;margin-right:5%;font-size:14px">
+                <i class="fa fa-print"></i> Print
+            </a>
+            <dl class="dl-horizontal">
+                <dt>Report Generate</dt>
+                <dd>Total Cost</dd>
+                <dt>From Date</dt>
+                <dd>@Convert.ToDateTime(ViewBag.FromDate).ToString("MMM dd yyyy hh:mm:ss tt")</dd>
+                <dt>To Date</dt>
+                <dd>@Convert.ToDateTime(ViewBag.ToDate).ToString("MMM dd yyyy hh:mm:ss tt")</dd>
+                <dt>Generate By</dt>
+                <dd>@HttpContext.Current.Request.Cookies["CookieUserInfo"].Values["UserName"]</dd>
+                <dt>Total Cost </dt>
+                <dd>@ViewBag.TotalCost.ToString("C", new CultureInfo("bn-BD"))</dd>
+                <dt>Total Item</dt>
+                <dd>@Model.Count()</dd>
+            </dl>
+        </div>
+    </div>
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Refference No</th>
+            <th>Import By</th>
+            <th>Supplier</th>
+            <th>Total Cost</th>
+            <th>Date</th>
+        </tr>
+        @foreach (var list in Model)
+        {
+            count++;
+            <tr>
+                <td>@count . </td>
+                <td>@list.RefferenceNo <button class="btn pull-right btnImportInfo" style="background-color:#1c488e; color:white;" data-id="@list.StockImportId" data-toggle="tooltip" title="View Transaction"><i class="fa fa-list" aria-hidden="true"></i></button></td>
+                <td>@list.ImportBy</td>
+                <td>@list.SupplierName</td>
+                <td>@list.TotalCost.ToString("C", new CultureInfo("bn-BD"))</td>
+                <td>@Convert.ToDateTime(list.Date).ToString("MMM dd yyyy hh:mm:ss tt")</td>
+            </tr>
+        }
+    </table>
+}
+else
+{
+    <h4>There is no record to display</h4>
+}
+<script>
+    $('[data-toggle="tooltip"]').tooltip();
+</script>

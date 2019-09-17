@@ -1,0 +1,28 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewStockProduct>
+@{
+    var count = 0;
+}
+@if (Model.Any())
+ {
+    <table class="table table-bordered table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Product Name</th>
+            <th>Quantity</th>
+        </tr>
+        @foreach (var item in Model)
+         {
+            count++;
+            <tr>
+                <td>@count.</td>
+                <td>@item.ProductName</td>
+                <td>@item.Quantity</td>
+            </tr>
+         }
+    </table>
+ }
+ else
+ {
+    <h3>There is no product to Inventory</h3>
+ }
+

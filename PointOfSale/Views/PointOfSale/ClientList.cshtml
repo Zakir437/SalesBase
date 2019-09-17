@@ -1,0 +1,77 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewCustomer>
+<style>
+    tr{
+        cursor:pointer;
+    }
+    tr:hover, tr.selected {
+        background-color: #f4f4f4;
+    }
+</style>
+@{ 
+    var count = 0;
+    PointOfSale.Models.PointOfSale_DBEntities db = new PointOfSale.Models.PointOfSale_DBEntities();
+    //customer total due list
+    var creditList = db.ViewCreditCustomers.Where(a => a.DueAmount > 0).GroupBy(a => a.CustomerId).Select(s => new { s.FirstOrDefault().CustomerId, TotalDue = s.Sum(a => a.DueAmount) }).ToList();
+    decimal? due = 0;
+}
+@if (Model.Count() > 0)
+{
+    <table class="table table-bordered table-responsive table-condensed">
+        <tr>
+            <th>SL.</th>
+            <th>Name</th>
+            <th>E-mail</th>
+            <th>Phone</th>
+            <th>Is Credit Allow</th>
+        </tr>
+        @foreach (var list in Model)
+        {
+            count++;
+            due = 0;
+            if(creditList != null)
+            {
+                if(creditList.Any(a => a.CustomerId == list.CustomerId))
+                {
+                    due = creditList.FirstOrDefault(a => a.CustomerId == list.CustomerId).TotalDue;
+                }
+            }
+            <tr data-id="@list.CustomerId" data-name="@list.Name" data-iscredit="@list.IsCreditAllowed" data-prevdue="@due" data-creditlimit="@list.CreditLimit" data-availabledebit="@list.DebitAmount">
+                <td>@count . </td>
+                <td>
+                    @list.Name
+                </td>
+                <td>@list.Email</td>
+                <td>@list.Phone</td>
+                <td>
+                    @if (list.IsCreditAllowed == true)
+                    {
+                        <span>Yes</span>
+                    }
+                    else
+                    {
+                        <span>No</span>
+                    }
+                </td>
+            </tr>
+        }
+    </table>
+}
+else
+{
+    <h4>There is no record to display</h4>
+}
+
+<script>
+    $('[data-toggle="tooltip"]').tooltip();
+    $("tr").click(function () {
+        $("#btnSetClient").prop("disabled", false);
+        $('#btnSetClient').data('id', $(this).data("id")); 
+        $('#btnSetClient').data('name', $(this).data("name")); 
+        $('#btnSetClient').data('iscredit', $(this).data("iscredit")); 
+        $('#btnSetClient').data('prevdue', $(this).data("prevdue")); 
+        $('#btnSetClient').data('creditlimit', $(this).data("creditlimit")); 
+        $('#btnSetClient').data('availabledebit', $(this).data("availabledebit")); 
+        $(this).addClass("selected").siblings().removeClass("selected");
+    });
+</script>
+

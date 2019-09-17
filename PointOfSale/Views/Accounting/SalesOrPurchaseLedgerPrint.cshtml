@@ -1,0 +1,80 @@
+﻿@model IEnumerable<PointOfSale.ModelViews.Ledger>
+@using System.Globalization;
+@{
+    ViewBag.Title = "SalesOrPurchaseLedgerPrint";
+    Layout = "~/Views/Shared/_LayoutPrintPage.cshtml";
+    var count = 0;
+}
+<section class="content-header" style="text-align:center;">
+    <h3>Sale/Purchase Ledger</h3>
+    <p>Cost-POS</p>
+    <hr />
+</section>
+<div class="row">
+    <div class="col-xs-offset-6 col-xs-6 text-left">
+        <p>
+            Generate By : @HttpContext.Current.Request.Cookies["CookieUserInfo"].Values["UserName"]<br>
+            Generate Date : @DateTime.Now.ToString("MMM dd yyyy hh:mm:ss tt") <br>
+            Total: @Model.Count()
+        </p>
+    </div>
+    <div class="col-xs-offset-6 col-xs-6 text-right">
+        <p>
+            From Date : @ViewBag.FromDate.ToString("MMM dd yyyy hh:mm:ss tt") <br />
+            To Date : @ViewBag.ToDate.ToString("MMM dd yyyy hh:mm:ss tt") <br />
+        </p>
+    </div>
+</div>
+<div class="row" style="margin-top:10px;">
+    <div class="col-md-12">
+        <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+            <tr>
+                <th>SL.</th>
+                <th>Name</th>
+                <th>Credit</th>
+                <th>Debit</th>
+                <th>Date</th>
+            </tr>
+            @foreach (var list in Model)
+             {
+                count++;
+                <tr>
+                    <td>@count . </td>
+                    @if (list.ImportId > 0)
+                     {
+                        <td>@list.Name (Purchase)</td>
+                        <td>@list.AmountPaid</td>
+                        <td></td>
+                     }
+                    else if(list.OrderId > 0)
+                    {
+                        <td>@list.Name (Sale)</td>
+                        if (list.IsDebit == false)
+                        {
+                            <td>@list.AmountPaid</td>
+                            <td></td>
+                        }
+                        else
+                        {
+                            <td></td>
+                            <td>@list.AmountPaid</td>
+                        }
+                    }
+                    <td>@Convert.ToDateTime(list.Date).ToString("MMM dd yyyy hh:mm:ss tt")</td>
+                </tr>
+             }
+            <tr style="font-weight: bold">
+                <td></td>
+                <td>Total</td>
+                <td>@Model.Where(a => a.IsDebit == false).Sum( a=> a.AmountPaid)</td>
+                <td>@Model.Where(a => a.IsDebit == true).Sum(a => a.AmountPaid)</td>
+                <td></td>
+            </tr>
+        </table>
+    </div>
+</div>
+<script>
+    window.onload = function () {
+        window.print();
+    }
+</script>

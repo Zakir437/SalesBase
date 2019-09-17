@@ -1,0 +1,51 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewWorkingSchedule>
+@using PointOfSale.Helpers
+@{
+    var count = 0;
+}
+@if (Model.Count() > 0)
+{
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Schedule Name</th>
+            <th>Created By</th>
+            <th>Created Date</th>
+            <th>Updated By</th>
+            <th>Updated Date</th>
+            <th></th>
+        </tr>
+        @foreach (var list in Model)
+         {
+            count++;
+            <tr>
+                <td>@count . </td>
+                <td>@list.ScheduleName</td>
+                <td>@list.CreatedBy</td>
+                <td>@Convert.ToDateTime(list.CreadetDate).ToString("MMM dd yyyy")</td>
+                <td>@list.UpdatedBy</td>
+                <td>@if (list.UpdatedDate != null)
+                     {
+                        <span>@Convert.ToDateTime(list.UpdatedDate).ToString("MMM dd yyyy")</span>
+                     }
+                    else
+                    {
+                        <span>Not yet updated</span>
+                    }
+                </td>
+                <td>
+                    <button class="btn btn-primary btnScheduleEdit" data-id="@list.WorkingScheduleId" data-toggle="tooltip" title="Edit Schedule Information"><i class="fa fa-pencil-square-o"></i></button>
+                </td>
+            </tr>
+         }
+    </table>
+}
+else
+{
+    <h4>There is no record to display</h4>
+}
+
+<script>
+    $('[data-toggle="tooltip"]').tooltip();
+</script>
+

@@ -1,0 +1,7 @@
+﻿@model PointOfSale.ModelViews.BrandModelView
+@Html.HiddenFor(m => m.BrandId)
+<div class="editor-label"><label for="CustomerName">Name</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.BrandName, new { htmlattributes = new { @class = "k-textbox form-control" } })
+    @Html.ValidationMessageFor(model => model.BrandName, "", new { @class = "text-Danger" })
+</div>

@@ -1,0 +1,64 @@
+﻿@{
+    ViewBag.Title = "XmlFileInfoDetails";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+}
+<section class="content">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4><i class="fa fa-money"></i> Pay Sheet(@Convert.ToDateTime(ViewBag.StartDate).ToString("MMMM dd,yyyy") - @Convert.ToDateTime(ViewBag.EndDate).ToString("MMMM dd,yyyy"))</h4>
+            </div>
+            <div class="pull-right">
+                <button class="btn btn-primary" id="btnPrint" data-toggle="tooltip" title="Print pay sheet"><i class="fa fa-print"></i> Print</button>
+                <button class="btn btn-primary" id="btnPrintForReceipt" data-toggle="tooltip" title="Print receipt sheet"><i class="fa fa-print"></i> Receipt Print</button>
+                <a class="btn btn-default" href="/Accounting/XmlFile"><i class="fa fa-arrow-left"></i> Back</a>
+            </div>
+        </div>
+        <div class="panel-body" style="padding:0px 15px;">
+            <div id="divEmpSalaryList" style="padding-top:5px; overflow-x:auto;"></div>
+        </div>
+    </div>
+</section>
+<div id="divEmpSalaryEditWin"></div>
+<script>
+    $(document).ready(function () {
+        $("#liForAccount").addClass('active');
+        $("#liForPayroll").addClass('active');
+
+         $("#divEmpSalaryList").append('<div class="loading_partial"></div>');
+         $("#divEmpSalaryList").load('@Url.Action("XmlFileInfoDetailsList", "Accounting")?xmlFileId=' + '@ViewBag.xmlFileId');
+    });
+
+    $("#btnPrint").click(function () {
+        var data = "xmlFileId=" + '@ViewBag.xmlFileId';
+        window.open('@Url.Action("EmpSalaryXmlPrint", "Accounting")?q=' + getDataEncrypted(data), '_blank');
+    });
+
+    $("#btnPrintForReceipt").click(function () {
+        var data = "xmlFileId=" + '@ViewBag.xmlFileId' + "?isReceiptPrint=true";
+        window.open('@Url.Action("EmpSalaryXmlPrint", "Accounting")?q=' + getDataEncrypted(data), '_blank');
+    });
+
+    $("#divEmpSalaryList").on('click', '.btnEmpSalaryEdit', function () {
+        var transId = $(this).data("id");
+        $("#divEmpSalaryEditWin").empty();
+        $("#divEmpSalaryEditWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: '50%',
+            height: 406,
+            title: 'Employee Salary Edit',
+            close: onWindowClose
+        });
+        $("#divEmpSalaryEditWin").html('<div class="win_loading_half"></div>');
+        var empSalaryEditWin = $("#divEmpSalaryEditWin").data("kendoWindow");
+        empSalaryEditWin.refresh({
+            url: '@Url.Action("EmpSalaryEdit", "Accounting")?transId=' + transId + '&xmlFileId=' + '@ViewBag.xmlFileId'
+        });
+        empSalaryEditWin.center().open();
+        document.documentElement.style.overflow = 'hidden';
+        document.body.scroll = "no";
+    });
+</script>

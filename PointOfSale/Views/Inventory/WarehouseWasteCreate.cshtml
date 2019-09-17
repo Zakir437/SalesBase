@@ -1,0 +1,205 @@
+﻿@{
+    ViewBag.Title = "WarehouseWasteCreate";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+}
+<section class="content">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4 class="uppercase">Warehouse Waste Create</h4>
+            </div>
+            <div class="pull-right">
+                <a class="btn btn-default" href="/Inventory/WHWaste"><i class="fa fa-arrow-left"></i> Back</a>
+            </div>
+        </div>
+        <div class="panel-body">
+            <div class="row" style="margin-bottom:10px;">
+                <div class="col-md-6">
+                    @(Html.Kendo().AutoComplete()
+                        .Name("productsAutoComplete")
+                        .Placeholder("Type product name...")
+                        .HtmlAttributes(new { style = "width:100%; max-width:100%" })
+                        .MinLength(3)
+                        .DataTextField("Text")
+                        .Filter("contains")
+                        .DataSource(source =>
+                        {
+                            source.Read(read =>
+                            {
+                                read.Action("GetWarehouseProduct", "Inventory")
+                                    .Data("additionInfo");
+                            })
+                            .ServerFiltering(true);
+                        })
+                        .Events(e =>
+                        {
+                            e.Change("onChangeProduct").Select("onSelectProduct");
+                        })
+                    )
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div id="divWasteList" style="width:100%!important;">
+                        <table class="table table-bordered" id="wasteTbl">
+                            <tr>
+                                <th>Product Name</th>
+                                <th width="150px;">Quantity</th>
+                                <th>Waste Type</th>
+                                <th>Comments</th>
+                                <th></th>
+                            </tr>
+                            <tr id="emptyRow">
+                                <td colspan="5">
+                                    <h3>There is no product</h3>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="row" style="margin:0;">
+                <div class="text-right">
+                    <button class="btn btn-success" id="btnWasteProductSave"><i class="fa fa-save"></i> Save</button>
+                    <a class="btn btn-info" href="/Inventory/WarehouseWasteCreate"><i class="fa fa-refresh"></i> Refresh</a>
+                    <a class="btn btn-warning" href="/Inventory/WHWaste"><i class="fa fa-times"></i> Cancel</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    var whId = 0, productName = "";
+    var validation;
+    $(document).ready(function () {
+        $("#liForInventory").addClass('active');
+        $("#liForWarehouse").addClass('active');
+
+        $("#btnWasteProductSave").prop('disabled', true);
+        validation = $("#divWasteList").kendoValidator().data("kendoValidator");
+    });
+    function onChangeProduct() {
+        $("#productsAutoComplete").data("kendoAutoComplete").value("");
+    }
+    function onSelectProduct(e) {
+        whId = this.dataItem(e.item.index()).Value;
+        productName = this.dataItem(e.item.index()).Text;
+        $("#btnWasteProductSave").prop('disabled', false);
+        if ($("#emptyRow").length == 1) {
+            $("#emptyRow").hide();
+        }
+        if ($("#waste_" + whId).length == 1) {
+            alert("This product already add to waste list")
+        }
+        else {
+            $("#wasteTbl").append('<tr id="waste_' + whId + '" class="wasteItem" data-id="' + whId + '">' +
+                '<td>' + productName + '</td>' +
+                '<td>' +
+                '<input type="number" min="1" class="k-textbox" id="quantity_' + whId + '" name="quantity_' + whId + '" data-id="' + whId + '" required validationMessage="*"/>' +
+                '<span class="field-validation-valid text-danger" data-valmsg-for="quantity_' + whId + '" data-valmsg-replace="true"></span>' +
+                '</td>' +
+                '<td>' +
+                '<input style="width: 100%;" id="TypeDropDown_' + whId + '" name="TypeDropDown_' + whId + '" data-val-required="*"/>' +
+                '<span class="field-validation-valid text-danger" data-valmsg-for="TypeDropDown_' + whId + '" data-valmsg-replace="true"></span>' +
+                '</td>' +
+                '<td>' +
+                '<input type="text" placeholder="Comments" class="k-textbox" style="width: 100%;" id="comment_' + whId + '" name="comment_' + whId + '" />' +
+                '</td>' +
+                '<td>' +
+                '<span id="btnCancelProduct" data-id="' + whId + '"><i class="fa fa-times" aria-hidden="true" style="font-size:24px;cursor:pointer"></i></span>' +
+                '</td>' +
+                '</tr> ');
+
+            $("#TypeDropDown_" + whId).kendoDropDownList({
+                filter: "contains",
+                optionLabel: "--Select type--",
+                // JSON property name to use
+                dataSource: new kendo.data.DataSource({
+                    transport: {
+                        read: {
+                            url: '/Inventory/GetWasteTypeList',
+                            serverPaging: true,
+                            pageSize: 5,
+                            contentType: 'application/json; charset=utf-8',
+                            type: 'GET',
+                            dataType: 'json',
+                            data: { type: 1 } //type 1 is wastetype for warehouse
+                        },
+                        serverSorting: true,
+                        serverFiltering: true
+                    }
+                }),
+                dataValueField: 'Value',
+                dataTextField: "Text"
+            });
+
+            $.ajax({
+                url: '/Inventory/GetWarehouseProduct',
+                type: 'GET',
+                data: { whId: whId },
+                success: function (data) {
+                    if (data > 0) {
+                        $("#quantity_" + whId).prop('max', data);
+                        $("#quantity_" + whId).attr("placeholder", "Max " + data);
+                    }
+                }
+            });
+        }
+    }
+    function additionInfo()
+    {
+        var ids = [];
+        $(".wasteItem").each(function () {
+            ids.push($(this).data("id"));
+        });
+        return {
+            ids: ids.join(","),
+            text: $("#productsAutoComplete").val()
+        }
+    }
+    //******************cancel product from waste list
+    $("#wasteTbl").on('click', '#btnCancelProduct', function () {
+        whId = $(this).data("id");
+        $("#waste_" + whId).remove();
+        if ($("#wasteTbl tr").length == 2) {
+            $("#btnWasteProductSave").prop('disabled', true);
+            $("#emptyRow").show();
+        }
+    });
+
+    //*********************Waste product save ***************
+    $("#btnWasteProductSave").click(function () {
+        if (validation.validate())
+        {
+            var wasteData = [];
+            $(".wasteItem").each(function () {
+                whId = $(this).data("id");
+                wasteData.push({
+                    Id: whId,
+                    Quantity: $("#quantity_" + whId).val(),
+                    WasteTypeId: $("#TypeDropDown_" + whId).val(),
+                    Comment: $("#comment_" + whId).val()
+                });
+            });
+            $.ajax({
+                url: '/Inventory/WHWasteSave',
+                type: 'POST',
+                data: JSON.stringify({ CreatedBy: userId, WasteData: wasteData }),
+                contentType: 'application/json',
+                success: function (data) {
+                    if (data == "success") {
+                        window.location.href = '/Inventory/WHWaste';
+                    }
+                    else
+                    {
+                        alert("Save error...");
+                    }
+                }
+            });
+        }
+    });
+
+</script>
+
+

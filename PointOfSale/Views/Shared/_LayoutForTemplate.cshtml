@@ -1,0 +1,421 @@
+﻿<!DOCTYPE html>
+
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- Tell the browser to be responsive to screen width -->
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <title>@ViewBag.Title</title>
+    @Styles.Render("~/Content/kendo")
+    @*@Styles.Render("~/Content/css")*@
+    @Scripts.Render("~/bundles/modernizr")
+    <script src="~/Scripts/jquery-2.2.4.min.js"></script>
+    <link href="~/Content/font-awesome.min.css" rel="stylesheet" />
+    <link href="~/Content/Loading/loading.css" rel="stylesheet" />
+    <link href="~/Content/loading_partial.css" rel="stylesheet" />
+    <link href="~/Content/bootstrap-toggle-master/css/bootstrap-toggle.min.css" rel="stylesheet" />
+    <script src="~/Scripts/moment.min.js"></script>
+    <link href="~/Content/Date Range Picker/daterangepicker.css" rel="stylesheet" />
+    <link href="~/Scripts/intl-tel-input-master/build/css/intlTelInput.css" rel="stylesheet" />
+    <script src="~/Content/Date Range Picker/daterangepicker.js"></script>
+
+    <link href="~/Content/SmartWizard-master/dist/css/smart_wizard.min.css" rel="stylesheet" />
+    <link href="~/Content/SmartWizard-master/dist/css/smart_wizard_theme_arrows.min.css" rel="stylesheet" />
+   
+    <!--Template component-->
+    <link href="~/Content/bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/Content/bower_components/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="~/Content/bower_components/Ionicons/css/ionicons.min.css" rel="stylesheet" />
+    <link href="~/Content/bower_components/jvectormap/jquery-jvectormap.css" rel="stylesheet" />
+    <link href="~/Content/dist/css/AdminLTE.css" rel="stylesheet" />
+    <link href="~/Content/dist/css/skins/_all-skins.min.css" rel="stylesheet" />
+    <!-- Google Font -->
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
+    
+    <style>
+        .uppercase {
+            text-transform: uppercase
+        }
+
+        .selected {
+            border: 1px solid #483c3c;
+        }
+
+        .btnList {
+            margin-bottom: 5px;
+        }
+
+        input[type="checkbox"] {
+            cursor: pointer;
+        }
+
+        /*.sidebar-menu li:hover .treeview {
+            visibility: visible;
+        }*/
+    </style>
+</head>
+<body class="hold-transition skin-blue sidebar-mini">
+    @{
+        PointOfSale.Models.PointOfSale_DBEntities db = new PointOfSale.Models.PointOfSale_DBEntities();
+        int loginUserId = Convert.ToInt32(Request.Cookies["CookieUserInfo"].Values["UserId"].ToString());
+    }
+    <div class="wrapper">
+        <header class="main-header">
+            <!-- Logo -->
+            <a href="" class="logo">
+                <!-- mini logo for sidebar mini 50x50 pixels -->
+                <span class="logo-mini"><b>POS</b></span>
+                <!-- logo for regular state and mobile devices -->
+                <span class="logo-lg">
+                    <img src="~/Content/Icon/web logo.png" />
+                </span>
+                @*<span class="logo-lg"><b>Cost</b> POS</span>*@
+            </a>
+            <!-- Header Navbar: style can be found in header.less -->
+            <nav class="navbar navbar-static-top">
+                <!-- Sidebar toggle button-->
+                @*<a href="#" class="sidebar-toggle" data-toggle="push-menu" role="button">
+                    <span class="sr-only">Toggle navigation</span>
+                </a>*@
+                <!-- Navbar Right Menu -->
+                <div class="navbar-custom-menu">
+                    <ul class="nav navbar-nav">
+                        <!-- User Account: style can be found in dropdown.less -->
+                        <li class="dropdown user user-menu">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                @*<img src="~/Content/dist/img/user8-128x128.jpg" class="user-image" alt="User Image" />*@
+                                <span class="hidden-xs">@HttpContext.Current.Request.Cookies["CookieUserInfo"].Values["UserName"]</span>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <!-- User image -->
+                                <li class="user-header">
+                                    @*<img src="~/Content/dist/img/user8-128x128.jpg" class="img-circle" alt="User Image" />*@
+                                    <p>
+                                        @HttpContext.Current.Request.Cookies["CookieUserInfo"].Values["UserName"]
+                                    </p>
+                                </li>
+                                <!-- Menu Body -->
+                                <li class="user-body">
+                                    @*<div class="row">
+                                        <div class="col-xs-4 text-center">
+                                            <a href="#">Followers</a>
+                                        </div>
+                                        <div class="col-xs-4 text-center">
+                                            <a href="#">Sales</a>
+                                        </div>
+                                        <div class="col-xs-4 text-center">
+                                            <a href="#">Friends</a>
+                                        </div>
+                                    </div>*@
+                                    <!-- /.row -->
+                                </li>
+                                <!-- Menu Footer-->
+                                <li class="user-footer">
+                                    <div class="pull-left">
+                                        @*<a href="#" class="btn btn-default btn-flat">Profile</a>*@
+                                    </div>
+                                    <div class="pull-right">
+                                        <a href="/Account/LogOff" class="btn btn-default btn-flat">Sign out</a>
+                                    </div>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </header>
+        <!-- Left side column. contains the logo and sidebar -->
+        <aside class="main-sidebar" style="overflow-y:auto">
+            <section class="sidebar">
+                <!-- Sidebar user panel -->
+                @*<div class="user-panel">
+                    <div class="pull-left image">
+                        <img src="~/Content/dist/img/user8-128x128.jpg" class="img-circle" alt="User Image" />
+                    </div>
+                    <div class="pull-left info">
+                        <p>@HttpContext.Current.Request.Cookies["CookieUserInfo"].Values["UserName"]</p>
+                        <a href="#"><i class="fa fa-circle text-success"></i> Online</a>
+                    </div>
+                </div>*@
+                <!-- search form -->
+                @*<form action="#" method="get" class="sidebar-form">
+                    <div class="input-group">
+                        <input type="text" name="q" class="form-control" placeholder="Search...">
+                        <span class="input-group-btn">
+                            <button type="submit" name="search" id="search-btn" class="btn btn-flat">
+                                <i class="fa fa-search"></i>
+                            </button>
+                        </span>
+                    </div>
+                </form>*@
+                <!-- /.search form -->
+                <!-- sidebar menu: : style can be found in sidebar.less -->
+                <ul class="sidebar-menu" data-widget="tree" @*style="overflow-y:auto; height:760px;"*@>
+                    @*<li class="header">MAIN NAVIGATION</li>*@
+                    @*<li class="active treeview menu-open">
+                        <a href="#">
+                            <i class="fa fa-dashboard"></i> <span>Dashboard</span>
+                            <span class="pull-right-container">
+                                <i class="fa fa-angle-left pull-right"></i>
+                            </span>
+                        </a>
+                        <ul class="treeview-menu">
+                            <li><a href="index.html"><i class="fa fa-circle-o"></i> Dashboard v1</a></li>
+                            <li class="active"><a href="index2.html"><i class="fa fa-circle-o"></i> Dashboard v2</a></li>
+                        </ul>
+                    </li>*@
+                    
+                    <li id="liForPos">
+                        <a href="/PointOfSale/Index">
+                            <i class="fa fa-th"></i> <span>Sales Point/Returns</span>
+                        </a>
+                    </li>
+                    <li class="treeview" id="liForSalesMenu">
+                        <a href="">
+                            <i class="fa fa-line-chart"></i>
+                            <span>Sales</span>
+                            <span class="pull-right-container">
+                                <i class="fa fa-angle-left pull-right"></i>
+                            </span>
+                        </a>
+                        <ul class="treeview-menu">
+                            <li id="liForSales"><a href="/Sales/Order"><i class="fa fa-list-ul"></i> Sales/Order</a></li>
+                            <li id="liForPurchaseOrder"><a href="/Sales/PurchaseOrder"><i class="fa fa-list-ul"></i> Purchase Order History</a></li>
+                            @*<li id="liForOffer"><a href="/PointOfSale/Offer"><i class="fa fa-percent"></i> Offer Management</a></li>*@
+                            <li id="liForOffers"><a href="/Offer/Offer"><i class="fa fa-percent"></i> Offer</a></li>
+                            <li id="liForAfterSaleService"><a href="/Sales/SaleService"><i class="fa fa-retweet"></i> After Sales Service</a></li>
+                            <li id="liForSalesConfig"><a href="/Sales/Configuration"><i class="fa fa-cog"></i> Configuration</a></li>
+                        </ul>
+                    </li>
+                    <li class="treeview" id="liForInventory">
+                        <a href="">
+                            <i class="fa fa-shopping-cart"></i>
+                            <span>Inventory</span>
+                            <span class="pull-right-container">
+                                <i class="fa fa-angle-left pull-right"></i>
+                            </span>
+                        </a>
+                        <ul class="treeview-menu">
+                            @*<li id="liForInventoryDashboard"><a href="/Inventory/Dashboard"><i class="fa fa-dashboard"></i>Dashboard</a></li>*@
+                            <li id="liForStock"><a href="/Inventory/StockList"><i class="fa fa-building"></i> Stock/Stock List</a></li>
+                            <li id="liForProcurement"><a href="/Inventory/Procurement"><i class="fa fa-list-ul"></i> Procurement</a></li>
+                            <li id="liForWasteHistory"><a href="/Stock/WasteHistory"><i class="fa fa-list-ul"></i> Waste Management/Waste History</a></li>
+                            <li id="liForBorrowProducts"><a href="/Stock/BorrowProducts"><i class="fa fa-mail-reply"></i> Borrow Items/Products</a></li>
+                            <li id="liForFullfilment"><a href="/Stock/MinimumQuantity"><i class="fa fa-hourglass-half"></i> Fulfillment</a></li>
+                            <li id="liForWarehouse"><a href="/Inventory/Warehouse"><i class="fa fa-list-ul"></i> Warehouse</a></li>
+                            <li class="treeview" id="liForInventoryConfig">
+                                <a href="#">
+                                    <i class="fa fa-cog"></i>
+                                    <span>Configuration</span>
+                                    <span class="pull-right-container">
+                                        <i class="fa fa-angle-left pull-right"></i>
+                                    </span>
+                                </a>
+                                <ul class="treeview-menu">
+                                    <li id="liForUnit"><a href="/Configuration/Unit"><i class="fa fa-list-ul"></i> Unit</a></li>
+                                    <li id="liForBrand"><a href="/Configuration/Brand"><i class="fa fa-list-ul"></i> Brand</a></li>
+                                    <li id="liForMasterProduct"><a href="/Configuration/SubMasterProduct"><i class="fa fa-list-ul"></i> Master Product</a></li>
+                                    <li id="liForTag"><a href="/Configuration/Tag"><i class="fa fa-list-ul"></i> Tag</a></li>
+                                    <li id="liForCategory"><a href="/Configuration/Category"><i class="fa fa-list-ul"></i> Category</a></li>
+                                    <li id="liForSubCategory"><a href="/Configuration/SubCategory"><i class="fa fa-list-ul"></i> Sub Category</a></li>
+                                    <li id="liForWasteType"><a href="/Inventory/WasteType"><i class="fa fa-list-ul"></i> Waste Type</a></li>
+                                    <li id="liForDeliveryCharge"><a href="/Inventory/DeliveryCharge"><i class="fa fa-list-ul"></i> Delivery Charge</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="treeview" id="liForAccount">
+                        <a href="#">
+                            <i class="fa fa-money"></i>
+                            <span>Accounts</span>
+                            <span class="pull-right-container">
+                                <i class="fa fa-angle-left pull-right"></i>
+                            </span>
+                        </a>
+                        <ul class="treeview-menu">
+                            <li id="liForPayroll"><a href="/Accounting/PaySalary"><i class="fa fa-list-ul"></i> Payroll</a></li>
+                            <li id="liForSaleOrPurchaseLedger"><a href="/Accounting/SalesOrPurchaseLedger"><i class="fa fa-list-ul"></i> Sales/PUrchase Ledger</a></li>
+                            @*<li id="liForPayroll"><a href="/Accounting/PaySalary"><i class="fa fa-list-ul"></i> Credit Ledger</a></li>*@
+                            <li class="treeview" id="liForAccountConfig">
+                                <a href="#">
+                                    <i class="fa fa-cog"></i>
+                                    <span>Configuration</span>
+                                    <span class="pull-right-container">
+                                        <i class="fa fa-angle-left pull-right"></i>
+                                    </span>
+                                </a>
+                                <ul class="treeview-menu">
+                                    <li id="liForPaymentBody"><a href="/Configuration/PaymentBody"><i class="fa fa-list-ul"></i> Payment body</a></li>
+                                    <li id="liForPaymentType"><a href="/Configuration/PaymentType"><i class="fa fa-list-ul"></i> Payment type</a></li>
+                                    <li id="liForPaymentMethod"><a href="/Configuration/PaymentMethod"><i class="fa fa-list-ul"></i> Payment method</a></li>
+                                    <li id="liForCreditLimit"><a href="/Configuration/CreditLimit"><i class="fa fa-list-ul"></i> Credit Limit</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    @*<li id="liForReport">
+                        <a href="/PointOfSale/Report">
+                            <i class="fa fa-files-o"></i> <span>Report</span>
+                        </a>
+                    </li>*@
+                    <li class="treeview" id="liForCRM">
+                        <a href="#">
+                            <i class="fa fa-handshake-o"></i>
+                            <span>CRM</span>
+                            <span class="pull-right-container">
+                                <i class="fa fa-angle-left pull-right"></i>
+                            </span>
+                        </a>
+                        <ul class="treeview-menu">
+                            <li id="liForCustomer"><a href="/Configuration/Customer"><i class="fa fa-list-ul"></i> Customer</a></li>
+                            <li id="liForSupplier"><a href="/Configuration/Supplier"><i class="fa fa-list-ul"></i> Supplier</a></li>
+                            <li id="liForAssociate"><a href="/Configuration/Associate"><i class="fa fa-list-ul"></i> Associate</a></li>
+                        </ul>
+                    </li>
+                    <li class="treeview" id="liForHr">
+                        <a href="#">
+                            <i class="fa fa-users"></i>
+                            <span>Human Resource</span>
+                            <span class="pull-right-container">
+                                <i class="fa fa-angle-left pull-right"></i>
+                            </span>
+                        </a>
+                        <ul class="treeview-menu">
+                            <li id="liForUser"><a href="/HumanResource/AllUserLists"><i class="fa fa-user"></i> Employee Registry</a></li>
+                            <li id="liForAttendance"><a href="/Attendance/Attendance"><i class="fa fa-list-ul"></i> Attendance/Leave</a></li>
+                            
+                            <li class="treeview" id="liForHRConfig">
+                                <a href="#">
+                                    <i class="fa fa-cog"></i>
+                                    <span>Configuration</span>
+                                    <span class="pull-right-container">
+                                        <i class="fa fa-angle-left pull-right"></i>
+                                    </span>
+                                </a>
+                                <ul class="treeview-menu">
+                                    <li id="liForLeaveType"><a href="/Configuration/LeaveType"><i class="fa fa-list-ul"></i> LeaveType</a></li>
+                                    <li id="liForHoliday"><a href="/Holiday/Holiday"><i class="fa fa-list-ul"></i> Holiday</a></li>
+                                    <li id="liForWorkingSchedule"><a href="/HumanResource/WorkingSchedule"><i class="fa fa-list-ul"></i> Work Schedule</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="treeview" id="liForReporting">
+                        <a href="#">
+                            <i class="fa fa-files-o"></i>
+                            <span>Reporting</span>
+                            <span class="pull-right-container">
+                                <i class="fa fa-angle-left pull-right"></i>
+                            </span>
+                        </a>
+                        <ul class="treeview-menu">
+                            <li id="liForTaskScheduler"><a href="/Inventory/TaskScheduler"><i class="fa fa-list-ul"></i> Inventory/Task Scheduler</a></li>
+                            <li id="liForReport"><a href="/Inventory/Report"><i class="fa fa-list-ul"></i> Report</a></li>
+                        </ul>
+                    </li>
+                    <li class="treeview" id="liForConfiguration">
+                        <a href="#">
+                            <i class="fa fa-cog"></i>
+                            <span>Administration</span>
+                            <span class="pull-right-container">
+                                <i class="fa fa-angle-left pull-right"></i>
+                            </span>
+                        </a>
+                        <ul class="treeview-menu">
+                            <li id="liForSystemUser"><a href="/Configuration/User"><i class="fa fa-user"></i> System-User</a></li>
+                            <li id="liForMiscFunction"><a href="/Configuration/MiscFunction"><i class="fa fa-list-ul"></i> Master Configuration</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </section>
+        </aside>
+
+        <!-- Content Wrapper. Contains page content -->
+        <div class="content-wrapper">
+            @RenderBody()
+        </div>
+        <!-- /.content-wrapper -->
+
+        <footer class="main-footer">
+            <div class="pull-right hidden-xs">
+                <b>Version</b> 1.0.0
+            </div>
+            <strong>Copyright &copy; @DateTime.Now.Year - SpicyBinary</strong> All rights
+            reserved.
+        </footer>
+       
+        <!-- Control Sidebar -->
+        <aside class="control-sidebar control-sidebar-dark"></aside>
+        <!-- /.control-sidebar -->
+        
+        <div class="control-sidebar-bg"></div>
+    </div>
+
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/kendo")
+    @Scripts.Render("~/bundles/bootstrap")
+    @RenderSection("scripts", required: false)
+    <script src="~/Content/bootstrap-toggle-master/js/bootstrap-toggle.min.js"></script>
+    <script src="~/Scripts/intl-tel-input-master/build/js/intlTelInput.min.js"></script>
+    <script src="~/Content/SmartWizard-master/dist/js/jquery.smartWizard.min.js"></script>
+
+    <!--Template component-->
+    @*<script src="~/Content/bower_components/jquery/dist/jquery.min.js"></script>*@
+    @*<script src="~/Content/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>*@
+    <script src="~/Content/bower_components/fastclick/lib/fastclick.js"></script>
+    <script src="~/Content/dist/js/adminlte.min.js"></script>
+    <script src="~/Content/bower_components/jquery-sparkline/dist/jquery.sparkline.min.js"></script>
+    <script src="~/Content/plugins/jvectormap/jquery-jvectormap-1.2.2.min.js"></script>
+    <script src="~/Content/plugins/jvectormap/jquery-jvectormap-world-mill-en.js"></script>
+    <script src="~/Content/bower_components/jquery-slimscroll/jquery.slimscroll.min.js"></script>
+    <script src="~/Content/bower_components/chart.js/Chart.js"></script>
+    @*<script src="~/Content/dist/js/pages/dashboard2.js"></script>*@
+    <script src="~/Content/dist/js/demo.js"></script>
+    <script src="~/Scripts/metronic.js"></script>
+    
+    <div id="divUserWindow"></div>
+    <script>
+        //$(window).load(function () {
+        //    $('.loading').hide(); // hide message when finished with load
+        //});
+        var userId = 0;
+        userId = @loginUserId;
+
+        $("#signUp").click(function () {
+            var userId = $(this).data("id");
+            $("#divUserWindow").empty();
+            $("#divUserWindow").kendoWindow({
+                actions: ["Close"],
+                draggable: false,
+                modal: true,
+                visible: false,
+                width: "40%",
+                height: "450px",
+                title: 'User',
+            });
+            var UserWindow = $("#divUserWindow").data("kendoWindow");
+            UserWindow.refresh('/Configuration/CreateUser?id=' + userId);
+            UserWindow.center().open();
+        });
+        function onWindowClose() {
+            document.documentElement.style.overflow = 'auto';
+            document.body.scroll = "yes";
+        }
+        function getDataEncrypted(text) {
+            var encryptedData;
+            $.ajax({
+                method: 'GET',
+                url: "/Home/GetEncryptedData?text=" + text,
+                async: false,
+                success: function (res) {
+                    encryptedData = res;
+                }
+            });
+            return encryptedData;
+        }
+    </script>
+</body>
+</html>

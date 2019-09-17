@@ -1,0 +1,39 @@
+﻿@{
+    ViewBag.Title = "SalaryAccounts";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+}
+@*<section class="content-header">
+    <h1>
+        Salary Accounts
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-list-ul"></i> Accounts</a></li>
+        <li><a href="/Accounting/PaySalary"><i class="fa fa-list-ul"></i> Payroll</a></li>
+        <li class="active">Salary Accounts</li>
+    </ol>
+</section>*@
+<section class="content">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4 class="uppercase">Salary Accounts</h4>
+            </div>
+            <div class="pull-right">
+                <a class="btn btn-default" href="/Accounting/PaySalary"><i class="fa fa-arrow-left"></i> Back</a>
+            </div>
+        </div>
+        <div class="panel-body">
+            <div id="divAccountList"></div>
+        </div>
+    </div>
+</section>
+<script>
+    $(document).ready(function () {
+        $("#liForAccount").addClass('active');
+        $("#liForPayroll").addClass('active');
+
+         $("#divAccountList").empty();
+         $("#divAccountList").append('<div class="loading_partial"></div>');
+         $("#divAccountList").load('@Url.Action("SalaryAccountList", "Accounting")');
+    });
+</script>

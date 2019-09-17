@@ -1,0 +1,72 @@
+﻿@using PointOfSale.Helpers
+@{
+    ViewBag.Title = "SaleOffer";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+}
+<style>
+    .btnBox {
+        height: 200px;
+        width: 100%;
+        border: 1px solid #808080;
+        margin-bottom:15px;
+    }
+
+    h1 {
+        padding: 50px 0px;
+    }
+</style>
+<section class="content">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4 class="uppercase">Sale Offer @if (ViewBag.IsCoupon == true)
+                { <span>(With Coupon)</span> }</h4>
+            </div>
+            <div class="pull-right">
+                <a class="btn btn-default" href="/PointOfSale/OfferCreate"><i class="fa fa-arrow-left"></i> Back</a>
+            </div>
+        </div>
+        <div class="panel-body">
+            <div class="col-md-4">
+                <a class="btn btn-default btnBox" href="@Html.EncodedParam("SaleOfferCreate","PointOfSale", new { subOfferId = 1, isCoupon = ViewBag.IsCoupon }, null)" data-toggle="tooltip" title="Create Buy 1 Get 1 Offer">
+                    <h1>Buy 1 Get 1</h1>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a class="btn btn-default btnBox" href="@Html.EncodedParam("SaleOfferCreate","PointOfSale", new { subOfferId = 2, isCoupon = ViewBag.IsCoupon }, null)" data-toggle="tooltip" title="Create Buy 2 Get 1 Offer">
+                    <h1>Buy 2 Get 1</h1>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a class="btn btn-default btnBox" href="@Html.EncodedParam("SaleOfferCreate","PointOfSale", new { subOfferId = 3, isCoupon = ViewBag.IsCoupon }, null)" data-toggle="tooltip" title="Create Discount Multi Offer">
+                    <h1>Discount Multi</h1>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a class="btn btn-default btnBox" href="@Html.EncodedParam("SaleOfferCreate","PointOfSale", new { subOfferId = 4, isCoupon = ViewBag.IsCoupon }, null)" data-toggle="tooltip" title="Create Discount Single Offer">
+                    <h1>Discount Single</h1>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a class="btn btn-default btnBox" href="@Html.EncodedParam("SaleOfferCreate","PointOfSale", new { subOfferId = 5, isCoupon = ViewBag.IsCoupon }, null)" data-toggle="tooltip" title="Create Discount Category Offer">
+                    <h1>Discount Category</h1>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a class="btn btn-default btnBox" href="@Html.EncodedParam("SaleOfferCreate","PointOfSale", new { subOfferId = 6, isCoupon = ViewBag.IsCoupon }, null)" data-toggle="tooltip" title="Create Discount Tag Offer">
+                    <h1>Discount Tag</h1>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<script>
+    $(document).ready(function () {
+
+        $('[data-toggle="tooltip"]').tooltip();
+        $("#liForSalesMenu").addClass('active');
+        $("#liForOffer").addClass('active');
+    })
+</script>

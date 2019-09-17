@@ -1,0 +1,72 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewPayment>
+@using System.Globalization;
+@{
+    var count = 0;
+}
+<style>
+    a {
+        cursor: pointer;
+    }
+</style>
+@if (Model.Any() == true)
+{
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Voucher No</th>
+            <th>Payment Type</th>
+            <th>Payment Body</th>
+            <th>Amount Paid</th>
+            <th>Transaction No</th>
+            <th>Date</th>
+        </tr>
+        @foreach (var list in Model)
+        {
+            count++;
+            <tr>
+                <td>@count. </td>
+                <td>
+                    @if (list.Type == 3 || list.Type == 2)
+                    {
+                        <a class="btnImportDetails" data-toggle="tooltip" title="view import transactions" data-id="@list.PaymentId">@list.ImportNumber</a>
+                    }
+                    else if (list.Type == 4)
+                    {
+                        <a class="btnShowImportDetails" data-toggle="tooltip" title="View voucher details" data-id="@list.ReturnImportId">@list.ReturnImportNumber</a>
+                    }
+                    else if(list.Type == 9)
+                    {
+                        <span>@list.WarehouseVoucher</span>
+                    }
+                    else if(list.Type == 10)
+                    {
+                        <span>Debit Refill</span>
+                    }
+                </td>
+                <td>@list.PaymentTypeName</td>
+                <td>@list.PaymentBodyName @if (list.SerialNumber != null){ <span>(@list.SerialNumber)</span> }</td>
+                <td>@list.Amount.ToString("C", new CultureInfo("bn-BD")) @if (list.IsCreditPayment == true) { <span>(credit payment)</span>  } </td>
+                <td>@list.TransactionNo</td>
+                <td>@Convert.ToDateTime(list.Date).ToString("MMM dd yyyy")</td>
+            </tr>
+        }
+        <tr style="font-weight:bold">
+            <td></td>
+            <td colspan="3">Total</td>
+            <td>@Model.Sum(a=>a.Amount).ToString("C", new CultureInfo("bn-BD"))</td>
+            <td></td>
+            <td></td>
+        </tr>
+    </table>
+}
+else
+{
+    <h3>There is no record to display</h3>
+}
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    });
+</script>
+
+

@@ -1,0 +1,114 @@
+﻿@model PointOfSale.Models.ViewPosOrder
+@using System.Globalization;
+@{
+    var count = 0;
+    ViewBag.Title = "OrderTransactionPrint";
+    Layout = "~/Views/Shared/_LayoutPrintPage.cshtml";
+    PointOfSale.Models.PointOfSale_DBEntities db = new PointOfSale.Models.PointOfSale_DBEntities();
+    var orderTransactionList = ViewBag.OrderTransList as List<PointOfSale.Models.ViewOrderTransaction>;
+}
+<section class="content-header" style="text-align:center;">
+    <h3>Order Voucher</h3>
+    <p>Cost-POS</p>
+    <hr />
+</section>
+<div class="row">
+    <div class="col-xs-offset-6 col-xs-6 text-left">
+        <p>
+            Generate By : @HttpContext.Current.Request.Cookies["CookieUserInfo"].Values["UserName"]<br>
+            Generate Date : @DateTime.Now.ToString("MMM dd yyyy hh:mm:ss tt") <br>
+        </p>
+    </div>
+    <div class="col-xs-offset-6 col-xs-6 text-right">
+        @if (Model != null)
+         {
+            <p>
+                Order by : @Model.CreatedBy<br />
+                Order No : @Model.OrderNumber<br />
+                Date : @Convert.ToDateTime(@Model.OrderDate).ToString("MMM dd yyyy hh:mm:ss tt")<br />
+                Subtotal : @Model.SubTotalPrice.ToString("C", new CultureInfo("bn-BD"))<br />
+                @if(Model.Discount > 0)
+                {
+                    if(Model.DiscountType == true)
+                    {
+                        <span>Discount : <span>@Model.Discount</span>Tk(<span>@Model.DiscPercent</span>%)</span>
+                    }
+                    else
+                    {
+                        <span>Discount : <span>@Model.DiscPercent</span>%(<span>@Model.Discount</span>Tk)</span>
+                    }
+                    <br />
+                }
+                @if(Model.Tax > 0)
+                {
+                    <span>Tax @if (Model.TaxFunc == true) { <span>(A)</span> } else { <span>(D)</span> }: @Model.TaxPercent%(@Model.Tax.ToString("C", new CultureInfo("bn-BD")))</span><br />
+                }
+                <span style="border-top:1px solid">Total Cost : @Model.TotalPrice.ToString("C", new CultureInfo("bn-BD"))</span><br />
+                @if(Model.DueAmount > 0)
+                {
+                    <span>Due Amount : @Model.DueAmount.Value.ToString("C", new CultureInfo("bn-BD"))</span>
+                }
+            </p>
+         }
+    </div>
+</div>
+<div class="row" style="margin-top:10px;">
+    <div class="col-md-12">
+        @if (orderTransactionList.Any())
+        {
+            <table class="table table-bordered">
+                <tr>
+                    <th>SL.</th>
+                    <th>Product Name</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Total Price</th>
+                </tr>
+                @foreach (var list in orderTransactionList)
+                {
+                    count++;
+                    <tr>
+                        <td>@count.</td>
+                        <td>
+                            @list.ProductName
+                            @if (list.Discount > 0)
+                             {
+                                <img src="~/Images/DiscountImage/272498.png" />
+                             }
+                            @if (list.RefundStatus == 1)
+                             {
+                                <i class="fa fa-reply" aria-hidden="true"></i>
+                             }
+                        </td>
+                        <td>@list.PerItemPrice.ToString("C", new CultureInfo("bn-BD"))</td>
+                        <td>@list.Quantity</td>
+                        <td>
+                            @list.Price.ToString("C", new CultureInfo("bn-BD"))
+                            @if (list.Discount > 0)
+                             {
+                                if (list.DiscountType == true)
+                                {
+                                    <span>(Discount <span>@list.Discount</span>Tk(@list.DiscountPercent%))</span>
+                                }
+                                else
+                                {
+                                    <span>(Discount <span>@list.DiscountPercent</span>%(<span>@list.Discount</span>Tk))</span>
+                                }
+                             }
+                        </td>
+                    </tr>
+                }
+            </table>
+        }
+        else
+        {
+            <h4>There is no record to display</h4>
+        }
+    </div>
+</div>
+<script>
+    window.onload = function () {
+        window.print();
+    }
+</script>
+

@@ -1,0 +1,96 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin-bottom:4%;margin-top:2%;">
+    <div id="divLeaveTypeForm"></div>
+    <div class="k-edit-buttons k-state-default" style="margin-left:30px;">
+        @if (ViewBag.Id > 0)
+        {
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnLeaveTypeCreate"><span class="k-icon k-update"></span>Update</button>
+        }
+        else
+        {
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnLeaveTypeCreate"><span class="k-icon k-update"></span>Create</button>
+        }
+        <button type="reset" class="k-button k-button-icontext k-grid-update" id="btnLeaveTypeRefresh"><span class="k-icon k-i-refresh"></span>Refresh</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnLeaveTypeCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+
+<script>
+     $(document).ready(function () {
+         $("#divLeaveTypeForm").empty();
+         $("#divLeaveTypeForm").load('@Url.Action("LeaveTypeCreatePartial", "Configuration")?id=' + '@ViewBag.Id');
+    });
+    $("#btnLeaveTypeRefresh").click(function () {
+        $("#divLeaveTypeForm").empty();
+        $("#divLeaveTypeForm").load('@Url.Action("LeaveTypeCreatePartial", "Configuration")?id=' + '@ViewBag.Id');
+    });
+    $("#btnLeaveTypeCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+    var validation = $("#divLeaveTypeForm").kendoValidator({
+        rules: {
+            remoteName: function (input) {
+                var remoteAttr = input.attr("data-val-remote-url");
+                if (typeof remoteAttr === typeof undefined || remoteAttr === false) {
+                    return true;
+                }
+                var isInvalid;
+                var data = {};
+                var Id = $("#Id").val();
+                var Name = $.trim($("#Name").val());
+                data = { Id: Id, Name: Name };
+                $.ajax({
+                    url: remoteAttr,
+                    mode: "abort",
+                    port: "validate" + input.attr('name'),
+                    dataType: "json",
+                    type: input.attr("data-val-remote-type"),
+                    data: data,
+                    async: false,
+                    success: function (response) {
+                        isInvalid = response;
+                        if (isInvalid === true) {
+                            isInvalid = true;
+                        }
+                        else {
+                            isInvalid = false;
+                        }
+                    }
+                });
+                return isInvalid;
+            }
+        },
+        messages: {
+            remoteName: function (input) {
+                return input.data('val-remote');
+            }
+        }
+    }).data("kendoValidator");
+    $("#btnLeaveTypeCreate").click(function () {
+        if (validation.validate()) {
+            var sendData = {
+                Id: $("#Id").val(),
+                Name: $.trim($("#Name").val()),
+                CreatedBy: userId
+            }
+            $.ajax({
+                url: '@Url.Action("LeaveTypeSave", "Configuration")',
+                type: "POST",
+                data: sendData,
+                success: function (data) {
+                    if (data == "success") {
+                        $("#divLeaveTypeWin").data("kendoWindow").close();
+                        $("#div_All_LeaveType").append('<div class="loading_partial"></div>');
+                        $("#div_All_LeaveType").load('@Url.Action("LeaveTypeLists", "Configuration")');
+                    }
+                    else
+                    {
+                        alert("Leave Type Save Error");
+                    }
+                }
+            });
+        }
+    });
+
+
+
+</script>

@@ -1,0 +1,122 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewOrderTransaction>
+@using System.Globalization;
+@{
+    var count = 0;
+}
+@if (Model.Count() > 0)
+{
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>
+                @if (ViewBag.IsReturnPartial == null && ViewBag.OrderStatus == true)
+                {
+                    <input type="checkbox" id="checkAll" />
+                }
+                Product Name
+            </th>
+            <th>Quantity</th>
+            <th>Peritem Price</th>
+            <th>Peritem Total</th>
+            <th>Discount Price</th>
+            <th>Total Price</th>
+            <th>Refund Status</th>
+            @if(ViewBag.IsReturnPartial != null)
+            {
+                <th style="width:200px;">Refund Qty</th>
+            }
+        </tr>
+        @foreach (var list in Model)
+        {
+            count++;
+            <tr>
+                <td>@count. </td>
+                <td>
+                    @if (list.IsRefundAllow == true && ViewBag.IsReturnPartial == null && list.Status == true)
+                    {
+                        <input type="checkbox" class="check" id="check_@list.OrderTransactionId" data-id="@list.OrderTransactionId" />
+                    }
+                    @list.ProductName
+                    @if (list.TransactionType == 1) // product
+                    {
+                        if (list.Discount > 0 || list.CouponDiscount > 0)
+                        {
+                            <img src="~/Images/DiscountImage/272498.png" />
+                        }
+                        if (list.RefundStatus == 1)
+                        {
+                            <i class="fa fa-reply" aria-hidden="true"></i>
+                        }
+                    }
+                </td>
+                @if (list.TransactionType == 1)
+                {
+                    <td>@list.Quantity</td>
+                    <td>@list.PerItemPrice.ToString("C", new CultureInfo("bn-BD"))</td>
+                }
+                else
+                {
+                    <td>N/A</td>
+                    <td>N/A</td>
+                }
+                @if (list.Discount > 0 || list.CouponDiscount > 0)
+                 {
+                    <td>@list.PerItemTotal.Value.ToString("C", new CultureInfo("bn-BD"))</td>
+                    <td>@list.Price.ToString("C", new CultureInfo("bn-BD"))</td>
+                    <td>@list.Price.ToString("C", new CultureInfo("bn-BD"))</td>
+                 }
+                else
+                {
+                    <td>@list.Price.ToString("C", new CultureInfo("bn-BD"))</td>
+                    <td>N/A</td>
+                    <td>@list.Price.ToString("C", new CultureInfo("bn-BD"))</td>
+                }
+                @*@if (list.Discount > 0)
+                 {
+                    if (list.DiscountType == true)
+                    {
+                        <td>@list.Price.ToString("C", new CultureInfo("bn-BD")) Discount(Fixed) <span>@list.Discount</span>Tk(<span>@list.Discount</span>%)</td>
+                    }
+                    else
+                    {
+                        <td>@list.Price.ToString("C", new CultureInfo("bn-BD")) Discount(Percent) @list.Discount%(<span>@list.Discount</span>Tk)</td>
+                    }
+                }
+                else
+                {
+                    <td>@list.Price.ToString("C", new CultureInfo("bn-BD"))</td>
+                }*@
+                <td>
+                    @if (list.Quantity > 0 && list.IsRefundAllow == true)
+                    {
+                        <span>Allow</span>
+                        @*<button class="btn btn-danger btnRefundItem" data-id="@list.OrderTransactionId" data-quantity="@list.Quantity" data-productid="@list.ProductId" data-isrefundallow="@list.IsRefundAllow">Refund</button>*@
+                    }
+                    else
+                    {
+                        <span>Not Allow</span>
+                    }
+                </td>
+                @if (ViewBag.IsReturnPartial != null)
+                    {
+                        <td>
+                            @if (ViewBag.IsReturnPartial == true) // item qty partial change
+                             {
+                                <input type="number" min="1" class="k-textbox item" max="@list.Quantity" id="qty_@list.OrderTransactionId" data-id="@list.OrderTransactionId" name="qty_@list.OrderTransactionId" required validationMessage="Plese enter valid quantity" />
+                                <span class="field-validation-valid text-danger" data-valmsg-for="qty_@list.OrderTransactionId" data-valmsg-replace="true"></span>
+                             }
+                            else //item qty full
+                            {
+                                <input type="number" class="k-textbox item" min="1" id="qty_@list.OrderTransactionId" name="qty_@list.OrderTransactionId" data-id="@list.OrderTransactionId" readonly value="@list.Quantity" />
+                            }
+                        </td>
+                 }
+            </tr>
+         }
+    </table>
+}
+else
+{
+    <h4>There is no record to display</h4>
+}
+

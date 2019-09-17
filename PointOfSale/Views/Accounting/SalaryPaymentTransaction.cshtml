@@ -1,0 +1,94 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewPayment>
+@using System.Globalization
+@{
+    var count = 0;
+}
+@if (Model.Any())
+{
+    <table class="table table-bordered">
+        <tr>
+            <th>SL.</th>
+            <th>Transaction No</th>
+            <th>Amount</th>
+            <th>Transaction No</th>
+            <th>Date</th>
+            @if (ViewBag.IsPrint == false)
+             {
+                <th></th>
+             }
+        </tr>
+        @foreach (var list in Model)
+         {
+            count++;
+            if (list.InOut == true)
+            {
+                <tr style="background-color:#e4f8ff">
+                    <td>@count.</td>
+                    @if (list.Type == 8)
+                     {
+                        <td>@list.SalaryTransNo</td>
+                     }
+                    else
+                    {
+                        <td>@list.PaySheetTransNo</td>
+                    }
+                    <td>
+                        @list.Amount.ToString("C", new CultureInfo("bn-BD")) @if (list.IsCreditPayment == true)
+                        { <span>(Credit Payment)</span> }
+                    </td>
+                    <td>@list.TransactionNo</td>
+                    <td>@Convert.ToDateTime(list.Date).ToString("MMM dd yyyy")</td>
+                    @if (ViewBag.IsPrint == false)
+                     {
+                        <td></td>
+                     }
+                </tr>
+            }
+            else
+            {
+                <tr style="background-color:#fafff6">
+                    <td>@count.</td>
+                    @if (list.Type == 5)
+                     {
+                        <td>@list.SalaryTransNo</td>
+                     }
+                    else
+                    {
+                        <td>@list.PaySheetTransNo</td>
+                    }
+                    <td>
+                        @list.Amount.ToString("C", new CultureInfo("bn-BD")) @if (list.IsCreditPayment == true)
+                        { <span>(Credit Payment)</span> }
+                    </td>
+                    <td>@list.TransactionNo</td>
+                    <td>@Convert.ToDateTime(list.Date).ToString("MMM dd yyyy")</td>
+                    @if (ViewBag.IsPrint == false)
+                     {
+                        if (list.Type == 5 && list.Status != false)
+                        {
+                            <td>
+                                <button class="btn btn-danger btnDeletePaymentTrans" data-id="@list.PaymentTransactionId"><i class="fa fa-trash"></i></button>
+                            </td>
+                        }
+                        else
+                        {
+                            <td></td>
+                        }
+                     }
+                </tr>
+            }
+         }
+    </table>
+}
+else
+{
+    <h4>There is no record to display</h4>
+}
+<script>
+    $(document).ready(function () {
+        $("#divTotalAmount").empty();
+        $("#divTotalAmount").append('@ViewBag.TotalAmount');
+    });
+    $('[data-toggle="tooltip"]').tooltip();
+</script>
+

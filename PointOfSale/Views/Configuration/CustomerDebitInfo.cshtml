@@ -1,0 +1,392 @@
+﻿@model PointOfSale.Models.ViewCustomer
+@using System.Globalization
+@using PointOfSale.Helpers
+@{
+    ViewBag.Title = "CustomerDebitInfo";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+
+    PointOfSale.Models.PointOfSale_DBEntities db = new PointOfSale.Models.PointOfSale_DBEntities();
+    long totalPaymentCount = 0;
+    long totalRefillCount = 0;
+    long totalDebitLedger = 0;
+    //debit payment count
+    if(db.ViewPayments.Where(a => a.CustomerId == Model.CustomerId).Any(a => a.PaymentBodyId == 17 && a.Type == 1))
+    {
+        totalPaymentCount = db.ViewPayments.Where(a => a.CustomerId == Model.CustomerId && a.PaymentBodyId == 17 && a.Type == 1).Count();
+    }
+    //debit refill count
+    if(db.ViewOrderTransactions.Where(a => a.CustomerId == Model.CustomerId).Any(a => a.TransactionType == 3))
+    {
+        totalRefillCount = db.ViewOrderTransactions.Where(a => a.CustomerId == Model.CustomerId && a.TransactionType == 3).Count();
+    }
+    totalDebitLedger = totalPaymentCount + totalRefillCount;
+}
+<style>
+    a{
+        cursor:pointer;
+    }
+</style>
+<section class="content">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4>Debit Payment Ledger</h4>
+            </div>
+            <div class="pull-right">
+                <a class="btn btn-default" href="@Html.EncodedParam("CustomerInvoiceInfo", "Configuration", new { customerId = Model.CustomerId  }, null)"><i class="fa fa-arrow-left"></i> Back</a>
+            </div>
+        </div>
+        <div class="panel-body">
+            <div class="col-md-6">
+                <dl class="dl-horizontal">
+                    <dt>Name</dt>
+                    <dd>@Model.Name</dd>
+                    <dt>Phone</dt>
+                    <dd>@Model.Phone</dd>
+                    <dt>E-mail</dt>
+                    <dd>@Model.Email</dd>
+                </dl>
+            </div>
+            <div class="col-md-6">
+                <dl class="dl-horizontal">
+                    <dt>Debit Limit</dt>
+                    <dd>@Model.DebitLimit.Value.ToString("C", new CultureInfo("bn-BD"))</dd>
+                    <dt>Debit Amount</dt>
+                    <dd>@Model.DebitAmount.Value.ToString("C", new CultureInfo("bn-BD"))</dd>
+                </dl>
+            </div>
+        </div>
+        <hr />
+        <div class="panel-body" style="padding:0px 15px;">
+            <div class="pull-left" style="max-width: 48%!important;">
+                <button class="btn btn-default selected" id="btnPaymentHistory">Payment History</button>
+                <button class="btn btn-default" id="btnRefillHistory">Refill History</button>
+                <button class="btn btn-default" id="btnDebitLedger">Debit Ledger</button>
+            </div>
+            <div class="pull-right" style="max-width: 48%!important;">
+                <div class="pull-left" style="padding: 5px 10px;padding-right:5px!important;" id="show_Days_Title"></div>
+                <button class="btn btn-primary btnPrint pull-right" style="height:32px;"><i class="fa fa-print"></i></button>
+                <div class="btn-group btn-group-devided pull-right" data-toggle="buttons" style="padding-right:5px;">
+                    <div id="reportrange" class="pull-right" style="background: #fff; cursor: pointer; padding: 5px 10px; border: 1px solid #ccc; width: 100%">
+                        <span></span> <b class="caret"></b>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="panel-body" style="padding:0px 15px;">
+            <div id="divList" style="padding-top:5px;"></div>
+            <div class="text-center" style="margin-bottom:10px">
+                <button class="btn btn-primary" id="btnSeeMore"><i class="fa fa-arrow-down"></i> See more</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div id="divOrderTranWin"></div>
+<script>
+    var listType = 1, orderId = 0;
+    var days = 0, from = null, to = null, count = 20;
+    var passdata = '';
+    var start = moment();
+    var end = moment().subtract(1, 'days');
+    $(document).ready(function () {
+        $(".btnPrint").prop("disabled", true);
+        $('.ranges li').first().click();
+    });
+
+    $("#btnPaymentHistory").click(function () {
+        listType = 1; // for payment history
+        $('.ranges li').first().click();
+        $("#btnRefillHistory").removeClass("selected");
+        $("#btnPaymentHistory").addClass("selected");
+        $("#btnDebitLedger").removeClass("selected");
+    });
+
+    $("#btnRefillHistory").click(function () {
+        listType = 2; // for all debit refill list
+        $('.ranges li').first().click();
+        $("#btnRefillHistory").addClass("selected");
+        $("#btnPaymentHistory").removeClass("selected");
+        $("#btnDebitLedger").removeClass("selected");
+    });
+
+    $("#btnDebitLedger").click(function () {
+        listType = 3; // for all debit refill list
+        $('.ranges li').first().click();
+        $("#btnDebitLedger").addClass("selected");
+        $("#btnRefillHistory").removeClass("selected");
+        $("#btnPaymentHistory").removeClass("selected");
+    });
+
+    //Show order Details
+    $("#divList").on('click', '.btnShowOrderDetails', function () {
+        orderId = $(this).data("id");
+        $("#divOrderTranWin").empty();
+        $("#divOrderTranWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 892,
+            height: 582,
+            title: 'Order Transaction',
+            resizable: false
+        });
+        var orderTranWin = $("#divOrderTranWin").data("kendoWindow");
+        orderTranWin.refresh('@Url.Action("OrderTransaction", "PointOfSale")?orderId=' + orderId);
+        orderTranWin.center().open();
+    });
+
+
+    @***************DateRange Start******************@
+    $('#reportrange').daterangepicker({
+        startDate: start,
+        endDate: end,
+        ranges: {
+            'Select Date': [moment(), moment().subtract(1, 'days')],
+            'Today': [moment(), moment()],
+            'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+            'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+        }
+    }, cb);
+    cb(start, end);
+    start = moment(); end = moment();
+    $(".applyBtn").click(function () {
+        from = $("input[name*='daterangepicker_start']").val();
+        to = $("input[name*='daterangepicker_end']").val();
+        btn_CustomDate(from, to);
+    });
+
+    $('.ranges').on("click", "li", function () {
+        var day = $(this).text();
+        if (day == "Select Date") {
+            btn_All();
+        } else {
+            if (day == "Today") {
+                btn_today();
+            } else if (day == "Last 7 Days") {
+                btn_last_seven();
+            } else if (day == "Last 30 Days") {
+                btn_last_thirty();
+            }
+        }
+    });
+    function cb(start, end) {
+        if (start == null && end == null) {
+            $('#reportrange span').html("Select Date");
+            return;
+        }
+        else if ((!start._isValid && !end._isValid)) {
+            $('#reportrange span').html("Select Date");
+            return;
+        } else if (start._d > end._d) {
+            $('#reportrange span').html("Select Date");
+            return;
+        }
+        $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+    }
+    function btn_today() {
+        days = 1;
+        from = null;
+        to = null;
+        $(".btnPrint").prop("disabled", false);
+        $("#btnSeeMore").hide();
+        $('#show_Days_Title').html("Today");
+        passdata = { days: 1, customerId: @Model.CustomerId , isDebitTrans: true};
+        if (listType == 1)
+        {
+            $("#divList").empty();
+            $("#divList").append('<div class="loading_partial"></div>');
+            $("#divList").load('@Url.Action("PaymentHistoryList", "PointOfSale")', passdata);
+        }
+        else if (listType == 2)
+        {
+            $("#divList").empty();
+            $("#divList").append('<div class="loading_partial"></div>');
+            $("#divList").load('@Url.Action("DebitRefillList", "PointOfSale")', passdata);
+        }
+        else if (listType == 3)
+        {
+           $("#divList").empty();
+           $("#divList").append('<div class="loading_partial"></div>');
+           $("#divList").load('@Url.Action("DebitLedgerList", "PointOfSale")', passdata);
+        }
+    }
+    function btn_last_seven() {
+        days = 7;
+        from = null;
+        to = null;
+        $(".btnPrint").prop("disabled", false);
+        $("#btnSeeMore").hide();
+        $('#show_Days_Title').html("Last 7 Days");
+        passdata = { days: 7, customerId: @Model.CustomerId, isDebitTrans : true };
+        if (listType == 1)
+        {
+            $("#divList").empty();
+            $("#divList").append('<div class="loading_partial"></div>');
+            $("#divList").load('@Url.Action("PaymentHistoryList", "PointOfSale")', passdata);
+        }
+        else if (listType == 2)
+        {
+            $("#divList").empty();
+            $("#divList").append('<div class="loading_partial"></div>');
+            $("#divList").load('@Url.Action("DebitRefillList", "PointOfSale")', passdata);
+        }
+        else if (listType == 3)
+        {
+           $("#divList").empty();
+           $("#divList").append('<div class="loading_partial"></div>');
+           $("#divList").load('@Url.Action("DebitLedgerList", "PointOfSale")', passdata);
+        }
+    }
+    function btn_last_thirty() {
+        days = 30;
+        from = null;
+        to = null;
+        $(".btnPrint").prop("disabled", false);
+        $("#btnSeeMore").hide();
+        $('#show_Days_Title').html("Last 30 Days");
+        passdata = { days: 30, customerId: @Model.CustomerId, isDebitTrans : true };
+        if (listType == 1)
+        {
+            $("#divList").empty();
+            $("#divList").append('<div class="loading_partial"></div>');
+            $("#divList").load('@Url.Action("PaymentHistoryList", "PointOfSale")', passdata);
+        }
+        else if (listType == 2)
+        {
+            $("#divList").empty();
+            $("#divList").append('<div class="loading_partial"></div>');
+            $("#divList").load('@Url.Action("DebitRefillList", "PointOfSale")', passdata);
+        }
+        else if (listType == 3)
+        {
+           $("#divList").empty();
+           $("#divList").append('<div class="loading_partial"></div>');
+           $("#divList").load('@Url.Action("DebitLedgerList", "PointOfSale")', passdata);
+        }
+
+    }
+    function btn_All() {
+        days = 0;
+        from = null;
+        to = null;
+        count = 20;
+        $(".btnPrint").prop("disabled", true);
+        $("#btnSeeMore").hide();
+        $('#show_Days_Title').html("");
+        $('#reportrange span').html("Select Date");
+        passdata = { customerId: @Model.CustomerId, count: count, isDebitTrans : true  };
+        if (listType == 1)
+        {
+            if (@totalPaymentCount > count)
+            {
+                $("#btnSeeMore").show();
+            }
+            $("#divList").empty();
+            $("#divList").append('<div class="loading_partial"></div>');
+            $("#divList").load('@Url.Action("PaymentHistoryList", "PointOfSale")', passdata);
+        }
+        else if (listType == 2)
+        {
+            if (@totalRefillCount > count)
+            {
+                $("#btnSeeMore").show();
+            }
+           $("#divList").empty();
+           $("#divList").append('<div class="loading_partial"></div>');
+           $("#divList").load('@Url.Action("DebitRefillList", "PointOfSale")', passdata);
+        }
+        else if (listType == 3)
+        {
+            if (@totalDebitLedger > count)
+            {
+                $("#btnSeeMore").show();
+            }
+           $("#divList").empty();
+           $("#divList").append('<div class="loading_partial"></div>');
+           $("#divList").load('@Url.Action("DebitLedgerList", "PointOfSale")', passdata);
+        }
+    }
+    function btn_CustomDate(from, to) {
+        days = 0;
+        $(".btnPrint").prop("disabled", false);
+        $("#btnSeeMore").hide();
+        passdata = { from: new Date(from).toISOString(), to: new Date(to).toISOString(), customerId: @Model.CustomerId, isDebitTrans : true };
+        $('#show_Days_Title').html("Custom Range");
+        if (listType == 1)
+        {
+             $("#divList").empty();
+             $("#divList").append('<div class="loading_partial"></div>');
+             $("#divList").load('@Url.Action("PaymentHistoryList", "PointOfSale")', passdata);
+        }
+        else if (listType == 2)
+        {
+             $("#divList").empty();
+             $("#divList").append('<div class="loading_partial"></div>');
+             $("#divList").load('@Url.Action("DebitRefillList", "PointOfSale")', passdata);
+        }
+        else if (listType == 3)
+        {
+           $("#divList").empty();
+           $("#divList").append('<div class="loading_partial"></div>');
+           $("#divList").load('@Url.Action("DebitLedgerList", "PointOfSale")', passdata);
+        }
+    }
+    @***************DateRange End******************@
+
+    //Invoice Info Print
+    $(".btnPrint").click(function () {
+        var data = "customerId=" + @Model.CustomerId + "&days=" + days + "&from=" + from + "&to=" + to + "&listType=2";
+        if (listType == 1)
+        {
+            window.open('@Url.Action("PaymentHistoryPrint", "PointOfSale")?q=' + btoa(data), '_blank');
+        }
+        else if (listType == 2)
+        {
+            window.open('@Url.Action("DebitRefillPrint", "PointOfSale")?q=' + btoa(data), '_blank');
+        }
+        else if (listType == 3)
+        {
+            window.open('@Url.Action("DebitLedgerPrint", "PointOfSale")?q=' + btoa(data), '_blank');
+        }
+    });
+     //See more data
+    $("#btnSeeMore").click(function () {
+        count = count + 20;
+        passdata = { customerId: @Model.CustomerId, count: count, isDebitTrans: true };
+        if (listType == 1)
+        {
+            if (count >= @totalPaymentCount)
+            {
+                $("#btnSeeMore").hide();
+            }
+            $("#divList").empty();
+            $("#divList").append('<div class="loading_partial"></div>');
+            $("#divList").load('@Url.Action("PaymentHistoryList", "PointOfSale")', passdata);
+        }
+        else if (listType == 2)
+        {
+            if(count >= @totalRefillCount)
+            {
+                $("#btnSeeMore").hide();
+            }
+            $("#divList").empty();
+            $("#divList").append('<div class="loading_partial"></div>');
+            $("#divList").load('@Url.Action("DebitRefillList", "PointOfSale")', passdata);
+        }
+        else if (listType == 3)
+        {
+            if(count >= @totalDebitLedger)
+            {
+                $("#btnSeeMore").hide();
+            }
+            $("#divList").empty();
+            $("#divList").append('<div class="loading_partial"></div>');
+            $("#divList").load('@Url.Action("DebitLedgerList", "PointOfSale")', passdata);
+        }
+    });
+
+
+
+</script>

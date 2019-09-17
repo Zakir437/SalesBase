@@ -1,0 +1,55 @@
+﻿@model PointOfSale.ModelViews.HR.UserInformationModelView
+@Html.HiddenFor(a => a.UserId)
+<style>
+    input {
+        max-height: 100%;
+    }
+</style>
+<div class="form-horizontal col-md-12 col-sm-12 col-xs-12" id="divSetJoindDate">
+    <hr />
+    <div class="form-group">
+        <label class="control-label col-md-2 col-sm-3" for="JoinDate">Join Date</label>
+        <div class="col-md-4 col-sm-5">
+            @(Html.Kendo().DatePickerFor(model => model.JoinDate).Format("MM/dd/yyyy")
+                        .HtmlAttributes(new { style = "width:100%" })
+            )
+            @Html.ValidationMessageFor(model => model.JoinDate, "", new { @class = "text-Danger" })
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10 col-sm-offset-3 col-sm-9">
+            <input type="button" value="Save" class="k-button k-state-default" id="btnSetJoinDate" />
+            <input type="reset" value="Refresh" class="k-button k-state-default" id="btnRefreshJoinDate" />
+        </div>
+    </div>
+</div>
+<script>
+    var validationJoinDate = $("#divSetJoindDate").kendoValidator().data("kendoValidator");
+    $("#btnSetJoinDate").click(function () {
+        if (validationJoinDate.validate())
+        {
+            var sendData =
+            {
+                UserId: $("#UserId").val(),
+                JoinDate: $("#JoinDate").val(),
+                CreatedBy : userId
+            }
+            $.ajax({
+                url: '@Url.Action("JoinDateSave", "HumanResource")',
+                type: "POST",
+                data: { model : sendData },
+                success: function (data)
+                {
+                    if (data == "success")
+                    {
+                        window.location.reload();
+                    }
+                    else {
+                        alert("Save error...");
+                        window.location.reload();
+                    }
+                }
+            });
+        };
+    });
+</script>

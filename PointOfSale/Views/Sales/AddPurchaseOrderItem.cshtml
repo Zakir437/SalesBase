@@ -1,0 +1,99 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin-bottom:4%;margin-top:2%;">
+    <div id="divItemForm"></div>
+    <div class="k-edit-buttons k-state-default" style="margin-left:30px;">
+        @if (ViewBag.ItemId > 0)
+        {
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnAddItem"><span class="k-icon k-update"></span>Update</button>
+        }
+        else
+        {
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnAddItem"><span class="k-icon k-update"></span>Create</button>
+        }
+        <button type="reset" class="k-button k-button-icontext k-grid-update" id="btnRefresh"><span class="k-icon k-i-refresh"></span>Refresh</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#divItemForm").append('<div class="tiny_loading"></div>');
+        $("#divItemForm").load('@Url.Action("AddPurchaseOrderItemPartial", "Sales")?itemId=' + '@ViewBag.ItemId' + '&purchaseId=' + '@ViewBag.PurchaseId' + '&isQuantityEdit=' + '@ViewBag.IsQuantityEdit');
+    });
+    $("#btnRefresh").click(function () {
+        $("#divItemForm").empty();
+        $("#divItemForm").append('<div class="tiny_loading"></div>');
+        $("#divItemForm").load('@Url.Action("AddPurchaseOrderItemPartial", "Sales")?itemId=' + '@ViewBag.ItemId' + '&purchaseId=' + '@ViewBag.PurchaseId' + '&isQuantityEdit=' + '@ViewBag.IsQuantityEdit');
+    });
+
+    $("#btnCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+
+    var validation = $("#divItemForm").kendoValidator({
+        rules: {
+            Quantity: function (input) {
+                if (input.is("[name=Quantity]") && $.trim(input.val()) == "") {
+                    return false;
+                }
+                return true;
+            },
+            equalQauntity: function (input) {
+                if (input.is("[name=Quantity]") && $.trim(input.val()) == input.data("qty")) {
+                    return false;
+                }
+                return true;
+            },
+            lessQuantity: function (input) {
+                if (input.is("[name=Quantity]") && $.trim(input.val()) < 1) {
+                    return false;
+                }
+                return true;
+            }
+        },
+        messages:
+        {
+            Quantity: "Please enter quantity",
+            equalQauntity: "Quantity can not be equal to current quantity",
+            lessQuantity: "Quantity should be greater than or equal to 1"
+        }
+    }).data("kendoValidator");
+
+    $("#btnAddItem").click(function () {
+        if (validation.validate())
+        {
+            $(this).prop('disabled', true);
+
+            var sendData = {
+                Id: '@ViewBag.ItemId',
+                PurchaseId: '@ViewBag.PurchaseId',
+                RequestQty: $.trim($("#RequestQty").val()),
+                PeritemCost: $.trim($("#PeritemCost").val()),
+                Cost: $.trim($("#Cost").val()),
+                RowId: $("#ProductDropdown").val(),
+                changeQuantity: $("#Quantity").val(),
+                CreatedBy : userId
+            }
+            $.ajax({
+                url: '@Url.Action("PurchaseOrderItemUpdate", "Sales")',
+                type: "POST",
+                data: sendData,
+                success: function (result) {
+                    $("#btnAddItem").closest(".k-window-content").data("kendoWindow").close();
+                    if (result == "success")
+                    {
+                        window.location.reload();
+                    }
+                    else
+                    {
+                        alert("Save Error");
+                    }
+                }
+            });
+        }
+    });
+</script>
+
+
+
+
+
+

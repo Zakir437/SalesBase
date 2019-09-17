@@ -1,0 +1,120 @@
+﻿@{
+    ViewBag.Title = "SalesOrPurchaseLedger";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+}
+@*<section class="content-header">
+        <h1>
+            Report
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="/PointOfSale/Report"><i class="fa fa-dashboard"></i> Report</a></li>
+            <li class="active">Report List</li>
+        </ol>
+    </section>*@
+<section class="content">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4 class="uppercase">Sale/Purchase Ledger</h4>
+            </div>
+            <div class="pull-right">
+                <button class="btn btn-default" id="btnTotalCost" data-toggle="tooltip" title="View Import Transaction">Import</button>
+                <button class="btn btn-default" id="btnTotalSale" data-toggle="tooltip" title="View Sale Transaction">Sale</button>
+                @*<button class="btn btn-default" id="btnSaleOrPurchaseLedger">Sales/Purchase Ledger</button>*@
+                @*<button class="btn btn-default" id="btnCreditLedger">Credit Ledger</button>*@
+            </div>
+        </div>
+        <div class="panel-body">
+            <div id="reportList">
+                <h4>Select date to view import/sale transaction</h4>
+            </div>
+        </div>
+    </div>
+</section>
+<div id="divTotalCostWin"></div>
+<div id="divTotalSaleWin"></div>
+<div id="divImportTranWin"></div>
+<div id="divSaleTranWin"></div>
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+        $("#liForAccount").addClass('active');
+        $("#liForSaleOrPurchaseLedger").addClass('active');
+    });
+    //Create total cost win
+    $("#btnTotalCost").click(function () {
+        $("#divTotalCostWin").empty();
+        $("#divTotalCostWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 638,
+            height: 225,
+            title: 'Import Report',
+            resizable: false
+        });
+        var totalCostWin = $("#divTotalCostWin").data("kendoWindow");
+        totalCostWin.refresh('@Url.Action("TotalCost", "PointOfSale")');
+        totalCostWin.center().open();
+    });
+    //Create total sale win
+    $("#btnTotalSale").click(function () {
+        $("#divTotalSaleWin").empty();
+        $("#divTotalSaleWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 638,
+            height: 225,
+            title: 'Sale Report',
+            resizable: false
+        });
+        var totalSaleWin = $("#divTotalSaleWin").data("kendoWindow");
+        totalSaleWin.refresh('@Url.Action("TotalSale", "PointOfSale")');
+        totalSaleWin.center().open();
+    });
+    //View Import transaction details
+    $("#reportList").on('click', ".btnImportInfo", function () {
+        var importId = $(this).data("id");
+        $("#divImportTranWin").empty();
+        $("#divImportTranWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 892,
+            height: 582,
+            title: 'Import Transaction',
+            resizable: false
+        });
+        var impTranWin = $("#divImportTranWin").data("kendoWindow");
+        impTranWin.refresh('@Url.Action("ImportTransaction", "PointOfSale")?importId=' + importId);
+        impTranWin.center().open();
+    });
+    //View Sale Transaction details
+    $("#reportList").on('click', ".btnSaleInfo", function () {
+        var orderId = $(this).data("id");
+        $("#divSaleTranWin").empty();
+        $("#divSaleTranWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 892,
+            height: 582,
+            title: 'Sale Transaction',
+            resizable: false
+        });
+        var saleTranWin = $("#divSaleTranWin").data("kendoWindow");
+        saleTranWin.refresh('@Url.Action("OrderTransaction", "PointOfSale")?orderId=' + orderId);
+        saleTranWin.center().open();
+    });
+
+</script>
+
+
+
+
+

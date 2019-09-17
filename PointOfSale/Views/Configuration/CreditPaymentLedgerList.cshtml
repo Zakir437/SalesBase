@@ -1,0 +1,59 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewPayment>
+@using System.Globalization;
+@{
+    var count = 0;
+    var paymentList = Model.GroupBy(g => new { g.PaymentId, g.Date })
+                        .Select(s => new
+                        {
+                            StockImportId = s.FirstOrDefault().PaymentId,
+                            RefferenceNo = s.FirstOrDefault().ImportNumber,
+                            Amount = s.Sum(a => a.Amount),
+                            Date = s.FirstOrDefault().Date
+                        });
+    
+}
+<style>
+    a {
+        cursor: pointer;
+    }
+</style>
+@if (paymentList.Any() == true)
+{
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Date</th>
+            <th>Voucher No</th>
+            <th>Amount Paid</th>
+        </tr>
+        @foreach (var list in paymentList)
+        {
+            count++;
+            <tr>
+                <td>@count. </td>
+                <td>@Convert.ToDateTime(list.Date).ToString("MMM dd yyyy")</td>
+                <td>
+                    <a class="btnImportDetails" data-id="@list.StockImportId">@list.RefferenceNo</a>
+                </td>
+                <td>@list.Amount.ToString("C", new CultureInfo("bn-BD"))</td>
+            </tr>
+        }
+        <tr style="font-weight:bold">
+            <td></td>
+            <td colspan="2" style="text-align:center">Total</td>
+            <td>@paymentList.Sum(a => a.Amount).ToString("C", new CultureInfo("bn-BD"))</td>
+        </tr>
+    </table>
+}
+else
+{
+    <h3>There is no record to display</h3>
+}
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    })
+</script>
+
+
+

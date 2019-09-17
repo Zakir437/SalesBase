@@ -1,0 +1,474 @@
+﻿@model PointOfSale.Models.ViewIndent
+@using PointOfSale.Helpers;
+@using System.Globalization;
+@{
+    ViewBag.Title = "IndentVoucherDetails";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+}
+
+<style>
+    .label{
+        font-size:90%;
+    }
+</style>
+@*<section class="content-header">
+    <ol class="breadcrumb">
+        <li><a href=""><i class="fa fa-shopping-cart"></i> Inventory</a></li>
+        <li><a href="/Inventory/IndentHistory"><i class="fa fa-indent"></i> Indent History</a></li>
+        <li class="active"><a href="/Inventory/IndentVoucherDetails"><i class="fa fa-list-ul"></i> Indent Voucher Details</a></li>
+    </ol>
+</section>*@
+<section class="content">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4 class="uppercase">Indent Voucher Details</h4>
+            </div>
+            <div class="pull-right">
+                <a class="btn btn-default" href="/Inventory/IndentHistory"><i class="fa fa-arrow-left"></i> Back</a>
+            </div>
+        </div>
+        <div class="panel-body">
+            <h2>@Model.VoucherName @if (ViewBag.IsView == false && Model.Status == 1) { <button class="btn btn-success btnapproveIndent" data-toggle="tooltip" title="Approve Indent" data-id="@Model.Id"><i class="fa fa-check"></i></button>}</h2>
+            <dl class="dl-horizontal">
+                <dt>Created By</dt>
+                <dd>@Model.CreatedBy</dd>
+                <dt>Created Date</dt>
+                <dd>@Convert.ToDateTime(Model.CreatedDate).ToString("MMMM dd yyyy hh:mm:ss tt")</dd>
+                <dt>Status</dt>
+                <dd>
+                    @if(Model.Status == 1)
+                     {
+                        <span class="label label-primary">Pending Approval</span>
+                    }
+                    else if (Model.Status == 2)
+                    {
+                        <span class="label label-warning">Partial Approved</span>
+                    }
+                    else if (Model.Status == 3)
+                    {
+                        <span class="label label-info">Approved but not completed</span>
+                    }
+                    else if (Model.Status == 4)
+                    {
+                        <span class="label label-success">Completed</span>
+                    }
+                    else if (Model.Status == 5)
+                    {
+                        <span class="label label-danger">Deleted</span>
+                    }
+                </dd>
+            </dl>
+        </div>
+        <hr />
+        <div class="panel-body">
+            @if (ViewBag.IsView == false)
+             {
+                <p class="pull-right">
+                    <button class="btn btn-success btnAddProduct"><i class="fa fa-plus-circle"></i> Add New Product</button>
+                </p>
+             }
+           
+            <div id="divIndentItemList"></div>
+        </div>
+    </div>
+</section>
+<div id="divAddProductWin"></div>
+<div id="divEditProductWin"></div>
+<div id="divEditQtyProductWin"></div>
+
+<script id="temp_win_indent_Delete_False" type="text/x-kendo-template">
+    <div style="padding:1em;">
+        <p style="font-size: 14px; padding: 10px"> #=msg# </p>
+        <div style="text-align: right;">
+            <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btn_indent_delete_false_noty_cancel"><span class="k-icon k-cancel"></span>Cancel</button>
+        </div>
+    </div>
+</script>
+<script id="temp_win_indent_Delete" type="text/x-kendo-template">
+    <div style="padding:1em;">
+        <p style="font-size: 14px; padding: 10px"> #=msg# </p>
+        <div style="text-align: right;">
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btn_indent_delete_noty_ok"><span class="k-icon k-update"></span>OK</button>
+            <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btn_indent_delete_noty_cancel"><span class="k-icon k-cancel"></span>Cancel</button>
+        </div>
+    </div>
+</script>
+<script id="temp_win_indent_edit" type="text/x-kendo-template">
+    <div style="padding:1em;">
+        <p style="font-size: 14px; padding: 10px"> #=msg# </p>
+        <div style="text-align: right;">
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btn_indent_noty_ok"><span class="k-icon k-update"></span>OK</button>
+            <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btn_indent_noty_cancel"><span class="k-icon k-cancel"></span>Cancel</button>
+        </div>
+    </div>
+</script>
+<script id="temp_win_indent_Item_approve" type="text/x-kendo-template">
+    <div style="padding:1em;">
+        <p style="font-size: 14px; padding: 10px"> #=msg# </p>
+        <div style="text-align: right;">
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btn_indent_approve_noty_ok"><span class="k-icon k-update"></span>OK</button>
+            <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btn_indent_approve_noty_cancel"><span class="k-icon k-cancel"></span>Cancel</button>
+        </div>
+    </div>
+</script>
+<script id="temp_win_voucherApprove" type="text/x-kendo-template">
+    <div style="padding:1em;">
+        <p style="font-size: 14px; padding: 10px"> #=msg# </p>
+        <div style="text-align: right;">
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btn_VoucherApp_noty_ok"><span class="k-icon k-update"></span>OK</button>
+            <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btn_VoucherApp_noty_cancel"><span class="k-icon k-cancel"></span>Cancel</button>
+        </div>
+    </div>
+</script>
+<script>
+    var itemId = 0;
+    $(document).ready(function () {
+        $("#liForInventory").addClass('active');
+        $("#liForStock").addClass('active');
+
+        $("#divIndentItemList").append('<div class="loading_partial"></div>');
+        $("#divIndentItemList").load('@Url.Action("IndentItemList", "Inventory")?voucherId=' + "@Model.Id" + '&IsView=' + '@ViewBag.IsView');
+    });
+    //add item
+    $(".btnAddProduct").click(function () {
+        winEmpty();
+        $("#divAddProductWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 911,
+            height: 374,
+            title: 'Add new product to voucher',
+            resizable: false,
+            close: onWindowClose
+        });
+        var addProWin = $("#divAddProductWin").data("kendoWindow");
+        addProWin.refresh('/Inventory/AddIndentItem?intentId=' + '@Model.Id');
+        addProWin.center().open();
+        document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+        document.body.scroll = "no";
+    });
+
+    //******************************** Edit Indent item *****************************************************
+    $("#divIndentItemList").on("click", ".btnEditItem", function (e) {
+        itemId = $(this).data("id");
+        var kendoWindow = $("<div />").kendoWindow({
+            actions: ["Close"],
+            title: "Alert",
+            resizable: false,
+            width: "30%",
+            modal: true,
+            close: onWindowClose
+        });
+        msg = "Are you sure want to edit this?";
+        var template = kendo.template($("#temp_win_indent_edit").html());
+        kendoWindow.data("kendoWindow").content(template).center().open();
+        document.documentElement.style.overflow = 'hidden';
+        document.body.scroll = "no";
+        kendoWindow.find("#btn_indent_noty_cancel").click(function () {
+            kendoWindow.data("kendoWindow").close();
+        }).end();
+        kendoWindow.find("#btn_indent_noty_ok").click(function () {
+            editIndent();
+            kendoWindow.data("kendoWindow").close();
+        }).end();
+    });
+    function editIndent() {
+        winEmpty();
+        $("#divEditProductWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 911,
+            height: 374,
+            title: 'Edit Indent Product',
+            resizable: false,
+            close: onWindowClose
+        });
+        var editProWin = $("#divEditProductWin").data("kendoWindow");
+        editProWin.refresh('/Inventory/AddIndentItem?intentId=' + '@Model.Id' + '&itemId=' + itemId);
+        editProWin.center().open();
+        document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+        document.body.scroll = "no";
+    }
+
+    //******************************** approve Indent item *****************************************************
+    $("#divIndentItemList").on("click", ".btnapproveItem", function (e) {
+        itemId = $(this).data("id");
+        var kendoWindow = $("<div />").kendoWindow({
+            actions: ["Close"],
+            title: "Alert",
+            resizable: false,
+            width: "30%",
+            modal: true,
+            close: onWindowClose
+        });
+        msg = "Are you sure want to approve this product?";
+        var template = kendo.template($("#temp_win_indent_Item_approve").html());
+        kendoWindow.data("kendoWindow").content(template).center().open();
+        document.documentElement.style.overflow = 'hidden';
+        document.body.scroll = "no";
+        kendoWindow.find("#btn_indent_approve_noty_cancel").click(function () {
+            kendoWindow.data("kendoWindow").close();
+        }).end();
+        kendoWindow.find("#btn_indent_approve_noty_ok").click(function () {
+            $.ajax({
+                url: '/Inventory/IndentItemStatusChange',
+                type: 'POST',
+                data: { itemId: itemId },
+                success: function (data)
+                {
+                    if (data == "success")
+                    {
+                        window.location.reload();
+                    }
+                    else
+                    {
+                        alert("error");
+                    }
+                }
+            });
+            kendoWindow.data("kendoWindow").close();
+        }).end();
+    });
+
+    //********************************Edit Indent item Quantity *****************************************************
+    $("#divIndentItemList").on("click", ".btnEditItemQuantity", function (e) {
+        itemId = $(this).data("id");
+        winEmpty();
+        $("#divEditQtyProductWin").empty();
+        $("#divEditQtyProductWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 911,
+            height: 374,
+            title: 'Edit Indent Product Quantity',
+            resizable: false,
+            close: onWindowClose
+        });
+        var editQtyProWin = $("#divEditQtyProductWin").data("kendoWindow");
+        editQtyProWin.refresh('/Inventory/AddIndentItem?intentId=' + '@Model.Id' + '&itemId=' + itemId + '&isQuantityEdit=true');
+        editQtyProWin.center().open();
+        document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+        document.body.scroll = "no";
+    });
+
+    function winEmpty()
+    {
+        $("#divAddProductWin").empty();
+        $("#divEditProductWin").empty();
+        $("#divEditQtyProductWin").empty();
+    }
+
+    //********************************approve changes *****************************************************
+
+    $("#divIndentItemList").on("click", ".btnapproveChanges", function (e) {
+        itemId = $(this).data("id");
+         $.ajax({
+                url: '@Url.Action("IndentItemStatusChange", "Inventory")',
+                type: "POST",
+                data: { itemId: itemId, isChangesApprove : true },
+                success: function (result) {
+                    if (result == "success")
+                    {
+                        window.location.reload();
+                    }
+                    else
+                    {
+                        alert("Save Error");
+                    }
+                }
+         });
+    });
+
+    //********************************remove changes *****************************************************
+
+    $("#divIndentItemList").on("click", ".btnRemoveChanges", function (e) {
+        itemId = $(this).data("id");
+         $.ajax({
+                url: '@Url.Action("IndentItemStatusChange", "Inventory")',
+                type: "POST",
+                data: { itemId: itemId, isRemoveChanges : true },
+                success: function (result) {
+                    if (result == "success")
+                    {
+                        window.location.reload();
+                    }
+                    else
+                    {
+                        alert("Save Error");
+                    }
+                }
+         });
+    });
+
+    //********************************delete item*****************************************************
+    $("#divIndentItemList").on("click", ".btnDeleteItem", function (e) {
+        itemId = $(this).data("id");
+        if ('@Model.ProcurementStatus' == 2)
+        {
+            $.ajax({
+                url: '/Inventory/CheckIsIndItemDelete',
+                type: "GET",
+                data: { itemId: itemId },
+                success: function (result) {
+                    if (result == "error")
+                    {
+                        alert("Check Error");
+                    }
+                    else if (result > 0)
+                    {
+                        var kendoWindow = $("<div />").kendoWindow({
+                            actions: ["Close"],
+                            title: "Alert",
+                            resizable: false,
+                            width: "30%",
+                            modal: true,
+                            close: onWindowClose
+                        });
+                        msg = "This item can not delete.";
+                        var template = kendo.template($("#temp_win_indent_Delete_False").html());
+                        kendoWindow.data("kendoWindow").content(template).center().open();
+                        document.documentElement.style.overflow = 'hidden';
+                        document.body.scroll = "no";
+                        kendoWindow.find("#btn_indent_delete_false_noty_cancel").click(function () {
+                            kendoWindow.data("kendoWindow").close();
+                        }).end();
+                    }
+                    else
+                    {
+                       var kendoWindow = $("<div />").kendoWindow({
+                        actions: ["Close"],
+                        title: "Alert",
+                        resizable: false,
+                        width: "30%",
+                        modal: true,
+                        close: onWindowClose
+                        });
+                        msg = "Are you sure you want to delete this item?";
+                        var template = kendo.template($("#temp_win_indent_Delete").html());
+                        kendoWindow.data("kendoWindow").content(template).center().open();
+                        document.documentElement.style.overflow = 'hidden';
+                        document.body.scroll = "no";
+                        kendoWindow.find("#btn_indent_delete_noty_cancel").click(function () {
+                            kendoWindow.data("kendoWindow").close();
+                        }).end();
+                        kendoWindow.find("#btn_indent_delete_noty_ok").click(function () {
+                            $.ajax({
+                                url: '@Url.Action("IndentItemStatusChange", "Inventory")',
+                                type: "POST",
+                                data: { itemId: itemId, isDeleteItem : true },
+                                success: function (result) {
+                                    if (result == "success")
+                                    {
+                                        window.location.reload();
+                                    }
+                                    else
+                                    {
+                                        alert("Save Error");
+                                    }
+                                }
+                            });
+                            kendoWindow.data("kendoWindow").close();
+                        }).end();
+                    }
+                }
+            });
+        }
+        else
+        {
+            var kendoWindow = $("<div />").kendoWindow({
+            actions: ["Close"],
+            title: "Alert",
+            resizable: false,
+            width: "30%",
+            modal: true,
+            close: onWindowClose
+            });
+            msg = "Are you sure you want to delete this item?";
+            var template = kendo.template($("#temp_win_indent_Delete").html());
+            kendoWindow.data("kendoWindow").content(template).center().open();
+            document.documentElement.style.overflow = 'hidden';
+            document.body.scroll = "no";
+            kendoWindow.find("#btn_indent_delete_noty_cancel").click(function () {
+                kendoWindow.data("kendoWindow").close();
+            }).end();
+            kendoWindow.find("#btn_indent_delete_noty_ok").click(function () {
+                $.ajax({
+                    url: '@Url.Action("IndentItemStatusChange", "Inventory")',
+                    type: "POST",
+                    data: { itemId: itemId, isDeleteItem : true },
+                    success: function (result) {
+                        if (result == "success")
+                        {
+                            window.location.reload();
+                        }
+                        else
+                        {
+                            alert("Save Error");
+                        }
+                    }
+                });
+                kendoWindow.data("kendoWindow").close();
+            }).end();
+        }
+    });
+
+
+
+    //*******************************  APPROVE VOUCHER btn work*****************************************
+    $(".btnapproveIndent").click(function () {
+        itemId = $(this).data("id");
+        var kendoWindow = $("<div/>").kendoWindow({
+            actions: ["Close"],
+            title: "Alert",
+            resizable: false,
+            width: "30%",
+            modal: true,
+            close: onWindowClose
+        });
+        msg = "Are you sure want to approve this voucher?";
+        var template = kendo.template($("#temp_win_voucherApprove").html());
+        kendoWindow.data("kendoWindow").content(template).center().open();
+        document.documentElement.style.overflow = 'hidden';
+        document.body.scroll = "no";
+
+        kendoWindow.find("#btn_VoucherApp_noty_cancel").click(function () {
+            kendoWindow.data("kendoWindow").close();
+        }).end();
+        kendoWindow.find("#btn_VoucherApp_noty_ok").click(function () {
+            kendoWindow.data("kendoWindow").close();
+            //notification.show({ message: "Approving...", showTime: startTime() }, "upload-progress");
+            $.ajax({
+                url: '@Url.Action("IndentVoucherStatusChange", "Inventory")',
+                type: 'Post',
+                data: { VoucherId: itemId, CreatedBy: userId, status: 3 },
+                success: function (data) {
+                    //notification.hide(); notification.setOptions({ autoHideAfter: 5000 });
+                    if (data == "success")
+                    {
+                        //notification.show({ message: "Indent has been successfully approved.", showTime: startTime() }, "upload-success");
+                        //location.reload();
+                        window.location.reload();
+                    }
+                    else
+                    {
+                        alert("Save error...");
+                        //notification.show({ message: "Indent approved was unsuccessful.", showTime: startTime() }, "upload-error");
+                    }
+                },
+                error: function (err) {
+                    //notification.hide(); notification.setOptions({ autoHideAfter: 5000 });
+                    //notification.show({ message: "Error occurred.", showTime: startTime() }, "upload-warning");
+                }
+            });
+        }).end();
+    });
+</script>
+
+

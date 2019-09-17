@@ -1,0 +1,32 @@
+﻿@model PointOfSale.ModelViews.SupplierModel
+@Html.HiddenFor(m => m.SupplierId)
+<div class="editor-label"><label for="Name">Name</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.Name, new { htmlattributes = new { @class = "k-textbox form-control", @style = "width:82%" } })
+    @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-Danger" })
+</div>
+<div class="editor-label"><label for="Email">E-mail</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.Email, new { htmlattributes = new { @class = "k-textbox form-control", @style = "width:82%" } })
+    @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-Danger" })
+</div>
+<div class="editor-label"><label for="Phone">Phone</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.Phone, new { htmlattributes = new { @class = "k-textbox form-control", @style = "width:82%" } })
+    @Html.ValidationMessageFor(model => model.Phone, "", new { @class = "text-Danger" })
+</div>
+<div class="editor-label"><label for="SupplierSince">Supplier Since</label></div>
+<div class="editor-field">
+    @(Html.Kendo().DatePickerFor(m=>m.SupplierSince)
+              .Start(CalendarView.Year)
+              .Depth(CalendarView.Year)
+              .Format("MMMM yyyy")
+              .HtmlAttributes(new { style = "width:82%" })
+    )
+    @Html.ValidationMessageFor(model => model.SupplierSince, "", new { @class = "text-Danger" })
+</div>
+<div class="editor-label"><label for="Address">Address</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.Address, new { htmlAttributes = new { @class = "k-textbox form-control", rows = 3,@style="width:82%" } })
+    @Html.ValidationMessageFor(model => model.Address, "", new { @class = "text-Danger" })
+</div>

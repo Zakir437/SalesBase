@@ -1,0 +1,12 @@
+﻿@model PointOfSale.ModelViews.ImportTransactionModel
+@Html.HiddenFor(a=>a.ImportTransactionId)
+<div class="editor-label"><label for="Quantity">Quantity</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.Quantity, new { htmlattributes = new { @class = "k-textbox form-control" } })
+    @Html.ValidationMessageFor(model => model.Quantity, "", new { @class = "text-Danger" })
+</div>
+<div class="editor-label"><label for="Cost">Cost</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.Cost, new { htmlattributes = new { @class = "k-textbox form-control" } })
+    @Html.ValidationMessageFor(model => model.Cost, "", new { @class = "text-Danger" })
+</div>

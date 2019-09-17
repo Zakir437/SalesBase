@@ -1,0 +1,87 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewSchedule>
+@using PointOfSale.Helpers
+@{
+    var count = 0;
+}
+@if (Model.Any() == true)
+{
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Name</th>
+            <th>Single/Multiple</th>
+            <th>CreatedBy</th>
+            <th>Created Date</th>
+            <th>UpdatedBy</th>
+            <th>Updated Date</th>
+            <th></th>
+        </tr>
+        @foreach (var list in Model)
+        {
+            count++;
+            <tr>
+                <td>@count. </td>
+                <td>@list.Name</td>
+                <td>
+                    @if (list.IsMultiSchedule == true)
+                     {
+                        <span>Multiple</span>
+                     }
+                    else
+                    {
+                        <span>Single</span>
+                    }
+                </td>
+                <td>@list.CreatedBy</td>
+                <td>@Convert.ToDateTime(list.CreatedDate).ToString("MMM dd,yyyy")</td>
+                <td>@list.UpdatedBy</td>
+                <td>
+                    @if (list.UpdatedDate != null)
+                     {
+                        @Convert.ToDateTime(list.UpdatedDate).ToString("MMM dd,yyyy")
+                     }
+                    else
+                    {
+                        <span>not yet updated</span>
+                    }
+                </td>
+                <td>
+                    <button class="btn btn-primary btnEditSchedule" data-id="@list.Id" data-toggle="tooltip" title="Edit Schedule Information"><i class="fa fa-pencil-square-o"></i></button>
+                    @if (list.Status == true)
+                    {
+                        <button type="button" data-id="@list.Id" data-isactive="0" class="btn btn-danger inactivateSchedule" data-toggle="tooltip" title="Inactivate Schedule">
+                            <i class="fa fa-stop" aria-hidden="true"></i>
+                        </button>
+                    }
+                    else
+                    {
+                        <button type="button" data-id="@list.Id" data-isactive="1" class="btn btn-success activateSchedule" data-toggle="tooltip" title="Activate Schedule">
+                            <i class="fa fa-play" aria-hidden="true"></i>
+                        </button>
+                    }
+                    @if (@list.Status == false)
+                    {
+                        <span data-id="@list.Id" style="cursor:pointer;" data-toggle="tooltip" title="Delete Schedule" class="btn btn-danger btnScheduleDelete">
+                            <i class="fa fa-trash"></i>
+                        </span>
+                    }
+                </td>
+            </tr>
+        }
+    </table>
+}
+else
+{
+    <h4>There is no record to display</h4>
+}
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    })
+</script>
+
+
+
+
+
+

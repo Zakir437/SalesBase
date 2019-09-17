@@ -1,0 +1,47 @@
+﻿@using PointOfSale.Helpers
+@{
+    ViewBag.Title = "EventOffer";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+}
+<style>
+    .btnBox {
+        height: 200px;
+        width: 100%;
+        border: 1px solid #808080;
+        margin-bottom: 15px;
+    }
+    h1 {
+        padding: 50px 0px;
+    }
+</style>
+<div class="content">
+    <div class="panel panel-info" style="margin-top:20px;">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4 class="uppercase">Event Offer</h4>
+            </div>
+            <div class="pull-right">
+                <a class="btn btn-default" href="/PointOfSale/OfferCreate"><i class="fa fa-arrow-left"></i> Back</a>
+            </div>
+        </div>
+        <div class="panel-body">
+            <div class="col-md-4">
+                <a class="btn btn-default btnBox" href="@Html.EncodedParam("Events","PointOfSale", new { subId = 1 }, null)" data-toggle="tooltip" title="Create Summer Offer">
+                    <h1>Summer offer</h1>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a class="btn btn-default btnBox" href="@Html.EncodedParam("Events","PointOfSale", new { subId = 2 }, null)" data-toggle="tooltip" title="Create Clearence Offer">
+                    <h1>Clearence</h1>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+        $("#liForSalesMenu").addClass('active');
+        $("#liForOffer").addClass('active');
+    })
+</script>

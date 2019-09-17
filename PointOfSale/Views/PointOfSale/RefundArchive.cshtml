@@ -1,0 +1,65 @@
+﻿@model IEnumerable<PointOfSale.ModelViews.RefundArchiveModel>
+@using PointOfSale.Helpers;
+@{
+    ViewBag.Title = "RefundArchive";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var count = 0;
+}
+<div class="panel panel-default" style="margin-top:20px;">
+    <div class="panel-heading" style="padding-bottom:46px;">
+        <div class="pull-left">
+            <h4>Refund Archive</h4>
+        </div>
+    </div>
+    <div class="panel-body">
+        <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+            <tr>
+                <th>SL.</th>
+                <th>Date</th>
+                <th>Info</th>
+                <th></th>
+            </tr>
+            @foreach (var list in Model)
+             {
+                var alist = list;
+                count++;
+                <tr>
+                    <td>@count. </td>
+                    <td>@Convert.ToDateTime(list.Date).ToString("MMM dd yyyy")</td>
+                    @if(Model.First() == list)
+                     {
+                        <td>Original</td>
+                     }
+                    else if(Model.Last() == alist)
+                    {
+                        <td>Refund (Current)</td>
+                    }
+                    else
+                    {
+                        <td>Refund</td>
+                    }
+                    <td>
+                        @if (Model.First() == alist)
+                         {
+                            <a class="btn btn-primary" href="@Html.EncodedParam("OriginalVoucher","PointOfSale", new { orderId = list.OrderId },null)" target="_blank">
+                                <i class="fa fa-eye"></i> View
+                            </a>
+                        }
+                        else if(Model.Last() == alist)
+                        {
+                            <a class="btn btn-primary" href="@Html.EncodedParam("OrderCurrentVoucher", "PointOfSale", new { orderId = list.OrderId },null)" target="_blank">
+                                <i class="fa fa-eye"></i> View
+                            </a>
+                        }
+                        else
+                        {
+                            <a class="btn btn-primary" href="@Html.EncodedParam("RefundVoucher", "PointOfSale", new { orderId = list.OrderId, date = list.Date },null)" target="_blank">
+                                <i class="fa fa-eye"></i> View
+                            </a>
+                        }
+                    </td>
+                </tr>
+             }
+        </table>
+    </div>
+</div>

@@ -1,0 +1,51 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin-bottom:4%;margin-top:2%;">
+    <div id="divPayDayForm"></div>
+    <div class="k-edit-buttons k-state-default" style="margin-left:30px;">
+        <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnPayDayUpdate"><span class="k-icon k-update"></span>Update</button>
+        <button type="reset" class="k-button k-button-icontext k-grid-update" id="btnPayDayRefresh"><span class="k-icon k-i-refresh"></span>Refresh</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnPayDayCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#divPayDayForm").append('<div class="tiny_loading"></div>');
+        $("#divPayDayForm").load('@Url.Action("_SalaryPayDay", "Configuration")?miscId=' + '@ViewBag.MiscId');
+    });
+    $("#btnPayDayRefresh").click(function () {
+        $("#divPayDayForm").empty();
+        $("#divPayDayForm").append('<div class="tiny_loading"></div>');
+        $("#divPayDayForm").load('@Url.Action("_SalaryPayDay", "Configuration")?miscId=' + '@ViewBag.MiscId');
+    });
+    $("#btnPayDayCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+    var payDayValidation = $("#divPayDayForm").kendoValidator().data("kendoValidator");
+    $("#btnPayDayUpdate").click(function () {
+        if (payDayValidation.validate())
+        {
+            var sendData = {
+                MiscId: $("#MiscId").val(),
+                PayDay: $("#PayDay").val()
+            }
+            $.ajax({
+                url: '@Url.Action("SalaryPayDayUpdate","Configuration")',
+                type: 'POST',
+                data: sendData,
+                success: function (data)
+                {
+                    if (data == "success")
+                    {
+                        $("#divSalaryPayDayWin").data("kendoWindow").close();
+                        $("#divMiscFuncList").empty();
+                        $("#divMiscFuncList").append('<div class="loading_partial"></div>');
+                        $("#divMiscFuncList").load('@Url.Action("MiscFuncList","Configuration")');
+                    }
+                    else {
+                        alert("Update error...");
+                    }
+                }
+            })
+        }
+    });
+
+</script>

@@ -1,0 +1,386 @@
+﻿@{
+    ViewBag.Title = "Configuration";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+}
+<style>
+    .image-uploader {
+        width: 100%;
+        /*height: 260px;*/
+        height: 160px;
+        display: block;
+        text-align: center;
+    }
+
+    hr {
+        margin: 0px;
+    }
+
+    .imgPreview {
+        background-color: #e8e4d0;
+        margin-bottom: 20px;
+        position: relative;
+        width: 100%;
+        height: 135px;
+        border: 1px solid #808080;
+        display: none;
+        overflow: hidden;
+    }
+
+        .imgPreview img {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            margin: auto;
+            display: block;
+            max-width: 100%;
+            height: auto;
+        }
+
+    .lblForPics {
+        text-align: center;
+        max-width: 100%;
+        width: 100%;
+        height: 130px;
+        vertical-align: middle;
+        border: 1px dashed blue;
+    }
+
+        .lblForPics span {
+            color: #083bb5 !important;
+        }
+
+    .previewImgClose {
+        position: relative;
+        width: 36px;
+        height: 36px;
+        cursor: pointer;
+        float: right;
+        right: -1.8em;
+        bottom: -1.8em;
+        z-index: 9999;
+        margin-top: -3em;
+    }
+
+    .form-control {
+        width: 100% !important;
+    }
+
+    /*.image-uploader {
+        width: 67%;
+        height: 150px;
+        display: inline;
+        text-align: center;
+    }
+    .imgPreview {
+        background-color: #e8e4d0;
+        margin-bottom: 20px;
+        position: relative;
+        width: 67%;
+        height: 150px;
+        border: 1px solid #808080;
+        display: none;
+        overflow: hidden;
+    }
+    .imgPreview img {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        margin: auto;
+        display: block;
+        max-width: 100%;
+        height: auto;
+    }
+    .lblForPics {
+        text-align: center;
+        max-width: 100%;
+        width: 67%;
+        height: 150px;
+        vertical-align: middle;
+        border: 1px dashed blue;
+    }
+    .lblForPics span {
+        color: #083bb5 !important;
+    }
+    #divForPic .span4 {
+        padding-top: 10px !important;
+        padding-bottom: 10px !important;
+    }
+    .form-control {
+        width: 100% !important;
+    }
+    .previewImgClose {
+        position: relative;
+        width: 36px;
+        height: 36px;
+        cursor: pointer;
+        float: right;
+        right: 8.2em;
+        bottom: -1.8em;
+        z-index: 9999;
+        margin-top: -3em;
+    }*/
+    .k-input {
+        height: 26px !important;
+    }
+
+    input, textarea {
+        max-width: 68%;
+    }
+
+    #divPic-0 {
+        width: 68%;
+    }
+</style>
+<section class="content">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4 class="uppercase">Products</h4>
+            </div>
+        </div>
+        <div class="panel-body">
+            <button class="btn btn-success" id="btnProductCreateWindow"><i class="fa fa-plus-circle" aria-hidden="true"></i> Add</button>
+            @Html.ActionLink("Master Product", "MasterProduct", "Sales", routeValues: null, htmlAttributes: new { @class = "btn btn-info" })
+            @Html.ActionLink("Restriction", "Restriction", "Sales", routeValues: null, htmlAttributes: new { @class = "btn btn-info" })
+            @Html.ActionLink("Vat", "Vat", "Sales/Configuration", routeValues: null, htmlAttributes: new { @class = "btn btn-info" })
+            @Html.ActionLink("Time Schedule", "Schedule", "Sales", routeValues: null, htmlAttributes: new { @class = "btn btn-info" })
+        </div>
+        <hr />
+        <div class="panel-body">
+            <div class="row" style="margin-bottom:5px;">
+                <div class="col-md-12">
+                    <div style="width:50%!important; padding-right:10px;" class="pull-left">
+                        @(Html.Kendo().MultiSelect()
+                        .Name("productMultiSelect")
+                        .DataTextField("Text")
+                        .DataValueField("Value")
+                        .Placeholder("Type product name...")
+                        .AutoBind(false)
+                        .Events(e => e.Change("onChange"))
+                        .HtmlAttributes(new { style = "width: 100%;" })
+                        .DataSource(source =>
+                        {
+                            source.Read(read =>
+                            {
+                                read.Action("GetProduct", "Sales").Data("additionalItemsGetProducts"); ;
+                            })
+                            .ServerFiltering(false);
+                        }))
+                        <span class="k-icon k-i-search" style="margin-top:-25px;float:right;margin-right:10px; position:relative">&nbsp;</span>
+                    </div>
+                    <div style="width:50%!important; padding-left:10px;" class="pull-right">
+                        @(Html.Kendo().DropDownList()
+                             .Name("categoryDropDown")
+                             .BindTo(ViewBag.CategoryList as SelectList)
+                             .DataTextField("Text")
+                             .DataValueField("Value")
+                             .OptionLabel("Select category...")
+                             .HtmlAttributes(new { style = "width:100%;" })
+                             .Events(e => { e.Change("onChangeCategory"); })
+                        )
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div id="divProductList" style="overflow-x:auto"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<div id="divProductWindow"></div>
+<div id="divMinimumQuantityWin"></div>
+<script id="temp_win_delete_entry" type="text/x-kendo-template">
+    <div style="padding:1em;">
+        <p style="font-size: 14px; padding: 10px"> #=msg# </p>
+        <div style="text-align: right;">
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btn_delete_Entry_noty_ok"><span class="k-icon k-update"></span>OK</button>
+            <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btn_delete_Entry_noty_cancel"><span class="k-icon k-cancel"></span>Cancel</button>
+        </div>
+    </div>
+</script>
+
+<script>
+    var productId = 0;
+    var categoryId = 0;
+    $(document).ready(function () {
+        $("#liForSalesMenu").addClass('active');
+        $("#liForSalesConfig").addClass('active');
+        $("#divProductList").empty();
+        $("#divProductList").append('<div class="loading_partial"></div>');
+        $("#divProductList").load('@Url.Action("ProductList", "Sales")');
+    });
+    //Product Create Start
+    $("#btnProductCreateWindow").click(function () {
+        $("#divProductWindow").empty();
+        $("#divProductWindow").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: "767px",
+            height: "537px",
+            title: 'Product',
+            resizable: false,
+            close: onWindowClose
+        });
+        var productWindow = $("#divProductWindow").data("kendoWindow");
+        productWindow.refresh('@Url.Action("ProductCreate", "Sales")');
+        productWindow.center().open().maximize();
+        document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+        document.body.scroll = "no";
+    });
+
+    //************************Product Edit************************
+
+    $("#divProductList").on('click', ".productEdit", function () {
+        productId = $(this).data("id");
+        $("#divProductWindow").empty();
+        $("#divProductWindow").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: "767px",
+            height: "537px",
+            title: 'Product',
+            resizable: false,
+            close: onWindowClose
+        });
+        var productEditWin = $("#divProductWindow").data("kendoWindow");
+        productEditWin.refresh('@Url.Action("ProductEdit", "Sales")?id=' + productId);
+        productEditWin.center().open().maximize();
+        document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+        document.body.scroll = "no";
+    });
+
+
+    $("#divProductList").on('click', ".btnProductDelete", function () {
+        productId = $(this).data("id");
+        var kendoWindow = $("<div />").kendoWindow({
+            actions: ["Close"],
+            title: "Alert",
+            resizable: false,
+            width: "30%",
+            modal: true
+        });
+
+        msg = "Are you sure want to delete this Product?";
+        var template = kendo.template($("#temp_win_delete_entry").html());
+        kendoWindow.data("kendoWindow").content(template).center().open();
+
+        kendoWindow.find("#btn_delete_Entry_noty_cancel").click(function () {
+            kendoWindow.data("kendoWindow").close();
+            document.documentElement.style.overflow = "auto";
+        }).end();
+        kendoWindow.find("#btn_delete_Entry_noty_ok").click(function () {
+            kendoWindow.data("kendoWindow").close();
+            document.documentElement.style.overflow = "auto";
+            deleteProduct(productId);
+        }).end();
+        document.documentElement.style.overflow = "hidden";
+    });
+
+    function deleteProduct(productId) {
+        $.ajax({
+            url: '@Url.Action("DeleteProduct", "Sales")',
+            type: 'Post',
+            data: { productId: productId },
+            success: function (data) {
+                if (data === "success") {
+                    $("#divProductList").empty();
+                    $("#divProductList").append('<div class="loading_partial"></div>');
+                    $("#divProductList").load('@Url.Action("ProductList", "Sales")');
+                } else {
+                    alert("Error Product Delete");
+                }
+            }
+        });
+    }
+
+    $("#divProductList").on("click", ".inactivateProduct,.activateProduct", function () {
+        var id = $(this).data("id");
+        var status = $(this).data("isactive");
+        var sendData = {
+            id: id,
+            status: status
+        };
+        $.ajax({
+            url: '@Url.Action("ChangeProductStatus", "Sales")',
+            method: 'POST',
+            data: sendData,
+            success: function (res) {
+                if (res == "success") {
+                    $("#divProductList").empty();
+                    $("#divProductList").append('<div class="loading_partial"></div>');
+                    $("#divProductList").load('@Url.Action("ProductList", "Sales")');
+                }
+                else {
+                    alert("Error Status Update");
+                }
+            }
+        });
+    });
+    //Edit minimul Quantity
+    $("#divProductList").on("click", ".minimalQuantityEdit", function () {
+        productId = $(this).data("id");
+        $("#divMinimumQuantityWin").empty();
+        $("#divMinimumQuantityWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 670,
+            height:171,
+            title: 'Minimum Quantity',
+            resizable: false
+        });
+        var minimumQuantityWin = $("#divMinimumQuantityWin").data("kendoWindow");
+        minimumQuantityWin.refresh('@Url.Action("MinimumQuantity", "Sales")?productId=' + productId);
+        minimumQuantityWin.center().open();
+    });
+
+    //load product list by selected product
+    function onChange()
+    {
+        var selectedId = "";
+        selectedId = this.value();
+        if (selectedId.length > 0)
+        {
+            $("#divProductList").empty();
+            $("#divProductList").append('<div class="loading_partial"></div>');
+            $("#divProductList").load('@Url.Action("ProductList", "Sales")?productIds=' + selectedId);
+        }
+        else {
+            $("#divProductList").empty();
+            $("#divProductList").append('<div class="loading_partial"></div>');
+            $("#divProductList").load('@Url.Action("ProductList", "Sales")?categoryId=' + categoryId);
+        }
+        $('#productMultiSelect').data('kendoMultiSelect').dataSource.read();
+    }
+
+    //filter product list by category select
+    function onChangeCategory()
+    {
+         categoryId = this.value();
+         $("#divProductList").empty();
+         $("#divProductList").append('<div class="loading_partial"></div>');
+         $("#divProductList").load('@Url.Action("ProductList", "Sales")?categoryId=' + categoryId);
+         $('#productMultiSelect').data('kendoMultiSelect').dataSource.read();
+    }
+
+    //pass additional data to load product multiselect
+    function additionalItemsGetProducts()
+    {
+        return {
+            categoryId: categoryId
+        }
+    }
+</script>
+
+

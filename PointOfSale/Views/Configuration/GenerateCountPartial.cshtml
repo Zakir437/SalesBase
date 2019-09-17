@@ -1,0 +1,7 @@
+﻿@model PointOfSale.ModelViews.MiscFuncModel
+@Html.HiddenFor(a => a.MiscId)
+<div class="editor-label"><label for="Value">Value</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.Value, new { htmlattributes = new { @class = "k-textbox form-control", @required="required" , @validationMessage="Please enter count value" } })
+    @Html.ValidationMessageFor(model => model.Value, "", new { @class = "text-Danger" })
+</div>

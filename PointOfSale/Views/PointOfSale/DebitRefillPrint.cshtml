@@ -1,0 +1,76 @@
+﻿@model PointOfSale.Models.Customer
+@{
+    ViewBag.Title = "DebitRefillPrint";
+    Layout = "~/Views/Shared/_LayoutPrintPage.cshtml";
+}
+<section class="content-header" style="text-align:center;">
+    <div class="row">
+        <div class="col-xs-3"></div>
+        <div class="col-xs-6">
+            <h3>Debit refill transaction</h3>
+            <p>Cost-POS</p>
+        </div>
+        <div class="col-xs-3">
+            <button class="btn btn-default pull-right" id="btnPrint" style="margin-top:10px;"><i class="fa fa-print"></i>Print</button>
+        </div>
+    </div>
+    <hr />
+</section>
+<div class="row">
+    <div class="col-xs-offset-6 col-xs-6 text-left">
+        <p>
+            Generate By : @HttpContext.Current.Request.Cookies["CookieUserInfo"].Values["UserName"]<br>
+            Generate Date : @DateTime.Now.ToString("MMM dd yyyy hh:mm:ss tt") <br>
+            @if (ViewBag.Days == 1)
+            {
+                <span>Generate parameter : Today</span>
+            }
+            else if (ViewBag.Days == 7)
+            {
+                <span>Generate parameter : Last 7 Days</span>
+            }
+            else if (ViewBag.Days == 30)
+            {
+                <span>Generate parameter : Last 30 Days</span>
+            }
+            else if (ViewBag.From != null)
+            {
+                <span>From : @Convert.ToDateTime(ViewBag.From).ToString("MMM dd yyyy")</span><br />
+                <span>To : @Convert.ToDateTime(ViewBag.To).ToString("MMM dd yyyy")</span>
+            }
+            else
+            {
+                <span>Generate parameter : All</span>
+            }
+        </p>
+    </div>
+    <div class="col-xs-offset-6 col-xs-6 text-right">
+        @if (Model != null)
+        {
+            <p>
+                Name : @Model.Name<br />
+                Phone : @Model.Phone <br />
+                E-mail : @Model.Email <br />
+            </p>
+        }
+    </div>
+</div>
+<div class="row">
+    <div class="col-xs-12">
+        <div id="divRefillList"></div>
+    </div>
+</div>
+<script>
+    var passdata = '';
+    $(document).ready(function () {
+        passdata = { from: "@ViewBag.From", to: "@ViewBag.To", customerId: @Model.CustomerId, days: @ViewBag.Days };
+        $("#divRefillList").empty();
+        $("#divRefillList").append('<div class="loading_partial"></div>');
+        $("#divRefillList").load('@Url.Action("DebitRefillList", "PointOfSale")', passdata);
+    });
+    $("#btnPrint").click(function () {
+        $("#btnPrint").hide();
+        window.print();
+        $("#btnPrint").show();
+    });
+</script>

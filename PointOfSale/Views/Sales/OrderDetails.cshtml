@@ -1,0 +1,48 @@
+﻿@model PointOfSale.Models.ViewPosOrder
+@{
+    ViewBag.Title = "OrderDetails";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+}
+<link href="~/Content/numpad.css" rel="stylesheet" />
+<link href="~/Content/myCss.css" rel="stylesheet" />
+<section class="content" id="divContent">
+</section>
+<script>
+    $(document).ready(function () {
+        $("#liForSalesMenu").addClass('active');
+        $("#liForSales").addClass('active');
+
+        $("#divContent").append('<div class="loading_partial"></div>');
+        $("#divContent").load('@Url.Action("OrderDetailsPartial", "Sales")?orderId=' + '@ViewBag.OrderId' + '&currentOrderId=' + '@ViewBag.CurrentOrderId');
+    });
+
+    //***********************Payment transaction partial***********************************
+    $("#divContent").on('click', '#btnPaymentTransaction', function () {
+         $("#divContent").empty();
+         $("#divContent").append('<div class="loading_partial"></div>');
+         $("#divContent").load('@Url.Action("OrderPaymentPartial", "Sales")?orderId=' + '@ViewBag.OrderId');
+    });
+
+    //***********************Order Details Partial***********************************
+    $("#divContent").on('click', '#btnBackInPaymentTrans, #btnBackInOrderArchive, #btnBackInRefundProduct', function () {
+         $("#divContent").empty();
+         $("#divContent").append('<div class="loading_partial"></div>');
+         $("#divContent").load('@Url.Action("OrderDetailsPartial", "Sales")?orderId=' + '@ViewBag.OrderId');
+    });
+
+    //***********************Order Archive***********************************
+    $("#divContent").on('click', '#btnOrderArchive', function () {
+         $("#divContent").empty();
+         $("#divContent").append('<div class="loading_partial"></div>');
+         $("#divContent").load('@Url.Action("OrderArchivePartial", "Sales")?orderId=' + '@ViewBag.OrderId');
+    });
+
+    //***********************refund products***********************************
+    $("#divContent").on('click', '#btnRefundProducts', function () {
+         $("#divContent").empty();
+         $("#divContent").append('<div class="loading_partial"></div>');
+         $("#divContent").load('@Url.Action("OrderRefundProductsPartial", "Sales")?orderId=' + '@ViewBag.OrderId');
+    });
+
+</script>
+

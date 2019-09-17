@@ -1,0 +1,44 @@
+﻿@model IEnumerable<PointOfSale.Models.GenerateDate>
+@using PointOfSale.Helpers
+
+@{
+    var count = 0;
+}
+@if (Model.Any() == true)
+{
+    <table class="table table-bordered table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Date</th>
+            <th></th>
+        </tr>
+        @foreach (var list in Model)
+        {
+            count++;
+            <tr>
+                <td>@count. </td>
+                <td>@Convert.ToDateTime(list.Date).ToString("MMMM dd,yyyy")</td>
+                <td>
+                    <a class="btn btn-info" href="@Html.EncodedParam("StockDailyTopSold", "Inventory", new { date = list.Date}, null)"><i class="fa fa-eye"></i> View</a>
+                </td>
+            </tr>
+        }
+    </table>
+}
+else
+{
+    <h3>There is no record to display</h3>
+}
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    })
+</script>
+
+
+
+
+
+
+
+

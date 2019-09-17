@@ -1,0 +1,77 @@
+﻿@model PointOfSale.ModelViews.POS.CouponModelView
+@Html.HiddenFor(a => a.Id)
+<div class="editor-label"><label for="Code">Code</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.Code, new { htmlattributes = new { @class = "k-textbox", @style = "width:100%; max-width:100%", required = "required" } })
+    @Html.ValidationMessageFor(model => model.Code, "", new { @class = "text-Danger" })
+</div>
+@if (ViewBag.Type == 1)  //type 1 cash coupon.......type 2 percentile coupon
+ {
+    <div class="editor-label"><label for="Amount">Amount</label></div>
+    <div class="editor-field">
+        @Html.EditorFor(model => model.Amount, new { htmlattributes = new { @class = "k-textbox", min = "1", type="number", @style = "width:100%; max-width:100%", required= "required", validationMessage="Please enter valid amount"  } })
+        @Html.ValidationMessageFor(model => model.Amount, "", new { @class = "text-Danger" })
+    </div>
+    <div class="editor-label"><label for="MinimumPurchase">Minimum Purchase</label></div>
+    <div class="editor-field">
+        @Html.EditorFor(model => model.MinimumPurchase, new { htmlattributes = new { @class = "k-textbox", @style = "width:100%; max-width:100%" } })
+        @Html.ValidationMessageFor(model => model.MinimumPurchase, "", new { @class = "text-Danger" })
+    </div>
+ }
+else if(ViewBag.Type == 2)
+{
+    <div class="editor-label"><label for="Percentile">Percentile</label></div>
+    <div class="editor-field">
+        @Html.EditorFor(model => model.Percentile, new { htmlattributes = new { @class = "k-textbox", min = "1", max = "100", @style = "width:100%; max-width:100%", required = "required", validationMessage="Please enter valid number" } })
+        @Html.ValidationMessageFor(model => model.Percentile, "", new { @class = "text-Danger" })
+    </div>
+    <div class="editor-label"><label for="MinimumPurchase">Minimum Purchase</label></div>
+    <div class="editor-field">
+        @Html.EditorFor(model => model.MinimumPurchase, new { htmlattributes = new { @class = "k-textbox", @style = "width:100%; max-width:100%", required = "required", validationMessage="Please enter valid amount" } })
+        @Html.ValidationMessageFor(model => model.MinimumPurchase, "", new { @class = "text-Danger" })
+    </div>
+    <div class="editor-label"><label for="MaximumAmount">Maximum Amount</label></div>
+    <div class="editor-field">
+        @Html.EditorFor(model => model.MaximumAmount, new { htmlattributes = new { @class = "k-textbox", @style = "width:100%; max-width:100%", required = "required", validationMessage="Please enter valid amount" } })
+        @Html.ValidationMessageFor(model => model.MaximumAmount, "", new { @class = "text-Danger" })
+    </div>
+}
+else if (ViewBag.Type == 3)
+{
+    <div class="editor-label"><label for="Amount">Amount</label></div>
+    <div class="editor-field">
+        @Html.EditorFor(model => model.Amount, new { htmlattributes = new { @class = "k-textbox", min = "1", max = "100", @style = "width:100%; max-width:100%", required = "required", validationMessage = "Please enter valid number" } })
+        @Html.ValidationMessageFor(model => model.Amount, "", new { @class = "text-Danger" })
+    </div>
+    <div class="editor-field">
+        @Html.CheckBoxFor(model => model.IsPriceRange) <label for="IsPriceRange">Is Price Range</label>
+    </div>
+    <div class="editor-label"><label for="FromPrice">From Price</label></div>
+    <div class="editor-field">
+        @Html.EditorFor(model => model.FromPrice, new { htmlattributes = new { @class = "k-textbox", min = "1", max = "100", @style = "width:100%; max-width:100%", required = "required", validationMessage = "Please enter valid number" } })
+        @Html.ValidationMessageFor(model => model.FromPrice, "", new { @class = "text-Danger" })
+    </div>
+    <div class="editor-label"><label for="ToPrice">To Price</label></div>
+    <div class="editor-field">
+        @Html.EditorFor(model => model.ToPrice, new { htmlattributes = new { @class = "k-textbox", min = "1", max = "100", @style = "width:100%; max-width:100%", required = "required", validationMessage = "Please enter valid number" } })
+        @Html.ValidationMessageFor(model => model.ToPrice, "", new { @class = "text-Danger" })
+    </div>
+}
+<div class="editor-label"><label for="FromDate">From Date</label></div>
+<div class="editor-field">
+    @(Html.Kendo().DateTimePickerFor(m => m.StartDate)
+                            .Format("MMMM dd yyyy hh:mm tt")
+                            .Min(DateTime.Now)
+                            .HtmlAttributes(new { style = "width: 100%; max-width:100%", required = "required", @validationMessage = "Please enter date" })
+    )
+    @Html.ValidationMessageFor(model => model.StartDate, "", new { @class = "text-Danger" })
+</div>
+<div class="editor-label"><label for="ToDate">To Date</label></div>
+<div class="editor-field">
+    @(Html.Kendo().DateTimePickerFor(m => m.EndDate)
+                            .Format("MMMM dd yyyy hh:mm tt")
+                            .Min(DateTime.Now)
+                            .HtmlAttributes(new { style = "width: 100%; max-width:100%", required = "required", @validationMessage = "Please enter date" })
+    )
+    @Html.ValidationMessageFor(model => model.EndDate, "", new { @class = "text-Danger" })
+</div>

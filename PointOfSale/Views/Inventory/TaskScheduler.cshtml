@@ -1,0 +1,126 @@
+﻿@{
+    ViewBag.Title = "TaskScheduler";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+}
+@*<section class="content-header">
+    <ol class="breadcrumb">
+        <li><a href="/Inventory/TaskScheduler"><i class="fa fa-list-ul"></i> Task Scheduler</a></li>
+    </ol>
+</section>*@
+<section class="content">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4 class="uppercase">Task Scheduler</h4>
+            </div>
+        </div>
+        <div class="panel-body">
+            <table class="table table-bordered">
+                <tr>
+                    <th>SL.</th>
+                    <th>Action Name</th>
+                    <th></th>
+                </tr>
+                <tr>
+                    <td>1.</td>
+                    <td> <a href="/Inventory/InventoryDailyDataSet" data-toggle="tooltip" title="View Details">Inventory Daily Data Set</a></td>
+                    <td>
+                        <button class="btn btn-primary" id="btnInvDataGenerate">Generate</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>2.</td>
+                    <td> <a href="/Inventory/TopSoldDate" data-toggle="tooltip" title="View Details">Stock Daily Top Sold</a></td>
+                    <td>
+                        <button class="btn btn-primary" id="btnStockSold">Generate</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>3.</td>
+                    <td> <a href="/Inventory/TopReturnGenerateDate" data-toggle="tooltip" title="View Details">Stock Daily Top Return</a></td>
+                    <td>
+                        <button class="btn btn-primary" id="btnStockReturn">Generate</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>3.</td>
+                    <td> <a href="/Inventory/DailySoldGenerateDate" data-toggle="tooltip" title="View Details">Stock Daily Sold</a></td>
+                    <td>
+                        <button class="btn btn-primary" id="btnStockDailySold">Generate</button>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</section>
+<script>
+    $(document).ready(function () {
+        $("#liForReporting").addClass('active');
+        $("#liForTaskScheduler").addClass('active');
+        $('[data-toggle="tooltip"]').tooltip();
+    });
+    //Inventory Daily data set generate
+    $("#btnInvDataGenerate").click(function () {
+        $(this).prop('disabled', true);
+        $.ajax({
+            url: '/Inventory/InvDataSetGenerate',
+            type: 'POST',
+            success: function (data)
+            {
+                if (data == "error")
+                {
+                    alert("Generate error");
+                }
+                $("#btnInvDataGenerate").prop('disabled', false);
+            }
+        });
+    });
+
+    //Stock Daily Sold generate
+    $("#btnStockDailySold").click(function () {
+        $(this).prop('disabled', true);
+        $.ajax({
+            url: '/Inventory/DailySoldGenerate',
+            type: 'POST',
+            success: function (data) {
+                if (data == "error") {
+                    alert("Generate error");
+                }
+                $("#btnStockDailySold").prop('disabled', false);
+            }
+        });
+    });
+
+    //Stock Daily Top Sold generate
+    $("#btnStockSold").click(function () {
+        $(this).prop('disabled', true);
+        $.ajax({
+            url: '/Inventory/DailyTopSoldGenerate',
+            type: 'POST',
+            success: function (data) {
+                if (data == "error") {
+                    alert("Generate error");
+                }
+                $("#btnStockSold").prop('disabled', false);
+            }
+        });
+    });
+
+    //Stock Daily Top Return generate
+    $("#btnStockReturn").click(function () {
+        $(this).prop('disabled', true);
+        $.ajax({
+            url: '/Inventory/DailyTopReturnGenerate',
+            type: 'POST',
+            success: function (data) {
+                if (data == "error") {
+                    alert("Generate error");
+                }
+                $("#btnStockReturn").prop('disabled', false);
+            }
+        });
+    });
+
+   
+
+</script>

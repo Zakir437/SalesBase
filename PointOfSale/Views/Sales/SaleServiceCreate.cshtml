@@ -1,0 +1,1095 @@
+﻿@{
+    ViewBag.Title = "SaleServiceCreate";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+}
+<style>
+    hr{
+        margin-top:0px;
+    }
+    .dl-horizontal dd {
+        margin-bottom:5px;
+    }
+</style>
+<section class="content">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4 class="uppercase">Sale Service Create</h4>
+            </div>
+            <div class="pull-right">
+                <a class="btn btn-default" href="/Sales/SaleService"><i class="fa fa-arrow-left"></i> Back</a>
+            </div>
+        </div>
+        <div class="panel-body ">
+            @(Html.Kendo().TabStrip()
+.Name("tabstrip")
+//.HtmlAttributes(new { @class = "sw-main sw-theme-arrows" })
+.Items(items =>
+{
+items.Add()
+
+    .Text("S/N or Invoice no")
+    .Content(@<text>
+        <div class="panel-body">
+            <div class="row" id="divSNOrInvoiceSearchBox">
+                <div class="col-md-6" style="margin-bottom:5px;">
+                    <div id="divSearchStringSerialNumber">
+                        <input id="searchStringForSerialNumber" style="width:100%; max-width:100%" />
+                    </div>
+                    <div id="divSearchStringOrder" style="display:none">
+                        <input id="searchStringOrder" style="width:100%; max-width:100%" />
+                    </div>
+                </div>
+                <div class="col-md-4" style="margin-bottom:5px;">
+                    <button class="btn btn-default selected" id="btnSearchBySerialNumber" data-toggle="tooltip" title="Search by device serial number">S/N</button>
+                    <button class="btn btn-default" id="btnSearchByInvoice" data-toggle="tooltip" title="Search by invoice no">Invoice No</button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-5">
+                    <div id="divProductInfo"></div>
+                </div>
+                <div class="col-md-5">
+                    <div id="divExistingOrderInfo"></div>
+                </div>
+            </div>
+            <div id="divProductCondition">
+                <h4>Product condition</h4>
+                <hr />
+                <div class="dl-horizontal">
+                    <dl>
+                        <dt>Type</dt>
+                        <dd>
+                            @(Html.Kendo().DropDownList()
+                                         .Name("ConditionDropdown")
+                                         .BindTo(ViewBag.ConditionList as SelectList)
+                                         .DataTextField("Text")
+                                         .DataValueField("Value")
+                                         .OptionLabel("Select condition...")
+                                         .HtmlAttributes(new { style = "width:50%;" })
+                                         .Events(e =>
+                                         {
+                                             e.Change("onChangeCondition");
+                                         })
+                            )
+                        </dd>
+                        <dt>Observation</dt>
+                        <dd>
+                            <textarea name="conditionObservation" id="conditionObservation" style="max-width:50%; width:50%" rows="5" class="k-textbox form-control"></textarea>
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+            <div id="divActionButton1" class="text-center">
+                <button class="btn btn-default" id="btnNext1">Next</button>
+            </div>
+        </div>
+    </text>)
+            .Selected(true);
+    items.Add().Text("Customer Information")
+            .Enabled(false)
+            .Content(@<text>
+                <div class="panel-body">
+                    <div id="divCustomerInfo">
+
+                    </div>
+                    <div id="divActionButton2" class="text-center" style="margin-top:10px;">
+                        <button class="btn btn-default" id="btnNext2">Next</button>
+                    </div>
+                </div>
+            </text>);
+    items.Add()
+         .Text("Supplementary Items")
+         .Enabled(false)
+         .Content(@<text>
+            <div class="panel-body">
+                <div style="width:50%!important; margin-bottom:5px;">
+                    @(Html.Kendo().AutoComplete()
+                            .Name("supplementaryAutoComplete")
+                            .Placeholder("Type supplementary name...")
+                            .HtmlAttributes(new { style = "width:100%; max-width:100%" })
+                            .DataTextField("Text")
+                            .Filter("contains")
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("GetSupplementaryItems", "Sales")
+                                       .Data("SuppadditionInfo");
+                                })
+                               .ServerFiltering(true);
+                            })
+                            .Events(e =>
+                            {
+                                e.Change("onChangeSupplementary").Select("onSelectSupplementary");
+                            })
+                    )
+                    <span class="k-icon k-i-search" style="margin-top:-25px;float:right;margin-right:10px; position:relative">&nbsp;</span>
+                </div>
+                <div>
+                    <table class="table table-bordered" id="tblSupplementary">
+                        <tr>
+                            <th>Name</th>
+                            <th></th>
+                        </tr>
+                        <tr id="supplementaryEmptyRow">
+                            <td colspan="2">
+                                <h4>There is no selected items</h4>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="divActionButton3" class="text-center" style="margin-top:10px;">
+                    <button class="btn btn-default" id="btnNext3">Next</button>
+                </div>
+            </div>
+        </text>);
+    items.Add().Text("Services")
+        .Enabled(false)
+        .Content(@<text>
+            <div class="panel-body">
+                <div class="row" style="margin:0;">
+                    <div style="width:50%!important; margin-bottom:5px;" class="pull-left">
+                        @(Html.Kendo().AutoComplete()
+                                .Name("serviceAutoComplete")
+                                .Placeholder("Type service name...")
+                                .HtmlAttributes(new { style = "width:100%; max-width:100%" })
+                                .DataTextField("Text")
+                                .Filter("contains")
+                                .DataSource(source =>
+                                {
+                                    source.Read(read =>
+                                    {
+                                        read.Action("GetService", "Sales")
+                                           .Data("ServiceadditionInfo");
+                                    })
+                                   .ServerFiltering(true);
+                                })
+                                .Events(e =>
+                                {
+                                    e.Change("onChangeService").Select("onSelectService");
+                                })
+                        )
+                        <span class="k-icon k-i-search" style="margin-top:-25px;float:right;margin-right:10px; position:relative">&nbsp;</span>
+                    </div>
+                    <div style="width:40%!important" class="pull-right">
+                        <div class="pull-right">
+                            <h4>Total = <span id="divTotalCharge">0.00</span>Tk</h4>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <table class="table table-bordered" id="tblService">
+                        <tr>
+                            <th>Name</th>
+                            <th>Service Charge</th>
+                            <th></th>
+                        </tr>
+                        <tr id="serviceEmptyRow">
+                            <td colspan="3">
+                                <h4>There is no selected items</h4>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="divActionButton4" class="text-center" style="margin-top:10px;">
+                    <button class="btn btn-default" id="btnNext4">Next</button>
+                </div>
+            </div>
+        </text>);
+;
+items.Add().Text("Delivery Info")
+.Enabled(false)
+.Content(@<text>
+            <div class="panel-body">
+                <div id="divDeliveryInfo">
+                    <div class="form-horizontal form-widgets">
+                        <h4 class="ra-well-title" style="font-size: 1.5em!important;">Delivery Information</h4>
+                        <hr />
+                        <div class="form-horizontal form-widgets col-sm-10">
+                            <div class="form-group">
+                                @Html.Label("Delivery Date", htmlAttributes: new { @class = "control-label col-md-4 col-sm-5 col-xs-12" })
+                                <div class="col-md-6 col-sm-7 col-xs-8">
+                                    @(Html.Kendo().DateTimePicker()
+                                        .Name("deliveryDate")
+                                        .Format("MMMM dd yyyy hh:mm tt")
+                                        .Min(DateTime.Now)
+                                        .HtmlAttributes(new { style = "width: 100%; max-width:100%", required = "required", @validationMessage = "Please enter validity date" })
+                                    )
+                                    @Html.ValidationMessage("deliveryDate", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+                <div id="divActionButton5" class="text-center" style="margin-top:10px;">
+                    <button class="btn btn-default" id="btnFinish">Finish</button>
+                </div>
+            </div>
+</text>)
+        ;
+})
+            )
+        </div>
+    </div>
+
+</section>
+
+
+
+<div id="divExpireAlertWin"></div>
+<div id="divMultipleProductServiceWin"></div>
+<script type="text/javascript">
+    var productId = 0, orderTransId = 0, masterId = 0, selectedValue, tabIndex = 0, customerId = 0, supplementaryId = 0, suppItemName = "", serviceId = 0, serviceName = "";
+    var totalServiceCharge = 0, conditionId = 0;
+
+    $(document).ready(function () {
+        //$('[data-toggle="tooltip"]').tooltip();
+
+        $("#liForSalesMenu").addClass('active');
+        $("#liForAfterSaleService").addClass('active');
+
+        masterId = '@ViewBag.ASaleServiceId';
+        //temporary order complete
+        if (masterId > 0)
+        {
+            var stepCount = 0, step = 1;
+            //if step1 complete
+            $.ajax({
+                url: '@Url.Action("GetAfterSaleServiceInfo", "Sales")',
+                type: "Get",
+                data: { step: step, assId: masterId },
+                success: function (data) {
+                    if (data == "notFound")
+                    {
+                        alert("Not Found...");
+                    }
+                    else
+                    {
+                        $("#divSNOrInvoiceSearchBox").hide();
+                        $(data).each(function (index, item) {
+                            $("#divProductInfo").append('<h4>Product Info</h4><hr/>' +
+                                '<div class="dl-horizontal">' +
+                                '<dl>' +
+                                '<dt>Product Name</dt>' +
+                                '<dd>' + item.ProductName + '</dd>' +
+                                '<dt>Order Number</dt>' +
+                                '<dd>' + item.InvoiceNo + '</dd>' +
+                                '<dt>Serial Number</dt>' +
+                                '<dd>' + item.SerialNumber + '</dd>' +
+                                '<dt>Order date</dt>' +
+                                '<dd>' + moment(item.OrderDate).format('MMMM Do YYYY') + '</dd>' +
+                                '<dt>Service Expire date</dt>' +
+                                '<dd>' + moment(item.ExpireDate).format('MMMM Do YYYY') + '</dd>' +
+                                '</dl>' +
+                                '</div>');
+
+                            productId = item.ProductId;
+
+                            //if condition included
+                            if (item.ConditionId > 0)
+                            {
+                                $("#ConditionDropdown").data("kendoDropDownList").value(item.ConditionId);
+                                $("#conditionObservation").val(item.ConditionObservation);
+                            }
+                            else
+                            {
+                                $("#divProductCondition").hide();
+                            }
+                            stepCount = item.StepCounter;
+                            step++;
+
+                            selectTab(stepCount);
+                            enableTab(stepCount);
+
+                            //if step 2 complete
+                            if (step <= stepCount) {
+                                $("#divCustomerInfo").empty();
+                                $("#divCustomerInfo").load('@Url.Action("ServicesCustomerCreatePartial", "Sales")?assId=' + masterId);
+                                $("#btnNext2").hide();
+
+                                enableTab(1);
+                                step++;
+                            }
+
+                            //if step 3 complete
+                            if (step <= stepCount)
+                            {
+                                $("#btnNext3").hide();
+                                enableTab(2);
+                                $.ajax({
+                                    url: '@Url.Action("GetAfterSaleServiceInfo", "Sales")',
+                                    type: "Get",
+                                    data: { step: step, assId: masterId },
+                                    success: function (data) {
+                                        if (data == "notFound") {
+                                            alert("Not Found...");
+                                        }
+                                        else {
+                                            $(data).each(function (index, item) {
+                                                $("#supplementaryEmptyRow").hide();
+                                                $("#tblSupplementary").append('<tr id="suppItem_' + item.SupplementaryId + '" class="suppItem" data-id="' + item.SupplementaryId + '" >' +
+                                                    '<td>' + item.SupplementaryName + '</td>' +
+                                                    '<td>' +
+                                                    '<span class="btnCancelSuppItem" data-id="' + item.SupplementaryId + '"><i class="fa fa-times" aria-hidden="true" style="font-size:24px;cursor:pointer"></i></span>' +
+                                                    '</td>' +
+                                                    '</tr > ');
+                                            });
+                                        }
+                                    }
+                                });
+                                step++;
+                            }
+
+                            //if step 4 complete
+                            if (step <= stepCount)
+                            {
+                                $("#btnNext4").hide();
+                                enableTab(3);
+                                $.ajax({
+                                    url: '@Url.Action("GetAfterSaleServiceInfo", "Sales")',
+                                    type: "Get",
+                                    data: { step: step, assId: masterId },
+                                    success: function (data) {
+                                        if (data == "notFound") {
+                                            alert("Not Found...");
+                                        }
+                                        else {
+                                            $("#serviceEmptyRow").hide();
+                                            $(data).each(function (index, item) {
+                                                $("#tblService").append('<tr id="serviceItem_' + item.ServiceId + '" class="serviceItem" data-id="' + item.ServiceId + '" data-charge="' + item.ServiceCharge + '" >' +
+                                                    '<td>' + item.ServiceName + '</td>' +
+                                                    '<td>' + item.ServiceCharge + '</td>' +
+                                                    '<td>' +
+                                                    '<span class="btnCancelService" data-id="' + item.ServiceId + '"><i class="fa fa-times" aria-hidden="true" style="font-size:24px;cursor:pointer"></i></span>' +
+                                                    '</td>' +
+                                                    '</tr > ');
+                                            });
+                                            calculateTotalServiceCharge();
+                                        }
+                                    }
+                                });
+                                step++;
+                            }
+                        });
+                    }
+                },
+                error: function () {
+                    alert("Not Found...");
+                }
+            });
+        }
+        else
+        {
+            $("#divProductCondition").hide();
+        }
+        var tabStrip = $("#tabstrip").data("kendoTabStrip");
+
+        var getItem = function (target) {
+            return tabStrip.tabGroup.children("li").eq(target);
+        }
+
+        function selectTab(tabIndex) {
+            tabStrip.select(getItem(tabIndex));
+        }
+
+        function enableTab(tabIndex)
+        {
+            tabStrip.enable(getItem(tabIndex));
+        }
+
+        //***************************Step1*************************************
+
+        $("#btnNext1").click(function () {
+
+            //save master work order and product info
+            if (orderTransId > 0)
+            {
+                $(this).prop('disabled', true);
+
+                $.ajax({
+                    url: '@Url.Action("AfterSaleServiceSave", "Sales")',
+                    type: "POST",
+                    data: { orderTransId: orderTransId, createdBy: userId, conditionId: conditionId, conditionObservation: $("#conditionObservation").val() },
+                    success: function (data) {
+                        if (data == "error") {
+                            alert("Save error...");
+                        }
+                        else {
+                            masterId = data;
+                            $("#divSNOrInvoiceSearchBox").hide();
+                            $("#divActionButton1").hide();
+
+                            selectTab(1);
+                            enableTab(1);
+                        }
+                    },
+                    error: function () {
+                        alert("Save error...");
+                    }
+                });
+            }
+        });
+
+        $("#divActionButton1").hide();
+
+        $("#searchStringForSerialNumber").kendoAutoComplete({
+            filter: "contains",
+            placeholder: "Search by serial number",
+            // JSON property name to use
+            dataSource: new kendo.data.DataSource({
+                transport: {
+                    read: {
+                        url: '@Url.Action("GetSerial", "Sales")',
+                            serverPaging: true,
+                            pageSize: 20,
+                            contentType: 'application/json; charset=utf-8',
+                            type: 'GET',
+                            dataType: 'json'
+                    },
+                        serverSorting: true,
+                        serverFiltering: true
+                }
+            }),
+            dataValueField: 'Value',
+            dataTextField: "Text",
+            change: onChangeSerial
+        });
+        $("#searchStringOrder").kendoAutoComplete({
+                filter: "contains",
+                placeholder: "Search order by order number",
+                // JSON property name to use
+                dataSource: new kendo.data.DataSource({
+                    transport: {
+                        read: {
+                            url: '@Url.Action("GetOrderList", "Sales")',
+                            serverPaging: true,
+                            pageSize: 20,
+                            contentType: 'application/json; charset=utf-8',
+                            type: 'GET',
+                            dataType: 'json',
+                            data: { IsServiceList : true }
+                        },
+                        serverSorting: true,
+                        serverFiltering: true
+                    }
+                }),
+                dataValueField: 'Value',
+                dataTextField: "Text",
+                select: onSelectOrder,
+                change: onChangeOrder
+        });
+
+        //************************************Step 2***********************************
+        $("#divCustomerInfo").load('@Url.Action("ServicesCustomerCreatePartial", "Sales")');
+        var customerValidation = $("#divCustomerInfo").kendoValidator().data("kendoValidator");
+
+        $("#btnNext2").click(function () {
+            if (customerValidation.validate())
+            {
+                $(this).prop('disabled', true);
+
+                var customerData = {
+                    ASSId: masterId,
+                    FirstName: $("#FirstName").val(),
+                    LastName: $("#LastName").val(),
+                    Email: $("#Email").val(),
+                    Mobile: $("#Mobile").val(),
+                    AlternateMobile: $("#AlternateMobile").val(),
+                    AddressLine1: $("#AddressLine1").val(),
+                    AddressLine2: $("#AddressLine2").val(),
+                    CreatedBy : userId
+                }
+                 $.ajax({
+                    url: '@Url.Action("ServicesCustomerSave", "Sales")',
+                    type: "POST",
+                    data: customerData,
+                    success: function (data) {
+                        if (data == "error")
+                        {
+                            alert("Save error...");
+                        }
+                        else
+                        {
+                            $("#btnNext2").hide();
+
+                            selectTab(2);
+                            enableTab(2);
+                        }
+                    },
+                    error: function () {
+                        alert("Save error...");
+                    }
+                });
+            }
+        });
+
+        //************************************Step 3***********************************
+        $("#btnNext3").click(function () {
+
+            if ($("#tblSupplementary tr").length > 2) {
+                $(this).prop('disabled', true);
+
+                var suppIds = [];
+                $(".suppItem").each(function () {
+                    suppIds.push($(this).data("id"));
+                });
+                 $.ajax({
+                    url: '@Url.Action("ServicesSupplementarySave", "Sales")',
+                    type: "POST",
+                    data: { suppIds: suppIds.join(','), aSalerServiceId: masterId, createdBy : userId },
+                    success: function (data) {
+                        if (data == "error")
+                        {
+                            alert("Save error...");
+                        }
+                        else
+                        {
+                            $("#btnNext3").hide();
+
+                            selectTab(3);
+                            enableTab(3);
+                        }
+                    },
+                    error: function () {
+                        alert("Save error...");
+                    }
+                });
+            }
+        });
+
+        //************************************Step 4***********************************
+
+        $("#btnNext4").click(function () {
+
+            if ($("#tblService tr").length > 2) {
+                $(this).prop('disabled', true);
+
+                var serviceIds = [];
+                $(".serviceItem").each(function () {
+                    serviceIds.push($(this).data("id"));
+                });
+
+                totalServiceCharge = 0;
+                $(".serviceItem").each(function () {
+                    if (parseFloat($(this).data("charge")) > 0) {
+                        totalServiceCharge = totalServiceCharge + parseFloat($(this).data("charge"));
+                    }
+                });
+
+                 $.ajax({
+                    url: '@Url.Action("ServicesServiceSave", "Sales")',
+                    type: "POST",
+                    data: { serviceIds: serviceIds.join(','), totalCharge: totalServiceCharge, aSaleServiceId: masterId, createdBy: userId },
+                    success: function (data) {
+                        if (data == "error")
+                        {
+                            alert("Save error...");
+                        }
+                        else
+                        {
+                            $("#btnNext4").hide();
+
+                            selectTab(4);
+                            enableTab(4);
+                        }
+                    },
+                    error: function () {
+                        alert("Save error...");
+                    }
+                });
+            }
+        });
+
+        //************************************Step 5***********************************
+
+        var deliveryValidation = $("#divDeliveryInfo").kendoValidator({
+            rules: {
+                datepicker: function (input) {
+                    if (input.is("[data-role=datetimepicker]")) {
+                        return input.data("kendoDateTimePicker").value();
+                    } else {
+                        return true;
+                    }
+                }
+            },
+            messages: {
+                datepicker: "Please enter valid date!"
+            }
+        }).data("kendoValidator");
+        $("#btnFinish").click(function () {
+            if (deliveryValidation.validate())
+            {
+                 $.ajax({
+                    url: '@Url.Action("ServiceDeliverySave", "Sales")',
+                    type: "POST",
+                    data: { deliveryDate: new Date($("#deliveryDate").val()).toISOString(), aSaleServiceId: masterId, createdBy: userId },
+                    success: function (data) {
+                        if (data == "error")
+                        {
+                            alert("Save error...");
+                        }
+                        else
+                        {
+                            location.href = '/Sales/SaleService';
+                        }
+                    },
+                    error: function () {
+                        alert("Save error...");
+                    }
+                });
+            }
+        });
+    });
+
+
+    //*********************Step1****************************
+    $("#btnSearchBySerialNumber").click(function () {
+        $(this).addClass("selected");
+        $("#btnSearchByInvoice").removeClass("selected");
+        $("#divSearchStringSerialNumber").show();
+        $("#divSearchStringOrder").hide();
+    });
+
+    $("#btnSearchByInvoice").click(function () {
+        $(this).addClass("selected");
+        $("#btnSearchBySerialNumber").removeClass("selected");
+        $("#divSearchStringSerialNumber").hide();
+        $("#divSearchStringOrder").show();
+    });
+
+    function onChangeCondition() {
+        conditionId = this.value();
+    }
+    function onChangeSerial()
+    {
+        selectedValue = this.value();
+        if(selectedValue.length > 0) {
+             $.ajax({
+                    url: '@Url.Action("GetOrderTransactionList", "Sales")',
+                    type: "Get",
+                    data: { serialNumber: selectedValue },
+                    success: function (data) {
+                        $("#divExistingOrderInfo").empty();
+                        $("#divProductInfo").empty();
+                        $("#divProductCondition").hide();
+                        $("#divActionButton1").hide();
+                        if (data == "notFound")
+                        {
+                            alert("Not Found...");
+                        }
+                        else
+                        if (data.IsExist == true)
+                        {
+                            $("#divProductInfo").append('<h4>Product Info</h4><hr/>' +
+                                '<div class="dl-horizontal">' +
+                                '<dl>' +
+                                '<dt>Product Name</dt>' +
+                                '<dd>' + data.ProductName + '</dd>' +
+                                '<dt>Order Number</dt>' +
+                                '<dd>' + data.OrderNumber + '</dd>' +
+                                '<dt>Serial Number</dt>' +
+                                '<dd>' + data.SerialNumber + '</dd>' +
+                                '<dt>Order date</dt>' +
+                                '<dd>' + moment(data.OrderDate).format('MMMM Do YYYY') + '</dd>' +
+                                '<dt>Service Expire date</dt>' +
+                                '<dd>' + moment(data.ExpireDate).format('MMMM Do YYYY') + '</dd>' +
+                                '</dl>' +
+                                '</div>');
+
+                            if (data.Status == 1)
+                            {
+                                $("#divExistingOrderInfo").append('<h4>Order Incomplete</h4><hr/>' +
+                                    '<div class="text-center">' +
+                                        '<h5>Please complete this order</h5>' +
+                                    '</div>' +
+                                    '<div class="dl-horizontal">' +
+                                    '<dl>' +
+                                    '<dt>Temporary Order No</dt>' +
+                                    '<dd>' + data.TemporaryWorkOrderNo + '</dd>' +
+                                    '</dl>' +
+                                    '</div>');
+                            }
+                            else
+                            {
+                                $("#divExistingOrderInfo").append('<h4>Work Order Info</h4><hr/>' +
+                                    '<div class="dl-horizontal">' +
+                                    '<dl>' +
+                                    '<dt>Order No</dt>' +
+                                    '<dd>' + data.WorkOrderNo + '</dd>' +
+                                    '<dt>Order By</dt>' +
+                                    '<dd>' + data.serviceCreatedBy + '</dd>' +
+                                    '<dt>Order Date</dt>' +
+                                    '<dd>' + moment(data.ServiceOrderDate).format('MMMM Do YYYY') + '</dd>' +
+                                    '<dt>Delivery date</dt>' +
+                                    '<dd>' + moment(data.DeliveryDate).format('MMMM Do YYYY') + '</dd>' +
+                                    '</dl>' +
+                                    '</div>');
+                            }
+                        }
+                        else
+                        {
+                            $(data).each(function (index, item) {
+                                if (item.IsExpire == true)
+                                {
+                                    $("#divExpireAlertWin").empty();
+                                    $("#divExpireAlertWin").kendoWindow({
+                                        actions: ["Close"],
+                                        draggable: false,
+                                        modal: true,
+                                        visible: false,
+                                        width: 744,
+                                        height:259,
+                                        title: 'Service Expired',
+                                        resizable: false,
+                                        close: onWindowClose
+                                    });
+                                    var expWin = $("#divExpireAlertWin").data("kendoWindow");
+                                    expWin.refresh('@Url.Action("ServiceExpireInfo", "Sales")?orderTransId=' + item.TransId);
+                                    expWin.center().open();
+                                    document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+                                    document.body.scroll = "no";
+                                }
+                                else
+                                {
+                                    $("#divProductInfo").append('<h4>Product Info</h4><hr/>' +
+                                        '<div class="dl-horizontal">' +
+                                        '<dl>' +
+                                        '<dt>Product Name</dt>' +
+                                        '<dd>' + item.ProductName + '</dd>' +
+                                        '<dt>Order Number</dt>' +
+                                        '<dd>' + item.OrderNumber + '</dd>' +
+                                        '<dt>Serial Number</dt>' +
+                                        '<dd>' + item.SerialNumber + '</dd>' +
+                                        '<dt>Order date</dt>' +
+                                        '<dd>' + moment(item.OrderDate).format('MMMM Do YYYY') + '</dd>' +
+                                        '<dt>Service Expire date</dt>' +
+                                        '<dd>' + moment(item.ExpireDate).format('MMMM Do YYYY') + '</dd>' +
+                                        '</dl>' +
+                                        '</div>');
+                                    $("#divActionButton1").show();
+                                    $("#divProductCondition").show();
+                                    customerId = item.CustomerId;
+                                    if(customerId > 0)
+                                    {
+                                        $("#divCustomerInfo").empty();
+                                        $("#divCustomerInfo").load('@Url.Action("ServicesCustomerCreatePartial", "Sales")?customerId=' + customerId);
+                                    }
+                                    else
+                                    {
+                                        $("#divCustomerInfo").empty();
+                                        $("#divCustomerInfo").load('@Url.Action("ServicesCustomerCreatePartial", "Sales")');
+                                    }
+                                    productId = item.ProductId;
+                                    orderTransId = item.TransId;
+                                }
+                            });
+                        }
+                        $("#searchStringForSerialNumber").data("kendoAutoComplete").value("");
+                    },
+                    error: function () {
+                        alert("Not Found...");
+                        $("#searchStringForSerialNumber").data("kendoAutoComplete").value("");
+                    }
+            });
+        }
+    }
+    function onChangeOrder(e)
+    {
+        $("#searchStringOrder").data("kendoAutoComplete").value("");
+    }
+    function onSelectOrder(e)
+    {
+        selectedValue = this.dataItem(e.item.index());
+        orderId = selectedValue.Value;
+        if (orderId > 0)
+        {
+             $.ajax({
+                    url: '@Url.Action("GetOrderTransactionList", "Sales")',
+                    type: "Get",
+                    data: { serviceOrderId: orderId },
+                    success: function (data) {
+                        $("#divExistingOrderInfo").empty();
+                        $("#divProductInfo").empty();
+                        $("#divProductCondition").hide();
+                        $("#divActionButton1").hide();
+                        if (data == "notFound")
+                        {
+                            alert("Not Found...");
+                        }
+                        else
+                        if (data.IsExist == true)
+                        {
+                            $("#divProductInfo").append('<h4>Product Info</h4><hr/>' +
+                                '<div class="dl-horizontal">' +
+                                '<dl>' +
+                                '<dt>Product Name</dt>' +
+                                '<dd>' + data.ProductName + '</dd>' +
+                                '<dt>Order Number</dt>' +
+                                '<dd>' + data.OrderNumber + '</dd>' +
+                                '<dt>Serial Number</dt>' +
+                                '<dd>' + data.SerialNumber + '</dd>' +
+                                '<dt>Order date</dt>' +
+                                '<dd>' + moment(data.OrderDate).format('MMMM Do YYYY') + '</dd>' +
+                                '<dt>Service Expire date</dt>' +
+                                '<dd>' + moment(data.ExpireDate).format('MMMM Do YYYY') + '</dd>' +
+                                '</dl>' +
+                                '</div>');
+
+                            if (data.Status == 1)
+                            {
+                                $("#divExistingOrderInfo").append('<h4>Order Incomplete</h4><hr/>' +
+                                    '<div class="text-center">' +
+                                    '<h5>Please complete this order</h5>' +
+                                    '</div>' +
+                                    '<div class="dl-horizontal">' +
+                                    '<dl>' +
+                                    '<dt>Temporary Order No</dt>' +
+                                    '<dd>' + data.TemporaryWorkOrderNo + '</dd>' +
+                                    '</dl>' +
+                                    '</div>');
+                            }
+                            else
+                            {
+                                $("#divExistingOrderInfo").append('<h4>Work Order Info</h4><hr/>' +
+                                    '<div class="dl-horizontal">' +
+                                    '<dl>' +
+                                    '<dt>Order No</dt>' +
+                                    '<dd>' + data.WorkOrderNo + '</dd>' +
+                                    '<dt>Order By</dt>' +
+                                    '<dd>' + data.serviceCreatedBy + '</dd>' +
+                                    '<dt>Order Date</dt>' +
+                                    '<dd>' + moment(data.ServiceOrderDate).format('MMMM Do YYYY') + '</dd>' +
+                                    '<dt>Delivery date</dt>' +
+                                    '<dd>' + moment(data.DeliveryDate).format('MMMM Do YYYY') + '</dd>' +
+                                    '</dl>' +
+                                    '</div>');
+                            }
+                        }
+                        else
+                        {
+                            $(data).each(function (index, item) {
+
+                                if (item.IsMultipleService == true)
+                                {
+                                    $("#divMultipleProductServiceWin").empty();
+                                    $("#divMultipleProductServiceWin").kendoWindow({
+                                        actions: ["Close"],
+                                        draggable: false,
+                                        modal: true,
+                                        visible: false,
+                                        width: 767,
+                                        height: 316,
+                                        title: 'Products',
+                                        resizable: false,
+                                        close: onWindowClose
+                                    });
+                                    var multiProService = $("#divMultipleProductServiceWin").data("kendoWindow");
+                                    multiProService.refresh('/Sales/MultiProServiceInfo?orderId=' + orderId);
+                                    multiProService.center().open();
+                                    document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+                                    document.body.scroll = "no";
+                                }
+                                else if (item.IsExpire == true)
+                                {
+                                    $("#divExpireAlertWin").empty();
+                                    $("#divExpireAlertWin").kendoWindow({
+                                        actions: ["Close"],
+                                        draggable: false,
+                                        modal: true,
+                                        visible: false,
+                                        width: 744,
+                                        height:259,
+                                        title: 'Service Expired',
+                                        resizable: false,
+                                        close: onWindowClose
+                                    });
+                                    var expWin = $("#divExpireAlertWin").data("kendoWindow");
+                                    expWin.refresh('@Url.Action("ServiceExpireInfo", "Sales")?orderTransId=' + item.TransId);
+                                    expWin.center().open();
+                                    document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+                                    document.body.scroll = "no";
+                                }
+                                else
+                                {
+                                    $("#divProductInfo").append('<h4>Product Info</h4><hr/>' +
+                                        '<div class="dl-horizontal">' +
+                                        '<dl>' +
+                                        '<dt>Product Name</dt>' +
+                                        '<dd>' + item.ProductName + '</dd>' +
+                                        '<dt>Order Number</dt>' +
+                                        '<dd>' + item.OrderNumber + '</dd>' +
+                                        '<dt>Serial Number</dt>' +
+                                        '<dd>' + item.SerialNumber + '</dd>' +
+                                        '<dt>Order date</dt>' +
+                                        '<dd>' + moment(item.OrderDate).format('MMMM Do YYYY') + '</dd>' +
+                                        '<dt>Service Expire date</dt>' +
+                                        '<dd>' + moment(item.ExpireDate).format('MMMM Do YYYY') + '</dd>' +
+                                        '</dl>' +
+                                        '</div>');
+                                    $("#divActionButton1").show();
+                                    $("#divProductCondition").show();
+                                    customerId = item.CustomerId;
+                                    if(customerId > 0)
+                                    {
+                                        $("#divCustomerInfo").empty();
+                                        $("#divCustomerInfo").load('@Url.Action("ServicesCustomerCreatePartial", "Sales")?customerId=' + customerId);
+                                    }
+                                    else
+                                    {
+                                        $("#divCustomerInfo").empty();
+                                        $("#divCustomerInfo").load('@Url.Action("ServicesCustomerCreatePartial", "Sales")');
+                                    }
+                                    productId = item.ProductId;
+                                    orderTransId = item.TransId;
+                                }
+                            });
+                        }
+                        $("#searchStringForSerialNumber").data("kendoAutoComplete").value("");
+                    },
+                    error: function () {
+                        alert("Not Found...");
+                        $("#searchStringForSerialNumber").data("kendoAutoComplete").value("");
+                    }
+            });
+        }
+        else
+        {
+            orderId = 0;
+        }
+    }
+
+    //********************************step 3******************************************
+    function SuppadditionInfo() {
+        var ids = [];
+        var totalIds = "";
+        var id = "";
+        $(".suppItem").each(function () {
+            id = $(this).data("id");
+            ids.push(id);
+        });
+        totalIds = ids.join(",");
+        return {
+            ids: totalIds,
+            text: $("#supplementaryAutoComplete").val(),
+            productId: productId
+        }
+    }
+    function onChangeSupplementary()
+    {
+        $("#supplementaryAutoComplete").data("kendoAutoComplete").value("");
+    }
+    function onSelectSupplementary(e)
+    {
+        selectedValue = this.dataItem(e.item.index());
+        supplementaryId = selectedValue.Value;
+        suppItemName = selectedValue.Text;
+        $("#supplementaryEmptyRow").hide();
+        if ($("#suppItem_" + supplementaryId).length == 1) {
+            alert("This item already add to list")
+        }
+        else {
+            $("#tblSupplementary").append('<tr id="suppItem_' + supplementaryId + '" class="suppItem" data-id="' + supplementaryId + '" >' +
+                '<td>' + suppItemName + '</td>' +
+                '<td>' +
+                '<span class="btnCancelSuppItem" data-id="' + supplementaryId + '"><i class="fa fa-times" aria-hidden="true" style="font-size:24px;cursor:pointer"></i></span>' +
+                '</td>' +
+                '</tr > ');
+        }
+    }
+    $("#tblSupplementary").on('click', '.btnCancelSuppItem', function () {
+        supplementaryId = parseInt($(this).data("id"));
+        $("#suppItem_" + supplementaryId).remove();
+        if ($("#tblSupplementary tr").length == 2) {
+            $("#supplementaryEmptyRow").show();
+        }
+    });
+    //********************************step 4******************************************
+    function ServiceadditionInfo() {
+        var ids = [];
+        var totalIds = "";
+        var id = "";
+        $(".serviceItem").each(function () {
+            id = $(this).data("id");
+            ids.push(id);
+        });
+        totalIds = ids.join(",");
+        return {
+            ids: totalIds,
+            text: $("#serviceAutoComplete").val(),
+            productId: productId
+        }
+    }
+
+    function onChangeService() {
+        $("#serviceAutoComplete").data("kendoAutoComplete").value("");
+    }
+
+    function onSelectService(e) {
+        selectedValue = this.dataItem(e.item.index());
+        serviceId = selectedValue.Value;
+        serviceName = selectedValue.Text;
+        if (serviceId > 0)
+        {
+            $.ajax({
+                url: '/Sales/GetService',
+                type: "Get",
+                data: { serviceId: serviceId },
+                success: function (data) {
+                    if (data == "notFound")
+                    {
+                        alert("Not Found...");
+                    }
+                    else
+                    {
+                        $("#serviceEmptyRow").hide();
+                        if ($("#serviceItem_" + supplementaryId).length == 1) {
+                            alert("This item already add to list")
+                        }
+                        else
+                        {
+                            $(data).each(function (index, item) {
+                                $("#tblService").append('<tr id="serviceItem_' + serviceId + '" class="serviceItem" data-id="' + serviceId + '" data-charge="' + item.ServiceCharge +'" >' +
+                                    '<td>' + serviceName + '</td>' +
+                                    '<td>' + item.ServiceCharge + '</td>' +
+                                    '<td>' +
+                                    '<span class="btnCancelService" data-id="' + serviceId + '"><i class="fa fa-times" aria-hidden="true" style="font-size:24px;cursor:pointer"></i></span>' +
+                                    '</td>' +
+                                    '</tr > ');
+
+                                calculateTotalServiceCharge();
+                            });
+                        }
+                    }
+                },
+                error: function () {
+                    alert("Not Found...");
+                }
+            });
+        }
+    }
+
+    $("#tblService").on('click', '.btnCancelService', function () {
+        serviceId = parseInt($(this).data("id"));
+        $("#serviceItem_" + serviceId).remove();
+        if ($("#tblService tr").length == 2) {
+            $("#serviceEmptyRow").show();
+        }
+        calculateTotalServiceCharge();
+    });
+
+
+    function calculateTotalServiceCharge()
+    {
+        totalServiceCharge = 0;
+        $(".serviceItem").each(function () {
+            if(parseFloat($(this).data("charge")) > 0)
+            {
+                totalServiceCharge = totalServiceCharge + parseFloat($(this).data("charge"));
+            }
+        });
+        $("#divTotalCharge").empty();
+        $("#divTotalCharge").append(totalServiceCharge.toFixed(2));
+    }
+</script>

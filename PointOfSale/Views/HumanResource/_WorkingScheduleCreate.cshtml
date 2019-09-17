@@ -1,0 +1,81 @@
+﻿@model PointOfSale.ModelViews.HR.WorkingScheduleModelView
+@Html.HiddenFor(a => a.ScheduleId)
+<style>
+    .labelFontNormal{
+        font-weight:normal;
+    }
+</style>
+<div class="editor-label"><label for="ScheduleName">Schedule Name</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.ScheduleName, new { htmlattributes = new { @class = "k-textbox", @style = "width:68%" } })
+    @Html.ValidationMessageFor(model => model.ScheduleName, "", new { @class = "text-Danger" })
+</div>
+<div class="editor-label"><label for="ScheduleName">Working Days</label></div>
+<div class="editor-field">
+    <label class="labelFontNormal">
+        <input type="checkbox" id="Saturday" data-id="sat" value="Saturday" class="chkWorkingdays" />
+        <span> Saturday</span>
+    </label>
+</div>
+<div class="editor-field">
+    <label class="labelFontNormal">
+        <input type="checkbox" data-id="sun" id="Sunday" value="Sunday" class="chkWorkingdays" />
+        <span> Sunday</span>
+    </label>
+</div>
+<div class="editor-field">
+    <label class="labelFontNormal">
+        <input type="checkbox" id="Monday" data-id="mon" value="Monday" class="chkWorkingdays" />
+        <span> Monday</span>
+    </label>
+</div>
+<div class="editor-field">
+    <label class="labelFontNormal">
+        <input type="checkbox" id="Tuesday" data-id="tue" value="Tuesday" class="chkWorkingdays" />
+        <span> Tuesday</span>
+    </label>
+</div>
+<div class="editor-field">
+    <label class="labelFontNormal">
+        <input type="checkbox" id="Wednesday" data-id="wed" value="Wednesday" class="chkWorkingdays" />
+        <span> Wednesday</span>
+    </label>
+</div>
+<div class="editor-field">
+    <label class="labelFontNormal">
+        <input type="checkbox" id="Thursday" data-id="thu" value="Thursday" class="chkWorkingdays" />
+        <span> Thursday</span>
+    </label>
+</div>
+<div class="editor-field">
+    <label class="labelFontNormal">
+        <input type="checkbox" id="Friday" data-id="fri" value="Friday" class="chkWorkingdays" />
+        <span> Friday</span>
+    </label>
+</div>
+<script>
+    $(document).ready(function () {
+        var scheduleId = parseInt(@Model.ScheduleId);
+        if (scheduleId > 0)
+        {
+            $.ajax({
+                url: '@Url.Action("GetWorkingDays", "HumanResource")',
+                type: 'GET',
+                data: { scheduleId : scheduleId },
+                dataType: 'json',
+                success: function (res) {
+                    alldayList = res;
+                    for (var i = 0; i < alldayList.length; i++) {
+                        $(".chkWorkingdays").each(function () {
+                            if ($(this).val() == alldayList[i].Day) {
+                                $(this).prop('checked', true);
+                            }
+                        });
+                    }
+                }
+            });
+        }
+    });
+</script>
+
+

@@ -1,0 +1,109 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" style="margin-bottom:4%;margin-top:2%;" id="divForContactInfoedit">
+    <div id="show_contact_info"></div>
+    <div class="k-edit-buttons k-state-default">
+        <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btn_ContactInfoEdit"><span class="k-icon k-update"></span>Update</button>
+        <button type="reset" class="k-button k-button-icontext k-grid-update" id="btn_RefreshContactInfo"><span class="k-icon k-i-refresh"></span>Refresh</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btn_CancelContactInfo"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#show_contact_info").empty();
+        $("#show_contact_info").append('<div class="tiny_loading"></div>')
+        $("#show_contact_info").load('@Url.Action("EditContactInfo", "HumanResource")?userId=' + '@ViewBag.UserId');
+     });
+    $("#btn_RefreshContactInfo").click(function () {
+        $("#show_contact_info").empty();
+        $("#show_contact_info").append('<div class="tiny_loading"></div>');
+        $("#show_contact_info").load('@Url.Action("EditContactInfo", "HumanResource")?userId=' + '@ViewBag.UserId');
+    });
+
+    $("#btn_CancelContactInfo").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+
+    var userContactValidation = $("#show_contact_info").kendoValidator({
+        rules: {
+            remoteEmail: function (input) {
+                var errormessage;
+                var remoteAttr = input.attr("data-val-remote-url");
+                if (typeof remoteAttr === typeof undefined || remoteAttr === false) {
+                    return true;
+                }
+                var isInvalid;
+                var data = {};
+                var UserId = $("#UserId").val();
+                var EmailAddress = $.trim($("#EmailAddress").val());
+                data = { UserId: UserId, EmailAddress: EmailAddress };
+                $.ajax({
+                    url: remoteAttr,
+                    mode: "abort",
+                    port: "validate" + input.attr('name'),
+                    dataType: "json",
+                    type: input.attr("data-val-remote-type"),
+                    data: data,
+                    async: false,
+                    success: function (response) {
+                        isInvalid = response;
+                        if (isInvalid == true) {
+                            isInvalid = true;
+                        }
+                        else {
+                            isInvalid = false;
+                        }
+                    }
+                });
+                return isInvalid;
+            },
+            MobileNo: function (input) {
+                if (input.is("[name=MobileNo]")) {
+                    if (telInput.intlTelInput("isValidNumber")) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        },
+        messages: {
+            remoteEmail: function (input) { return input.data('val-remote'); },
+            MobileNo: "Please enter valid contact number",
+        }
+    }).data("kendoValidator");
+
+    $("#btn_ContactInfoEdit").click(function () {
+        if (userContactValidation.validate())
+        {
+            var sendData = {
+                UserId: $("#UserId").val(),
+                EmailAddress: $("#EmailAddress").val(),
+                MobileNo: $("#MobileNo").intlTelInput("getNumber"),
+                CreatedBy: userId
+            };
+            $.ajax({
+                url: '@Url.Action("ContactInformationUpdate", "HumanResource")',
+                type: 'Post',
+                data: sendData,
+                success: function (data) {
+                    if (data === 'Error') {
+                        alert("update unsuccessful.");
+                    }
+                    else
+                    {
+                        alert("Contact information has been successfully updated");
+                    }
+                    $("#win_user_contactInfo_edit").data("kendoWindow").close();
+                    $("#div_ryt_panel").empty();
+                    $("#div_ryt_panel").append('<div class="loading_partial"></div>');
+                    $("#div_ryt_panel").load('@Url.Action("_ShowUserInfo", "HumanResource")?userId=' + '@ViewBag.UserId' + '&isDisplay=false');
+                },
+                error: function (err) {
+                    alert("Contact information has been successfully updated");
+                }
+            });
+        }
+    });
+
+
+</script>

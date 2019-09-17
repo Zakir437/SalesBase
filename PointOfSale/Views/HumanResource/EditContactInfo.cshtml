@@ -1,0 +1,33 @@
+﻿@model PointOfSale.ModelViews.HR.UserInformationModelView
+@Html.HiddenFor(m => m.UserId)
+<div class="editor-label"><label>Email Address</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.EmailAddress, new { htmlAttributes = new { @class = "k-textbox form-control", @style="width:230px;" } })
+    @Html.ValidationMessageFor(model => model.EmailAddress, "", new { @class = "text-danger" })
+</div>
+<div class="editor-label"><label>Mobile No</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.MobileNo, new { htmlAttributes = new { @class = "k-textbox form-control" } })
+    @Html.ValidationMessageFor(model => model.MobileNo, "", new { @class = "text-danger" })
+</div>
+<script>
+    $(document).ready(function () {
+        //mobile
+        telInput = $("#MobileNo");
+        telInput.intlTelInput({
+            geoIpLookup: function (callback) {
+                $.get("http://ipinfo.io", function () { }, "jsonp").always(function (resp) {
+                    var countryCode =(resp && resp.country) ? resp.country : "";
+                    //var countryCode = "BD";
+                    callback(countryCode);
+                });
+            },
+            initialCountry: "auto",
+            utilsScript: "../Scripts/intl-tel-input-master/build/js/utils.js"
+        });
+        var reset = function () {
+            telInput.removeClass("error");
+        };
+        telInput.on("keyup change", reset);
+    });
+</script>

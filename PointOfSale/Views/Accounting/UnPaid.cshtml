@@ -1,0 +1,46 @@
+﻿@{
+    ViewBag.Title = "UnPaid";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="panel panel-default" style="margin-top:20px;">
+    <div class="panel-heading" style="padding-bottom:46px;">
+        <div class="pull-left">
+            <h4>Unpaid List</h4>
+        </div>
+        <div class="pull-right">
+            @*<button class="btn btn-primary" id="btnPrint"><i class="fa fa-print"></i> Print</button>*@
+        </div>
+    </div>
+    <div class="panel-body" style="padding:0px 15px;">
+        <div id="divPaySheetList" style="padding-top:5px; overflow-x:auto;"></div>
+        <div class="pull-right" style="margin-bottom:5px;">
+            <button class="btn btn-primary" id="btnConfirm">Confirm</button>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#divPaySheetList").empty();
+        $("#divPaySheetList").append('<div class="loading_partial"></div>');
+        $("#divPaySheetList").load('@Url.Action("UnpaidList", "Accounting")?unPaidIds=' + '@ViewBag.UnpaidIds' + "&paySheetId=" + '@ViewBag.PaySheetId');
+    });
+    $("#btnConfirm").click(function () {
+        $.ajax({
+            url: '@Url.Action("PayCompleteWithUnPaid", "Accounting")',
+            type:"POST",
+            data: { transId: '@ViewBag.PaySheetId', createdBy: userId, unPaidIds : '@ViewBag.UnpaidIds' },
+            success: function (data) {
+                if (data == "success") {
+                    window.location.href = '@Url.Action("XmlFile", "Accounting")';
+                }
+                else
+                {
+                    alert("Save error...");
+                }
+            }
+        });
+    });
+
+</script>
+
+

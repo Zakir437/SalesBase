@@ -1,0 +1,33 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin-bottom:4%;margin-top:2%;">
+    <div id="divCreditLedgerForm"></div>
+    <div class="k-edit-buttons k-state-default" style="margin-left:30px;">
+        <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnCreditLedgerSubmit"><span class="k-icon k-update"></span>Submit</button>
+        <button type="reset" class="k-button k-button-icontext k-grid-update" id="btnCreditLedgerRefresh"><span class="k-icon k-i-refresh"></span>Refresh</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnCreditLedgerCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+     $(document).ready(function () {
+         $("#divCreditLedgerForm").empty();
+         $("#divCreditLedgerForm").load('@Url.Action("CreditLedgerPartial", "Accounting")');
+    });
+    $("#btnCreditLedgerRefresh").click(function () {
+        $("#divCreditLedgerForm").empty();
+        $("#divCreditLedgerForm").load('@Url.Action("CreditLedgerPartial", "Accounting")');
+    });
+    $("#btnCreditLedgerCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+    $("#btnCreditLedgerSubmit").click(function () {
+        var fromDatePicker = $("#fromDatePickerForCreditLedger").data("kendoDateTimePicker");
+        var toDatePicker = $("#toDatePickerForCreditLedger").data("kendoDateTimePicker");
+        $("#divCreditLedgerWin").data("kendoWindow").close();
+
+        var data = "fromDate=" + fromDatePicker.value().toISOString() + "?toDate=" + toDatePicker.value().toISOString();
+        window.open('@Url.Action("AllCreditLedger", "Accounting")?q=' + getDataEncrypted(data), '_blank');
+
+        @*$("#reportList").empty();
+        $("#reportList").append('<div class="loading_partial"></div>');
+        $("#reportList").load('@Url.Action("CreditLedgerList", "Accounting")?FromDate=' + fromDatePicker.value().toISOString() + '&ToDate=' + toDatePicker.value().toISOString());*@
+    });
+</script>

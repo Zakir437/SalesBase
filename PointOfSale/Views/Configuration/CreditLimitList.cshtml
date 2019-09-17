@@ -1,0 +1,78 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewCreditLimit>
+@using PointOfSale.Helpers
+@{
+    var count = 0;
+}
+@if (Model.Any() == true)
+{
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Name</th>
+            <th>Limit</th>
+            <th>CreatedBy</th>
+            <th>Created Date</th>
+            <th>UpdatedBy</th>
+            <th>Updated Date</th>
+            <th></th>
+        </tr>
+        @foreach (var list in Model)
+        {
+            count++;
+            <tr>
+                <td>@count. </td>
+                <td>@list.Name</td>
+                <td>@list.Limit</td>
+                <td>@list.CreatedBy</td>
+                <td>@Convert.ToDateTime(list.CreatedDate).ToString("MMM dd,yyyy")</td>
+                <td>@list.UpdatedBy</td>
+                <td>
+                    @if (list.UpdatedDate != null)
+                    {
+                        @Convert.ToDateTime(list.UpdatedDate).ToString("MMM dd,yyyy")
+                    }
+                    else
+                    {
+                        <span>Not yet updated</span>
+                    }
+                </td>
+                <td>
+                    <button class="btn btn-primary btnCreditLimitEdit" data-id="@list.Id" data-toggle="tooltip" title="Edit credit limit Information"><i class="fa fa-pencil-square-o"></i></button>
+                    @if (list.Status == true)
+                    {
+                        <button type="button" data-id="@list.Id" data-isactive="0" class="btn btn-danger inactivateCreditLimit" data-toggle="tooltip" title="Inactivate Credit limit">
+                            <i class="fa fa-stop" aria-hidden="true"></i>
+                        </button>
+                    }
+                    else
+                    {
+                        <button type="button" data-id="@list.Id" data-isactive="1" class="btn btn-success activateCreditLimit" data-toggle="tooltip" title="Activate Credit limit">
+                            <i class="fa fa-play" aria-hidden="true"></i>
+                        </button>
+                    }
+                    @if (@list.Status == false)
+                    {
+                        <span data-id="@list.Id" style="cursor:pointer;" data-toggle="tooltip" title="Delete Credit limit" class="btn btn-danger btnDeleteCreditLimit">
+                            <i class="fa fa-trash"></i>
+                        </span>
+                    }
+                </td>
+            </tr>
+        }
+    </table>
+}
+else
+{
+    <h4>There is no record to display</h4>
+}
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    })
+</script>
+
+
+
+
+
+

@@ -1,0 +1,47 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewStockWarehouse>
+@{
+    var count = 0;
+}
+@if (Model.Any() == true)
+{
+    <h4 class="text-bold">Product : @Model.FirstOrDefault().ProductName</h4>
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Indent</th>
+            <th>Work order</th>
+            <th>Quantity</th>
+        </tr>
+        @foreach (var list in Model)
+        {
+            count++;
+            <tr>
+                <td>@count.</td>
+                <td>@list.IndentVoucher</td>
+                <td>@list.WOVoucher</td>
+                <td>@list.Quantity</td>
+            </tr>
+        }
+    </table>
+}
+else
+{
+    <h3>There is no record to display</h3>
+}
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    })
+</script>
+
+
+
+
+
+
+
+
+
+
+
+

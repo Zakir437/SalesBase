@@ -1,0 +1,45 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewOrderTransaction>
+@using System.Globalization;
+@{
+    var count = 0;
+}
+@if (Model.Any())
+{
+    <table class="table table-bordered">
+        <tr>
+            <th>SL.</th>
+            <th>Voucher No</th>
+            <th>Quantity</th>
+            <th>Peritem Price</th>
+            <th>Price</th>
+            <th>Date</th>
+        </tr>
+        @foreach (var list in Model)
+        {
+            count++;
+            <tr>
+                <td>@count.</td>
+                <td>
+                    @*@if (list.Discount > 0)
+                     {
+                        <img src="~/Images/DiscountImage/272498.png" />
+                     }
+                    @if (list.ItemRefundStatus == 1)
+                     {
+                        <i class="fa fa-reply" aria-hidden="true"></i>
+                     }*@
+                    @list.OrderNumber
+                </td>
+                <td>@list.Quantity</td>
+                <td>@list.PerItemPrice.ToString("C", new CultureInfo("bn-BD"))</td>
+                <td>@list.Price.ToString("C", new CultureInfo("bn-BD")) @if (list.Discount > 0) { <span>(Discount @list.Discount%)</span> }</td>
+                <td>@Convert.ToDateTime(list.OrderDate).ToString("MMM dd yyyy")</td>
+            </tr>
+        }
+    </table>
+}
+else
+{
+    <h4>There is no record to display</h4>
+}
+

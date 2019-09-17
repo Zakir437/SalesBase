@@ -1,0 +1,205 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewAmountCoupon>
+@{
+    var count = 0;
+}
+<style>
+    .checkbox {
+        margin-top: 0px;
+        margin-bottom: 5px;
+    }
+</style>
+@if (Model.Any() == true)
+{
+    if (ViewBag.Isprint == true)
+    {
+        <table class="table table-bordered table-hover table-responsive">
+            <tr>
+                <th>SL.</th>
+                <th>Offer Name</th>
+                <th>Discount</th>
+                <th>Is Percentile</th>
+                <th>Is Infinite</th>
+                <th>From Price</th>
+                <th>To Price</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>CreatedBy</th>
+                <th>Created Date</th>
+            </tr>
+            @foreach (var list in Model)
+            {
+                count++;
+                <tr>
+                    <td>@count. </td>
+                    <td>@list.OfferName</td>
+                    @if (list.IsPercentile == true)
+                    {
+                        <td>@list.Amount %</td>
+                        <td>Yes</td>
+                    }
+                    else
+                    {
+                        <td>@list.Amount Tk</td>
+                        <td>No</td>
+                    }
+                    <td>
+                        @if (list.IsInifinte == true)
+                        {
+                            <span>Yes</span>
+                        }
+                        else
+                        {
+                            <span>No</span>
+                        }
+                    </td>
+                    <td>@list.FromPrice Tk</td>
+                    <td>
+                        @if (list.IsInifinte == true)
+                        {
+                            <span>Infinite</span>
+                        }
+                        else
+                        {
+                            <span>@list.ToPrice Tk</span>
+                        }
+                    </td>
+                    <td>@Convert.ToDateTime(list.StartDate).ToString("MMM dd,yyyy hh:mm:ss tt")</td>
+                    <td>@Convert.ToDateTime(list.EndDate).ToString("MMM dd,yyyy hh:mm:ss tt")</td>
+                    <td>@list.CreatedBy</td>
+                    <td>@Convert.ToDateTime(list.CreatedDate).ToString("MMM dd,yyyy")</td>
+                    @*<td>@list.UpdatedBy</td>
+                        <td>
+                            @if (list.UpdatedDate != null)
+                            {
+                                @Convert.ToDateTime(list.UpdatedDate).ToString("MMM dd,yyyy")
+                            }
+                            else
+                            {
+                                <span>not yet updated</span>
+                            }
+                        </td>*@
+                </tr>
+            }
+        </table>
+    }
+    else
+    {
+        <table class="table table-bordered table-hover table-responsive">
+            <tr>
+                <th>SL.</th>
+                <th>
+                    <div class="checkbox">
+                        <label style="font-weight:bold; font-size:14px; color:#333"><input type="checkbox" id="checkAll" /> Offer Name</label>
+                    </div>
+                </th>
+                <th>Discount</th>
+                <th>Is Percentile</th>
+                <th>Is Infinite</th>
+                <th>From Price</th>
+                <th>To Price</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>CreatedBy</th>
+                <th>Created Date</th>
+                <th></th>
+            </tr>
+            @foreach (var list in Model)
+            {
+                count++;
+                <tr>
+                    <td>@count. </td>
+                    <td>
+                        <div class="checkbox">
+                            <label><input type="checkbox" data-id="@list.OfferId" class="check" id="check_@list.OfferId" /> @list.OfferName</label>
+                        </div>
+                    </td>
+                    @if (list.IsPercentile == true)
+                    {
+                        <td>@list.Amount %</td>
+                        <td>Yes</td>
+                    }
+                    else
+                    {
+                        <td>@list.Amount Tk</td>
+                        <td>No</td>
+                    }
+                    <td>
+                        @if (list.IsInifinte == true)
+                        {
+                            <span>Yes</span>
+                        }
+                        else
+                        {
+                            <span>No</span>
+                        }
+                    </td>
+                    <td>@list.FromPrice Tk</td>
+                    <td>
+                        @if (list.IsInifinte == true)
+                        {
+                            <span>Infinite</span>
+                        }
+                        else
+                        {
+                            <span>@list.ToPrice Tk</span>
+                        }
+                    </td>
+                    <td>@Convert.ToDateTime(list.StartDate).ToString("MMM dd,yyyy hh:mm:ss tt")</td>
+                    <td>@Convert.ToDateTime(list.EndDate).ToString("MMM dd,yyyy hh:mm:ss tt")</td>
+                    <td>@list.CreatedBy</td>
+                    <td>@Convert.ToDateTime(list.CreatedDate).ToString("MMM dd,yyyy")</td>
+                    @*<td>@list.UpdatedBy</td>
+                        <td>
+                            @if (list.UpdatedDate != null)
+                            {
+                                @Convert.ToDateTime(list.UpdatedDate).ToString("MMM dd,yyyy")
+                            }
+                            else
+                            {
+                                <span>not yet updated</span>
+                            }
+                        </td>*@
+                    <td>
+                        <button class="btn btn-primary btnEdit" data-id="@list.Id" data-toggle="tooltip" title="Edit Discount Information"><i class="fa fa-pencil-square-o"></i></button>
+                        @if (list.Status == true)
+                        {
+                            <button type="button" data-id="@list.OfferId" data-isactive="0" class="btn btn-danger inactivateDiscount" data-toggle="tooltip" title="Inactivate Discount">
+                                <i class="fa fa-stop" aria-hidden="true"></i>
+                            </button>
+                        }
+                        else
+                        {
+                            <button type="button" data-id="@list.OfferId" data-isactive="1" class="btn btn-success activateDiscount" data-toggle="tooltip" title="Activate Discount">
+                                <i class="fa fa-play" aria-hidden="true"></i>
+                            </button>
+                        }
+                        @if (@list.Status == false)
+                        {
+                            <span data-id="@list.OfferId" style="cursor:pointer;" data-toggle="tooltip" title="Delete Discount" class="btn btn-danger btnDiscountDelete">
+                                <i class="fa fa-trash"></i>
+                            </span>
+                        }
+                    </td>
+                </tr>
+            }
+        </table>
+    }
+}
+else
+{
+    <h4>There is no record to display</h4>
+}
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    })
+</script>
+
+
+
+
+
+
+
+
+

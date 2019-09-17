@@ -1,0 +1,120 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewOffer>
+@using System.Globalization
+@using PointOfSale.Helpers
+@{
+    var count = 0;
+}
+@if (Model.Any() == true)
+{
+    if (ViewBag.isInPOS == false)
+    {
+        <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+            <tr>
+                <th>SL.</th>
+                <th>Name</th>
+                <th>Actual Price</th>
+                <th>Offer Price</th>
+                <th>Discount Percent</th>
+                <th>Discount Amount</th>
+                <th>Schedule</th>
+                <th>Coupon</th>
+                <th>Validity</th>
+                @*<th>CreatedBy</th>
+                    <th>Created Date</th>
+                    <th>UpdatedBy</th>
+                    <th>Updated Date</th>*@
+                <th></th>
+            </tr>
+            @foreach (var list in Model)
+            {
+                count++;
+                <tr>
+                    <td>@count. </td>
+                    <td>
+                        <a href="@Html.EncodedParam("OfferItem","PointOfSale", new { id = list.Id }, null)" data-toggle="tooltip" title="View Offer details">@list.OfferName</a>
+                    </td>
+                    <td>@list.ActualPrice.ToString("C", new CultureInfo("bn-BD"))</td>
+                    <td>@list.OfferPrice.ToString("C", new CultureInfo("bn-BD"))</td>
+                    <td>@list.DiscPercentage%</td>
+                    <td>@list.DiscAmount.ToString("C", new CultureInfo("bn-BD"))</td>
+                    <td>@list.ScheduleName</td>
+                    <td>@list.Coupon</td>
+                    <td>@Convert.ToDateTime(list.Validity).ToString("MMM dd,yyyy hh:mm:ss tt")</td>
+                    @*<td>@list.CreatedBy</td>
+                        <td>@Convert.ToDateTime(list.CreatedDate).ToString("MMM dd,yyyy")</td>
+                        <td>@list.UpdatedBy</td>
+                        <td>
+                            @if (list.UpdatedDate != null)
+                            {
+                                @Convert.ToDateTime(list.UpdatedDate).ToString("MMM dd,yyyy")
+                            }
+                            else
+                            {
+                                <span>Not yet updated</span>
+                            }
+                        </td>*@
+                    <td>
+                        @if (list.MasterOfferId == 0 || list.MasterOfferId == null)
+                         {
+                            <button class="btn btn-info btnEditCoupon" data-id="@list.Id" data-toggle="tooltip" title="Edit offer coupon"><i class="fa fa-pencil-square-o"></i></button>
+                         }
+                        <button class="btn btn-primary btnOfferEdit" data-id="@list.Id" data-toggle="tooltip" title="Edit offer Information"><i class="fa fa-pencil-square-o"></i></button>
+                       
+                        @if (list.Status == true)
+                        {
+                            <button type="button" data-id="@list.Id" data-isactive="0" class="btn btn-danger inactivateOffer" data-toggle="tooltip" title="Inactivate offer">
+                                <i class="fa fa-stop" aria-hidden="true"></i>
+                            </button>
+                         }
+                        else
+                        {
+                            <button type="button" data-id="@list.Id" data-isactive="1" class="btn btn-success activateOffer" data-toggle="tooltip" title="Activate offer">
+                                <i class="fa fa-play" aria-hidden="true"></i>
+                            </button>
+                        }
+                        @if (@list.Status == false)
+                         {
+                            <span data-id="@list.Id" style="cursor:pointer;" data-toggle="tooltip" title="Delete offer" class="btn btn-danger btnOfferDelete">
+                                <i class="fa fa-trash"></i>
+                            </span>
+                         }
+                    </td>
+                </tr>
+             }
+        </table>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-md-12">
+                @foreach (var list in Model)
+                 {
+                    <div class="col-md-1 text-center" id="" data-id="" style="cursor:pointer; border: 1px solid #cccccc; margin: 5px; height:66px; width:23.60%">
+                        <h6 style="margin:4px auto; font-size: 11px">@list.OfferName</h6>
+                        @*<img style="max-width:35px; max-height:18px; height:18px;" src="~/Images/ProductImage/" alt="Image">*@
+                        <h6 style="margin:6px auto; font-size:10px">Price: @list.OfferPrice.ToString("C", new CultureInfo("bn-BD"))</h6>
+                    </div>
+                    @*<div class="col-md-4">
+                        <div style="border:1px solid #cccccc; margin: 5px; height:66px;">
+                            <label style="margin:4px auto;">@list.OfferName</label>
+                            <h6 style="margin:6px auto;">Price: @list.OfferPrice.ToString("C", new CultureInfo("bn-BD"))</h6>
+                        </div>
+                    </div>*@
+                 }
+            </div>
+        </div>
+    }
+}
+else
+{
+    <h4>There is no record to display</h4>
+}
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    })
+</script>
+
+
+
+

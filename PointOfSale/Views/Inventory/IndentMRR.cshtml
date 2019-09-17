@@ -1,0 +1,51 @@
+﻿@{
+    ViewBag.Title = "IndentMRR";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+}
+<style>
+    .k-input {
+        height: 26px !important;
+    }
+
+    p {
+        margin: 10px;
+    }
+</style>
+<section class="content">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4 class="uppercase">Indent MRR</h4>
+            </div>
+            <div class="pull-right">
+                <a class="btn btn-default" href="/Inventory/Procurement"><i class="fa fa-arrow-left"></i> Back</a>
+            </div>
+        </div>
+        <div class="panel-body" style="border:none!important;">
+            <div id="divList"></div>
+        </div>
+    </div>
+</section>
+<script id="temp_win_voucherConfirm" type="text/x-kendo-template">
+    <div style="padding:1em;">
+        <p style="font-size: 14px; padding: 10px"> #=msg# </p>
+        <div style="text-align: right;">
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btn_VoucherConfirm_noty_ok"><span class="k-icon k-update"></span>OK</button>
+            <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btn_VoucherConfirm_noty_cancel"><span class="k-icon k-cancel"></span>Cancel</button>
+        </div>
+    </div>
+</script>
+<script>
+    var id = 0;
+    $(document).ready(function () {
+        $("#liForInventory").addClass('active');
+        $("#liForProcurement").addClass('active');
+
+        $("#divList").append('<div class="loading_partial"></div>');
+        $("#divList").load('/Inventory/IndentMRRList?isListForProc=true');
+    });
+</script>
+
+
+
+

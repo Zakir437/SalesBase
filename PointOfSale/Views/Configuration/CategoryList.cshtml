@@ -1,0 +1,71 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewCategory>
+@{
+    var count = 0;
+}
+@if (Model.Count() > 0)
+{
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Name</th>
+            <th>Restriction</th>
+            <th>CreatedBy</th>
+            <th>Created Date</th>
+            <th>UpdatedBy</th>
+            <th>Updated Date</th>
+            <th></th>
+        </tr>
+        @foreach (var list in Model)
+        {
+            count++;
+            <tr>
+                <td>@count. </td>
+                <td>@list.CategoryName</td>
+                <td>@list.Restricion</td>
+                <td>@list.CreatedBy</td>
+                <td>@Convert.ToDateTime(list.CreatedDate).ToString("MMM dd,yyyy")</td>
+                <td>@list.UpdatedBy</td>
+                <td>
+                    @if (list.UpdatedDate != null)
+                    {
+                        @Convert.ToDateTime(list.UpdatedDate).ToString("MMM dd,yyyy")
+                    }
+                    else
+                    {
+                        <span>not yet updated</span>
+                    }
+                </td>
+                <td>
+                    <button class="btn btn-primary btnCategoryEdit" data-id="@list.CategoryId" data-toggle="tooltip" title="Edit Category Information"><i class="fa fa-pencil-square-o"></i></button>
+                    @if (list.Status == true)
+                     {
+                        <button type="button" data-id="@list.CategoryId" data-isactive="0" class="btn btn-danger inactivateCategory" data-toggle="tooltip" title="Inactivate Category">
+                            <i class="fa fa-stop" aria-hidden="true"></i>
+                        </button>
+                     }
+                    else
+                    {
+                        <button type="button" data-id="@list.CategoryId" data-isactive="1" class="btn btn-success activateCategory" data-toggle="tooltip" title="Activate Category">
+                            <i class="fa fa-play" aria-hidden="true"></i>
+                        </button>
+                    }
+                    @if (@list.Status == false)
+                     {
+                        <span data-id="@list.CategoryId" style="cursor:pointer;" data-toggle="tooltip" title="Delete Category" class="btn btn-danger btnCategoryDelete">
+                            <i class="fa fa-trash"></i>
+                        </span>
+                     }
+                </td>
+            </tr>
+         }
+    </table>
+}
+else
+{
+    <h4>There is no record to display</h4>
+}
+
+<script>
+    $('[data-toggle="tooltip"]').tooltip();
+</script>
+

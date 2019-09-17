@@ -1,0 +1,14 @@
+﻿@(Html.Kendo().DropDownList()
+                     .Name("supplier")
+                     .BindTo(ViewBag.SupplierList as SelectList)
+                     .DataTextField("Text")
+                     .DataValueField("Value")
+                     .OptionLabel("Select one supplier...")
+                     .HtmlAttributes(new { style = "width:100%;", required="required" })
+                     .Events(e =>
+                    {
+                        e.Change("onChangeSupplier");
+                    })
+)
+
+

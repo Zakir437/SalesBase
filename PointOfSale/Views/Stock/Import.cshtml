@@ -1,0 +1,466 @@
+﻿@{
+    ViewBag.Title = "Import";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+}
+<link href="~/Content/numpad.css" rel="stylesheet" />
+<link href="~/Content/myCss.css" rel="stylesheet" />
+<link href="~/Content/Hover/hover.css" rel="stylesheet" />
+<style>
+    #divProductWindow input{
+        max-width:68%;
+    }
+    textarea {
+        max-width: 100%
+    }
+    .image-uploader {
+        width: 67%;
+        height: 150px;
+        display: inline;
+        text-align: center;
+    }
+
+    .imgPreview {
+        background-color: #e8e4d0;
+        /*margin-bottom: 20px;*/
+        position: relative;
+        width: 67%;
+        height: 150px;
+        border: 1px solid #808080;
+        display: none;
+        overflow: hidden;
+    }
+
+    .imgPreview img {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        margin: auto;
+        display: block;
+        max-width: 100%;
+        height: auto;
+    }
+    .lblForPics {
+        text-align: center;
+        max-width: 100%;
+        width: 67%;
+        height: 150px;
+        vertical-align: middle;
+        border: 1px dashed blue;
+    }
+    .lblForPics span {
+        color: #083bb5 !important;
+    }
+    #divForPic .span4 {
+        padding-top: 10px !important;
+        padding-bottom: 10px !important;
+    }
+    .previewImgClose {
+        position: relative;
+        width: 36px;
+        height: 36px;
+        cursor: pointer;
+        float: right;
+        right: 8.2em;
+        bottom: -1.8em;
+        z-index: 9999;
+        margin-top: -3em;
+    }
+    input[type=number] {
+        width:100%;
+        max-width:100%;
+        padding-left:8px;
+    }
+    .k-input {
+        height: 26px !important;
+    }
+</style>
+<section class="content">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4 class="uppercase">Import</h4>
+            </div>
+            <div class="pull-right">
+                <a class="btn btn-default" href="/Stock/ImportHistory"><i class="fa fa-arrow-left"></i> Back</a>
+            </div>
+        </div>
+        <div class="panel-body">
+            <div id="form">
+                <div class="row" style="margin-top:15px;">
+                    <div class="col-md-10" style="padding-right:0px;">
+                        <div style="width:100%!important; padding-right:3px;" class="pull-left">
+                            @(Html.Kendo().MultiSelect()
+                            .Name("Supplier")
+                            .Placeholder("Type Supplier name...")
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .MaxSelectedItems(1)
+                            .Filter("contains")
+                            .AutoBind(false)
+                            .HtmlAttributes(new { style = "width: 100%;", required = "required" })
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("GetSupplierList", "Configuration");
+                                })
+                                .ServerFiltering(false);
+                            })
+                            .Events(e => e.Change("onChangeSupplier"))
+                            )
+                            <span class="k-icon k-i-search" style="margin-top:-25px;float:right;margin-right:10px; position:relative">&nbsp;</span>
+                            <span class="field-validation-valid text-danger" data-valmsg-for="Supplier" data-valmsg-replace="true"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-2 pull-right">
+                        <button style="width:100%" class="btn btn-primary" id="btnSupplierCreateWin">Add Supplier</button>
+                    </div>
+                </div>
+                <div class="row" style="margin-top:5px;">
+                    <div class="col-md-10" style="padding-right:0px;">
+                        <div style="width:100%!important;">
+                            @(Html.Kendo().AutoComplete()
+                            .Name("productsAutoComplete")
+                            .Placeholder("Type product name...")
+                            .HtmlAttributes(new { style = "width:100%; max-width:100%" })
+                            .MinLength(3)
+                            .DataTextField("Text")
+                            .Filter("contains")
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("GetProductListForText", "PointOfSale")
+                                       .Data("additionInfo");
+                                })
+                               .ServerFiltering(true);
+                            })
+                            .Events(e =>
+                            {
+                                e.Change("onChangeText").Select("onSelect");
+                            })
+                            )
+                            <span class="k-icon k-i-search" style="margin-top:-25px;float:right;margin-right:10px; position:relative">&nbsp;</span>
+                        </div>
+                    </div>
+                    <div class="col-md-2 pull-right">
+                        <button style=" width:100%" class="btn btn-primary" id="btnProductCreateWin">Add Product</button>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div id="divImportList" style="width:100%!important; margin-top:10px;">
+                            <table class="table table-bordered table-hover table-responsive table-condensed table-striped" id="importTbl">
+                                <tr>
+                                    <th>Product Name</th>
+                                    <th>Quantity</th>
+                                    <th>Cost(Peritem)</th>
+                                    <th>Sub Total Cost</th>
+                                    <th></th>
+                                </tr>
+                                <tr id="emptyRow">
+                                    <td colspan="5">
+                                        <h3>Please select product</h3>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="form-group">
+                            <div class="pull-right" style="font-size:18px;">
+                                <label>Total Cost : </label> <span id="totalCost">0.00</span>Tk
+                            </div><br />
+                            <label for="comment">Comment:</label>
+                            <textarea class="form-control" rows="3" cols="30" id="comment"></textarea>
+                        </div>
+                        <div class="pull-right">
+                            <button class="btn btn-primary" id="btnImport">Save</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<div id="divProductWindow"></div>
+<div id="divSupplierWin"></div>
+<div id="divImportPayWin"></div>
+<script>
+    var selectedId = "";
+    var supplierId = 0;
+    var supplierValidate;
+    var totalCost = 0;
+    var quantity = 0;
+    var rowId = 0;
+    var perItemCost = 0;
+    var importData = [];
+    var methodId = 5;
+    $(document).ready(function () {
+        //validate supplier
+        supplierValidate = $("#form").kendoValidator({
+        }).data("kendoValidator");
+        $("#btnImport").prop('disabled', true);
+
+        $("#liForInventory").addClass('active');
+        $("#liForStock").addClass('active');
+    });
+
+    //***********************Product Create *****************************
+    $("#btnProductCreateWin").click(function () {
+        $("#divProductWindow").empty();
+        $("#divProductWindow").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: "767px",
+            height: "537px",
+            title: 'Product',
+            resizable: false
+        });
+        var productWindow = $("#divProductWindow").data("kendoWindow");
+        productWindow.refresh('@Url.Action("ProductCreate", "Configuration")');
+        productWindow.maximize().center().open();
+    });
+
+    //*****************supplier Create*****************************
+    $("#btnSupplierCreateWin").click(function () {
+        $("#divSupplierWin").empty();
+        $("#divSupplierWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 638,
+            height: 382,
+            title: 'Supplier',
+            resizable:false
+        });
+        var supplierWin = $("#divSupplierWin").data("kendoWindow");
+        supplierWin.refresh('@Url.Action("CreateSupplier", "Configuration")');
+        supplierWin.center().open();
+    });
+    //****************Supplier Change *******************
+    function onChangeSupplier() {
+        supplierId = parseInt(this.value());
+    }
+    //*******************Product Autocomplete**************
+    function additionInfo() {
+        var ids = [];
+        $(".importItems").each(function () {
+            ids.push($(this).data("rowid"));
+        });
+        return {
+            ids: ids.join(","),
+            text: $("#productsAutoComplete").val()
+        }
+    }
+    function onChangeText()
+    {
+        $("#productsAutoComplete").data("kendoAutoComplete").value("");
+    }
+    function onSelect(e)
+    {
+        rowId = this.dataItem(e.item.index()).Value;
+        $.ajax({
+                url: '@Url.Action("GetProduct", "PointOfSale")',
+                type: 'Get',
+                data: { rowId: rowId },
+                success: function (data)
+                {
+                    if (data == "error")
+                    {
+                        alert("Not Found...");
+                    }
+                    else
+                    {
+                        $("#btnImport").prop('disabled', false);
+                        if ($("#emptyRow").length == 1)
+                        {
+                            $("#emptyRow").hide();
+                        }
+                        if ($("#import_" + rowId).length == 1) {
+                            alert("This product already add to import list")
+                        }
+                        else {
+                            $("#importTbl").append('<tr id="import_' + rowId + '" class="importItems" data-rowid="' + rowId + '" data-productid="' + data.ProductId + '" data-distributeid="' + data.DistributeId + '" data-productname="' + data.ProductName + '">' +
+                                '<td>' + data.ProductName + '</td>' +
+                                '<td>' +
+                                '<input type="number" min="1" class="quantity k-input" onclick="setSubtotalCost(' + rowId + ')" onkeyup="setSubtotalCost(' + rowId + ')" id="quantity_' + rowId + '" name="quantity_' + rowId + '" data-id="' + rowId + '" data-val-required="*"/>' +
+                                '<span class="field-validation-valid text-danger" data-valmsg-for="quantity_' + rowId + '" data-valmsg-replace="true"></span>' +
+                                '</td>' +
+                                '<td>' +
+                                '<input type="number" min="0" class="k-input" onclick="setSubtotalCost(' + rowId + ')"  onkeyup="setSubtotalCost(' + rowId + ')"  id="perItemcost_' + rowId + '" name="perItemcost_' + rowId + '" data-id="' + rowId + '" data-val-required="*"/>' +
+                                '<span class="field-validation-valid text-danger" data-valmsg-for="perItemcost_' + rowId + '" data-valmsg-replace="true"></span>' +
+                                '</td>' +
+                                '<td>' +
+                                '<input type="number" min="0" class="cost k-input" onclick="totalCostFunc(' + rowId + ')" onkeyup="totalCostFunc(' + rowId + ')"  id="cost_' + rowId + '" name="cost_' + rowId + '" data-id="' + rowId + '" data-val-required="*"/>' +
+                                '<span class="field-validation-valid text-danger" data-valmsg-for="cost_' + rowId + '" data-valmsg-replace="true"></span>' +
+                                '</td>' +
+                                '<td>' +
+                                '<span id="btnCancelProduct" data-id="' + rowId + '"><i class="fa fa-times" aria-hidden="true" style="font-size:24px;cursor:pointer"></i></span>' +
+                                '</td>' +
+                                '</tr > ');
+                        }
+                    }
+                },
+                error: function() {
+                    alert("Not Found...");
+                    $("#productsAutoComplete").data("kendoAutoComplete").value("");
+                }
+        });
+    }
+    // Product search additional info
+
+    // supplier search additional info
+    //function additionalInfoForSupplier() {
+    //    return {
+    //        text: $.trim($("#Supplier").data("kendoMultiSelect").input.val())
+    //    }
+    //}
+
+    //******************cancel product from import list
+    $("#importTbl").on('click', '#btnCancelProduct', function () {
+        rowId = $(this).data("id");
+        $("#import_" + rowId).remove();
+        totalCostFunc();
+        if ($("#importTbl tr").length == 2) {
+            totalCost = 0;
+            $("#btnImport").prop('disabled', true);
+            $("#emptyRow").show();
+            $("#totalCost").empty();
+            $("#totalCost").append(totalCost.toFixed(2));
+        }
+    });
+    //set sub total cost by input per item cost
+    function setSubtotalCost(id) {
+        totalCost = 0;
+        quantity = 0;
+        quantity = $("#quantity_" + id).val();
+        totalCost = quantity * $("#perItemcost_" + id).val();
+        $("#cost_" + id).val(totalCost.toFixed(2));
+        totalCostFunc();
+    }
+    //***********calculate total cost*****************
+    function totalCostFunc(id) {
+        totalCost = 0;
+        if (id > 0) {
+            quantity = 0;
+            quantity = $("#quantity_" + id).val();
+            perItemCost = $("#cost_" + id).val() / quantity;
+            $("#perItemcost_" + id).val(perItemCost.toFixed(2));
+        }
+        $(".cost").each(function () {
+            if ($(this).val() != "") {
+                totalCost = totalCost + parseFloat($(this).val());
+            }
+        });
+        $("#totalCost").empty();
+        $("#totalCost").append(totalCost.toFixed(2));
+    }
+
+      //import save
+    $("#btnImport").click(function () {
+        if (supplierValidate.validate())
+        {
+            importData = [];
+            $(".importItems").each(function () {
+                rowId = parseInt($(this).data("rowid"));
+                importData.push({
+                    ProductId: parseInt($(this).data("productid")),
+                    DistributeId: $(this).data("distributeid"),
+                    ProductName: $(this).data("productname"),
+                    Quantity: $("#quantity_" + rowId).val(),
+                    PeritemCost: $("#perItemcost_" + rowId).val(),
+                    Cost: $("#cost_" + rowId).val()
+                });
+            });
+            var model = { ImportData: importData, SupplierId: supplierId };
+            //totalCost = parseFloat($("#totalCost").text()).toFixed(2);
+            $("#divImportPayWin").empty();
+            $("#divImportPayWin").kendoWindow({
+                actions: ["Close"],
+                draggable: false,
+                modal: true,
+                visible: false,
+                width: 767,
+                height: 280,
+                title: 'Pay',
+                resizable: false
+            });
+            var importPayWin = $("#divImportPayWin").data("kendoWindow");
+            importPayWin.refresh({
+                url: '@Url.Action("ImportPay", "Stock")',
+                type: "POST",
+                data: model
+            });
+            importPayWin.center().open().maximize();
+        }
+    });
+
+    $("#divImportPayWin").on('click', "#btnPay", function () {
+        importData = [];
+        $(".importItems").each(function () {
+            rowId = parseInt($(this).data("rowid"));
+            importData.push({
+                ProductId: parseInt($(this).data("productid")),
+                DistributeId: $(this).data("distributeid"),
+                ProductName: $(this).data("productname"),
+                Quantity: $("#quantity_" + rowId).val(),
+                PeritemCost: $("#perItemcost_" + rowId).val(),
+                Cost: $("#cost_" + rowId).val()
+            });
+        });
+        var payments = [];
+        $(".amountInTransaction").each(function () {
+            if ($(this).data("id") == 1) {
+                payments.push({
+                    PaymentTypeId: 1,
+                    PaymentBodyId: parseInt($(this).data("cashbodyid")),
+                    AmountPaid: cashAmount
+                });
+            }
+            else if ($(this).data("id") == 2) {
+                payments.push({
+                    PaymentTypeId: 2,
+                    PaymentBodyId: parseInt($(this).data("cardbodyid")),
+                    AmountPaid: parseFloat($(this).data("cardamount")),
+                    TransactionNo: $(this).data("transactionno")
+                });
+            }
+            else if ($(this).data("id") == 3) {
+                payments.push({
+                    PaymentTypeId: 3,
+                    PaymentBodyId: parseInt($(this).data("bkashbodyid")),
+                    AmountPaid: parseFloat($(this).data("bkashamount")),
+                    TransactionNo: $(this).data("transactionno")
+                });
+            }
+            else if ($(this).data("id") == 4) {
+                payments.push({
+                    PaymentTypeId: 6,
+                    PaymentBodyId: parseInt($(this).data("checkbodyid")),
+                    AmountPaid: parseFloat($(this).data("checkamount")),
+                    TransactionNo: $(this).data("transactionno")
+                });
+            }
+        });
+
+        $.ajax({
+            url: '@Url.Action("ImportSave","Stock")',
+            type: 'POST',
+            data: JSON.stringify({ UserId: userId, MethodId: methodId, CreditAmount: creditAmount, ImportData: importData, Payments: payments, Comments: $("#comment").val(), SupplierId: supplierId }),
+            contentType: 'application/json',
+            success: function (data) {
+                if (data == "success") {
+                    window.location.reload();
+                }
+                else {
+                    alert("Import error...");
+                }
+            }
+        });
+    });
+
+</script>

@@ -1,0 +1,20 @@
+﻿<div class="editor-label"><label for="fromDatePickerForLedger">From</label></div>
+<div class="editor-field">
+    @(Html.Kendo().DateTimePicker()
+    .Name("fromDatePickerForLedger")
+    .Value(DateTime.Now)
+    .Max(DateTime.Now)
+    .Format("MMM dd yyyy hh:mm tt")
+    .HtmlAttributes(new { @style = "width:248px" })
+    )
+</div>
+<div class="editor-label"><label for="toDatePickerForLedger">To</label></div>
+<div class="editor-field">
+    @(Html.Kendo().DateTimePicker()
+    .Name("toDatePickerForLedger")
+    .Max(DateTime.Now)
+    .Value(DateTime.Now)
+    .Format("MMM dd yyyy hh:mm tt")
+    .HtmlAttributes(new { @style = "width:248px;" })
+    )
+</div>

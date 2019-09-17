@@ -1,0 +1,60 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewStockImport>
+@using System.Globalization;
+@{
+    ViewBag.Title = "PrintImportReport";
+    Layout = "~/Views/Shared/_LayoutPrintPage.cshtml";
+    var count = 0;
+}
+<section class="content-header" style="text-align:center;">
+    <h3>Import Report</h3>
+    <p>Cost-POS</p>
+    <hr />
+</section>
+<div class="row">
+    <div class="col-xs-offset-6 col-xs-6 text-left">
+        <p>
+            Generate By : @HttpContext.Current.Request.Cookies["CookieUserInfo"].Values["UserName"]<br>
+            Generate Date : @DateTime.Now.ToString("MMM dd yyyy hh:mm:ss tt") <br>
+            Total Cost : @ViewBag.TotalCost.ToString("C", new CultureInfo("bn-BD"))<br />
+            Total Import : @Model.Count()
+        </p>
+    </div>
+    <div class="col-xs-offset-6 col-xs-6 text-right">
+        <p>
+            From Date : @ViewBag.FromDate.ToString("MMM dd yyyy hh:mm:ss tt") <br />
+            To Date : @ViewBag.ToDate.ToString("MMM dd yyyy hh:mm:ss tt") <br />
+        </p>
+    </div>
+</div>
+<div class="row" style="margin-top:10px;">
+    <div class="col-md-12">
+        <table class="table table-bordered">
+            <tr>
+                <th>SL.</th>
+                <th>Refference No</th>
+                <th>Import By</th>
+                <th>Supplier</th>
+                <th>Total Cost</th>
+                <th>Date</th>
+            </tr>
+            @foreach (var list in Model)
+             {
+                count++;
+                <tr>
+                    <td>@count . </td>
+                    <td>@list.RefferenceNo</td>
+                    <td>@list.ImportBy</td>
+                    <td>@list.SupplierName</td>
+                    <td>@list.TotalCost.ToString("C", new CultureInfo("bn-BD"))</td>
+                    <td>@Convert.ToDateTime(list.Date).ToString("MMM dd yyyy hh:mm:ss tt")</td>
+                </tr>
+             }
+        </table>
+    </div>
+</div>
+<script>
+    window.onload = function () {
+        window.print();
+    }
+</script>
+

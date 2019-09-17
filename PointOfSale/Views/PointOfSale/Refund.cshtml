@@ -1,0 +1,266 @@
+﻿@model PointOfSale.Models.ViewPosOrder
+@using System.Globalization;
+@using PointOfSale.Helpers;
+<style>
+    dt{
+        font-size:18px;
+    }
+    dd{
+        font-size: 15px;
+    }
+</style>
+<link href="~/Content/numpad.css" rel="stylesheet" />
+<link href="~/Content/myCss.css" rel="stylesheet" />
+@{
+    ViewBag.Title = "Refund";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+    PointOfSale.Models.PointOfSale_DBEntities db = new PointOfSale.Models.PointOfSale_DBEntities();
+}
+@*<section class="content-header">
+    <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-dashboard"></i> Inventory</a></li>
+        <li><a href="/PointOfSale/Orders"><i class="fa fa-line-chart"></i> Sales</a></li>
+        <li class="active">Order Information</li>
+     </ol>
+</section>*@
+<section class="content">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4 class="uppercase">Order Information</h4>
+            </div>
+            <div class="pull-right">
+                <a class="btn btn-default" href="/PointOfSale/Orders"><i class="fa fa-arrow-left"></i> Back</a>
+            </div>
+        </div>
+        <div class="panel-body">
+            <div class="row">
+                <a href="@Html.EncodedParam("OrderTransactionPrint","PointOfSale", new { orderId = Model.OrderId },null)" target="_blank" style="float:right;margin-right:33px;font-size:14px">
+                    <i class="fa fa-print"></i> Print
+                </a>
+            </div>
+            <div class="col-md-6 pull-left">
+                <dl>
+                    <dt>Order Number : <span style="font-weight:100">@Model.OrderNumber</span></dt>
+                </dl>
+                <button class="btn btn-default" id="btnPaymentTransaction" data-id="@Model.OrderId">Payment Transaction</button>
+                @if (Model.RefundOrderId > 0)
+                {
+                    <button class="btn btn-default" id="btnRefundInfo" data-id="@Model.OrderId">Refund History</button>
+                    @*<a class="btn btn-default" href="@Html.EncodedParam("OriginalVoucher","PointOfSale", new { orderId = Model.OrderId },null)" target="_blank">
+                            Original Voucher
+                        </a>
+                        <a class="btn btn-default" href="@Html.EncodedParam("RefundArchive","PointOfSale", new { orderId = Model.OrderId },null)" target="_blank">
+                            Refund Archive
+                        </a>*@
+                }
+            </div>
+            <div class="col-md-4 pull-right text-right">
+                <dl>
+                    <dt>@Model.CreatedBy</dt>
+                    <dd>@Convert.ToDateTime(@Model.OrderDate).ToString("MMM dd yyyy hh:mm:ss tt")</dd>
+                    <dd>Sub Total : @Model.SubTotalPrice.ToString("C", new CultureInfo("bn-BD"))</dd>
+                    @if (Model.Discount > 0)
+                    {
+                        if (Model.DiscountType == true)
+                        {
+                            <dd>Discount : <span>@Model.Discount.ToString("C", new CultureInfo("bn-BD"))</span>(@Model.DiscPercent%)</dd>
+                        }
+                        else
+                        {
+                            <dd>Discount : @Model.DiscPercent%(<span>@Model.Discount.ToString("C", new CultureInfo("bn-BD"))</span>)</dd>
+                        }
+                    }
+                    @if (Model.Tax > 0)
+                    {
+                        <dd>Tax @if (Model.TaxFunc == true)
+                        { <span>(A)</span> }
+                        else
+                        { <span>(D)</span> }  : @Model.TaxPercent%(@Model.Tax.ToString("C", new CultureInfo("bn-BD")))</dd>
+                    }
+                    <dd style="border-top:1px solid;">Total : @Model.TotalPrice.ToString("C", new CultureInfo("bn-BD"))</dd>
+                    @if (Model.DueAmount > 0)
+                    {
+                        <dd>Due : @Model.DueAmount.Value.ToString("C", new CultureInfo("bn-BD"))</dd>
+                    }
+                </dl>
+            </div>
+        </div>
+        <hr />
+        <div class="panel-body">
+            <div id="divOrderedList"></div>
+        </div>
+    </div>
+</section>
+<div id="divRefundAlert"></div>
+<div id="divPaymentTranWin"></div>
+<div id="divRefundInfoWin"></div>
+<div id="divRefundPayWin"></div>
+
+<script>
+    var orderId = 0;
+    var orderTransId = 0;
+    var quantity = 0;
+    var productId = 0;
+    var refundQuantity = 0;
+    $(document).ready(function () {
+
+        $("#liForSalesMenu").addClass('active');
+        $("#liForSales").addClass('active');
+
+        $("#divOrderedList").empty();
+        $("#divOrderedList").append('<div class="loading_partial"></div>');
+        $("#divOrderedList").load('@Url.Action("OrderedProducts","PointOfSale")?orderId=' + @Model.OrderId);
+    });
+
+    $("#divOrderedList").on('click', '.btnRefundItem', function () {
+        var isrefundallow = $(this).data("isrefundallow");
+        if (isrefundallow == "False")
+        {
+            alert("Refund not allow for this product");
+        }
+        else
+        {
+            orderTransId = parseInt($(this).data("id"));
+            quantity = parseFloat($(this).data("quantity"));
+            productId = parseInt($(this).data("productid"));
+            $("#divRefundAlert").empty();
+            $("#divRefundAlert").kendoWindow({
+                actions: ["Close"],
+                draggable: false,
+                modal: true,
+                visible: false,
+                width: 500,
+                height: 161,
+                resizable: false,
+                title: 'Alert'
+            });
+            var refundWin = $("#divRefundAlert").data("kendoWindow");
+            refundWin.refresh('@Url.Action("RefundCreate", "PointOfSale")?orderTransactionId=' + orderTransId);
+            refundWin.center().open();
+        }
+    });
+
+    //View Payment transaction
+    $("#btnPaymentTransaction").click(function () {
+        orderId = $(this).data("id");
+        $("#divPaymentTranWin").empty();
+        $("#divPaymentTranWin").kendoWindow({
+                actions: ["Close"],
+                draggable: false,
+                modal: true,
+                visible: false,
+                width: 1200,
+                height: 500,
+               resizable: false,
+                title: 'Payment Transaction'
+            });
+        var paymentTranWin = $("#divPaymentTranWin").data("kendoWindow");
+        paymentTranWin.refresh('@Url.Action("PaymentHistoryPartial", "PointOfSale")?orderId=' + orderId);
+        paymentTranWin.center().open();
+    });
+
+    //Show Refund Info
+    $("#btnRefundInfo").click(function () {
+        orderId = $(this).data("id");
+        $("#divRefundInfoWin").empty();
+        $("#divRefundInfoWin").kendoWindow({
+                actions: ["Close"],
+                draggable: false,
+                modal: true,
+                visible: false,
+                width: 1037,
+                height: 405,
+                resizable: false,
+                title: 'Refund Info'
+            });
+        var refundAlertWin = $("#divRefundInfoWin").data("kendoWindow");
+        refundAlertWin.refresh('@Url.Action("RefundInfo", "PointOfSale")?orderId=' + orderId);
+        refundAlertWin.center().open();
+    });
+
+    $("#divRefundAlert").on('click', '#btnConfirm', function() {
+        if (validation.validate())
+        {
+            refundQuantity = parseFloat($("#Quantity").val());
+            $("#divRefundAlert").data("kendoWindow").close();
+            quantity = quantity - refundQuantity;
+            var orderProducts = [];
+            orderProducts.push({
+                ProductId: productId,
+                Quantity: quantity,
+            });
+            var model = {
+                OrderId: @Model.OrderId,
+                OrderTransId: orderTransId,
+                OrderProducts: orderProducts
+            };
+            $("#divRefundPayWin").empty();
+            $("#divRefundPayWin").kendoWindow({
+                    actions: ["Close"],
+                    draggable: false,
+                    modal: true,
+                    visible: false,
+                    title: 'Refund Pay',
+                    resizable: false
+                });
+            var refundPayWin = $("#divRefundPayWin").data("kendoWindow");
+            refundPayWin.refresh({ url: '@Url.Action("RefundPay", "PointOfSale")', type: "POST", data: model });
+            refundPayWin.center().open().maximize();
+        }
+    });
+
+    //order payment info
+    $("#divRefundPayWin").on('click', "#btnPaymentInfo", function () {
+        document.getElementById("btnPaymentTransaction").click();
+    });
+    //***************************************Refund pay *************************************************
+    $("#divRefundPayWin").on('click', "#refundPay", function () {
+        var payments = [];
+        $(".amountInTransaction").each(function () {
+            if ($(this).data("id") == 1) {
+                payments.push({
+                    PaymentTypeId: 1,
+                    PaymentBodyId: parseInt($(this).data("cashbodyid")),
+                    AmountPaid: parseFloat(cashAmount)
+                });
+            }
+            else if ($(this).data("id") == 2) {
+                payments.push({
+                    PaymentTypeId: 2,
+                    PaymentBodyId: parseInt($(this).data("cardbodyid")),
+                    AmountPaid: parseFloat($(this).data("cardamount")),
+                    TransactionNo: $(this).data("transactionno")
+                });
+            }
+            else if ($(this).data("id") == 3) {
+                payments.push({
+                    PaymentTypeId: 3,
+                    PaymentBodyId: parseInt($(this).data("bkashbodyid")),
+                    AmountPaid: parseFloat($(this).data("bkashamount")),
+                    TransactionNo: $(this).data("transactionno")
+                });
+            }
+        });
+         $.ajax({
+            url: '@Url.Action("RefundSave", "PointOfSale")',
+            type: "POST",
+            data: JSON.stringify({
+                orderTransactionId: orderTransId,
+                quantity: refundQuantity,
+                Payments: payments,
+                methodId: methodId,
+                userId: userId
+            }),
+            contentType: 'application/json',
+            success: function (data) {
+                if (data = "success")
+                {
+                    window.location.reload();
+                }
+            }
+        });
+    });
+
+
+</script>

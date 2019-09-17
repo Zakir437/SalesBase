@@ -1,0 +1,43 @@
+﻿@model PointOfSale.ModelViews.POS.OfferModelView
+@Html.HiddenFor(a => a.Id)
+@Html.HiddenFor(a => a.MasterOfferId)
+@Html.HiddenFor(a => a.OfferItemId)
+<div class="editor-field">
+    @Html.CheckBoxFor(model => model.IsCouponApplicable, new { htmlattributes = new { @class = "k-textbox" } }) <label for="IsCouponApplicable">Is Coupon Applicable</label>
+</div>
+<div id="divCouponInput">
+    <div class="editor-label"><label for="Coupon">Coupon code</label></div>
+    <div class="editor-field">
+        @Html.EditorFor(model => model.Coupon, new { htmlattributes = new { @class = "k-textbox", @style = "width:100%; max-width:100%", required = "required" } })
+        @Html.ValidationMessageFor(model => model.Coupon, "", new { @class = "text-Danger" })
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        if ($("#IsCouponApplicable").attr('checked')) {
+            $("#IsCouponApplicable").val(true);
+        }
+        else {
+            $("#IsCouponApplicable").val(false);
+            $("#divCouponInput").hide();
+            $('#Coupon').val("");
+            $('#Coupon').prop('required', false);
+
+        }
+    });
+
+    $('#IsCouponApplicable').change(function () {
+        if ($(this).is(":checked")) {
+            $('#IsCouponApplicable').val(true);
+            $("#divCouponInput").show();
+            $('#Coupon').prop('required', true);
+        } else {
+            $('#IsCouponApplicable').val(false);
+            $("#divCouponInput").hide();
+            $('#Coupon').val("");
+            $('#Coupon').prop('required', false);
+        }
+    });
+
+</script>

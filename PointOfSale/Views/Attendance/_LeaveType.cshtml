@@ -1,0 +1,64 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" style="margin-bottom:4%;margin-top:2%;" id="div_Salary_trans_edit">
+    <div id="div_leave_partial"><div class="win_loading_half"></div></div>
+    <div class="editor-field">
+        <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btn_Leave_Save"><span class="k-icon k-update"></span>OK</button>
+        <button type="reset" class="k-button k-button-icontext k-grid-cancel" id="btn_Leave_Cancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#div_leave_partial").load('@Url.Action("_LeaveTypePartial", "Attendance")?attId=' + '@ViewBag.AttId');
+    });
+    $("#btn_Leave_Cancel").click(function () {
+        $("#divUserList").empty();
+        $("#divUserList").append('<div class="loading_partial"></div>');
+        $("#divUserList").load('@Url.Action("UserLists", "Attendance")');
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+    var validation = $("#div_leave_partial").kendoValidator({
+        rules: {
+            option: function (input) {
+                if (input.attr('name') === "LeaveType" && $("#LeaveType").val() === '') {
+                    return false;
+                }
+                return true;
+            },
+            IsPaid: function (input) {
+                if (input.attr('name') === "IsPaidLeave" && $("#IsPaidLeave").val() === '') {
+                    return false;
+                }
+                return true;
+            }
+
+        },
+        messages: {
+            option: "Please select one",
+            IsPaid: "Please select one",
+        }
+    }).data("kendoValidator");
+    $("#btn_Leave_Save").click(function () {
+        if (validation.validate()) {
+            var sendData = { Id: attid, UserId: id, LeaveType: $("#LeaveType").val(), IsPaidLeave: $("#IsPaidLeave").val(), AttType: value, InsertedBy: userId };
+            $.ajax({
+                url: '@Url.Action("SaveAttendance", "Attendance")',
+                type: 'Post',
+                data: sendData,
+                success: function (response) {
+                    if (response === "success") {
+                        $("#Win_Leave").data("kendoWindow").close();
+                        $("#divUserList").empty();
+                        $("#divUserList").append('<div class="loading_partial"></div>');
+                        $("#divUserList").load('@Url.Action("UserLists", "Attendance")');
+                    }
+                    else
+                    {
+                        alert("Attendence save was unsuccessful.");
+                    }
+                },
+                error: function (err) {
+                    alert("Attendence save was unsuccessful.");
+                }
+            });
+        }
+    });
+</script>

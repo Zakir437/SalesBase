@@ -1,0 +1,49 @@
+﻿@*@model IEnumerable<PointOfSale.Models.ViewImportTransaction>
+@using System.Globalization;
+@{
+    var count = 0;
+}
+
+
+
+<div class="panel panel-default" style="margin-top:20px;">
+    <div class="panel-body">
+        <dl class="dl-horizontal">
+            <dt>Import By</dt>
+            <dd>@Model.FirstOrDefault().FirstName @Model.FirstOrDefault().LastName</dd>
+            <dt>Refference No</dt>
+            <dd>@Model.FirstOrDefault().RefferenceNo</dd>
+            <dt>Supplier</dt>
+            <dd>@Model.FirstOrDefault().Supplier</dd>
+            <dt>Total Cost</dt>
+            <dd>@Model.FirstOrDefault().TotalCost.ToString("C", new CultureInfo("bn-BD"))</dd>
+            <dt>Due Amount</dt>
+            <dd>@Model.FirstOrDefault().DueAmount.ToString("C", new CultureInfo("bn-BD"))</dd>
+            <dt>Date</dt>
+            <dd>@Convert.ToDateTime(@Model.FirstOrDefault().Date).ToString("MMM dd yyyy hh:mm:ss tt")</dd>
+        </dl>
+    </div>
+    <hr />
+    <div class="panel-body">
+        <table class="table table-bordered table-striped">
+            <tr>
+                <th>SL.</th>
+                <th>Product Name</th>
+                <th>Quantity</th>
+                <th>Peritem Cost</th>
+                <th>Cost</th>
+            </tr>
+            @foreach (var list in Model)
+            {
+                count++;
+                <tr>
+                    <td>@count.</td>
+                    <td>@list.ProductName</td>
+                    <td>@list.Quantity</td>
+                    <td>@list.PeritemCost.ToString("C", new CultureInfo("bn-BD"))</td>
+                    <td>@list.Cost.ToString("C", new CultureInfo("bn-BD"))</td>
+                </tr>
+            }
+        </table>
+    </div>
+</div>*@

@@ -1,0 +1,126 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin-bottom:4%;margin-top:2%;">
+    <div id="divSupplierCreate"></div>
+    <div class="k-edit-buttons k-state-default" style="margin-left:30px;">
+        @if (ViewBag.Id > 0)
+        {
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnSupplierCreate"><span class="k-icon k-update"></span>Update</button>
+        }
+        else
+        {
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnSupplierCreate"><span class="k-icon k-update"></span>Create</button>
+        }
+        <button type="reset" class="k-button k-button-icontext k-grid-update" id="btnRefreshSupplier"><span class="k-icon k-i-refresh"></span>Refresh</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnCancelSupplier"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#divSupplierCreate").empty();
+        $("#divSupplierCreate").load('@Url.Action("SupplierCreatePartial", "Configuration")?id=' + '@ViewBag.Id');
+    });
+    $("#btnRefreshSupplier").click(function () {
+        $("#divSupplierCreate").empty();
+        $("#divSupplierCreate").load('@Url.Action("SupplierCreatePartial", "Configuration")?id=' + '@ViewBag.Id');
+    });
+
+    $("#btnCancelSupplier").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+
+    var validaton = $("#divSupplierCreate").kendoValidator({
+        rules: {
+            remoteEmail: function (input) {
+                var remoteAttr = input.attr("data-val-remote-url");
+                if (typeof remoteAttr === typeof undefined || remoteAttr === false) {
+                    return true;
+                }
+                var isInvalid;
+                var data = {};
+                var Id = $("#SupplierId").val();
+                var Email = $.trim($("#Email").val());
+                data = { Id: Id, Email: Email };
+                $.ajax({
+                    url: remoteAttr,
+                    mode: "abort",
+                    port: "validate" + input.attr('name'),
+                    dataType: "json",
+                    type: input.attr("data-val-remote-type"),
+                    data: data,
+                    async: false,
+                    success: function (response) {
+                        isInvalid = response;
+                        if (isInvalid === true) {
+                            isInvalid = true;
+                        }
+                        else {
+                            isInvalid = false;
+                        }
+                    }
+                });
+                return isInvalid;
+            }
+        },
+        messages: {
+            remoteEmail: function (input) {
+                return input.data('val-remote');
+            }
+        }
+    }).data("kendoValidator");
+
+    $("#btnSupplierCreate").click(function () {
+        if (validaton.validate()) {
+            var sendData = {
+                SupplierId: $("#SupplierId").val(),
+                Name: $("#Name").val(),
+                Email: $("#Email").val(),
+                Phone: $("#Phone").val(),
+                SupplierSince: $("#SupplierSince").val(),
+                Address: $("#Address").val(),
+                CreatedBy: userId
+            };
+            $.ajax({
+                url: '@Url.Action("SupplierSave", "Configuration")',
+                type: 'POST',
+                data: sendData,
+                success: function (data) {
+                    if (data = "success") {
+                        $("#divSupplierWin").data("kendoWindow").close();
+                        if (tab == 1)
+                        {
+                            $("#div_All").empty();
+                            $("#div_All").append('<div class="loading_partial"></div>');
+                            $("#div_All").load('@Url.Action("SupplierList", "Configuration")');
+                        }
+                        else if (tab == 2)
+                        {
+                            status = 1;
+                            passdata = { status: status };
+                            $("#div_Active").append('<div class="loading_partial"></div>');
+                            $("#div_Active").load('@Url.Action("SupplierList", "Configuration")', passdata);
+                        }
+                        else if (tab == 3)
+                        {
+                            status = 0;
+                            passdata = { status: status};
+                            $("#div_Inactive").append('<div class="loading_partial"></div>');
+                            $("#div_Inactive").load('@Url.Action("SupplierList", "Configuration")', passdata);
+                        }
+                        else if (tab == 4)
+                        {
+                            status = 2;
+                            passdata = { status: status };
+                            $("#div_Deleted").append('<div class="loading_partial"></div>');
+                            $("#div_Deleted").load('@Url.Action("SupplierList", "Configuration")', passdata);
+                        }
+                    }
+                    else {
+                        alert("Supplier Save Error");
+                    }
+                }
+            });
+        }
+        else {
+            return false;
+        }
+    });
+</script>

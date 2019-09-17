@@ -1,0 +1,71 @@
+﻿@model PointOfSale.ModelViews.CustomerModelView
+@Html.HiddenFor(m => m.CustomerId)
+<div class="editor-label"><label for="CustomerName">Name</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.Name, new { htmlattributes = new { @class = "k-textbox form-control", style = "width:100%; max-width:100%" } })
+    @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-Danger" })
+</div>
+<div class="editor-label"><label for="Email">E-mail</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.Email, new { htmlattributes = new { @class = "k-textbox form-control", style = "width:100%; max-width:100%" } })
+    @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-Danger" })
+</div>
+<div class="editor-label"><label for="Phone">Phone</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.Phone, new { htmlattributes = new { @class = "k-textbox form-control", style = "width:100%; max-width:100%" } })
+    @Html.ValidationMessageFor(model => model.Phone, "", new { @class = "text-Danger" })
+</div>
+<div class="editor-label"><label for="MembershipNumber">Membership Number</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.MembershipNumber, new { htmlattributes = new { @class = "k-textbox form-control", style = "width:100%; max-width:100%" } })
+    @Html.ValidationMessageFor(model => model.MembershipNumber, "", new { @class = "text-Danger" })
+</div>
+<div class="editor-field">
+    @Html.CheckBoxFor(model => model.IsCreditAllowed)<label for="IsCreditAllowed"> Is Credit Allow</label>
+    @Html.ValidationMessageFor(model => model.IsCreditAllowed, "", new { @class = "text-Danger" })
+</div>
+<div id="divCreditLImit">
+    <div class="editor-label"><label for="CreditLimitId">Credit Limit</label></div>
+    <div class="editor-field">
+        @(Html.Kendo().DropDownListFor(a => a.CreditLimitId)
+                     .BindTo(ViewBag.CreditLimit as SelectList)
+                     .DataTextField("Text")
+                     .DataValueField("Value")
+                     .OptionLabel("--Select one limit--")
+                     .HtmlAttributes(new { style = "width:100%; max-width:100%", required = "required", validationMessage = "Please select a limit" })
+        )
+        @Html.ValidationMessageFor(model => model.CreditLimitId, "", new { @class = "text-Danger" })
+    </div>
+</div>
+<div class="editor-label"><label for="Address">Address</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.Address, new { htmlAttributes = new { @class = "k-textbox form-control", rows = 3, style = "width:100%; max-width:100%" } })
+    @Html.ValidationMessageFor(model => model.Address, "", new { @class = "text-Danger" })
+</div>
+
+<script>
+    $(document).ready(function () {
+        if ($("#IsCreditAllowed").attr('checked')) {
+            $("#IsCreditAllowed").val(true);
+        }
+        else {
+            $("#IsCreditAllowed").val(false);
+            $("#divCreditLImit").hide();
+            $('#CreditLimitId').prop('required', false);
+        }
+    });
+
+    $('#IsCreditAllowed').change(function () {
+        if ($(this).is(":checked")) {
+            $('#IsCreditAllowed').val(true);
+            $("#divCreditLImit").show();
+            $('#CreditLimitId').prop('required', true);
+        } else {
+            $('#IsCreditAllowed').val(false);
+            $("#divCreditLImit").hide();
+            $('#CreditLimitId').prop('required', false);
+            $("#CreditLimitId").data("kendoDropDownList").value("");
+        }
+    });
+
+</script>

@@ -1,0 +1,64 @@
+﻿@model PointOfSale.Models.IndentItem
+<style>
+    .k-textbox{
+        width:100%;
+        max-width:100%;
+    }
+</style>
+@if(Model != null)
+ {
+    <div class="editor-label"><label for="ProductName">Product Name</label></div>
+    <div class="editor-field">
+        @Html.DisplayFor(model => model.ProductName, new { htmlattributes = new {  } })
+    </div>
+ }
+else
+{
+    <div class="editor-label"><label for="ProductName">Product Name</label></div>
+    <div class="editor-field">
+        @(Html.Kendo().DropDownList()
+                        .Name("ProductDropdown")
+                        .BindTo(ViewBag.ProductList as SelectList)
+                        .DataTextField("Text")
+                        .DataValueField("Value")
+                        .Filter("contains")
+                        .OptionLabel("--Select product--")
+                        .HtmlAttributes(new { style = "width:100%", required = "required", validationMessage = "Please select a product" })
+                        .Events(e =>
+                        {
+                            //e.Change("onChangeProduct");
+                        })
+        )
+        @Html.ValidationMessage("ProductDropdown", "", new { @class = "text-Danger" })
+    </div>
+}
+@if (ViewBag.IsQuantityEdit == false)
+ {
+    <div class="editor-label"><label for="RequestQuantity">Quantity</label></div>
+    <div class="editor-field">
+        @Html.EditorFor(model => model.RequestQuantity, new { htmlattributes = new { @class = "k-textbox", min="1", required = "required", validationMessage = "Please enter quantity" } })
+        @Html.ValidationMessageFor(model => model.RequestQuantity, "", new { @class = "text-Danger" })
+    </div>
+    <div class="editor-label"><label for="Price">Price</label></div>
+    <div class="editor-field">
+        @Html.EditorFor(model => model.Price, new { htmlattributes = new { @class = "k-textbox", type = "number", min = "0" } })
+        @Html.ValidationMessageFor(model => model.Price, "", new { @class = "text-Danger" })
+    </div>
+    <div class="editor-label"><label for="Comment">Comment</label></div>
+    <div class="editor-field">
+        @Html.EditorFor(model => model.Comment, new { htmlattributes = new { @class = "k-textbox" } })
+        @Html.ValidationMessageFor(model => model.Comment, "", new { @class = "text-Danger" })
+    </div>
+ }
+else
+{
+    <div class="editor-field">
+        <span class="text-info">Current Quantity : @Model.RequestQuantity Piece/s</span>
+    </div>
+    <div class="editor-label"><label for="ChangeQty">Quantity</label></div>
+    <div class="editor-field">
+        <input type="number" placeholder="Quantity" data-qty="@Model.RequestQuantity" min="@ViewBag.RemainingQty" id="Quantity" name="Quantity" class="k-textbox" />
+        @Html.ValidationMessage("Quantity", new { @class = "text-Danger" })
+    </div>
+}
+

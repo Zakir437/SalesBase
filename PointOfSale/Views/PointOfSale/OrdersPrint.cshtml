@@ -1,0 +1,78 @@
+﻿@{
+    ViewBag.Title = "OrdersPrint";
+    Layout = "~/Views/Shared/_LayoutPrintPage.cshtml";
+    PointOfSale.Models.PointOfSale_DBEntities db = new PointOfSale.Models.PointOfSale_DBEntities();
+}
+<section class="content-header" style="text-align:center;">
+    <div class="row">
+        <div class="col-xs-3"></div>
+        <div class="col-xs-6">
+            <h3>Orders</h3>
+            <p>Cost-POS</p>
+        </div>
+        <div class="col-xs-3">
+            <button class="btn btn-default pull-right" id="btnPrint" style="margin-top:10px;"><i class="fa fa-print"></i>Print</button>
+        </div>
+    </div>
+    <hr />
+</section>
+<div class="row">
+    <div class="col-xs-offset-6 col-xs-6 text-left">
+        <p>
+            Generate By : @HttpContext.Current.Request.Cookies["CookieUserInfo"].Values["UserName"]<br>
+            Generate Date : @DateTime.Now.ToString("MMM dd yyyy hh:mm:ss tt") <br>
+            @if (ViewBag.Days == 1)
+            {
+                <span>Generate parameter : Today</span>
+            }
+            else if (ViewBag.Days == 7)
+            {
+                <span>Generate parameter : Last 7 Days</span>
+            }
+            else if (ViewBag.Days == 30)
+            {
+                <span>Generate parameter : Last 30 Days</span>
+            }
+            else if (ViewBag.From != null)
+            {
+                <span>From : @Convert.ToDateTime(ViewBag.From).ToString("MMM dd yyyy")</span><br />
+                <span>To : @Convert.ToDateTime(ViewBag.To).ToString("MMM dd yyyy")</span>
+            }
+            else
+            {
+                <span>Generate parameter : All</span>
+            }
+        </p>
+    </div>
+    <div class="col-xs-offset-6 col-xs-6 text-right">
+        @if (ViewBag.CustomerId > 0)
+        {
+            long customerId = Convert.ToInt64(ViewBag.CustomerId);
+            var customer = db.Customers.FirstOrDefault(a => a.CustomerId == customerId);
+            <p>
+                Name : @customer.Name<br />
+                Phone : @customer.Phone <br />
+                E-mail : @customer.Email <br />
+            </p>
+        }
+    </div>
+</div>
+<div class="row">
+    <div class="col-xs-12">
+        <div id="divOrderList"></div>
+    </div>
+</div>
+<script>
+    var passdata = '';
+    $(document).ready(function () {
+        passdata = { from: "@ViewBag.From", to: "@ViewBag.To", customerId: "@ViewBag.CustomerId", days : "@ViewBag.Days" };
+        $("#divOrderList").empty();
+        $("#divOrderList").append('<div class="loading_partial"></div>');
+        $("#divOrderList").load('@Url.Action("OrderListForPrint", "PointOfSale")', passdata);
+    });
+    $("#btnPrint").click(function () {
+        $("#btnPrint").hide();
+        window.print();
+        $("#btnPrint").show();
+    });
+</script>

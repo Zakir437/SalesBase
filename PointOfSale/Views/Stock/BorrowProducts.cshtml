@@ -1,0 +1,274 @@
+﻿@{
+    ViewBag.Title = "BorrowProducts";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+}
+<link href="~/Content/numpad.css" rel="stylesheet" />
+<link href="~/Content/myCss.css" rel="stylesheet" />
+<link href="~/Content/Hover/hover.css" rel="stylesheet" />
+<style>
+    .k-input {
+        height: 26px !important;
+    }
+</style>
+@*<section class="content-header">
+    <ol class="breadcrumb">
+        <li><a href="/Inventory/Dashboard"><i class="fa fa-dashboard"></i> Inventory</a></li>
+        <li class="active">Borrowed Products</li>
+    </ol>
+</section>*@
+<section class="content">
+    <div class="row">
+        <div class="col-md-12">
+            
+        </div>
+    </div>
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4 class="uppercase">Borrow Products</h4>
+            </div>
+        </div>
+        <div class="panel-heading">
+            <ul class="nav nav-tabs StatusTab">
+                <li class="active" id="liForAll"><a href="#tab1liForAll" data-toggle="tab">All</a></li>
+                <li id="liForPaid"><a href="#tab2PaidList" data-toggle="tab">Paid</a></li>
+                <li id="liForUnpaid"><a href="#tab3UnpaidList" data-toggle="tab">Unpaid</a></li>
+            </ul>
+        </div>
+        <div class="panel-body" style="border:none!important;">
+            <div class="row" style="margin:0px 0px 5px 0px;">
+                <div style="width:48%!important;" class="pull-left">
+                    @(Html.Kendo().MultiSelect()
+                            .Name("associateMultiSelect")
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .Placeholder("Type associate name...")
+                            .AutoBind(false)
+                            .Events(e => e.Change("onChangeAssociate"))
+                            .HtmlAttributes(new { style = "width: 100%;" })
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("GetAssociateList", "Configuration").Data("additionalDataForAssociate"); ;
+                                })
+                                .ServerFiltering(false);
+                            }))
+                    <span class="k-icon k-i-search" style="margin-top:-25px;float:right;margin-right:10px; position:relative">&nbsp;</span>
+                </div>
+                <div style="width:48%!important;" class="pull-right">
+                    <button class="btn btn-primary btnPrint pull-right"><i class="fa fa-print"></i></button>
+                    @*@(Html.Kendo().DropDownList()
+                             .Name("shopDropDown")
+                             .BindTo(ViewBag.ShopList as SelectList)
+                             .DataTextField("Text")
+                             .DataValueField("Value")
+                             .OptionLabel("Select associate...")
+                             .HtmlAttributes(new { style = "width:100%;" })
+                             .Events(e => { e.Change("onChangeAssociate"); })
+                    )*@
+                </div>
+            </div>
+            <div class="tab-content">
+                <div class="tab-pane fade in active" id="tab1liForAll">
+                   
+                    <div id="div_All"></div>
+                </div>
+                <div id="tab2PaidList" class="tab-pane fade">
+                    <div id="div_Paid"></div>
+                </div>
+                <div id="tab3UnpaidList">
+                    <div id="div_Unpaid"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<div id="divBorrowPayWin"></div>
+<script id="temp_win_delete_entry" type="text/x-kendo-template">
+    <div style="padding:1em;">
+        <p style="font-size: 14px; padding: 10px"> #=msg# </p>
+        <div style="text-align: right;">
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btn_delete_Entry_noty_ok"><span class="k-icon k-update"></span>OK</button>
+            <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btn_delete_Entry_noty_cancel"><span class="k-icon k-cancel"></span>Cancel</button>
+        </div>
+    </div>
+</script>
+<script>
+    var tab = 0, status = 0, id = 0, selectedId = "";
+    $(document).ready(function () {
+        $("#liForInventory").addClass('active');
+        $("#liForBorrowProducts").addClass('active');
+
+        $(".btnPrint").prop('disabled', true);
+
+        $("#liForAll").click();
+    });
+    function clearBeforeClick()
+    {
+        $("#div_All").empty();
+        $("#div_Paid").empty();
+        $("#div_Unpaid").empty();
+
+        $(".btnPrint").prop('disabled', true);
+        $('#associateMultiSelect').data('kendoMultiSelect').value("");
+        $('#associateMultiSelect').data('kendoMultiSelect').dataSource.read();
+    }
+    $("#liForAll").click(function () {
+        tab = 1;
+        status = 1;
+        clearBeforeClick();
+        passdata = { status: status };
+        $("#div_All").append('<div class="loading_partial"></div>');
+        $("#div_All").load('@Url.Action("BorrowProductList", "Stock")', passdata);
+
+    });
+    $("#liForPaid").click(function () {
+        tab = 2; status = 2;
+        clearBeforeClick();
+        passdata = { status: status };
+        $("#div_Paid").append('<div class="loading_partial"></div>');
+        $("#div_Paid").load('@Url.Action("BorrowProductList", "Stock")', passdata);
+    });
+
+    $("#liForUnpaid").click(function () {
+        tab = 3; status = 3;
+        clearBeforeClick();
+        passdata = { status: status};
+        $("#div_Unpaid").append('<div class="loading_partial"></div>');
+        $("#div_Unpaid").load('@Url.Action("BorrowProductList", "Stock")', passdata);
+    });
+
+    $("#div_All, #div_Paid, #div_Unpaid").on('click', ".btnBorrowPaid", function () {
+        id = $(this).data("id");
+        $("#divBorrowPayWin").empty();
+        $("#divBorrowPayWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 767,
+            height: 280,
+            title: 'Pay',
+            resizable: false
+        });
+        var borrowPayWin = $("#divBorrowPayWin").data("kendoWindow");
+        borrowPayWin.refresh({
+            url: '@Url.Action("ImportPay", "Stock")',
+            type: "POST",
+            data: { orderTransId: id }
+        });
+        borrowPayWin.center().open().maximize();
+    });
+
+
+    $("#divBorrowPayWin").on('click', "#btnPay", function () {
+        var payments = [];
+        $(".amountInTransaction").each(function () {
+            if ($(this).data("id") == 1) {
+                payments.push({
+                    PaymentTypeId: 1,
+                    PaymentBodyId: parseInt($(this).data("cashbodyid")),
+                    AmountPaid: cashAmount
+                });
+            }
+            else if ($(this).data("id") == 2) {
+                payments.push({
+                    PaymentTypeId: 2,
+                    PaymentBodyId: parseInt($(this).data("cardbodyid")),
+                    AmountPaid: parseFloat($(this).data("cardamount")),
+                    TransactionNo: $(this).data("transactionno")
+                });
+            }
+            else if ($(this).data("id") == 3) {
+                payments.push({
+                    PaymentTypeId: 3,
+                    PaymentBodyId: parseInt($(this).data("bkashbodyid")),
+                    AmountPaid: parseFloat($(this).data("bkashamount")),
+                    TransactionNo: $(this).data("transactionno")
+                });
+            }
+            else if ($(this).data("id") == 4) {
+                payments.push({
+                    PaymentTypeId: 6,
+                    PaymentBodyId: parseInt($(this).data("checkbodyid")),
+                    AmountPaid: parseFloat($(this).data("checkamount")),
+                    TransactionNo: $(this).data("transactionno")
+                });
+            }
+        });
+
+        $.ajax({
+            url: '@Url.Action("ImportSave","Stock")',
+            type: 'POST',
+            data: JSON.stringify({ UserId: userId, CreditAmount: creditAmount, Payments: payments, orderTransId : id }),
+            contentType: 'application/json',
+            success: function (data) {
+                if (data == "success") {
+                    window.location.reload();
+                }
+                else {
+                    alert("Import error...");
+                }
+            }
+        });
+    });
+
+
+    function additionalItemsGetProducts()
+    {
+
+    }
+
+    function onChangeProduct()
+    {
+
+    }
+
+    function onChangeAssociate()
+    {
+        selectedId = "";
+        selectedId = this.value();
+        if (selectedId.length > 0)
+        {
+            $(".btnPrint").prop('disabled', false);
+        }
+        else
+        {
+            $(".btnPrint").prop('disabled', true);
+        }
+        $("#div_All").empty();
+        $("#div_Paid").empty();
+        $("#div_Unpaid").empty();
+        if (tab == 1)
+        {
+            $("#div_All").append('<div class="loading_partial"></div>');
+            $("#div_All").load('@Url.Action("BorrowProductList", "Stock")?status=' + status + '&associateIds=' + selectedId);
+        }
+        else if (tab == 2)
+        {
+             $("#div_Paid").append('<div class="loading_partial"></div>');
+             $("#div_Paid").load('@Url.Action("BorrowProductList", "Stock")?status=' + status + '&associateIds=' + selectedId);
+        }
+        else if (tab == 3)
+        {
+            $("#div_Unpaid").append('<div class="loading_partial"></div>');
+            $("#div_Unpaid").load('@Url.Action("BorrowProductList", "Stock")?status=' + status + '&associateIds=' + selectedId);
+        }
+    }
+
+    function additionalDataForAssociate()
+    {
+        return {
+            status: status
+        }
+    }
+
+    $(".btnPrint").click(function () {
+        var data = "associateIds=" + selectedId + "?status=" + status;
+        window.open('@Url.Action("BorrowProductsPrint", "Stock")?q=' + getDataEncrypted(data), '_blank');
+    });
+
+
+</script>
+

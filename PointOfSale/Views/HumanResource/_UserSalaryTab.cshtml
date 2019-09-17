@@ -1,0 +1,90 @@
+﻿<div class="col-sm-12" style="padding-left:0px!important;padding-right:0px!important;">
+    <div class="panel with-nav-tabs panel-default">
+        <div class="panel-heading">
+            <ul class="nav nav-tabs">
+                @if (ViewBag.isDisplay == false && (ViewBag.SalaryId == 0 || ViewBag.SalaryId == null))
+                 {
+                    <li class="active"><a href="#tab1Pck" data-toggle="tab">Assign Salary</a></li>
+                 }
+                else
+                {
+                    <li class="active"><a href="#tab1Pck" data-toggle="tab">Salary Info</a></li>
+                }
+                <li id="liUserSalaryPaid"><a href="#tab2PaidSalary" data-toggle="tab">All Paid Salary List</a></li>
+                <li id="liUserSalaryDue"><a href="#tab3DueSalary" data-toggle="tab">All Due Salary List</a></li>
+                @*<li id="liUserLoanList"><a href="#tab4LoanList" data-toggle="tab">Loan</a></li>*@
+                @*<li id="liBankAcList"><a href="#tab4BankAcList" data-toggle="tab">Bank Account</a></li>*@
+            </ul>
+        </div>
+        <div class="panel-body" style="border:none!important;">
+            <div class="tab-content">
+                <div class="tab-pane fade in active" id="tab1Pck"><div class="loading_half"></div></div>
+                <div class="tab-pane fade" id="tab2PaidSalary"><div class="loading_half"></div></div>
+                <div class="tab-pane fade" id="tab3DueSalary"><div class="loading_half"></div></div>
+                <div class="tab-pane fade" id="tab4LoanList"><div class="loading_half"></div></div>
+                <div class="tab-pane fade" id="tab4BankAcList"><div class="loading_half"></div></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        var isDisplay = '@(ViewBag.isDisplay)';
+        if ('@(ViewBag.SalaryId)' > 0)
+        {
+             if (isDisplay == "True")
+             {
+                 $("#tab1Pck").append('<div class="loading_half"></div>');
+                 $("#tab1Pck").load('@Url.Action("ShowSalary", "HumanResource")?salaryId=' + '@ViewBag.SalaryId');
+             }
+            else
+             {
+                 $("#tab1Pck").append('<div class="loading_half"></div>');
+                 $("#tab1Pck").load('@Url.Action("AssignSalary", "HumanResource")?userId=' + '@ViewBag.UserId' + '&salaryId=' +  '@ViewBag.SalaryId' );
+             }
+         }
+         else
+         {
+            if(isDisplay=="True")
+            {
+                $("#tab1Pck").empty();
+                $("#tab1Pck").append('<div class="control-label col-md-3 col-sm-3"> No salary assigned</div>');
+            }
+            else
+            {
+                $("#tab1Pck").append('<div class="loading_half"></div>');
+                $("#tab1Pck").load('@Url.Action("AssignSalary", "HumanResource")?userId=' + '@ViewBag.UserId' + '&salaryId=' +  '@ViewBag.SalaryId');
+            }
+         }
+
+    });
+
+    $("#tab1Pck").on('click', '#btnAssignRefresh', function ()
+    {
+        $("#tab1Pck").empty();
+        $("#tab1Pck").load('@Url.Action("AssignSalary", "HumanResource")?userId=' + '@ViewBag.UserId' + '&salaryId=' +  '@ViewBag.SalaryId');
+    });
+
+    $("#liUserSalaryPaid").click(function () {
+        var sendData = { UserId: '@(ViewBag.UserId)', isPaidList: true };
+        $("#tab2PaidSalary").empty();
+        $("#tab2PaidSalary").append('<div class="loading_half"></div>');
+        $("#tab2PaidSalary").load('@Url.Action("SalaryList", "HumanResource")', sendData);
+    });
+    $("#liUserSalaryDue").click(function () {
+        var sendData = { UserId: '@(ViewBag.UserId)', isPaidList: false };
+        $("#tab3DueSalary").empty();
+        $("#tab3DueSalary").append('<div class="loading_half"></div>');
+        $("#tab3DueSalary").load('@Url.Action("SalaryList", "HumanResource")', sendData);
+    });
+
+    //function clearBeforeClick() {
+    //    $("#div_All_LeaveType").empty();
+    //    $("#div_Active_LeaveType").empty();
+    //    $("#div_Inactive_LeaveType").empty();
+    //    $("#div_Deleted_LeaveType").empty();
+    //}
+
+
+
+</script>

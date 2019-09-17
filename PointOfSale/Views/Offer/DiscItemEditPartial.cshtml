@@ -1,0 +1,169 @@
+﻿@model PointOfSale.ModelViews.Offer.OfferModelView
+<style>
+    input[type=number] {
+        width: 100%;
+        max-width: 100%;
+    }
+    .radio {
+        display: inline;
+    }
+
+    .checkbox {
+        margin-top: 5px;
+        margin-bottom: 5px;
+    }
+</style>
+<div class="editor-label"><label>Validity</label></div>
+<div class="editor-field" style="margin-top:7px;">
+    <div class="radio" style="margin-right: 10px;">
+        <label><input type="radio" name="optradio" id="checkDate" checked >Date</label>
+    </div>
+    <div class="radio">
+        <label><input type="radio" name="optradio" id="checkDays">Days</label>
+    </div>
+</div>
+<div id="divDateValidity">
+    <div class="editor-label"><label for="StartDate">Start Date</label></div>
+    <div class="editor-field">
+        @(Html.Kendo().DateTimePickerFor(m => m.StartDate)
+                            .Format("MMMM dd yyyy hh:mm tt")
+                            .Min(DateTime.Now)
+                            .Events(e => { e.Change("onEndChange"); })
+                            .Events(e => { e.Change("onStartChange"); })
+                            .HtmlAttributes(new { style = "width: 100%; max-width:100%", required = "required", @validationMessage = "Please enter valid date!" })
+        )
+        @Html.ValidationMessageFor(model => model.StartDate, "", new { @class = "text-Danger" })
+    </div>
+    <div class="editor-label"><label for="EndDate">End Date</label></div>
+    <div class="editor-field">
+        @(Html.Kendo().DateTimePickerFor(m => m.EndDate)
+                            .Format("MMMM dd yyyy hh:mm tt")
+                            .Min(DateTime.Now)
+                            .HtmlAttributes(new { style = "width: 100%; max-width:100%", required = "required", @validationMessage = "Please enter valid date!" })
+        )
+        @Html.ValidationMessageFor(model => model.EndDate, "", new { @class = "text-Danger" })
+    </div>
+</div>
+<div id="divDaysValidity" style="display:none">
+    <div class="editor-label"><label>Days</label></div>
+    <div class="editor-field">
+        <div style="width:49%" class="pull-left">
+            @Html.EditorFor(model => model.ValidityDays, new { htmlattributes = new { @class = "k-textbox", @style = "width:100%; max-width:100%", @min = 1, required = "required", @validationMessage = "Please enter validity days" } })
+            @Html.ValidationMessageFor(model => model.ValidityDays, "", new { @class = "text-Danger" })
+        </div>
+        <div style="width:49%" class="pull-right">
+            @(Html.Kendo().TimePickerFor(m => m.ValidityTime)
+                                .HtmlAttributes(new { style = "width: 100%; max-width:100%", required = "required", @validationMessage = "Please enter validity time" })
+            )
+            @Html.ValidationMessageFor(model => model.ValidityTime, "", new { @class = "text-Danger" })
+        </div>
+    </div>
+</div>
+<div class="editor-label"><label for="StartDate">Time Schedule</label></div>
+<div class="editor-field">
+    @(Html.Kendo().DropDownListFor(a => a.ScheduleId)
+        .DataTextField("Name")
+        .DataValueField("Id")
+        .DataSource(source =>
+        {
+            source.Read(read =>
+            {
+                read.Action("GetSchedule", "Configuration");
+            });
+        })
+        .OptionLabel("--Select time schedule--")
+        .HtmlAttributes(new { style = "width:100%" })
+    )
+</div>
+<div class="editor-field">
+    <div class="checkbox">
+        <label>@Html.CheckBoxFor(model => model.IsEditable) Is-Editable</label>
+    </div>
+</div>
+<div class="form-group">
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped" id="tblOfferItems">
+        <thead>
+            <tr>
+                <th width="20%">Name</th>
+                <th width="10%">Price</th>
+                <th width="62px">Free</th>
+                <th>Off(%)</th>
+                <th>Off(Tk)</th>
+                <th>Discount price</th>
+            </tr>
+            <tr>
+                <td>@Model.DiscItem.ProductName</td>
+                <td id="productPrice">@Model.DiscItem.Price</td>
+                <td>
+                    <div class="checkbox">
+                        <label><input type="checkbox" id="chkFree" onclick="calculateDiscount(2)" /> Free</label>
+                    </div>
+                </td>
+                <td>
+                    <input type="number" min="1" max="100" id="percentOff" name="percentOff" class="k-textbox" data-id="" onchange="changeHandler(this)" onclick="calculateDiscount(3)" onkeyup="calculateDiscount(3)" value="@Model.DiscItem.PercentageOff" required validationMessage="*" />
+                    <span class="field-validation-valid text-danger" data-valmsg-for="percentOff" data-valmsg-replace="true"></span>
+                </td>
+                <td>
+                    <input type="number" min="1" max="@Model.DiscItem.Price" id="amountOff" class="k-textbox" data-id="" name="amountOff" onclick="calculateDiscount(4)" onkeyup="calculateDiscount(4)" value="@Model.DiscItem.AmountOff" required validationMessage="*" />
+                    <span class="field-validation-valid text-danger" data-valmsg-for="amountOff" data-valmsg-replace="true"></span>
+                </td>
+                <td>
+                    <span id="discPrice">@Model.DiscItem.OfferPrice</span>
+                </td>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+<script>
+    $(document).ready(function () {
+       
+        $("#divDayValidity").hide();
+        $('#ValidityDays').prop('required', false);
+        $('#ValidityTime').prop('required', false);
+
+        start = $("#StartDate").data("kendoDateTimePicker");
+        end = $("#EndDate").data("kendoDateTimePicker");
+        start.max(end.value());
+        end.min(start.value());
+    });
+
+    $("#checkDate").change(function () {
+        if ($(this).is(":checked")) {
+            $("#divDateValidity").show();
+            $("#divDaysValidity").hide();
+
+            $('#ValidityDays').prop('required', false);
+            $('#ValidityTime').prop('required', false);
+
+            $("#StartDate").prop("disabled", false);
+            $("#EndDate").prop("disabled", false);
+
+            $("#ValidityDays").prop("disabled", true);
+            $("#ValidityTime").prop("disabled", true);
+
+            $("#ValidityDays").val("");
+            $("#ValidityTime").val("");
+        }
+    });
+
+    $("#checkDays").change(function () {
+        if ($(this).is(":checked")) {
+            $("#divDateValidity").hide();
+            $("#divDaysValidity").show();
+
+            $("#StartDate").prop("disabled", true);
+            $("#EndDate").prop("disabled", true);
+
+            $("#StartDate").val("");
+            $("#EndDate").val("");
+
+            $('#ValidityDays').prop('required', true);
+            $('#ValidityTime').prop('required', true);
+
+            $("#ValidityDays").prop("disabled", false);
+            $("#ValidityTime").prop("disabled", false);
+        }
+    });
+</script>

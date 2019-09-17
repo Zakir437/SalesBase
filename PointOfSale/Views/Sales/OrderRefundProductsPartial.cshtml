@@ -1,0 +1,19 @@
+﻿<div class="panel panel-info">
+    <div class="panel-heading" style="padding-bottom:46px;">
+        <div class="pull-left">
+            <h4 class="uppercase">Sales Order Information <i class="fa fa-chevron-right"></i> Refund Products</h4>
+        </div>
+        <div class="pull-right">
+            <a class="btn btn-default" id="btnBackInRefundProduct"><i class="fa fa-arrow-left"></i> Back</a>
+        </div>
+    </div>
+    <div class="panel-body">
+        <div id="divRefundProdctList"></div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#divRefundProdctList").append('<div class="tiny_loading"></div>');
+        $("#divRefundProdctList").load('@Url.Action("OrderRefundProductList", "Sales")?orderId=' + '@ViewBag.OrderId');
+    })
+</script>

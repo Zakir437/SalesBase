@@ -1,0 +1,65 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewPosOrder>
+@using PointOfSale.Helpers
+@using System.Globalization
+@{
+    var count = 0;
+}
+@if (Model.Any())
+{
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Info</th>
+            <th>Order No.</th>
+            <th>PO Voucher</th>
+            <th>Salesman</th>
+            <th>Total Price</th>
+            <th>Date</th>
+            <th style="width:131px"></th>
+        </tr>
+        @foreach (var list in Model)
+        {
+            count++;
+            <tr>
+                <td>@count. </td>
+                <td>
+                    @if (list.Discount > 0)
+                    {
+                        <img src="~/Images/DiscountImage/272498.png" />
+                    }
+                    @if (list.IsItemRefund == true)
+                    {
+                        <i class="fa fa-reply" aria-hidden="true"></i>
+                    }
+                </td>
+                <td>
+                    <a href="@Html.EncodedParam("OrderDetails", "Sales", new { OrderId = list.OrderId}, null)">@list.OrderNumber</a>
+                </td>
+                <td>@list.POVoucher</td>
+                <td>@list.CreatedBy</td>
+                <td>@list.InvoiceAmount.ToString("C", new CultureInfo("bn-BD"))</td>
+                @*<td>@list.DueAmount.Value.ToString("C", new CultureInfo("bn-BD"))</td>*@
+                <td>@Convert.ToDateTime(list.OrderDate).ToString("MMM dd yyyy hh:mm:ss tt")</td>
+                <td>
+                    <a class="btn btn-primary" href="@Html.EncodedParam("OrderDetails", "Sales", new { OrderId = list.OrderId}, null)" data-toggle="tooltip" title="View Details"><i class="fa fa-align-justify" aria-hidden="true"></i></a>
+                    <button class="btn btn-warning btnPaymentTransaction" data-id="@list.OrderId" data-toggle="tooltip" title="View payment transaction"><i class="fa fa-dollar" aria-hidden="true"></i></button>
+                    @if (list.NewOrderId > 0)
+                     {
+                        <a class="btn btn-info" href="@Html.EncodedParam("OrderDetails", "Sales", new { OrderId = list.OrderId, isViewLastOrder = true}, null)" data-toggle="tooltip" title="View Last Order"><i class="fa fa-eye" aria-hidden="true"></i></a>
+                        @*<button class="btn btn-info" data-id="@list.OrderId" data-toggle="tooltip" title="Order Archive"><i class="fa fa-reply" aria-hidden="true"></i></button>*@
+                     }
+                </td>
+            </tr>
+         }
+    </table>
+}
+else
+{
+    <h4>There is no record to display</h4>
+}
+<script>
+    $('[data-toggle="tooltip"]').tooltip();
+</script>
+
+
+

@@ -1,0 +1,59 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin-bottom:4%;margin-top:2%;">
+    <div id="divPaymentTypeCreate"></div>
+    <div class="k-edit-buttons k-state-default" style="margin-left:30px;">
+        @if (ViewBag.PaymentTypeId > 0)
+        {
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnPaymentTypeCreate"><span class="k-icon k-update"></span>Update</button>
+        }
+        else
+        {
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnPaymentTypeCreate"><span class="k-icon k-update"></span>Add</button>
+        }
+        <button type="reset" class="k-button k-button-icontext k-grid-update" id="btnRefresh"><span class="k-icon k-i-refresh"></span>Refresh</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#divPaymentTypeCreate").empty();
+        $("#divPaymentTypeCreate").load('@Url.Action("PaymentTypeCreatePartial", "Configuration")?id=' + '@ViewBag.PaymentTypeId');
+    });
+    $("#btnRefresh").click(function () {
+        $("#divPaymentTypeCreate").empty();
+        $("#divPaymentTypeCreate").load('@Url.Action("PaymentTypeCreatePartial", "Configuration")?id=' + '@ViewBag.PaymentTypeId');
+    });
+    $("#btnCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+
+    var validation = $("#divPaymentTypeCreate").kendoValidator({
+    }).data("kendoValidator");
+    $("#btnPaymentTypeCreate").click(function () {
+        if (validation.validate()) {
+            var sendData = {
+                PaymentTypeId: $("#PaymentTypeId").val(),
+                Name: $("#Name").val(),
+                Type: $("#Type").val(),
+                CreatedBy: userId
+            }
+            $.ajax({
+                url: '@Url.Action("PaymentTypeSave", "Configuration")',
+                type: "POST",
+                data: sendData,
+                success: function (data) {
+                    if (data = "success") {
+                        $("#divPaymentTypeWindow").data("kendoWindow").close();
+                        $("#divPaymentList").empty();
+                        $("#divPaymentList").append('<div class="loading_partial"></div>');
+                        $("#divPaymentList").load('@Url.Action("PaymentTypeList", "Configuration")');
+                    }
+                    else {
+                        alert("Payment Type Save Error");
+                    }
+                }
+            });
+        }
+    });
+</script>
+

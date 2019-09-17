@@ -1,0 +1,44 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewStockImport>
+@using System.Globalization;
+@{
+    var count = 0;
+}
+@if (Model.Any() == true)
+{
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Invoice Name</th>
+            <th>Total Cost</th>
+            <th>Date</th>
+        </tr>
+        @foreach (var list in Model)
+        {
+            count++;
+            <tr>
+                <td>@count. </td>
+                <td>
+                    @list.RefferenceNo <br />
+                    @if(list.IsCredit == true)
+                    {
+                      <span>Due(@list.DueAmount.ToString("C", new CultureInfo("bn-BD")))</span>
+                    }
+                </td>
+                <td>@list.TotalCost.ToString("C", new CultureInfo("bn-BD"))</td>
+                <td>@Convert.ToDateTime(list.Date).ToString("MMM dd yyyy")</td>
+            </tr>
+        }
+    </table>
+}
+else
+{
+    <h3>There is no record to display</h3>
+}
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    })
+</script>
+
+
+

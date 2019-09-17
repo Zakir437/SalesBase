@@ -1,0 +1,76 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewPaymentMethod>
+@using PointOfSale.Helpers
+@{
+    var count = 0;
+}
+@if (Model.Any())
+ {
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Name</th>
+            <th>Created By</th>
+            <th>Created Date</th>
+            <th>Updated By</th>
+            <th>Updated Date</th>
+            <th></th>
+        </tr>
+        @foreach (var list in Model)
+        {
+            count++;
+            <tr>
+                <td>@count. </td>
+                <td>
+                    <a href="@Html.EncodedParam("PaymentMethodDetails", "Accounting", new { methodId = list.Id}, null)" data-toggle="tooltip" title="View Details">@list.MethodName</a>
+                </td>
+                <td>@list.CreatedBy</td>
+                <td>@Convert.ToDateTime(list.CreatedDate).ToString("MMM dd yyyy")</td>
+                <td>@list.UpdatedBy</td>
+                <td>
+                @if (list.UpdatedDate != null)
+                 {
+                    <span>@Convert.ToDateTime(list.UpdatedDate).ToString("MMM dd yyyy")</span>
+                 }
+                else
+                {
+                    <span>Not yet updated</span>
+                }
+                </td>
+                <td>
+                    <button class="btn btn-primary btnPaymentMethodEdit" data-id="@list.Id" data-toggle="tooltip" title="Edit payment method Info"><i class="fa fa-pencil-square-o"></i></button>
+                    @if (list.Status == true)
+                     {
+                        <button type="button" data-id="@list.Id" data-isactive="0" class="btn btn-danger inactivatePaymentMethod" data-toggle="tooltip" title="Inactivate payment method">
+                            <i class="fa fa-stop" aria-hidden="true"></i>
+                        </button>
+                     }
+                    else
+                    {
+                        <button type="button" data-id="@list.Id" data-isactive="1" class="btn btn-success activatePaymentMethod" data-toggle="tooltip" title="Activate payment method">
+                            <i class="fa fa-play" aria-hidden="true"></i>
+                        </button>
+                         if (list.Type == 1)
+                         {
+                            <span data-id="@list.Id" style="cursor:pointer;" data-toggle="tooltip" title="Delete Payment Method" class="btn btn-danger btnMethodDelete">
+                                <i class="fa fa-trash"></i>
+                            </span>
+                         }
+                    }
+                    <button class="btn btn-success btnIn" data-id="@list.Id" data-toggle="tooltip" title="In Default"><i class="fa fa-arrow-down"></i></button>
+                    <button class="btn btn-success btnOut" data-id="@list.Id" data-toggle="tooltip" title="Out Default"><i class="fa fa-arrow-up"></i></button>
+                </td>
+            </tr>
+         }
+    </table>
+ }
+else
+{
+    <h4>There is no record to display</h4>
+}
+
+<script>
+    $('[data-toggle="tooltip"]').tooltip();
+</script>
+
+
+

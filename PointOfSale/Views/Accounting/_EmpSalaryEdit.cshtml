@@ -1,0 +1,34 @@
+﻿@model PointOfSale.ModelViews.Accounting.EmpSalaryXmlModelView
+@Html.HiddenFor(a => a.Id)
+@Html.HiddenFor(a => a.UpdatedBy)
+<style>
+    input{
+        width:100%;
+        max-width:100%;
+    }
+</style>
+<div class="editor-label"><label for="TotalAmount">Salary</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.TotalAmount, new { htmlattributes = new { @class = "k-textbox form-control" } })
+    @Html.ValidationMessageFor(model => model.TotalAmount, "", new { @class = "text-Danger" })
+</div>
+<div class="editor-label"><label for="TotalPresent">Total Present</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.TotalPresent, new { htmlattributes = new { @class = "k-textbox form-control" } })
+    @Html.ValidationMessageFor(model => model.TotalPresent, "", new { @class = "text-Danger" })
+</div>
+<div class="editor-label"><label for="TotalPaidLeave">Total Paid Leave</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.TotalPaidLeave, new { htmlattributes = new { @class = "k-textbox form-control" } })
+    @Html.ValidationMessageFor(model => model.TotalPaidLeave, "", new { @class = "text-Danger" })
+</div>
+<div class="editor-label"><label for="TotalWorkingDays">Total Workingday</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.TotalWorkingDays, new { htmlattributes = new { @class = "k-textbox form-control" } })
+    @Html.ValidationMessageFor(model => model.TotalWorkingDays, "", new { @class = "text-Danger" })
+</div>
+<div class="editor-label"><label for="TotalHoliday">Total Holiday</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.TotalHoliday, new { htmlattributes = new { @class = "k-textbox form-control" } })
+    @Html.ValidationMessageFor(model => model.TotalHoliday, "", new { @class = "text-Danger" })
+</div>

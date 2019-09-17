@@ -1,0 +1,358 @@
+﻿@{
+    ViewBag.Title = "LeaveType";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+}
+@*<section class="content-header">
+    <h1>
+        LeaveType
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-user"></i> HR</a></li>
+        <li class="active">LeaveType</li>
+    </ol>
+</section>*@
+<section class="content">
+    @*<div class="row">
+        <div class="col-md-12">
+            @Html.ActionLink("User", "AllUserLists", "HumanResource", routeValues: null, htmlAttributes: new { @class = "btn btn-default" })
+            @Html.ActionLink("Attendance", "Attendance", "Attendance", routeValues: null, htmlAttributes: new { @class = "btn btn-default" })
+            @Html.ActionLink("Working Schedule", "WorkingSchedule", "HumanResource", routeValues: null, htmlAttributes: new { @class = "btn btn-default" })
+            @Html.ActionLink("Holiday", "Holiday", "Holiday", routeValues: null, htmlAttributes: new { @class = "btn btn-default" })
+            @Html.ActionLink("Leave Type", "LeaveType", "Configuration", routeValues: null, htmlAttributes: new { @class = "btn btn-default selected" })
+            @Html.ActionLink("System-User", "User", "Configuration", routeValues: null, htmlAttributes: new { @class = "btn btn-default" })
+            <br />
+            <button class="btn btn-default" id="btnCreateLeaveTypeWin" style="margin:15px 0 5px 0"><i class="fa fa-plus-circle" aria-hidden="true"></i> Add</button>
+        </div>
+    </div>*@
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4 class="uppercase">LeaveType</h4>
+            </div>
+            <div class="pull-right">
+                @*<a class="btn btn-default" href="/Configuration/Product"><i class="fa fa-arrow-left"></i> Back</a>*@
+            </div>
+        </div>
+        <div class="panel-body">
+            <button class="btn btn-success" id="btnCreateLeaveTypeWin" style="margin:5px 0 5px 0"><i class="fa fa-plus-circle" aria-hidden="true"></i> Add</button>
+            <div class="row" style="padding-top:5px;">
+                <div class="col-md-12">
+                    <div class="panel with-nav-tabs panel-default">
+                        <div class="panel-heading">
+                            <ul class="nav nav-tabs StatusTab">
+                                <li class="active" id="liForAll"><a href="#tab1liForAll" data-toggle="tab">All</a></li>
+                                <li id="liForActive"><a href="#tab2liForActive" data-toggle="tab">Active</a></li>
+                                <li id="liForInactive"><a href="#tab3InactiveList" data-toggle="tab">Inactive</a></li>
+                                <li id="liForDelete"><a href="#tab4DeleteList" data-toggle="tab">Deleted</a></li>
+                            </ul>
+                        </div>
+                        <div class="panel-body" style="border:none!important;" id="div_for_panel_body">
+                            <div class="row" style="margin-bottom:10px" id="div_filter_Options">
+                                <div class="col-sm-9" style="">
+                                    @*<span class="autocomplete-wrapper">
+                                    <input class="text-field" id="textForSearch" name="country" placeholder="Type employee name or designation" type="text" autocomplete="off">
+                                    <span class="k-icon k-i-search" style="margin-top:-25px;margin-right:10px;float:right;">&nbsp;</span>
+                                </span>*@
+                                    @*@(Html.Kendo().MultiSelect()
+                                              .AutoClose(false)
+                                              .Name("UserLists")
+                                              .DataTextField("UserName")
+                                              .DataValueField("UserId")
+                                              .Placeholder("Type user name")
+                                              .AutoBind(false)
+                                              .Events(e => e.Change("onUserChange"))
+                                              .DataSource(source =>
+                                              {
+                                                  source.Read(read =>
+                                                  {
+                                                      read.Action("GetAllUsersList", "Configuration");
+                                                  })
+                                                  .ServerFiltering(false);
+                                              })
+                                )*@
+                                </div>
+                                <div class="col-sm-3">
+                                    @*@(Html.Kendo().DropDownList().Name("SiteId")
+                                .OptionLabel("All")
+                                .BindTo(ViewBag.AllSiteList as SelectList)
+                                .Events(e => e.Change("onSitenameChange"))
+                                .HtmlAttributes(new { style = "width:100%" })
+                                )*@
+                                </div>
+                            </div>
+                            <div class="tab-content">
+                                <div class="tab-pane fade in active" id="tab1liForAll">
+                                    <div id="div_All_LeaveType"></div>
+                                </div>
+                                <div id="tab2liForActive" class="tab-pane fade">
+                                    <div id="div_Active_LeaveType"></div>
+                                </div>
+                                <div id="tab3InactiveList">
+                                    <div id="div_Inactive_LeaveType"></div>
+                                </div>
+                                <div id="tab4DeleteList">
+                                    <div id="div_Deleted_LeaveType"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<div id="divLeaveTypeWin"></div>
+<script id="temp_win_delete_entry" type="text/x-kendo-template">
+    <div style="padding:1em;">
+        <p style="font-size: 14px; padding: 10px"> #=msg# </p>
+        <div style="text-align: right;">
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btn_delete_Entry_noty_ok"><span class="k-icon k-update"></span>OK</button>
+            <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btn_delete_Entry_noty_cancel"><span class="k-icon k-cancel"></span>Cancel</button>
+        </div>
+    </div>
+</script>
+<script>
+    var showCount = 0, tab = 1, id = 0;
+    var passdata = '';
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+        $("#liForAll").click();
+
+        $("#liForHr").addClass('active');
+        $("#liForHRConfig").addClass('active');
+        $("#liForLeaveType").addClass('active');
+
+    });
+    function clearBeforeClick()
+    {
+        $("#div_All_LeaveType").empty();
+        $("#div_Active_LeaveType").empty();
+        $("#div_Inactive_LeaveType").empty();
+        $("#div_Deleted_LeaveType").empty();
+    }
+    $("#liForAll").click(function () {
+        tab = 1;
+        clearBeforeClick();
+        $("#div_All_LeaveType").append('<div class="loading_partial"></div>');
+        $("#div_All_LeaveType").load('@Url.Action("LeaveTypeLists", "Configuration")');
+    });
+
+    $("#liForActive").click(function () {
+        clearBeforeClick();
+        tab = 2; status = 1;
+        passdata = { status: status };
+        $("#div_Active_LeaveType").append('<div class="loading_partial"></div>');
+        $("#div_Active_LeaveType").load('@Url.Action("LeaveTypeLists", "Configuration")', passdata);
+    });
+
+    $("#liForInactive").click(function () {
+        clearBeforeClick();
+        tab = 3; status = 0;
+        passdata = { status: status};
+        $("#div_Inactive_LeaveType").append('<div class="loading_partial"></div>');
+        $("#div_Inactive_LeaveType").load('@Url.Action("LeaveTypeLists", "Configuration")', passdata);
+    });
+    $("#liForDelete").click(function () {
+        clearBeforeClick();
+        tab = 4; status = 2;
+        passdata = { status: status };
+        $("#div_Deleted_LeaveType").append('<div class="loading_partial"></div>');
+        $("#div_Deleted_LeaveType").load('@Url.Action("LeaveTypeLists", "Configuration")', passdata);
+    });
+
+    $("#btnCreateLeaveTypeWin").click(function () {
+        $("#divLeaveTypeWin").empty();
+        $("#divLeaveTypeWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 638,
+            height: 177,
+            title: 'Leave Type',
+            resizable: false
+        });
+        var leaveTypeWin = $("#divLeaveTypeWin").data("kendoWindow");
+        leaveTypeWin.refresh('@Url.Action("LeaveTypeCreate", "Configuration")');
+        leaveTypeWin.center().open();
+    });
+
+     $("#div_All_LeaveType, #div_Active_LeaveType, #div_Inactive_LeaveType, #div_Deleted_LeaveType").on("click", ".btnLeaveEdit", function () {
+        id = $(this).data("id");
+        $("#divLeaveTypeWin").empty();
+        $("#divLeaveTypeWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 638,
+            height: 177,
+            title: 'Leave Type',
+            resizable: false
+        });
+        var leaveTypeWin = $("#divLeaveTypeWin").data("kendoWindow");
+        leaveTypeWin.refresh('@Url.Action("LeaveTypeCreate", "Configuration")?id=' + id);
+        leaveTypeWin.center().open();
+    });
+
+    $("#div_All_LeaveType, #div_Active_LeaveType, #div_Inactive_LeaveType, #div_Deleted_LeaveType").on("click", ".activateUser,.inactivateUser", function () {
+        id = $(this).data("id");
+        status = $(this).data("isactive");
+        var sendData = {
+            id: id,
+            status: status
+        };
+        $.ajax({
+            url: '@Url.Action("ChangeLeaveTypeStatus", "Configuration")',
+            method: 'POST',
+            data: sendData,
+            success: function (res) {
+                if (res == "success") {
+                    if (tab == 1)
+                    {
+                        $("#div_All_LeaveType").empty();
+                        $("#div_All_LeaveType").append('<div class="loading_partial"></div>');
+                        $("#div_All_LeaveType").load('@Url.Action("LeaveTypeLists", "Configuration")');
+                    }
+                    else if (tab == 2)
+                    {
+                        status = 1;
+                        passdata = { status: status };
+                        $("#div_Active_LeaveType").append('<div class="loading_partial"></div>');
+                        $("#div_Active_LeaveType").load('@Url.Action("LeaveTypeLists", "Configuration")', passdata);
+                    }
+                    else if (tab == 3)
+                    {
+                        status = 0;
+                        passdata = { status: status};
+                        $("#div_Inactive_LeaveType").append('<div class="loading_partial"></div>');
+                        $("#div_Inactive_LeaveType").load('@Url.Action("LeaveTypeLists", "Configuration")', passdata);
+                    }
+                    else if (tab == 4)
+                    {
+                        status = 2;
+                        passdata = { status: status };
+                        $("#div_Deleted_LeaveType").append('<div class="loading_partial"></div>');
+                        $("#div_Deleted_LeaveType").load('@Url.Action("LeaveTypeLists", "Configuration")', passdata);
+                    }
+                }
+                else {
+                    alert("Error Status Update");
+                }
+            }
+        });
+    });
+
+
+    $("#div_All_LeaveType, #div_Active_LeaveType, #div_Inactive_LeaveType, #div_Deleted_LeaveType").on("click", ".inactivateLeaveType,.activateLeaveType", function () {
+        id = $(this).data("id");
+        status = $(this).data("isactive");
+        var sendData = {
+            id: id,
+            status: status
+        };
+        $.ajax({
+            url: '@Url.Action("ChangeLeaveTypeStatus", "Configuration")',
+            method: 'POST',
+            data: sendData,
+            success: function (res) {
+                if (res == "success") {
+                    if (tab == 1)
+                    {
+                        $("#div_All_LeaveType").empty();
+                        $("#div_All_LeaveType").append('<div class="loading_partial"></div>');
+                        $("#div_All_LeaveType").load('@Url.Action("LeaveTypeLists", "Configuration")');
+                    }
+                    else if (tab == 2)
+                    {
+                        status = 1;
+                        passdata = { status: status };
+                        $("#div_Active_LeaveType").append('<div class="loading_partial"></div>');
+                        $("#div_Active_LeaveType").load('@Url.Action("LeaveTypeLists", "Configuration")', passdata);
+                    }
+                    else if (tab == 3)
+                    {
+                        status = 0;
+                        passdata = { status: status};
+                        $("#div_Inactive_LeaveType").append('<div class="loading_partial"></div>');
+                        $("#div_Inactive_LeaveType").load('@Url.Action("LeaveTypeLists", "Configuration")', passdata);
+                    }
+                    else if (tab == 4)
+                    {
+                        status = 2;
+                        passdata = { status: status };
+                        $("#div_Deleted_LeaveType").append('<div class="loading_partial"></div>');
+                        $("#div_Deleted_LeaveType").load('@Url.Action("LeaveTypeLists", "Configuration")', passdata);
+                    }
+                }
+                else {
+                    alert("Error Status Update");
+                }
+            }
+        });
+    });
+
+    $("#div_All_LeaveType, #div_Active_LeaveType, #div_Inactive_LeaveType").on('click', ".btnDeleteLeaveType", function () {
+        id = $(this).data("id");
+        var kendoWindow = $("<div />").kendoWindow({
+            actions: ["Close"],
+            title: "Alert",
+            resizable: false,
+            width: "30%",
+            modal: true
+        });
+
+        msg = "Are you sure want to delete this type?";
+        var template = kendo.template($("#temp_win_delete_entry").html());
+        kendoWindow.data("kendoWindow").content(template).center().open();
+
+        kendoWindow.find("#btn_delete_Entry_noty_cancel").click(function () {
+            kendoWindow.data("kendoWindow").close();
+            document.documentElement.style.overflow = "auto";
+        }).end();
+        kendoWindow.find("#btn_delete_Entry_noty_ok").click(function () {
+            kendoWindow.data("kendoWindow").close();
+            document.documentElement.style.overflow = "auto";
+            deleteType(id);
+        }).end();
+        document.documentElement.style.overflow = "hidden";
+    });
+
+    function deleteType(id) {
+        $.ajax({
+            url: '@Url.Action("ChangeLeaveTypeStatus", "Configuration")',
+            type: 'Post',
+            data: { id: id, status : 2 },
+            success: function (data) {
+                if (data === "success") {
+                    if (tab == 1)
+                    {
+                        $("#div_All_LeaveType").empty();
+                        $("#div_All_LeaveType").append('<div class="loading_partial"></div>');
+                        $("#div_All_LeaveType").load('@Url.Action("LeaveTypeLists", "Configuration")');
+                    }
+                    else if (tab == 2)
+                    {
+                        status = 1;
+                        passdata = { status: status };
+                        $("#div_Active_LeaveType").append('<div class="loading_partial"></div>');
+                        $("#div_Active_LeaveType").load('@Url.Action("LeaveTypeLists", "Configuration")', passdata);
+                    }
+                    else if (tab == 3)
+                    {
+                        status = 0;
+                        passdata = { status: status};
+                        $("#div_Inactive_LeaveType").append('<div class="loading_partial"></div>');
+                        $("#div_Inactive_LeaveType").load('@Url.Action("LeaveTypeLists", "Configuration")', passdata);
+                    }
+                }
+                else
+                {
+                    alert("Delete Error");
+                }
+            }
+        });
+    }
+
+
+</script>

@@ -1,0 +1,81 @@
+﻿@model PointOfSale.Models.ViewProduct
+@Html.HiddenFor(a => a.ProductId)
+@Html.HiddenFor(a => a.ProductName)
+@Html.HiddenFor(a => a.IsPriceChangeAllow)
+@Html.HiddenFor(a => a.IsUnitWise)
+@Html.HiddenFor(a => a.IsDiscountAllow)
+@Html.HiddenFor(a => a.IsRefundAllow)
+@Html.HiddenFor(a => a.IsUniqueItem)
+<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" style="margin:2%;">
+    <div id="divSerialNumber"></div>
+    <div class="text-center k-edit-buttons k-state-default">
+        <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnSerialConfirm"><span class="k-icon k-update"></span>Confirm</button>
+        <button type="reset" class="k-button k-button-icontext k-grid-update" id="btnSerialRefresh"><span class="k-icon k-i-refresh"></span>Refresh</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnSerialCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        //if purchase order price exist
+        itemPrice = @Model.Price;
+        if (poPrice > 0)
+        {
+            itemPrice = poPrice;
+        }
+
+        if (@Model.OfferPrice > 0)
+        {
+            itemPrice = @Model.OfferPrice;
+        }
+
+        $("#divSerialNumber").append('<div class="tiny_loading"></div>');
+        $("#divSerialNumber").load('@Url.Action("SerialNumberPartial", "PointOfSale")');
+    });
+    $("#btnSerialRefresh").click(function () {
+        $("#divSerialNumber").empty();
+        $("#divSerialNumber").append('<div class="tiny_loading"></div>');
+        $("#divSerialNumber").load('@Url.Action("SerialNumberPartial", "PointOfSale")');
+    });
+    $("#btnSerialCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+    var serialValidation = $("#divSerialNumber").kendoValidator({
+
+    }).data("kendoValidator");
+    $("#btnSerialConfirm").click(function () {
+        if (serialValidation.validate())
+        {
+            count++;
+            $(this).prop('disabled', true);
+            serialNumber = $("#SerialNumber").val();
+            $("#emptyCartPlaceholder").hide();
+            $("#cartListContainer").prepend('<li class="singleCartItem" id="cartItem_' + count + '" data-poitemid="' + poItemId + '" data-id="' + count + '" data-productid="' + '@Model.ProductId' + '" data-productid="' + @Model.ProductId +'" data-distributeid="' + @Model.DistributeId + '" data-isunitwise="' + $("#IsUnitWise").val() + '" data-isrefundallow="' + $("#IsRefundAllow").val().toLowerCase() + '" data-productname="' + $("#ProductName").val() + '" data-isuniqueitem="' + $("#IsUniqueItem").val().toLowerCase() +'">' +
+                '<span id="pro_' + '@Model.ProductId' + '" data-id="' + count + '" style="font-size:13px; font-weight:bold;">' +
+                $("#ProductName").val() +
+                '</span> | ' +
+                '<span id="divPerItemPrice_' + count + '">' +
+                //'<span id="perItemPrice_' + count + '" data-ispricechangeallow="' + $("#IsPriceChangeAllow").val().toLowerCase() + '" data-isdiscountallow="' + $("#IsDiscountAllow").val().toLowerCase() + '">' + itemPrice + '</span >Tk | ' +
+                (@Model.OfferPrice  > 0 ? '<span id="divPerItemTotalPrice_' + count + '" >' + @Model.Price +'</span> TK |' : '') +
+                '<span id="price_' + count + '" data-id="' + count + '" data-price = "' + @Model.Price + '" class="subitemPrice"data-isdiscountallow="' + $("#IsDiscountAllow").val().toLowerCase() + '">' + itemPrice + '</span>' +
+                'Tk' +
+                '</span>' +
+                '<span class="pull-right" >' +
+                '<input type="checkbox" class="checkBorrow" id="checkBorrow_' + count + '" data-id="' + count + '" data-associateid="0" />' +
+                ' <span class="fa fa-times-circle itemCancel" data-id="' + count + '"></span>' +
+                '</span> ' +
+                '<br />' +
+                (@Model.OfferPrice > 0 ? '<div id= "discPerItem_' + count + '">Discount(<span id="discount_' + count + '" data-disctype="0" data-offertype="2" data-offerid="'+ @Model.OfferId +'">' + @Model.PercentageOff + '</span> %) | -<span id="discPerUnit_' + count + '">' + @Model.AmountOff + '</span> Tk <span class="discPerItemCancel" data-id ="' + count + '">' +
+                                                //'<span class="fa fa-times-circle"></span>' +
+                '</span></div>' : '<span id="discPerItem_' + count + '"></span>') +
+                '<span id="discCouponPerItem_' + count + '"></span>' +
+                ('@Model.IsAfterSaleService' == 'True' ? '@Model.ServiceName' + '(<span id="service_' + count + '" data-servicename="' + '@Model.ServiceName' + '" data-servicetypeid = "' + '@Model.ServiceTypeId' +'">' + '@Model.ServiceDays' + '</span>days)' : "") +
+                 '<span class="pull-right">' + ('@Model.IsPointBased' == 'True' ? 'Points(<span id="points_' + count + '">' + '@Model.Points' + '</span>)' : "") + '</span>' +
+                 '<br>' +
+                'Serial Number : <span id="serialNumber_' + count + '" data-points="' +  '@Model.Points' + '">' + serialNumber + '</span>' +
+                '</li>');
+            calculateCartAmount();
+            poPrice = 0;
+            $("#divProductSN").data("kendoWindow").close();
+        }
+    });
+</script>

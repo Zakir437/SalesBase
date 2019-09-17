@@ -1,0 +1,25 @@
+﻿@model PointOfSale.ModelViews.Accounting.MultipleMonthModelView
+@Html.HiddenFor(a => a.UserId)
+@Html.HiddenFor(a => a.CreatedBy)
+<div class="editor-label"><label for="MonthDate">Select Month</label></div>
+<div class="editor-field">
+    @(Html.Kendo().DropDownListFor(a => a.MonthDate)
+                     .BindTo(ViewBag.List as SelectList)
+                     .DataTextField("Text")
+                     .DataValueField("Value")
+                     .OptionLabel("--Select a month--")
+                     .HtmlAttributes(new { style = "width:100%" })
+                     .Events(e => { e.Change("onChangeMonth"); })
+    )
+    @Html.ValidationMessageFor(model => model.MonthDate, "", new { @class = "text-Danger" })
+</div>
+<div id="divDateSelect" style="display:none">
+    <div class="editor-label"><label for="SelectedDate">Select Date</label></div>
+    <div class="editor-field">
+        @(Html.Kendo().DatePickerFor(a => a.SelectedDate)
+          .HtmlAttributes(new { style = "width: 100%; max-width:100%"  })
+        )
+        @Html.ValidationMessageFor(model => model.SelectedDate, "", new { @class = "text-Danger" })
+    </div>
+</div>
+

@@ -1,0 +1,101 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin-bottom:4%;margin-top:2%;">
+    <div id="divDebitLimitForm"></div>
+    <div class="k-edit-buttons k-state-default" style="margin-left:30px;">
+        @if (ViewBag.DebitLimitId > 0)
+         {
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnDebitLimitCreate"><span class="k-icon k-update"></span>Update</button>
+         }
+        else
+        {
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnDebitLimitCreate"><span class="k-icon k-update"></span>Create</button>
+        }
+        <button type="reset" class="k-button k-button-icontext k-grid-update" id="btnDebitLimitRefresh"><span class="k-icon k-i-refresh"></span>Refresh</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnDebitLimitCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#divDebitLimitForm").append('<div class="tiny_loading"></div>');
+        $("#divDebitLimitForm").load('@Url.Action("DebitLimitPartial", "Configuration")?debitLimitId=' + '@ViewBag.DebitLimitId' + '&isAmountEdit=' + '@ViewBag.IsAmountEdit');
+    });
+    $("#btnDebitLimitRefresh").click(function () {
+        $("#divDebitLimitForm").empty();
+        $("#divDebitLimitForm").append('<div class="tiny_loading"></div>');
+        $("#divDebitLimitForm").load('@Url.Action("DebitLimitPartial", "Configuration")?debitLimitId=' + '@ViewBag.DebitLimitId'+ '&isAmountEdit=' + '@ViewBag.IsAmountEdit');
+    });
+
+    $("#btnDebitLimitCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+
+    var validation = $("#divDebitLimitForm").kendoValidator({
+    }).data("kendoValidator");
+
+    $("#btnDebitLimitCreate").click(function () {
+
+        if (validation.validate())
+        {
+            $(this).prop('disabled', true);
+
+            var sendData = {
+                Id: $("#Id").val(),
+                CustomerId: '@ViewBag.CustomerId',
+                Limit: $.trim($("#Limit").val()),
+                Amount: $.trim($("#Amount").val()),
+                IsAmountEdit : '@ViewBag.IsAmountEdit',
+                CreatedBy : userId
+            }
+            $.ajax({
+                url: '@Url.Action("DebitLimitSave", "Configuration")',
+                type: "POST",
+                data: sendData,
+                success: function (result) {
+                    $("#divDebitLimitWin").data("kendoWindow").close();
+                    if (result == "success") {
+                        if (tab == 1)
+                        {
+                            $("#div_All").empty();
+                            $("#div_All").append('<div class="loading_partial"></div>');
+                            $("#div_All").load('@Url.Action("CustomerList", "Configuration")');
+                        }
+                        else if (tab == 2)
+                        {
+                            status = 1;
+                            passdata = { status: status };
+                            $("#div_Active").append('<div class="loading_partial"></div>');
+                            $("#div_Active").load('@Url.Action("CustomerList", "Configuration")', passdata);
+                        }
+                        else if (tab == 3)
+                        {
+                            status = 0;
+                            passdata = { status: status};
+                            $("#div_Inactive").append('<div class="loading_partial"></div>');
+                            $("#div_Inactive").load('@Url.Action("CustomerList", "Configuration")', passdata);
+                        }
+                        else if (tab == 4)
+                        {
+                            status = 2;
+                            passdata = { status: status };
+                            $("#div_Deleted").append('<div class="loading_partial"></div>');
+                            $("#div_Deleted").load('@Url.Action("CustomerList", "Configuration")', passdata);
+                        }
+                        else if (tab == 5)
+                        {
+                            status = 3;
+                            passdata = { status: status };
+                            $("#div_Debit").append('<div class="loading_partial"></div>');
+                            $("#div_Debit").load('@Url.Action("CustomerList", "Configuration")', passdata);
+                        }
+                    }
+                    else {
+                        alert("Save Error");
+                    }
+                }
+            });
+        }
+    });
+</script>
+
+
+
+

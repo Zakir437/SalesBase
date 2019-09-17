@@ -1,0 +1,63 @@
+﻿@model PointOfSale.Models.ViewWImport
+@using System.Globalization
+@{
+    ViewBag.Title = "WImportTransaction";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+}
+<section class="content">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4 class="uppercase">Warehouse Import Transaction</h4>
+            </div>
+            <div class="pull-right">
+                <a class="btn btn-default" href="/Inventory/WImportHistory"><i class="fa fa-arrow-left"></i> Back</a>
+            </div>
+        </div>
+        <div class="panel-body">
+            <h2>
+                @Model.VoucherNo 
+            </h2>
+            <div class="row">
+                <div class="col-xs-6">
+                    <dl class="dl-horizontal">
+                        <dt>Supplier</dt>
+                        <dd>@Model.SupplierName</dd>
+                        <dt>WO Voucher</dt>
+                        <dd>@Model.WOVoucher</dd>
+                        <dt>Import By</dt>
+                        <dd>@Model.ImportBy</dd>
+                        <dt>Date</dt>
+                        <dd>@Convert.ToDateTime(Model.ImportDate).ToString("MMMM dd yyyy hh:mm:ss tt")</dd>
+                    </dl>
+                </div>
+                <div class="col-xs-6">
+                    <dl class="dl-horizontal">
+                        <dt>Total Amount</dt>
+                        <dd>@Model.TotalAmount.ToString("C", new CultureInfo("bn-BD"))</dd>
+                        <dt>Paid Amount</dt>
+                        <dd>@Model.PaidAmount.ToString("C", new CultureInfo("bn-BD"))</dd>
+                        <dt>Due Amount</dt>
+                        <dd>@Model.DueAmount.ToString("C", new CultureInfo("bn-BD"))</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+        <hr />
+        <div class="panel-body">
+            <div id="divImpTransList"></div>
+        </div>
+    </div>
+</section>
+<script>
+    $(document).ready(function () {
+        $("#liForInventory").addClass('active');
+        $("#liForWarehouse").addClass('active');
+
+        $("#divImpTransList").append('<div class="loading_partial"></div>');
+        $("#divImpTransList").load('/Inventory/WImpTransList?importId=' + '@Model.Id');
+    });
+</script>
+
+
+

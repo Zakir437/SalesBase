@@ -1,0 +1,122 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin-bottom:4%;margin-top:2%;">
+    <div id="divManualAtt"></div>
+    <div class="k-edit-buttons k-state-default" style="margin-left:18px;">
+        <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnManualAttSave"><span class="k-icon k-update"></span>Save</button>
+        <button type="reset" class="k-button k-button-icontext k-grid-update" id="btnManualAttRefresh"><span class="k-icon k-i-refresh"></span>Refresh</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnManualAttCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script id="temp_win_delete_entry" type="text/x-kendo-template">
+    <div style="padding:1em;">
+        <p style="font-size: 14px; padding: 10px"> #=msg# </p>
+        <div style="text-align: right;">
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btn_delete_Entry_noty_ok"><span class="k-icon k-update"></span>OK</button>
+            <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btn_delete_Entry_noty_cancel"><span class="k-icon k-cancel"></span>Cancel</button>
+        </div>
+    </div>
+</script>
+<div id="divAttConfirmWin"></div>
+<script>
+    var id = 0;
+    $(document).ready(function () {
+        $("#divManualAtt").append('<div class="tiny_loading"></div>');
+        $("#divManualAtt").load('@Url.Action("_ManuallyAtt", "Attendance")');
+    });
+    $("#btnManualAttRefresh").click(function () {
+        $("#divManualAtt").empty();
+        $("#divManualAtt").load('@Url.Action("_ManuallyAtt", "Attendance")');
+    });
+    $("#btnManualAttCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+
+    function additionInfo() {
+        return {
+            text: $("#User").val()
+        }
+    }
+    function onSelectUser(e)
+    {
+        var selectedOne = this.dataItem(e.item.index());
+        id = selectedOne.Value;
+    }
+    var validation = $("#divManualAtt").kendoValidator().data("kendoValidator");
+    $("#btnManualAttSave").click(function () {
+        if (validation.validate())
+        {
+            var sendData = {
+                UserId: id,
+                DateTime: $("#DateTime").val(),
+                CreatedBy: userId
+            }
+            $.ajax({
+                url: '@Url.Action("ManuallyAttSave","Attendance")',
+                type: 'POST',
+                data: { model: sendData, check: true },
+                success: function (data)
+                {
+                    if (data == "success")
+                    {
+                         $("#divManuallyAttWin").data("kendoWindow").close();
+                         $("#divUserList").empty();
+                         $("#divUserList").append('<div class="loading_partial"></div>');
+                         $("#divUserList").load('@Url.Action("UserLists", "Attendance")');
+                         alert("Attendance save successfully.");
+                    }
+                    else if (data == "error")
+                    {
+                        alert("Attendance save unsuccessfull.");
+                    }
+                    else if(data > 0)
+                    {
+                        $("#divAttConfirmWin").empty();
+                         $("#divAttConfirmWin").kendoWindow({
+                                actions: ["Close"],
+                                draggable: false,
+                                modal: true,
+                                visible: false,
+                                width: 638,
+                                height: 181,
+                                title: 'Alert',
+                                resizable: false
+                            });
+                        var attConfirmWin = $("#divAttConfirmWin").data("kendoWindow");
+                        attConfirmWin.refresh('@Url.Action("AttConfirm", "Attendance")?id=' + data);
+                        attConfirmWin.center().open();
+
+
+                    }
+                }
+            });
+        };
+    });
+    $("#divAttConfirmWin").on('click', '#btnAttConfirmOk', function () {
+         var sendData = {
+                UserId: id,
+                DateTime: $("#DateTime").val(),
+                CreatedBy: userId
+            }
+            $.ajax({
+                url: '@Url.Action("ManuallyAttSave","Attendance")',
+                type: 'POST',
+                data: { model: sendData, check: false },
+                success: function (data)
+                {
+                    $("#divAttConfirmWin").data("kendoWindow").close();
+                    $("#divManuallyAttWin").data("kendoWindow").close();
+                    if (data == "success")
+                    {
+                         $("#divUserList").empty();
+                         $("#divUserList").append('<div class="loading_partial"></div>');
+                         $("#divUserList").load('@Url.Action("UserLists", "Attendance")');
+                         alert("Attendance save successfully.");
+                    }
+                    else
+                    {
+                        alert("Attendance save unsuccessfull.");
+                    }
+                }
+            });
+    });
+
+</script>

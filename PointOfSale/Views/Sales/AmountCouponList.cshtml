@@ -1,0 +1,116 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewAmountCoupon>
+@{
+    var count = 0;
+}
+@if (Model.Any() == true)
+{
+    <table class="table table-bordered table-hover table-responsive">
+        <tr>
+            <th>SL.</th>
+            <th>Coupon</th>
+            <th>Amount</th>
+            <th>Is Percentile</th>
+            <th>Is Infinite</th>
+            <th>From Price</th>
+            <th>To Price</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>CreatedBy</th>
+            <th>Created Date</th>
+            <th></th>
+        </tr>
+        @foreach (var list in Model)
+        {
+            count++;
+            <tr>
+                <td>@count. </td>
+                <td>@list.CouponCode</td>
+                <td>@list.Amount</td>
+                <td>
+                    @if(list.IsPercentile == true)
+                    {
+                        <span>Yes</span>
+                    }
+                    else
+                    {
+                        <span>No</span>
+                    }
+                </td>
+                <td>
+                    @if(list.IsInifinte == true)
+                    {
+                        <span>Yes</span>
+                    }
+                    else
+                    {
+                        <span>No</span>
+                    }
+                </td>
+                <td>@list.FromPrice</td>
+                <td>
+                    @if(list.IsInifinte == true)
+                    {
+                        <span>Infinite</span>
+                    }
+                    else
+                    {
+                        <span>@list.ToPrice</span>
+                    }
+                </td>
+                <td>@Convert.ToDateTime(list.StartDate).ToString("MMM dd,yyyy hh:mm:ss tt")</td>
+                <td>@Convert.ToDateTime(list.EndDate).ToString("MMM dd,yyyy hh:mm:ss tt")</td>
+                <td>@list.CreatedBy</td>
+                <td>@Convert.ToDateTime(list.CreatedDate).ToString("MMM dd,yyyy")</td>
+                @*<td>@list.UpdatedBy</td>
+                    <td>
+                        @if (list.UpdatedDate != null)
+                        {
+                            @Convert.ToDateTime(list.UpdatedDate).ToString("MMM dd,yyyy")
+                        }
+                        else
+                        {
+                            <span>not yet updated</span>
+                        }
+                    </td>*@
+                <td>
+                    <button class="btn btn-primary btnEdit" data-id="@list.Id" data-toggle="tooltip" title="Edit Coupon Information"><i class="fa fa-pencil-square-o"></i></button>
+                    @*@if (list.Status == true)
+                        {
+                            <button type="button" data-id="@list.Id" data-isactive="0" class="btn btn-danger inactivateSchedule" data-toggle="tooltip" title="Inactivate Schedule">
+                                <i class="fa fa-stop" aria-hidden="true"></i>
+                            </button>
+                        }
+                        else
+                        {
+                            <button type="button" data-id="@list.Id" data-isactive="1" class="btn btn-success activateSchedule" data-toggle="tooltip" title="Activate Schedule">
+                                <i class="fa fa-play" aria-hidden="true"></i>
+                            </button>
+                        }
+                        @if (@list.Status == false)
+                        {
+                            <span data-id="@list.Id" style="cursor:pointer;" data-toggle="tooltip" title="Delete Schedule" class="btn btn-danger btnScheduleDelete">
+                                <i class="fa fa-trash"></i>
+                            </span>
+                        }*@
+                </td>
+            </tr>
+        }
+    </table>
+}
+else
+{
+    <h4>There is no record to display</h4>
+}
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    })
+</script>
+
+
+
+
+
+
+
+

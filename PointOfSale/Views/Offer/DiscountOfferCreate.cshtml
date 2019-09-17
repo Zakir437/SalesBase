@@ -1,0 +1,623 @@
+﻿@model PointOfSale.ModelViews.Offer.OfferModelView
+@Html.HiddenFor(a => a.IsDateValidity)
+@{
+    ViewBag.Title = "DiscountOfferCreate";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+}
+<style>
+    input[type=number] {
+        width: 100%;
+        max-width: 100%;
+        padding-left: 8px;
+    }
+    .radio {
+        display: inline;
+    }
+    .checkbox {
+        margin-top: 5px;
+        margin-bottom: 5px;
+    }
+</style>
+<section class="content">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4>Discount Offer</h4>
+            </div>
+            <div class="pull-right">
+                <a class="btn btn-default" href="/Offer/DiscountOffer"><i class="fa fa-arrow-left"></i> Back</a>
+            </div>
+        </div>
+        <div class="panel-body" id="divOfferCreateForm">
+            <div class="col-sm-12 row">
+                <div class="form-horizontal form-widgets col-sm-8">
+                    <div class="form-group">
+                        @Html.Label("Validity", htmlAttributes: new { @class = "control-label col-md-3 col-sm-5 col-xs-12" })
+                        <div class="col-md-6 col-sm-7 col-xs-8" style="margin-top:7px;">
+                            <div class="radio" style="margin-right: 10px;">
+                                <label><input type="radio" name="optradio" id="dateValidity" checked>Date</label>
+                            </div>
+                            <div class="radio">
+                                <label><input type="radio" name="optradio" id="daysValidity">Days</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="divDateValidity">
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.StartDate, "Star Date", htmlAttributes: new { @class = "control-label col-md-3 col-sm-5 col-xs-12" })
+                            <div class="col-md-6 col-sm-7 col-xs-8">
+                                @(Html.Kendo().DateTimePickerFor(m => m.StartDate)
+                                        .Format("MMMM dd yyyy hh:mm tt")
+                                        .Min(DateTime.Now)
+                                        .Events(e => { e.Change("onEndChange"); })
+                                        .Events(e => { e.Change("onStartChange"); })
+                                        .HtmlAttributes(new { style = "width: 100%; max-width:100%", required = "required", @validationMessage = "Please enter valid date!" })
+                                )
+                                @Html.ValidationMessageFor(model => model.StartDate, "", new { @class = "text-Danger" })
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.EndDate, "End Date", htmlAttributes: new { @class = "control-label col-md-3 col-sm-5 col-xs-12" })
+                            <div class="col-md-6 col-sm-7 col-xs-8">
+                                @(Html.Kendo().DateTimePickerFor(m => m.EndDate)
+                                        .Format("MMMM dd yyyy hh:mm tt")
+                                        .Min(DateTime.Now)
+                                        .HtmlAttributes(new { style = "width: 100%; max-width:100%", required = "required", @validationMessage = "Please enter valid date!" })
+                                )
+                                @Html.ValidationMessageFor(model => model.EndDate, "", new { @class = "text-Danger" })
+                            </div>
+                        </div>
+                    </div>
+                    <div id="divDayValidity">
+                        <div class="form-group">
+                            @Html.Label("Days", htmlAttributes: new { @class = "control-label col-md-3 col-sm-5 col-xs-12" })
+                            <div class="col-md-6 col-sm-7 col-xs-8">
+                                <div style="width:49%" class="pull-left">
+                                    @Html.EditorFor(model => model.ValidityDays, new { htmlattributes = new { @class = "k-textbox", @style = "width:100%; max-width:100%", @min = 1, required = "required", @validationMessage = "Please enter validity days" } })
+                                    @Html.ValidationMessageFor(model => model.ValidityDays, "", new { @class = "text-Danger" })
+                                </div>
+                                <div style="width:49%" class="pull-right">
+                                    @(Html.Kendo().TimePickerFor(m => m.ValidityTime)
+                                        .HtmlAttributes(new { style = "width: 100%; max-width:100%", required = "required", @validationMessage = "Please enter validity time" })
+                                    )
+                                    @Html.ValidationMessageFor(model => model.ValidityTime, "", new { @class = "text-Danger" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.ScheduleId, "Time Schedule", htmlAttributes: new { @class = "control-label col-md-3 col-sm-5 col-xs-12" })
+                        <div class="col-md-6 col-sm-7 col-xs-8">
+                            @(Html.Kendo().DropDownListFor(a => a.ScheduleId)
+                                 .DataTextField("Name")
+                                 .DataValueField("Id")
+                                 .DataSource(source =>
+                                 {
+                                     source.Read(read =>
+                                     {
+                                         read.Action("GetSchedule", "Configuration");
+                                     });
+                                 })
+                                 .OptionLabel("--Select time schedule--")
+                                 .HtmlAttributes(new { style = "width:100%" })
+                            )
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3 col-sm-5 col-xs-12"></div>
+                        <div class="col-md-6 col-sm-7 col-xs-8">
+                            <div class="checkbox">
+                                <label>@Html.CheckBoxFor(model => model.IsEditable) Is-Editable</label>
+                            </div>
+                            @*@Html.CheckBoxFor(model => model.IsEditable, new { htmlattributes = new { @class = "k-textbox" } }) <label for="IsEditable">Is-Editable</label>*@
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-4" id="divOfferInfo">
+                    <dl class="dl-horizontal">
+                       
+                    </dl>
+                </div>
+            </div>
+        </div>
+        <hr style="margin:0;" />
+        <div class="panel-body">
+            <div class="row" style="margin: 0;">
+                <div class="col-md-4">
+                    @(Html.Kendo().AutoComplete()
+                            .Name("productsAutoComplete")
+                            .Placeholder("Type product name...")
+                            .HtmlAttributes(new { style = "width:100%; max-width:100%" })
+                            .MinLength(3)
+                            .DataTextField("Text")
+                            .Filter("contains")
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("GetProductListForText", "Offer").Data("additionInfo");
+                                })
+                               .ServerFiltering(true);
+                            })
+                            .Events(e =>
+                            {
+                                e.Change("onChangeProduct").Select("onSelect");
+                            })
+                    )
+                    <span class="k-icon k-i-search" style="margin-top:-25px;float:right;margin-right:10px; position:relative">&nbsp;</span>
+                </div>
+                <div class="col-md-4">
+                    @(Html.Kendo().DropDownList()
+                        .Name("Category")
+                        .BindTo(ViewBag.CategoryList as SelectList)
+                        .DataTextField("Text")
+                        .DataValueField("Value")
+                        .OptionLabel("--Select One Category--")
+                        .HtmlAttributes(new { style = "width:100%" })
+                        .Events(e =>
+                        {
+                            e.Change("onChangeCategory");
+                        })
+                    )
+                </div>
+                <div class="col-md-4">
+                    @(Html.Kendo().DropDownList()
+                            .Name("SubCategory")
+                            .HtmlAttributes(new { style = "width:100%" })
+                            .OptionLabel("--Select Sub Category--")
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("GetSubCategories", "Offer")
+                                        .Data("filterCategory");
+                                })
+                                .ServerFiltering(true);
+                            })
+                            .Enable(false)
+                            .AutoBind(false)
+                            .CascadeFrom("Category")
+                            .Events(e =>
+                            {
+                                e.Change("onChangeSubCategory");
+                            })
+                    )
+                    <script>
+                        //filter sub category by category
+                        function filterCategory() {
+                            return {
+                                categoryId: $("#Category").val()
+                            };
+                        }
+                    </script>
+                </div>
+            </div>
+            <div class="row" style="margin:0; margin-top:5px;">
+                <div class="col-md-12">
+                    <div id="divOfferItemList">
+                        <table class="table table-bordered table-hover table-responsive table-condensed table-striped" id="tblOfferItems">
+                            <thead>
+                                <tr>
+                                    <th width="20%">Name</th>
+                                    <th width="15%">Category</th>
+                                    <th width="10%">Price</th>
+                                    <th width="62px">Free</th>
+                                    <th>Off(%)</th>
+                                    <th>Off(Tk)</th>
+                                    <th>Discount price</th>
+                                    <th></th>
+                                </tr>
+                                <tr id="emptyRow">
+                                    <td colspan="9">
+                                        <h4>There is no record to display</h4>
+                                    </td>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="text-right">
+                        <button class="btn btn-primary" id="btnOfferItemSave"><i class="fa fa-save"></i> Save</button>
+                        <button class="btn btn-info" id="btnOfferItemRefresh"><i class="fa fa-refresh"></i> Refresh</button>
+                        <a class="btn btn-warning" href="/Offer/DiscountOffer"> <i class="fa fa-times"></i> Cancel </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<script>
+    var productId = 0,rowId = 0, categoryId = 0,subCategoryId = 0, tagId = 0, selectedOne, productPrice = 0, count = 0, id = 0;
+    var actualPrice = 0, offerPrice = 0, discAmount = 0, discPercent = 0, discPrice = 0;
+    var discOff = 0, amountOff = 0;
+    var validation;
+    var fromPrice = 0, toPrice = 0;
+
+    var start, end;
+
+    $(document).ready(function () {
+        $("#btnOfferItemSave").prop('disabled', true);
+
+        $("#liForSalesMenu").addClass('active');
+        $("#liForOffers").addClass('active');
+
+        if ($("#IsEditable").attr('checked')) {
+            $("#IsEditable").val(true);
+        }
+        else {
+            $("#IsEditable").val(false);
+        }
+        $("#divDayValidity").hide();
+        $("#IsDateValidity").val(true);
+        $('#ValidityDays').prop('required', false);
+        $('#ValidityTime').prop('required', false);
+
+        validation = $("#divOfferCreateForm,#tblOfferItems").kendoValidator({
+            rules:
+            {
+                dateTimepicker: function (input) {
+                    if (input.is("[data-role=datetimepicker]")) {
+                        return input.data("kendoDateTimePicker").value();
+                    } else {
+                        return true;
+                    }
+                }
+            },
+            messages: {
+                remoteCouponCode: function (input) {
+                    return input.data('val-remote');
+                },
+                dateTimepicker: "Please enter valid date!"
+            }
+        }).data("kendoValidator");
+       
+        start = $("#StartDate").data("kendoDateTimePicker");
+        end = $("#EndDate").data("kendoDateTimePicker");
+        start.max(end.value());
+        end.min(start.value());
+    });
+
+    $("#btnOfferItemRefresh").click(function () {
+        location.reload();
+    });
+
+    //***************************Date validation ******************************
+    function onStartChange() {
+        var startDate = start.value(),
+            endDate = end.value();
+
+        if (startDate) {
+            startDate = new Date(startDate);
+            startDate.setDate(startDate.getDate());
+            end.min(startDate);
+        } else if (endDate) {
+            start.max(new Date(endDate));
+        } else {
+            endDate = new Date();
+            start.max(endDate);
+            end.min(endDate);
+        }
+    }
+
+    function onEndChange() {
+        var endDate = end.value(),
+            startDate = start.value();
+
+        if (endDate) {
+            endDate = new Date(endDate);
+            endDate.setDate(endDate.getDate());
+            start.max(endDate);
+        } else if (startDate) {
+            end.min(new Date(startDate));
+        } else {
+            endDate = new Date();
+            start.max(endDate);
+            end.min(endDate);
+        }
+    }
+
+
+    $("#dateValidity").click(function () {
+        $("#IsDateValidity").val(true);
+        $("#divDateValidity").show();
+        $("#divDayValidity").hide();
+
+        $("#StartDate").prop("disabled", false);
+        $("#EndDate").prop("disabled", false);
+
+        $("#ValidityDays").prop("disabled", true);
+        $("#ValidityTime").prop("disabled", true);
+
+        $("#ValidityDays").val("");
+        $("#ValidityTime").val("");
+    });
+    $("#daysValidity").click(function () {
+        $("#IsDateValidity").val(false);
+        $("#divDateValidity").hide();
+        $("#divDayValidity").show();
+
+        $("#StartDate").prop("disabled", true);
+        $("#EndDate").prop("disabled", true);
+
+        $("#StartDate").val("");
+        $("#EndDate").val("");
+
+        $("#ValidityDays").prop("disabled", false);
+        $("#ValidityTime").prop("disabled", false);
+
+        $('#ValidityDays').prop('required', true);
+        $('#ValidityTime').prop('required', true);
+
+    });
+    $('#IsEditable').change(function () {
+        if ($(this).is(":checked")) {
+            $('#IsEditable').val(true);
+        } else {
+            $('#IsEditable').val(false);
+        }
+    });
+
+    //cancel item
+    $("#divOfferItemList").on('click', '.btnCancelItem', function () {
+        id = parseInt($(this).data("id"));
+        $("#offerItem_" + id).remove();
+        calculateOffer();
+
+        var row_count = $('#tblOfferItems').find('tr').length;
+        if (row_count == 2) {
+            $("#emptyRow").show();
+            $("#btnOfferItemSave").prop('disabled', true);
+        }
+    });
+
+    //number input handler
+    function changeHandler(val) {
+        if (Number(val.value) > 100) {
+            val.value = 100;
+        }
+        else if (Number(val.value) <= 0)
+        {
+            val.value = 0;
+        }
+    }
+    //price input handler
+    function priceChangeHandler(val) {
+
+        if (Number(val.value) <= val.min) {
+            val.value = val.min;
+        }
+        else if (Number(val.value) >= val.max)
+        {
+            val.value = val.max;
+        }
+    }
+
+    //*******************Product Autocomplete**************
+    function onChangeProduct() {
+        $("#productsAutoComplete").data("kendoAutoComplete").value("");
+    }
+    function onSelect(e) {
+        selectedOne = this.dataItem(e.item.index());
+        rowId = selectedOne.Value;
+        $.ajax({
+            url: '/Offer/GetProduct',
+            type: "GET",
+            data: { rowId: rowId },
+            success: function (data) {
+                if (data === "error") {
+                    alert("Product not found");
+                    return 0;
+                }
+                else
+                {
+                    if ($("#emptyRow").length == 1) {
+                        $("#emptyRow").hide();
+                        $("#btnOfferItemSave").prop('disabled', false);
+                    }
+                    count++;
+                    $("#tblOfferItems").append('<tr id="offerItem_' + count + '" class="offerItem" data-id="' + count + '" data-productid="' + data.ProductId + '"  data-distributeid="' + data.DistributeId + '"  data-productname="' + data.ProductName + '" data-rowid="' + rowId +'">' +
+                        '<td>' + data.ProductName + '</td>' +
+                        '<td>' + data.Categorys + '</td>' +
+                        '<td>' +
+                        '<span id="productPrice_' + count + '">' + data.Price + '</span>' +
+                        '</td>' +
+                        '<td>' +
+                        '<label><input type="checkbox" data-id="' + count + '" class="chkFree" id="chkFree_' + count + '"  onclick="calculateDiscount(' + count + ',2)"/> Free</label>' +
+                        '</td>' +
+                        '<td>' +
+                        '<input type="number" min="1" max="100" id="percentOff_' + count + '" name="percentOff_' + count + '" class="percentOff" data-id="' + count + '" onchange="changeHandler(this)"  onclick="calculateDiscount(' + count + ',3)"  onkeyup="calculateDiscount(' + count + ',3)" value="0" required validationMessage="*"/>' +
+                        '<span class="field-validation-valid text-danger" data-valmsg-for="percentOff_' + count + '" data-valmsg-replace="true"></span>' +
+                        '</td>' +
+                        '<td>' +
+                        '<input type="number" min="1" max="' + data.Price + '" id="amountOff_' + count + '" class="amountOff" data-id="' + count + '" name="amountOff_' + count + '" onclick="calculateDiscount(' + count + ',4)"  onkeyup="calculateDiscount(' + count + ',4)" value="0" required validationMessage="*"/>' +
+                        '<span class="field-validation-valid text-danger" data-valmsg-for="amountOff_' + count + '" data-valmsg-replace="true"></span>' +
+                        '</td>' +
+                        '<td>' +
+                        '<span id="discPrice_' + count + '" data-id="' + count + '">' + data.Price + '</span>' +
+                        '</td>' +
+                        '<td>' +
+                        '<span class="btnCancelItem" data-id="' + count + '" data-toggle="tooltip" title="Cancel item"><i class="fa fa-times" aria-hidden="true" style="font-size:24px;cursor:pointer"></i></span>' +
+                        '</td>' +
+                        '</tr>');
+                 
+                    calculateOffer();
+                }
+            }
+        });
+    }
+    //product autocomplete additonal info
+    function additionInfo() {
+        var ids = [];
+        $(".offerItem").each(function () {
+            ids.push($(this).data("rowid"));
+        });
+        return {
+            ids: ids.join(","),
+            text: $("#productsAutoComplete").val(),
+            categoryId: categoryId,
+            subCategoryId: subCategoryId,
+            isDiscountOffer : true
+        }
+    }
+    //add product by category
+    function onChangeCategory()
+    {
+        selectedOne = "";
+        selectedOne = this.value();
+        subCategoryId = 0;
+        if (selectedOne.length > 0)
+        {
+            categoryId = parseInt(selectedOne);
+        }
+        else {
+            categoryId = 0;
+        }
+    }
+    //add product by subcategory
+    function onChangeSubCategory()
+    {
+        selectedOne = "";
+        selectedOne = this.value();
+        if (selectedOne.length > 0)
+        {
+            subCategoryId = parseInt(selectedOne);
+        }
+        else
+        {
+            subCategoryId = 0;
+        }
+    }
+
+    //calculate discount offer
+    function calculateDiscount(id, type) {
+
+        if ($("#percentOff_" + id).val() > 0) {
+            discOff = parseFloat($("#percentOff_" + id).val());
+        }
+        else {
+            discOff = 0;
+        }
+        if (discOff > 100) {
+            discOff = 100;
+        }
+        if ($("#amountOff_" + id).val() > 0) {
+            amountOff = parseFloat($("#amountOff_" + id).val());
+        }
+        else {
+            amountOff = 0;
+        }
+        productPrice = parseFloat($("#productPrice_" + id).text());
+        if (type == 1 || type == 3) // calculate if quantity change or percentage off change
+        {
+            amountOff = productPrice * (discOff / 100);
+            discPrice = productPrice - amountOff;
+            $("#discPrice_" + id).empty();
+            $("#discPrice_" + id).append(discPrice.toFixed(2));
+            $("#amountOff_" + id).val(amountOff.toFixed(2));
+
+            if (discOff == 100) {
+                $("#chkFree_" + id).prop('checked', true);
+            }
+            else {
+                $("#chkFree_" + id).prop('checked', false);
+            }
+        }
+        else if (type == 2) // calculate if check free change
+        {
+            if ($("#chkFree_" + id).is(':checked')) {
+                $("#discPrice_" + id).empty();
+                $("#discPrice_" + id).append(0.00);
+                $("#amountOff_" + id).val(productPrice.toFixed(2));
+                $("#percentOff_" + id).val(100);
+            }
+            else {
+                $("#discPrice_" + id).empty();
+                $("#discPrice_" + id).append(productPrice.toFixed(2));
+                $("#amountOff_" + id).val(0);
+                $("#percentOff_" + id).val(0);
+            }
+        }
+        else if (type == 4) // calculate if amount off change
+        {
+            discOff = (amountOff / productPrice) * 100;
+            discPrice = productPrice - amountOff;
+            $("#discPrice_" + id).empty();
+            $("#discPrice_" + id).append(discPrice.toFixed(2));
+            $("#percentOff_" + id).val(discOff.toFixed(2));
+            if (discOff == 100) {
+                $("#chkFree_" + id).prop('checked', true);
+            }
+            else {
+                $("#chkFree_" + id).prop('checked', false);
+            }
+        }
+    }
+
+     // offeritem Save
+    $("#btnOfferItemSave").click(function () {
+        if (validation.validate())
+        {
+            $(this).prop('disabled', true);
+            var offerItem = [];
+            var isFree = false;
+            $('.offerItem').each(function () {
+                id = parseInt($(this).data("id"));
+                if ($("#chkFree_" + id).is(':checked'))
+                {
+                    isFree = true;
+                }
+                else {
+                    isFree = false;
+                }
+                offerItem.push({
+                    ProductId: parseInt($(this).data("productid")),
+                    DistributeId: parseInt($(this).data("distributeid")),
+                    ProductName: $(this).data("productname"),
+                    IsFree: isFree,
+                    PercentageOff: parseFloat($("#percentOff_" + id).val()),
+                    AmountOff: parseFloat($("#amountOff_" + id).val()),
+                    Price: parseFloat($("#productPrice_" + id).text()),
+                    OfferPrice: parseFloat($("#discPrice_" + id).text()),
+                });
+            });
+
+            var offer;
+            offer = {
+                StartDate: $("#StartDate").val(),
+                EndDate: $("#EndDate").val(),
+                ValidityDays: $("#ValidityDays").val(),
+                ValidityTime: $("#ValidityTime").val(),
+                IsDateValidity: $("#IsDateValidity").val(),
+                IsEditable: $("#IsEditable").val(),
+                ScheduleId: $("#ScheduleId").val(),
+                DiscountItems: offerItem,
+                CreatedBy: userId
+            }
+           
+            $.ajax({
+                url: '/Offer/DiscountOfferSave',
+                type: "POST",
+                data: JSON.stringify({ model: offer }),
+                contentType: 'application/json',
+                success: function (data)
+                {
+                    if (data == "success")
+                    {
+                        location.href = '/Offer/DiscountOffer';
+                    }
+                    else {
+                        alert("Save error...");
+                    }
+                }
+            });
+        }
+    });
+</script>
+
+
+
+
+
+

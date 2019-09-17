@@ -1,0 +1,61 @@
+﻿@model IEnumerable<PointOfSale.Models.Unit>
+@{
+    var count = 0;
+}
+@if (Model.Any())
+{
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Name</th>
+            <th></th>
+        </tr>
+        @foreach (var list in Model)
+        {
+            count++;
+            <tr>
+                <td>@count. </td>
+                <td>@list.UnitName</td>
+                <td>
+                    <button class="btn btnUnitEdit" style="background-color:#1c488e; color:white;" data-id="@list.UnitId" data-toggle="tooltip" title="Edit Unit Information"><i class="fa fa-pencil-square-o"></i></button>
+                    @if (list.Status == 1)
+                    {
+                        @*<button type="button" data-id="@list.BrandId" data-isactive="1" class="btn btn-success activateBrandType" disabled data-toggle="tooltip" title="Activate Brand Status Type">
+                                <i class="fa fa-play" aria-hidden="true"></i>
+                            </button>*@
+                        <button type="button" data-id="@list.UnitId" data-isactive="0" class="btn btn-danger inactivateUnitType" data-toggle="tooltip" title="Inactivate Unit Status Type">
+                            <i class="fa fa-stop" aria-hidden="true"></i>
+                        </button>
+                    }
+                    else
+                    {
+                        <button type="button" data-id="@list.UnitId" data-isactive="1" class="btn btn-success activateUnitType" data-toggle="tooltip" title="Activate Unit Status Type">
+                            <i class="fa fa-play" aria-hidden="true"></i>
+                        </button>
+                        @*<button type="button" data-id="@list.BrandId" data-isactive="0" class="btn btn-danger inactivateBrandType" disabled data-toggle="tooltip" title="Inactivate Brand Status Type">
+                                <i class="fa fa-stop" aria-hidden="true"></i>
+                            </button>*@
+                    }
+
+                    @if (@list.Status == 0)
+                    {
+                        <span data-id="@list.UnitId" style="cursor:pointer;" data-toggle="tooltip" title="Delete Unit" class="btn btn-danger btnUnitDelete">
+                            <i class="fa fa-trash"></i>
+                        </span>
+                    }
+
+                </td>
+            </tr>
+        }
+    </table>
+}
+else
+{
+    <h4>There is no record to display</h4>
+}
+
+
+<script>
+    $('[data-toggle="tooltip"]').tooltip();
+</script>
+

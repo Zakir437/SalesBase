@@ -1,0 +1,175 @@
+﻿@using PointOfSale.Helpers
+@{
+    ViewBag.Title = "CustomerCreditInfo";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+}
+@*<section class="content-header">
+    <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-handshake-o"></i> CRM</a></li>
+        <li><a href="/Configuration/Customer"><i class="fa fa-list-ul"></i> Customer</a></li>
+        <li class="active">Customer List</li>
+    </ol>
+</section>*@
+<section class="content">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4>Customer Credit Invoice</h4>
+            </div>
+            <div class="pull-right">
+                <a class="btn btn-default" href="@Html.EncodedParam("CreditPaymentLedger", "PointOfSale", new { customerId = ViewBag.CustomerId }, null)">Credit Payment Ledger</a>
+                <a class="btn btn-default" href="@Html.EncodedParam("PaymentHistory", "PointOfSale", new { customerId = ViewBag.CustomerId, iscreditHistory= true  }, null)">Credit Payment History</a>
+                <a class="btn btn-default" href="@Html.EncodedParam("CustomerInvoiceInfo", "Configuration", new { customerId = ViewBag.CustomerId  }, null)"><i class="fa fa-arrow-left"></i> Back</a>
+            </div>
+        </div>
+        <div id="divCreditList"></div>
+    </div>
+</section>
+
+
+<div id="divCreditPayWin"></div>
+<div id="divPaymentTranWin"></div>
+<div id="divOrderTranWin"></div>
+<script>
+    var isTotalPay = false, methodId = 1;
+    $(document).ready(function () {
+
+        $("#liForCRM").addClass('active');
+        $("#liForCustomer").addClass('active');
+
+        $("#divCreditList").empty();
+        $("#divCreditList").append('<div class="loading_partial"></div>');
+        $("#divCreditList").load('@Url.Action("CustomerCreditPartial", "PointOfSale")?customerId=' + '@ViewBag.CustomerId');
+    });
+    var totalDue = 0, orderId = 0;
+    $("#divCreditList").on('click', '.btnPay', function () {
+        isTotalPay = false;
+        totalDue = $(this).data("due");
+        orderId = $(this).data("id");
+        var sendData = { totalDue: totalDue }
+        $("#divCreditPayWin").empty();
+        $("#divCreditPayWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            title: 'Pay',
+            resizable: false
+        });
+        var payWin = $("#divCreditPayWin").data("kendoWindow");
+        payWin.refresh('@Url.Action("CreditPay", "PointOfSale")?totalDue=' + totalDue);
+        payWin.center().open().maximize();
+    });
+    //credit pay save
+    $("#divCreditPayWin").on('click', '#btnPay', function () {
+
+        $(this).prop('disabled', true);
+
+        var payments = [];
+        $(".amountInTransaction").each(function () {
+            if ($(this).data("id") == 1) {
+                payments.push({
+                    PaymentTypeId: 1,
+                    PaymentBodyId: parseInt($(this).data("cashbodyid")),
+                    AmountPaid: cashAmount
+                });
+            }
+            else if ($(this).data("id") == 2) {
+                payments.push({
+                    PaymentTypeId: 2,
+                    PaymentBodyId: parseInt($(this).data("cardbodyid")),
+                    AmountPaid: parseFloat($(this).data("cardamount")),
+                    TransactionNo: $(this).data("transactionno")
+                });
+            }
+            else if ($(this).data("id") == 3) {
+                payments.push({
+                    PaymentTypeId: 3,
+                    PaymentBodyId: parseInt($(this).data("bkashbodyid")),
+                    AmountPaid: parseFloat($(this).data("bkashamount")),
+                    TransactionNo: $(this).data("transactionno")
+                });
+            }
+        });
+        if (document.getElementById("returnRow").style.display == "") {
+            returnAmount = parseFloat($("#returnAmount").text());
+        }
+        else {
+            returnAmount = 0;
+        }
+        $.ajax({
+            url: '@Url.Action("CreditPaySave", "PointOfSale")',
+            type: "POST",
+            data: JSON.stringify({ UserId: userId, MethodId: methodId, OrderId: orderId, Payments: payments, ReturnAmount: returnAmount, IsTotalPay: isTotalPay, CustomerId: customerId }),
+            contentType: 'application/json',
+            success: function (data) {
+                $("#divCreditPayWin").data("kendoWindow").close();
+                if (data == "success")
+                {
+                    $("#divCreditList").empty();
+                    $("#divCreditList").append('<div class="loading_partial"></div>');
+                    $("#divCreditList").load('@Url.Action("CustomerCreditPartial", "PointOfSale")?customerId=' + '@ViewBag.CustomerId');
+                    isTotalPay = false;
+                }
+                else {
+                    alert("Save error...");
+                    isTotalPay = false;
+                }
+            }
+        });
+    });
+    //Full pay
+    $("#divCreditList").on('click', '#btnTotalPay', function () {
+        isTotalPay = true;
+        $("#divCreditPayWin").empty();
+        $("#divCreditPayWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            title: 'Pay',
+            resizable: false
+        });
+        var payTotalWin = $("#divCreditPayWin").data("kendoWindow");
+        payTotalWin.refresh('@Url.Action("CreditPay", "PointOfSale")?totalDue=' + totalInvoiceDue);
+        payTotalWin.center().open().maximize();
+    });
+
+    //Show payment history by orderId
+    $("#divCreditList").on('click', '.btnShowPaymentHistory', function () {
+        orderId = $(this).data("id");
+        $("#divPaymentTranWin").empty();
+        $("#divPaymentTranWin").kendoWindow({
+                actions: ["Close"],
+                draggable: false,
+                modal: true,
+                visible: false,
+                width: 1100,
+                height: 500,
+                resizable: false,
+                title: 'Payment Transaction'
+            });
+        var paymentTranWin = $("#divPaymentTranWin").data("kendoWindow");
+        paymentTranWin.refresh('@Url.Action("PaymentHistoryPartial", "PointOfSale")?orderId=' + orderId);
+        paymentTranWin.center().open();
+    });
+
+    //Show order Details
+    $("#divCreditList").on('click', '.btnShowOrderDetails', function () {
+        orderId = $(this).data("id");
+        $("#divOrderTranWin").empty();
+        $("#divOrderTranWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 892,
+            height: 582,
+            title: 'Order Transaction',
+            resizable: false
+        });
+        var orderTranWin = $("#divOrderTranWin").data("kendoWindow");
+        orderTranWin.refresh('@Url.Action("OrderTransaction", "PointOfSale")?orderId=' + orderId);
+        orderTranWin.center().open();
+    });
+</script>

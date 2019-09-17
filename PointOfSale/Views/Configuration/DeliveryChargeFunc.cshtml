@@ -1,0 +1,89 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" style="margin : 2%;">
+    <div id="divDeliveryChargeFuncForm"></div>
+    <div class="k-edit-buttons k-state-default">
+        <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnDiscountCreate"><span class="k-icon k-update"></span>Update</button>
+        <button type="reset" class="k-button k-button-icontext k-grid-update" id="btnDiscountRefresh"><span class="k-icon k-i-refresh"></span>Refresh</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnDiscountCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#divDeliveryChargeFuncForm").append('<div class="tiny_loading"></div>');
+        $("#divDeliveryChargeFuncForm").load('/Configuration/DeliveryChargeFuncPartial?miscId=' + '@ViewBag.MiscId');
+    });
+
+    $("#btnDiscountRefresh").click(function () {
+        $("#divDeliveryChargeFuncForm").empty();
+        $("#divDeliveryChargeFuncForm").append('<div class="tiny_loading"></div>');
+        $("#divDeliveryChargeFuncForm").load('/Configuration/DeliveryChargeFuncPartial?miscId=' + '@ViewBag.MiscId');
+    });
+
+    $("#btnDiscountCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+
+    $("#btnDiscountCreate").click(function () {
+        var sendData = {
+            miscId: '@ViewBag.MiscId',
+            IsAuto: $("#checkAuto").is(":checked"),
+        }
+        $.ajax({
+            url: '/Configuration/DeliveryChargeFuncUpdate',
+            type: "POST",
+            data: sendData,
+            success: function (result) {
+                $("#divDeliveryChargeFuncEdit").data("kendoWindow").close();
+                if (result == "success") {
+                    $("#divMiscFuncList").empty();
+                    $("#divMiscFuncList").append('<div class="loading_partial"></div>');
+                    $("#divMiscFuncList").load('/Configuration/MiscFuncList');
+                }
+                else {
+                    alert("Save Error");
+                }
+            }
+        });
+    });
+
+    //***************************Date validation ******************************
+    function onStartChange() {
+        var startDate = start.value(),
+            endDate = end.value();
+
+        if (startDate) {
+            startDate = new Date(startDate);
+            startDate.setDate(startDate.getDate());
+            end.min(startDate);
+        } else if (endDate) {
+            start.max(new Date(endDate));
+        } else {
+            endDate = new Date();
+            start.max(endDate);
+            end.min(endDate);
+        }
+    }
+
+    function onEndChange() {
+        var endDate = end.value(),
+            startDate = start.value();
+
+        if (endDate) {
+            endDate = new Date(endDate);
+            endDate.setDate(endDate.getDate());
+            start.max(endDate);
+        } else if (startDate) {
+            end.min(new Date(startDate));
+        } else {
+            endDate = new Date();
+            start.max(endDate);
+            end.min(endDate);
+        }
+    }
+</script>
+
+
+
+
+
+
+

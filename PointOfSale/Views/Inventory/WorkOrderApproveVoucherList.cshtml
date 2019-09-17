@@ -1,0 +1,87 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewWorkOrder>
+@using PointOfSale.Helpers
+@{
+    var count = 0;
+}
+@if (Model.Any() == true)
+{
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Voucher Name</th>
+            <th>Status</th>
+            <th>Created By</th>
+            <th>Created Date</th>
+            <th></th>
+        </tr>
+        @foreach (var list in Model)
+        {
+            count++;
+            <tr>
+                <td>@count. </td>
+                <td>
+                    <a href="@Html.EncodedParam("WorkOrderVoucherDetails","Inventory", new { VoucherId = list.Id, isView = true },null)" target="_blank">
+                        @list.VoucherName
+                    </a>
+                </td>
+                <td>
+                    @if (list.Status == 1)
+                    {
+                        <span class="label label-primary">Pending</span>
+                    }
+                    else if (list.Status == 2)
+                    {
+                        <span class="label label-warning">Partial Approved</span>
+                    }
+                    else if (list.Status == 3)
+                    {
+                        <span class="label label-info">Approved</span>
+                    }
+                    else if (list.Status == 4)
+                    {
+                        <span class="text-success">Completed</span>
+                    }
+                    else if (list.Status == 5)
+                    {
+                        <span class="label label-danger">Deleted</span>
+                    }
+                </td>
+                <td>@list.CreatedBy</td>
+                <td>@Convert.ToDateTime(list.CreatedDate).ToString("MMMM dd,yyyy")</td>
+                @*<td>@list.UpdatedBy</td>
+                <td>
+                    @if (list.UpdatedDate != null)
+                     {
+                        <span>@Convert.ToDateTime(list.UpdatedDate).ToString("MMMM dd,yyyy")</span>
+                     }
+                    else
+                    {
+                        <span>Not updated yet</span>
+                    }
+                </td>*@
+                <td>
+                    <a class="btn btn-success" href="@Html.EncodedParam("WorkOrderImportManual","Inventory", new { id = list.Id, isView = true },null)" data-toggle="tooltip" title="Work-order import">
+                        <i class="fa fa-arrow-circle-o-down"></i>
+                    </a>
+                </td>
+            </tr>
+        }
+    </table>
+}
+else
+{
+    <h3>There is no record to display</h3>
+}
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    })
+</script>
+
+
+
+
+
+
+
+

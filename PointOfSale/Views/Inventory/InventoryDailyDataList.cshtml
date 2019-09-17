@@ -1,0 +1,43 @@
+﻿@model IEnumerable<PointOfSale.Models.InventoryDailyDataSet>
+@{
+    var count = 0;
+}
+@if (Model.Any() == true)
+{
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Total Item Sold</th>
+            <th>Total Item Return</th>
+            <th>Total Item Borrowed</th>
+            <th>Total Item Wasted</th>
+            <th>Date</th>
+        </tr>
+        @foreach (var list in Model)
+        {
+            count++;
+            <tr>
+                <td>@count. </td>
+                <td>@list.TotalItemSold</td>
+                <td>@list.TotalItemReturned</td>
+                <td>@list.TotalItemBorrowed</td>
+                <td>@list.TotalItemWasted</td>
+                <td>@Convert.ToDateTime(list.Date).ToString("MMMM dd,yyyy")</td>
+            </tr>
+         }
+    </table>
+}
+else
+{
+    <h3>There is no record to display</h3>
+}
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    })
+</script>
+
+
+
+
+

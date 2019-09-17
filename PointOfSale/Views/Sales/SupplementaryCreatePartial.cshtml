@@ -1,0 +1,70 @@
+﻿@model PointOfSale.ModelViews.Sales.SupplementaryModelView
+@Html.HiddenFor(a => a.Id)
+<div class="editor-label"><label for="Name">Name</label></div>
+<div class="editor-field">
+    @Html.EditorFor(model => model.Name, new { htmlattributes = new { @class = "k-textbox", @style = "width:100%; max-width:100%" } })
+    @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-Danger" })
+</div>
+<div class="editor-label"><label for="">Category</label></div>
+<div class="editor-field">
+    @(Html.Kendo().MultiSelect()
+        .Name("CategoryMultiSelect")
+        .Placeholder("Select category...")
+        .DataTextField("Text")
+        .DataValueField("Value")
+        .BindTo(ViewBag.CategoryList as SelectList)
+        .Filter("contains")
+        .HtmlAttributes(new { style = "width: 100%;", required = "required", validationMessage = "Please select category" })
+        .Events(e =>
+        {
+            e.DataBound("onDataBoundCategory").Change("onChangeCategoryMulti");
+        })
+    )
+    <span class="field-validation-valid text-danger" data-valmsg-for="CategoryMultiSelect" data-valmsg-replace="true"></span>
+</div>
+<div class="editor-label"><label for="">Sub Category</label></div>
+<div class="editor-field">
+    @(Html.Kendo().MultiSelect()
+        .Name("SubCategoryMultiSelect")
+        .Placeholder("Select sub category...")
+        .DataTextField("Text")
+        .DataValueField("Value")
+        .Filter("contains")
+        .AutoBind(false)
+        .HtmlAttributes(new { style = "width: 100%;" })
+        .DataSource(source =>
+        {
+            source.Read(read =>
+            {
+                read.Action("GetSubCategories", "Sales")
+                    .Data("dataSubMulti");
+            })
+            .ServerFiltering(false);
+        })
+        .Events(e =>
+        {
+            e.DataBound("onDataBoundSubCategory");
+        })
+    )
+</div>
+<div class="editor-field">
+    @Html.CheckBoxFor(model => model.IsRequestConditionInfo)<label for="IsRequestConditionInfo">Request Condition Info</label>
+</div>
+<script>
+    $(document).ready(function () {
+        if ($("#IsRequestConditionInfo").attr('checked')) {
+            $("#IsRequestConditionInfo").val(true);
+        }
+        else {
+            $("#IsRequestConditionInfo").val(false);
+        }
+    });
+
+    $('#IsRequestConditionInfo').change(function () {
+        if ($(this).is(":checked")) {
+            $('#IsRequestConditionInfo').val(true);
+        } else {
+            $('#IsRequestConditionInfo').val(false);
+        }
+    });
+</script>

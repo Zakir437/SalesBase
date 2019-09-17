@@ -1,0 +1,189 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin : 2%;">
+    <div id="divChargeForm"></div>
+    <div class="k-edit-buttons k-state-default">
+        @if (ViewBag.Id > 0)
+        {
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnChargeCreate"><span class="k-icon k-update"></span>Update</button>
+        }
+        else
+        {
+            <button type="button" class="k-button k-button-icontext k-primary k-grid-update" id="btnChargeCreate"><span class="k-icon k-update"></span>Create</button>
+        }
+        <button type="reset" class="k-button k-button-icontext k-grid-update" id="btnChargeRefresh"><span class="k-icon k-i-refresh"></span>Refresh</button>
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnChargeCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#divChargeForm").append('<div class="tiny_loading"></div>');
+        $("#divChargeForm").load('/Inventory/DeliveryChargeCreatePartial?id=' + '@ViewBag.Id');
+    });
+
+    $("#btnChargeRefresh").click(function () {
+        $("#divChargeForm").empty();
+        $("#divChargeForm").append('<div class="tiny_loading"></div>');
+        $("#divChargeForm").load('/Inventory/DeliveryChargeCreatePartial?id=' + '@ViewBag.Id');
+    });
+
+    $("#btnChargeCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+
+    var validation = $("#divChargeForm").kendoValidator({
+        rules: {
+            equal: function (input) {
+                if ((input.is("[name=FromPrice]") || input.is("[name=ToPrice]")) && $.trim($("#FromPrice").val()) == $.trim($("#ToPrice").val()) && $.trim($("#ToPrice").val()) > 0 && $.trim($("#FromPrice").val()) > 0) {
+                    return false;
+                }
+                return true;
+            },
+            fromPrice: function (input) {
+                if (input.is("[name=FromPrice]") && ($.trim(input.val()) === "" || $.trim(input.val()) < 1)) {
+                    return false;
+                }
+                return true;
+            },
+            toPrice: function (input) {
+                if (input.is("[name=ToPrice]") && ($.trim(input.val()) == "" || $.trim(input.val()) < 1)) {
+                    return false;
+                }
+                return true;
+            },
+            fromLessTo: function (input) {
+                if (input.is("[name=FromPrice]") && parseInt($.trim(input.val())) > parseInt($.trim($("#ToPrice").val())) && $.trim($("#ToPrice").val()) > 0) {
+                    return false;
+                }
+                return true;
+            },
+            toGreaterFrom: function (input) {
+                if (input.is("[name=ToPrice]") && parseInt($.trim($("#FromPrice").val())) > parseInt($.trim(input.val())) && $.trim($("#FromPrice").val()) > 0) {
+                    return false;
+                }
+                return true;
+            },
+            availabilityCheck: function (input) {
+                var isInvalid = true;
+                if ((input.is("[name=FromPrice]") || input.is("[name=ToPrice]"))) {
+                    if ($.trim($("#FromPrice").val()) > 0 && $.trim($("#ToPrice").val()) > 0)
+                    {
+                        $.ajax({
+                            url: '/Inventory/CheckPriceAvailability',
+                            mode: "abort",
+                            type: 'GET',
+                            dataType: "json",
+                            async: false,
+                            data: { fromPrice: $.trim($("#FromPrice").val()), toPrice: $.trim($("#ToPrice").val()), id: $("#Id").val() },
+                            success: function (data) {
+                                if (data == "error") {
+                                    alert("price availability check error.")
+                                }
+                                else {
+                                    isInvalid = data;
+                                    if (isInvalid === true) {
+                                        isInvalid = true;
+                                    }
+                                    else {
+                                        isInvalid = false;
+                                    }
+                                }
+                            }
+                        });
+                    }
+                    else if ($.trim(input.val()) > 0)
+                    {
+                        $.ajax({
+                            url: '/Inventory/CheckPriceAvailability',
+                            mode: "abort",
+                            type: 'GET',
+                            dataType: "json",
+                            async: false,
+                            data: { price: $.trim(input.val()), id: $("#Id").val() },
+                            success: function (data) {
+                                if (data == "error") {
+                                    alert("price availability check error.")
+                                }
+                                else {
+                                    isInvalid = data;
+                                    if (isInvalid === true) {
+                                        isInvalid = true;
+                                    }
+                                    else {
+                                        isInvalid = false;
+                                    }
+                                }
+                            }
+                        });
+                    }
+                }
+                return isInvalid;
+            }
+        },
+        messages: {
+            fromPrice: "Please enter From price.",
+            toPrice: "Please enter To price.",
+            fromLessTo: "From price not greater than To price.",
+            toGreaterFrom: "To price not less than From price.",
+            equal: "From and To are not equal.",
+            availabilityCheck : "This price is already exist."
+        }
+    }).data("kendoValidator");
+
+    $("#btnChargeCreate").click(function () {
+
+        if (validation.validate())
+        {
+            var sendData = {
+                Id: $("#Id").val(),
+                FromPrice: $.trim($("#FromPrice").val()),
+                ToPrice: $.trim($("#ToPrice").val()),
+                Amount: $.trim($("#Amount").val()),
+                IsParcentile: $("#checkPercentile").is(":checked"),
+                CreatedBy : userId
+            }
+            $.ajax({
+                url: '/Inventory/DeliveryChargeSave',
+                type: "POST",
+                data: sendData,
+                success: function (result) {
+                    $("#divChargeCreateWin").data("kendoWindow").close();
+                    if (result == "success") {
+                            clearBeforeClick();
+                            if (tab == 1) {
+                                $("#div_All").append('<div class="loading_partial"></div>');
+                                $("#div_All").load('/Inventory/DeliveryChargeList');
+                            }
+                            else if (tab == 2) {
+                                status = 1;
+                                $("#div_Active").append('<div class="loading_partial"></div>');
+                                $("#div_Active").load('/Inventory/DeliveryChargeList?status=' + status);
+
+                            }
+                            else if (tab == 3) {
+                                status = 0;
+                                $("#div_Inactive").append('<div class="loading_partial"></div>');
+                                $("#div_Inactive").load('/Inventory/DeliveryChargeList?status=' + status);
+                            }
+                            else if (tab == 4) {
+                                status = 2;
+                                $("#div_Deleted").append('<div class="loading_partial"></div>');
+                                $("#div_Deleted").load('/Inventory/DeliveryChargeList?status=' + status);
+                            }
+                    }
+                    else {
+                        alert("Save Error");
+                    }
+                }
+            });
+        }
+    });
+
+
+   
+
+
+
+</script>
+
+
+
+

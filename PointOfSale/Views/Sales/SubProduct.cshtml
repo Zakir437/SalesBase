@@ -1,0 +1,17 @@
+﻿<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin-bottom:4%;margin-top:2%; margin-left:2%">
+    <div id="divSubProductList"></div>
+    <div class="k-edit-buttons k-state-default">
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnSubProductCancel"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#divSubProductList").append('<div class="tiny_loading"></div>');
+        $("#divSubProductList").load('@Url.Action("SubProductList", "Sales")?masterId=' + '@ViewBag.MasterId');
+    });
+    $("#btnSubProductCancel").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+
+</script>
+

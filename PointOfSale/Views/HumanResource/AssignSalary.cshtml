@@ -1,0 +1,68 @@
+﻿@model PointOfSale.ModelViews.HR.SalaryModelView
+@Html.HiddenFor(a => a.Id)
+@Html.HiddenFor(a => a.UserId)
+@Html.HiddenFor(a => a.CreatedBy)
+<style>
+    input{
+        max-height:100%;
+    }
+</style>
+<div class="form-horizontal col-md-12 col-sm-12 col-xs-12" id="divAssignSalary">
+    <hr />
+    <div class="form-group">
+        <label class="control-label col-md-2 col-sm-3" for="Amount">Amount</label>
+        <div class="col-md-4 col-sm-5">
+            @Html.EditorFor(model => model.Amount, new { htmlattributes = new { @class = "k-textbox", @min="1", style = "width:100%" } })
+            @Html.ValidationMessageFor(model => model.Amount, "", new { @class = "text-Danger" })
+        </div>
+        <label class="control-label col-md-2 col-sm-3" for="EffectiveDate">Effective From</label>
+        <div class="col-md-4 col-sm-5">
+            @(Html.Kendo().DatePickerFor(a => a.EffectiveDate)
+                  .Start(CalendarView.Year)
+                  .Depth(CalendarView.Year)
+                  .Min(DateTime.Now)
+                  .Format("MMMM yyyy")
+                  .HtmlAttributes(new { style = "width: 100%;" })
+            )
+            @Html.ValidationMessageFor(model => model.EffectiveDate, "", new { @class = "text-Danger" })
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10 col-sm-offset-3 col-sm-9">
+            <input type="button" value="Save" class="k-button k-state-default" id="btnAssignSalary" />
+            <input type="reset" value="Refresh" class="k-button k-state-default" id="btnAssignRefresh" />
+        </div>
+    </div>
+</div>
+<script>
+    var assignSalaryValidation = $("#divAssignSalary").kendoValidator().data("kendoValidator");
+    $("#btnAssignSalary").click(function () {
+        if (assignSalaryValidation.validate())
+        {
+            var sendData = {
+                Id: $("#Id").val(),
+                UserId: $("#UserId").val(),
+                Amount: $("#Amount").val(),
+                EffectiveDate: $("#EffectiveDate").val(),
+                CreatedBy : userId
+            }
+            $.ajax({
+                url: '@Url.Action("AssignSalarySave", "HumanResource")',
+                type: "POST",
+                data: {model : sendData},
+                success: function (data)
+                {
+                    if (data == "success") {
+                        window.location.reload();
+                    }
+                    else {
+                        alert("Save error...");
+                        window.location.reload();
+                    }
+                }
+            });
+        };
+    });
+</script>
+
+

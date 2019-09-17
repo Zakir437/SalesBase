@@ -1,0 +1,39 @@
+﻿@if (HttpContext.Current.Request.Cookies["CookieUserInfo"] != null)
+{
+    using (Html.BeginForm("LogOff", "Account", FormMethod.Post, new { id = "logoutForm", @class = "navbar-right" }))
+    {
+        @Html.AntiForgeryToken()
+        var UserId = Convert.ToInt32(HttpContext.Current.Request.Cookies["CookieUserInfo"].Values["UserId"].ToString());
+        <script>
+            var userId = @UserId;
+        </script>
+        <ul class="nav navbar-nav navbar-right">
+            <li>
+                <div class="dropdown" style="margin-top:8px;">
+                    <button class="btn dropdown-toggle" type="button" data-toggle="dropdown">
+                        Hello, @HttpContext.Current.Request.Cookies["CookieUserInfo"].Values["UserName"]
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a id="signUp" data-id="@UserId" style="cursor:pointer">Edit Profile</a></li>
+                        @*<li><a href="@Html.EncodedParam("SetNewPassword", "Account", new { UserId = UserId, isDisplay = true}, null)">Reset Password</a></li>*@
+                    </ul>
+                </div>
+            </li>
+            <li><a href="javascript:document.getElementById('logoutForm').submit()">Log off</a></li>
+        </ul>
+    }
+}
+else
+{
+    <ul class="nav navbar-nav navbar-right">
+        @*<li><a id="signUp" data-id="" style="cursor:pointer">SignUp</a></li>*@
+        <li>@Html.ActionLink("Login", "Login", "Account", routeValues: null, htmlAttributes: new { id = "loginLink" })</li>
+    </ul>
+}
+
+
+
+
+
+

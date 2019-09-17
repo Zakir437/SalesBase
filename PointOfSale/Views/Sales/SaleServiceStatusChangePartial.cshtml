@@ -1,0 +1,17 @@
+﻿<div class="editor-label"><label for="Status">Status</label></div>
+<div class="editor-field">
+    @(Html.Kendo().DropDownList()
+                     .Name("ServiceStatus")
+                     .BindTo(ViewBag.StatusList as SelectList)
+                     .DataTextField("Text")
+                     .DataValueField("Value")
+                     .OptionLabel("Select status...")
+                     .HtmlAttributes(new { style = "width:100%;", required="required", validationMessage="Please select a status" })
+    )
+    @Html.ValidationMessage("ServiceStatus", "", new { @class = "text-Danger" })
+</div>
+<script>
+    $(document).ready(function () {
+        $("#ServiceStatus").data("kendoDropDownList").value('@ViewBag.Status');
+    });
+</script>

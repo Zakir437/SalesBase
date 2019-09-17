@@ -1,0 +1,221 @@
+﻿@{
+    ViewBag.Title = "Dashboard";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+}
+<section class="content-header">
+    <h1>
+        Inventory
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="/Inventory/Dashboard"><i class="fa fa-dashboard"></i> Inventory</a></li>
+        <li class="active">Dashboard</li>
+    </ol>
+</section>
+<section class="content">
+    <!-- =========================================================== -->
+    <div class="row">
+        <div class="col-md-3 col-sm-6 col-xs-12">
+            <div class="info-box bg-aqua">
+                <span class="info-box-icon"><i class="fa fa-cart-arrow-down "></i></span>
+                <div class="info-box-content">
+                    <span class="info-box-text">Total Item Sold</span>
+                    <span class="info-box-number">5,478</span>
+                    <div class="progress">
+                        <div class="progress-bar" style="width: 70%"></div>
+                    </div>
+                    <span class="progress-description">
+                        70% Increase in 30 Days
+                    </span>
+                </div>
+                <!-- /.info-box-content -->
+            </div>
+            <!-- /.info-box -->
+        </div>
+        <!-- /.col -->
+        <div class="col-md-3 col-sm-6 col-xs-12">
+            <div class="info-box bg-red">
+                <span class="info-box-icon"><i class="fa fa-mail-forward"></i></span>
+                <div class="info-box-content">
+                    <span class="info-box-text">Total Item Return</span>
+                    <span class="info-box-number">178</span>
+                    <div class="progress">
+                        <div class="progress-bar" style="width: 5%"></div>
+                    </div>
+                    <span class="progress-description">
+                        5% Increase in 30 Days
+                    </span>
+                </div>
+                <!-- /.info-box-content -->
+            </div>
+            <!-- /.info-box -->
+        </div>
+        <!-- /.col -->
+        <div class="col-md-3 col-sm-6 col-xs-12">
+            <div class="info-box bg-yellow">
+                <span class="info-box-icon"><i class="fa  fa-hourglass-end"></i></span>
+                <div class="info-box-content">
+                    <span class="info-box-text">Fulfillment</span>
+                    <span class="info-box-number">80%</span>
+                    <div class="progress">
+                        <div class="progress-bar" style="width: 80%"></div>
+                    </div>
+                    <span class="progress-description">
+                        80% Increase in 30 Days
+                    </span>
+                </div>
+                <!-- /.info-box-content -->
+            </div>
+            <!-- /.info-box -->
+        </div>
+        <!-- /.col -->
+        <div class="col-md-3 col-sm-6 col-xs-12">
+            <div class="info-box bg-green">
+                <span class="info-box-icon"><i class="fa fa-indent"></i></span>
+                <div class="info-box-content">
+                    <span class="info-box-text">Indent</span>
+                    <span class="info-box-number">4,283</span>
+                    <div class="progress">
+                        <div class="progress-bar" style="width: 70%"></div>
+                    </div>
+                    <span class="progress-description">
+                        70% Increase in 30 Days
+                    </span>
+                </div>
+                <!-- /.info-box-content -->
+            </div>
+            <!-- /.info-box -->
+        </div>
+        <!-- /.col -->
+        <!-- /.col -->
+        <div class="col-md-3 col-sm-6 col-xs-12">
+            <div class="info-box bg-purple">
+                <span class="info-box-icon"><i class="fa  fa-mail-reply"></i></span>
+                <div class="info-box-content">
+                    <span class="info-box-text">Borrow Products</span>
+                    <span class="info-box-number">4,283</span>
+                    <div class="progress">
+                        <div class="progress-bar" style="width: 70%"></div>
+                    </div>
+                    <span class="progress-description">
+                        70% Increase in 30 Days
+                    </span>
+                </div>
+                <!-- /.info-box-content -->
+            </div>
+            <!-- /.info-box -->
+        </div>
+        <!-- /.col -->
+    </div>
+    <!-- /.row -->
+
+    <!-- =========================================================== -->
+    <div class="row">
+        <div class="col-md-3">
+            <button type="button" class="btn btn-block btn-success btn-flat">STOCK</button>
+        </div>
+        <div class="col-md-3">
+            <button type="button" class="btn btn-block btn-info btn-flat">PROCUREMENT</button>
+        </div>
+        <div class="col-md-3">
+            <button type="button" class="btn btn-block btn-warning btn-flat">FULFILLMENT</button>
+        </div>
+        <div class="col-md-3">
+            <button type="button" class="btn btn-block btn-primary btn-flat">WASTE</button>
+        </div>
+    </div>
+    <br />
+    <!-- =========================================================== -->
+    <div class="row">
+        <div class="col-md-3 col-sm-6 col-xs-12">
+            <button type="button" class="btn bg-purple btn-block btn-flat">BORROWED PRODUCTS</button>
+        </div>
+        <div class="col-md-3 col-sm-6 col-xs-12">
+            <button type="button" class="btn btn-block bg-maroon btn-flat">SALES</button>
+        </div>
+        <div class="col-md-3 col-sm-6 col-xs-12">
+            <button type="button" class="btn btn-block bg-blue btn-flat">IMPORT HISTORY</button>
+        </div>
+        <div class="col-md-3 col-sm-6 col-xs-12">
+            <button type="button" class="btn btn-block bg-purple btn-flat">CONFIGURATION</button>
+        </div>
+    </div>
+    <br />
+    <!-- =========================================================== -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="box box-success box-solid">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Stock (most sold)</h3>
+                    <div class="box-tools pull-right">
+                        <button type="button" class="btn btn-box-tool"><i class="fa fa-refresh"></i></button>
+                    </div>
+                    <!-- /.box-tools -->
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                    The body of the box
+                </div>
+                <!-- /.box-body -->
+            </div>
+            <!-- /.box -->
+        </div>
+        <div class="col-md-6">
+            <div class="box box-info box-solid">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Borrow Products</h3>
+                    <div class="box-tools pull-right">
+                        <button type="button" class="btn btn-box-tool"><i class="fa fa-refresh"></i></button>
+                    </div>
+                    <!-- /.box-tools -->
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                    The body of the box
+                </div>
+                <!-- /.box-body -->
+            </div>
+            <!-- /.box -->
+        </div>
+        <div class="col-md-6">
+            <div class="box box-warning box-solid">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Fulfillment</h3>
+                    <div class="box-tools pull-right">
+                        <button type="button" class="btn btn-box-tool"><i class="fa fa-refresh"></i></button>
+                    </div>
+                    <!-- /.box-tools -->
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                    The body of the box
+                </div>
+                <!-- /.box-body -->
+            </div>
+            <!-- /.box -->
+        </div>
+        <div class="col-md-6">
+            <div class="box box-primary box-solid">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Waste/Refund</h3>
+                    <div class="box-tools pull-right">
+                        <button type="button" class="btn btn-box-tool"><i class="fa fa-refresh"></i></button>
+                    </div>
+                    <!-- /.box-tools -->
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                    The body of the box
+                </div>
+                <!-- /.box-body -->
+            </div>
+            <!-- /.box -->
+        </div>
+    </div>
+</section>
+
+<script>
+    $(document).ready(function () {
+        $("#liForInventory").addClass('active');
+        $("#liForInventoryDashboard").addClass('active');
+    });
+</script>

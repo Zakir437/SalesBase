@@ -1,0 +1,90 @@
+﻿@model PointOfSale.ModelViews.HR.UserLoginModelView
+@Html.HiddenFor(m => m.UserId)
+<style>
+    input{
+        max-width:70%;
+    }
+</style>
+<div class="editor-label"><label for="Username">Username</label></div>
+<div class="editor-field">
+    <div id="divUserName">
+        @Html.DisplayFor(model => model.Username, new { htmlAttributes = new { @class = "form-control k-textbox", } })
+        <span data-toggle="tooltip" title="Edit username" class="btn btn-primary btnUserNameEdit"><i class="fa fa-pencil-square-o"></i></span>
+    </div>
+    <div id="divUserNameEdit" style="display:none">
+        @Html.EditorFor(model => model.Username, new { htmlAttributes = new { @class = "form-control k-textbox", @style="display:inline" } })
+        <span data-toggle="tooltip" title="Save username" class="btn btn-primary btnUsernameSave"><span class="k-icon k-update"></span></span>
+        @Html.ValidationMessageFor(model => model.Username, "", new { @class = "text-danger" })
+    </div>
+</div>
+<div class="editor-label"><label for="Password">Password</label></div>
+<div class="editor-field">
+    <div id="divPasswordDisplay">
+        @Html.DisplayFor(model => model.Password, new { htmlAttributes = new { @class = "form-control k-textbox", } })
+        <span data-toggle="tooltip" title="Edit password" class="btn btn-primary btnPasswordEdit"><i class="fa fa-pencil-square-o"></i></span>
+    </div>
+    <div id="divPasswordEdit" style="display:none">
+        @Html.EditorFor(model => model.Password, new { htmlAttributes = new { @class = "form-control k-textbox", @style = "display:inline" } })
+        <span data-toggle="tooltip" title="Save password" class="btn btn-primary btnPasswordSave"><span class="k-icon k-update"></span></span>
+        @Html.ValidationMessageFor(model => model.Password, "", new { @class = "text-danger" })
+    </div>
+</div>
+<script>
+    $('[data-toggle="tooltip"]').tooltip();
+    $(".btnUserNameEdit").click(function () {
+        $("#divUserName").css("display", "none");
+        $("#divUserNameEdit").css("display", "block");
+    });
+
+    $(".btnPasswordEdit").click(function () {
+        $("#divPasswordDisplay").css("display", "none");
+        $("#divPasswordEdit").css("display", "block");
+    });
+
+    var userNameValidation = $("#divUserNameEdit").kendoValidator({
+        rules: {
+            remoteUserName: function (input) {
+                var remoteAttr = input.attr("data-val-remote-url");
+                if (typeof remoteAttr === typeof undefined || remoteAttr === false) {
+                    return true;
+                }
+                var isInvalid;
+                var data = {};
+                var Id = $("#UserId").val();
+                var UserName = $.trim($("#Username").val());
+                data = { Id: Id, UserName: UserName };
+                $.ajax({
+                    url: remoteAttr,
+                    mode: "abort",
+                    port: "validate" + input.attr('name'),
+                    dataType: "json",
+                    type: input.attr("data-val-remote-type"),
+                    data: data,
+                    async: false,
+                    success: function (response) {
+                        isInvalid = response;
+                        if (isInvalid === true) {
+                            isInvalid = true;
+                        }
+                        else {
+                            isInvalid = false;
+                        }
+                    }
+                });
+                return isInvalid;
+            },
+        },
+        messages: {
+            remoteUserName: function (input) {
+                return input.data('val-remote');
+            }
+        }
+    }).data("kendoValidator");
+
+    var passwordValidation = $("#divPasswordEdit").kendoValidator().data("kendoValidator");
+
+
+
+
+
+</script>

@@ -1,0 +1,56 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewImportTransaction>
+@using System.Globalization;
+@{
+    var count = 0;
+}
+<style>
+    a {
+        cursor: pointer;
+    }
+</style>
+@if (Model.Any() == true)
+{
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Product Name</th>
+            <th>Quantity</th>
+            @if (ViewBag.IsPrint == false)
+             {
+                <th>Cost</th>
+             }
+        </tr>
+        @foreach (var list in Model)
+         {
+            count++;
+            <tr>
+                <td>@count. </td>
+                <td>
+                    @list.ProductName
+                </td>
+                <td>
+                    @list.Quantity
+                </td>
+                @if (ViewBag.IsPrint == false)
+                 {
+                    <td>
+                        <button class="btn btn-primary btnProQuantityTran" data-id="@list.ProductId" data-distributeid="@list.DistributeId" data-toggle="tooltip" title="View Transaction"><i class="fa fa-align-justify"></i></button>
+                    </td>
+                 }
+            </tr>
+         }
+    </table>
+ }
+else
+{
+    <h3>There is no record to display</h3>
+}
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    })
+</script>
+
+
+
+

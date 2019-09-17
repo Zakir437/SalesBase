@@ -1,0 +1,27 @@
+﻿@model PointOfSale.Models.ViewStockProduct
+<div class="k-edit-form-container col-lg-11 col-md-10 col-sm-11 col-xs-10" id="" style="margin-bottom:4%;margin-top:2%;">
+    <div style="margin-left:50px;">
+        @if (Model != null)
+        {
+            <dl class="dl-horizontal">
+                <dt>Product Name </dt>
+                <dd>@Model.ProductName</dd>
+                <dt>Quantity</dt>
+                <dd>@Model.Quantity</dd>
+            </dl>
+        }
+        else
+        {
+            <h2>This product not found in stock</h2>
+        }
+    </div>
+    <div class="k-edit-buttons k-state-default" style="margin-left:8px;">
+        <button type="button" class="k-button k-button-icontext k-grid-cancel" id="btnAvailabilityWin"><span class="k-icon k-cancel"></span>Cancel</button>
+    </div>
+</div>
+
+<script>
+    $("#btnAvailabilityWin").click(function () {
+        $(this).closest(".k-window-content").data("kendoWindow").close();
+    });
+</script>

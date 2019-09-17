@@ -1,0 +1,52 @@
+﻿@{
+    ViewBag.Title = "Holiday";
+    Layout = "~/Views/Shared/_LayoutForTemplate.cshtml";
+}
+<section class="content">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="padding-bottom:46px;">
+            <div class="pull-left">
+                <h4 class="uppercase">Holiday</h4>
+            </div>
+        </div>
+        <div class="panel-body">
+            <button class="btn btn-success" id="btnHolidayCreateWin" data-toggle="tooltip" title="Add new Schedule" style="margin:5px 0 5px 0;"><i class="fa fa-plus-circle" aria-hidden="true"></i> Add</button>
+            <div class="row">
+                <div class="col-md-12">
+                    <div id="divHolidayPackageList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div id="divHolidayPackageWin"></div>
+<script>
+    $(document).ready(function () {
+        $("#liForHr").addClass('active');
+        $("#liForHRConfig").addClass('active');
+        $("#liForHoliday").addClass('active');
+
+        $('[data-toggle="tooltip"]').tooltip();
+        $("#divHolidayPackageList").append('<div class="loading_partial"></div>');
+        $("#divHolidayPackageList").load('@Url.Action("HolidayPackageList", "Holiday")');
+    });
+    //Holiday Create
+    $("#btnHolidayCreateWin").click(function () {
+        $("#divHolidayPackageWin").empty();
+        $("#divHolidayPackageWin").kendoWindow({
+            actions: ["Close"],
+            draggable: false,
+            modal: true,
+            visible: false,
+            width: 767,
+            height: 250,
+            title: 'Holiday Package',
+            resizable: false
+        });
+        var holidayWin = $("#divHolidayPackageWin").data("kendoWindow");
+        holidayWin.refresh('@Url.Action("HolidayPackageCreate", "Holiday")');
+        holidayWin.center().open();
+    });
+</script>
+

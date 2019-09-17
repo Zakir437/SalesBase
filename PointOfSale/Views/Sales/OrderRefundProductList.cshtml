@@ -1,0 +1,48 @@
+﻿@model IEnumerable<PointOfSale.Models.StockDailyReturn>
+@using System.Globalization;
+@{
+    var count = 0;
+    var refundProducts = Model.GroupBy(a => new { a.ProductId, a.DistributeId })
+                        .Select(s => new
+                        {
+                            s.FirstOrDefault().ProductId,
+                            s.FirstOrDefault().DistributeId,
+                            s.FirstOrDefault().ProductName,
+                            s.FirstOrDefault().DiscountType,
+                            s.FirstOrDefault().DiscountPercent,
+                            Quantity = s.Sum(a => a.Quantity),
+                            Price = s.Sum(a => a.Price)
+                        });
+}
+@if (refundProducts != null)
+{
+
+    <table class="table table-bordered table-hover table-responsive table-condensed table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Product Name</th>
+            <th>Quantity</th>
+            <th>Price</th>
+        </tr>
+        @foreach (var list in refundProducts)
+        {
+            count++;
+            <tr>
+                <td>@count. </td>
+                <td>@list.ProductName</td>
+                <td>@list.Quantity</td>
+                <td>@list.Price.ToString("C", new CultureInfo("bn-BD")) @if (list.DiscountPercent > 0) { <span>(Discount @list.DiscountPercent%)</span> }</td>
+            </tr>
+         }
+        <tr>
+            <td colspan="3" class="text-right">Total</td>
+            <td>@refundProducts.Sum(s => s.Price).ToString("C", new CultureInfo("bn-BD"))</td>
+        </tr>
+    </table>
+}
+else
+{
+    <h4>There is no record to display</h4>
+}
+
+

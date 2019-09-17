@@ -1,0 +1,49 @@
+﻿@model IEnumerable<PointOfSale.Models.ViewStockProduct>
+@using System.Globalization
+@using PointOfSale.Helpers
+@{ 
+    var count = 0;
+}
+@if(Model.Count() > 0)
+{
+    <table class="table table-bordered table-striped">
+        <tr>
+            <th>SL.</th>
+            <th>Product Name</th>
+            <th>Minimum Quantity</th>
+            <th>Quantity</th>
+            <th>Cost</th>
+            <th>Price</th>
+            <th></th>
+        </tr>
+        @foreach(var item in Model)
+         {
+            count++;
+            <tr>
+                <td>@count.</td>
+                <td>
+                    <a href="@Html.EncodedParam("ProductInfo","Stock", new { productId = item.ProductId }, null)">@item.ProductName</a>
+                    @*<a id="productInfo" data-id="@item.ProductId" style="cursor:pointer" data-toggle="tooltip" title="Product Info">@item.ProductName</a>*@
+                </td>
+                <td>@item.MinimumQuantity</td>
+                <td>@item.Quantity</td>
+                <td>@item.Cost.Value.ToString("C", new CultureInfo("bn-BD"))</td>
+                <td>@item.Price.Value.ToString("C", new CultureInfo("bn-BD"))</td>
+                <td>
+                    <button class="btn btn-primary btnStockEdit" data-id="@item.StockId" data-toggle="tooltip" title="Edit Stock Quantity"><i class="fa fa-pencil-square-o"></i></button>
+                    <button class="btn btn-info minimalQuantityEdit" data-id="@item.ProductId" data-distributeid="@item.DistributeId" data-toggle="tooltip" title="Edit Minimum Quantity"><i class="fa fa-pencil-square-o"></i></button>
+                    <button class="btn btn-success btnPriceEdit" data-id="@item.ProductId" data-distributeid="@item.DistributeId" data-toggle="tooltip" title="Edit Product Price"><i class="fa fa-pencil-square-o"></i></button>
+                </td>
+            </tr>
+         }
+    </table>
+}
+else
+{
+    <h3>There is no product to Stock</h3>
+}
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    })
+</script>
